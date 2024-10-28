@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 1 Introduction | Generative AI with Large Language Models</title>
+  <meta name="description" content="This is a collection of notes from open sources" />
+  <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 1 Introduction | Generative AI with Large Language Models" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="This is a collection of notes from open sources" />
+  <meta name="github-repo" content="rstudio/bookdown-demo" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 1 Introduction | Generative AI with Large Language Models" />
+  
+  <meta name="twitter:description" content="This is a collection of notes from open sources" />
+  
+
+<meta name="author" content="DEA" />
+
+
+<meta name="date" content="2024-10-27" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="index.html"/>
+
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Generative AI Notes</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
+<li class="chapter" data-level="1" data-path="introduction-1.html"><a href="introduction-1.html"><i class="fa fa-check"></i><b>1</b> Introduction</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="introduction-1.html"><a href="introduction-1.html#generative-ai-overview"><i class="fa fa-check"></i><b>1.1</b> Generative AI Overview</a>
+<ul>
+<li class="chapter" data-level="1.1.1" data-path="introduction-1.html"><a href="introduction-1.html#what-is-generative-ai"><i class="fa fa-check"></i><b>1.1.1</b> What is Generative AI?</a></li>
+<li class="chapter" data-level="1.1.2" data-path="introduction-1.html"><a href="introduction-1.html#understanding-parameters"><i class="fa fa-check"></i><b>1.1.2</b> Understanding Parameters</a></li>
+<li class="chapter" data-level="1.1.3" data-path="introduction-1.html"><a href="introduction-1.html#model-adaptation-and-use"><i class="fa fa-check"></i><b>1.1.3</b> Model Adaptation and Use</a></li>
+<li class="chapter" data-level="1.1.4" data-path="introduction-1.html"><a href="introduction-1.html#interaction-with-llms"><i class="fa fa-check"></i><b>1.1.4</b> Interaction with LLMs</a></li>
+</ul></li>
+<li class="chapter" data-level="1.2" data-path="introduction-1.html"><a href="introduction-1.html#use-cases-of-llm"><i class="fa fa-check"></i><b>1.2</b> Use Cases of LLM</a></li>
+<li class="chapter" data-level="1.3" data-path="introduction-1.html"><a href="introduction-1.html#text-generation-before-transformers"><i class="fa fa-check"></i><b>1.3</b> Text Generation before Transformers</a>
+<ul>
+<li class="chapter" data-level="1.3.1" data-path="introduction-1.html"><a href="introduction-1.html#recurrent-neural-networks-rnns"><i class="fa fa-check"></i><b>1.3.1</b> Recurrent Neural Networks (RNNs)</a></li>
+<li class="chapter" data-level="1.3.2" data-path="introduction-1.html"><a href="introduction-1.html#example-of-rnn-in-action"><i class="fa fa-check"></i><b>1.3.2</b> Example of RNN in Action</a></li>
+<li class="chapter" data-level="1.3.3" data-path="introduction-1.html"><a href="introduction-1.html#challenges-in-language-understanding"><i class="fa fa-check"></i><b>1.3.3</b> Challenges in Language Understanding</a></li>
+</ul></li>
+<li class="chapter" data-level="1.4" data-path="introduction-1.html"><a href="introduction-1.html#introduction-of-transformer-architecture"><i class="fa fa-check"></i><b>1.4</b> Introduction of Transformer Architecture</a>
+<ul>
+<li class="chapter" data-level="1.4.1" data-path="introduction-1.html"><a href="introduction-1.html#advantages-of-transformers"><i class="fa fa-check"></i><b>1.4.1</b> Advantages of Transformers</a></li>
+</ul></li>
+<li class="chapter" data-level="1.5" data-path="introduction-1.html"><a href="introduction-1.html#transformers"><i class="fa fa-check"></i><b>1.5</b> Transformers</a>
+<ul>
+<li class="chapter" data-level="1.5.1" data-path="introduction-1.html"><a href="introduction-1.html#overview"><i class="fa fa-check"></i><b>1.5.1</b> Overview</a></li>
+<li class="chapter" data-level="1.5.2" data-path="introduction-1.html"><a href="introduction-1.html#attention-mechanisms"><i class="fa fa-check"></i><b>1.5.2</b> Attention Mechanisms</a></li>
+<li class="chapter" data-level="1.5.3" data-path="introduction-1.html"><a href="introduction-1.html#transformer-architecture"><i class="fa fa-check"></i><b>1.5.3</b> Transformer Architecture</a></li>
+<li class="chapter" data-level="1.5.4" data-path="introduction-1.html"><a href="introduction-1.html#tokenization"><i class="fa fa-check"></i><b>1.5.4</b> Tokenization</a></li>
+<li class="chapter" data-level="1.5.5" data-path="introduction-1.html"><a href="introduction-1.html#embedding-layer"><i class="fa fa-check"></i><b>1.5.5</b> Embedding Layer</a></li>
+<li class="chapter" data-level="1.5.6" data-path="introduction-1.html"><a href="introduction-1.html#positional-encoding"><i class="fa fa-check"></i><b>1.5.6</b> Positional Encoding</a></li>
+<li class="chapter" data-level="1.5.7" data-path="introduction-1.html"><a href="introduction-1.html#self-attention-layer"><i class="fa fa-check"></i><b>1.5.7</b> Self-Attention Layer</a></li>
+<li class="chapter" data-level="1.5.8" data-path="introduction-1.html"><a href="introduction-1.html#feed-forward-network"><i class="fa fa-check"></i><b>1.5.8</b> Feed-Forward Network</a></li>
+<li class="chapter" data-level="1.5.9" data-path="introduction-1.html"><a href="introduction-1.html#softmax-layer"><i class="fa fa-check"></i><b>1.5.9</b> Softmax Layer</a></li>
+<li class="chapter" data-level="1.5.10" data-path="introduction-1.html"><a href="introduction-1.html#prediction-process"><i class="fa fa-check"></i><b>1.5.10</b> Prediction Process</a></li>
+<li class="chapter" data-level="1.5.11" data-path="introduction-1.html"><a href="introduction-1.html#example"><i class="fa fa-check"></i><b>1.5.11</b> Example</a></li>
+</ul></li>
+<li class="chapter" data-level="1.6" data-path="introduction-1.html"><a href="introduction-1.html#transformer-architecture-1"><i class="fa fa-check"></i><b>1.6</b> Transformer Architecture</a>
+<ul>
+<li class="chapter" data-level="1.6.1" data-path="introduction-1.html"><a href="introduction-1.html#overview-1"><i class="fa fa-check"></i><b>1.6.1</b> Overview</a></li>
+<li class="chapter" data-level="1.6.2" data-path="introduction-1.html"><a href="introduction-1.html#encoder"><i class="fa fa-check"></i><b>1.6.2</b> Encoder</a></li>
+<li class="chapter" data-level="1.6.3" data-path="introduction-1.html"><a href="introduction-1.html#decoder"><i class="fa fa-check"></i><b>1.6.3</b> Decoder</a></li>
+<li class="chapter" data-level="1.6.4" data-path="introduction-1.html"><a href="introduction-1.html#encoder-decoder-models"><i class="fa fa-check"></i><b>1.6.4</b> Encoder-Decoder Models</a></li>
+<li class="chapter" data-level="1.6.5" data-path="introduction-1.html"><a href="introduction-1.html#practical-application"><i class="fa fa-check"></i><b>1.6.5</b> Practical Application</a></li>
+</ul></li>
+<li class="chapter" data-level="1.7" data-path="introduction-1.html"><a href="introduction-1.html#prompt-engineering"><i class="fa fa-check"></i><b>1.7</b> Prompt Engineering</a>
+<ul>
+<li class="chapter" data-level="1.7.1" data-path="introduction-1.html"><a href="introduction-1.html#key-concepts"><i class="fa fa-check"></i><b>1.7.1</b> Key Concepts</a></li>
+</ul></li>
+<li class="chapter" data-level="1.8" data-path="introduction-1.html"><a href="introduction-1.html#configuring-generative-ai-models"><i class="fa fa-check"></i><b>1.8</b> Configuring Generative AI Models</a></li>
+<li class="chapter" data-level="1.9" data-path="introduction-1.html"><a href="introduction-1.html#generative-ai-project-lifecycle"><i class="fa fa-check"></i><b>1.9</b> Generative AI project lifecycle</a>
+<ul>
+<li class="chapter" data-level="1.9.1" data-path="introduction-1.html"><a href="introduction-1.html#project-life-cycle-stages"><i class="fa fa-check"></i><b>1.9.1</b> Project Life Cycle Stages</a></li>
+</ul></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://davutemrah.github.io" target="blank">Back to Home Page</li>
+<li><a href="https://davutemrah.github.io/notebooks/" target="blank">Back to Collections</li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Generative AI with Large Language Models</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="introduction-1" class="section level1 hasAnchor" number="1">
+<h1><span class="header-section-number">Chapter 1</span> Introduction<a href="introduction-1.html#introduction-1" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="generative-ai-overview" class="section level2 hasAnchor" number="1.1">
+<h2><span class="header-section-number">1.1</span> Generative AI Overview<a href="introduction-1.html#generative-ai-overview" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Generative AI tools have become widely accessible and are capable of creating content that mimics or approximates human ability. Examples include:</p>
+<ul>
+<li><p>Chatbots</p></li>
+<li><p>Image generation from text</p></li>
+<li><p>Code development plugins</p></li>
+</ul>
+<div id="what-is-generative-ai" class="section level3 hasAnchor" number="1.1.1">
+<h3><span class="header-section-number">1.1.1</span> What is Generative AI?<a href="introduction-1.html#what-is-generative-ai" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p><strong>Subset of Traditional Machine Learning</strong>: Generative AI models learn by finding statistical patterns in massive datasets originally created by humans.</p></li>
+<li><p><strong>Training</strong>: Large language models (LLMs) are trained on trillions of words over many weeks or months using significant computational power.</p></li>
+<li><p><strong>Foundation Models</strong>: These models, sometimes called base models, have billions of parameters and exhibit emergent properties beyond language, including reasoning and problem-solving abilities.</p>
+<p>Bert, GPT, LLaMa, BLOOM, PaLM, FLAN-T5</p></li>
+</ul>
+</div>
+<div id="understanding-parameters" class="section level3 hasAnchor" number="1.1.2">
+<h3><span class="header-section-number">1.1.2</span> Understanding Parameters<a href="introduction-1.html#understanding-parameters" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p><strong>Parameters as Memory</strong>: Think of parameters as the model’s memory. More parameters mean more memory, which typically leads to the ability to perform more sophisticated tasks.</p></li>
+<li><p><strong>Model Representation</strong>: Throughout the course, LLMs will be represented by purple circles.</p></li>
+<li><p><strong>Example Model</strong>: In the labs, you will use an open-source model called flan-T5 for language tasks.</p></li>
+</ul>
+</div>
+<div id="model-adaptation-and-use" class="section level3 hasAnchor" number="1.1.3">
+<h3><span class="header-section-number">1.1.3</span> Model Adaptation and Use<a href="introduction-1.html#model-adaptation-and-use" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p><strong>Fine Tuning</strong>: You can either use these models as they are or apply fine-tuning techniques to adapt them to specific use cases without the need to train a new model from scratch.</p></li>
+<li><p><strong>Multimodal Generative AI</strong>: While generative AI models exist for images, video, audio, and speech, this course focuses on LLMs and natural language generation.</p></li>
+</ul>
+</div>
+<div id="interaction-with-llms" class="section level3 hasAnchor" number="1.1.4">
+<h3><span class="header-section-number">1.1.4</span> Interaction with LLMs<a href="introduction-1.html#interaction-with-llms" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p><strong>Natural Language Prompts</strong>: Unlike traditional machine learning and programming paradigms that use formalized syntax, LLMs take natural language instructions (prompts) and perform tasks.</p></li>
+<li><p><strong>Context Window</strong>: The space available for a prompt is called the context window, typically large enough for a few thousand words.</p></li>
+</ul>
+<p>Prompt –&gt; LLM –&gt; Completion (generated text)</p>
+</div>
+</div>
+<div id="use-cases-of-llm" class="section level2 hasAnchor" number="1.2">
+<h2><span class="header-section-number">1.2</span> Use Cases of LLM<a href="introduction-1.html#use-cases-of-llm" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The broader applications of large language models (LLMs) and generative AI beyond chatbots. It highlights that while chatbots are prominent, LLMs can also perform diverse tasks, such as:</p>
+<p><strong>Text Generation:</strong> LLMs can generate essays based on prompts and summarize dialogues.</p>
+<p><strong>Translation:</strong> They can translate between different languages and convert natural language into machine code, such as generating Python code.</p>
+<p><strong>Information Retrieval:</strong> LLMs can identify named entities (people and places) in texts through tasks like named entity recognition.</p>
+<p><strong>Augmentation:</strong> There’s ongoing development in connecting LLMs to external data sources and APIs to enhance their capabilities and access real-time information.</p>
+<p>Larger models (with billions of parameters) show improved language understanding, although smaller models can be fine-tuned for specific tasks. The rapid advancements in LLM capabilities are attributed to their underlying architecture.</p>
+</div>
+<div id="text-generation-before-transformers" class="section level2 hasAnchor" number="1.3">
+<h2><span class="header-section-number">1.3</span> Text Generation before Transformers<a href="introduction-1.html#text-generation-before-transformers" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Introduction to Generative Algorithms</strong></p>
+<p>Generative algorithms have been a part of natural language processing for a long time. Before the advent of transformer models, the primary architecture used for generative tasks was recurrent neural networks (RNNs).</p>
+<div id="recurrent-neural-networks-rnns" class="section level3 hasAnchor" number="1.3.1">
+<h3><span class="header-section-number">1.3.1</span> Recurrent Neural Networks (RNNs)<a href="introduction-1.html#recurrent-neural-networks-rnns" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p><strong>Architecture</strong>: RNNs process sequences of data by maintaining a hidden state that captures information from previous time steps.</p></li>
+<li><p><strong>Limitations</strong>:</p></li>
+<li><p><strong>Computational and Memory Constraints</strong>: RNNs require significant computational resources and memory to process long sequences.</p>
+<ul>
+<li><strong>Short-Term Memory</strong>: RNNs struggle with long-term dependencies due to vanishing gradients, leading to poor performance on tasks requiring an understanding of extended context.</li>
+</ul></li>
+</ul>
+</div>
+<div id="example-of-rnn-in-action" class="section level3 hasAnchor" number="1.3.2">
+<h3><span class="header-section-number">1.3.2</span> Example of RNN in Action<a href="introduction-1.html#example-of-rnn-in-action" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p><strong>Simple Next-Word Prediction Task</strong>:</p>
+<ul>
+<li><p>With only one preceding word, the RNN’s prediction is not very accurate.</p></li>
+<li><p>Scaling the RNN to consider more preceding words increases computational complexity and resource usage.</p></li>
+<li><p>Despite scaling, the model often fails to capture enough context for accurate predictions.</p></li>
+</ul></li>
+</ul>
+</div>
+<div id="challenges-in-language-understanding" class="section level3 hasAnchor" number="1.3.3">
+<h3><span class="header-section-number">1.3.3</span> Challenges in Language Understanding<a href="introduction-1.html#challenges-in-language-understanding" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p><strong>Context Requirement</strong>: Successful next-word prediction requires understanding the entire sentence or document.</p></li>
+<li><p><strong>Complexity of Language</strong>:</p>
+<ul>
+<li><p><strong>Homonyms</strong>: Words with multiple meanings depending on context (e.g., “bank” as a financial institution or the side of a river).</p></li>
+<li><p><strong>Syntactic Ambiguity</strong>: Sentence structures can be ambiguous (e.g., “The teacher taught the students with the book” – did the teacher use the book or did the students have the book?).</p></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="introduction-of-transformer-architecture" class="section level2 hasAnchor" number="1.4">
+<h2><span class="header-section-number">1.4</span> Introduction of Transformer Architecture<a href="introduction-1.html#introduction-of-transformer-architecture" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>In 2017, the transformer architecture revolutionized generative AI with the publication of the paper “Attention is All You Need” by researchers from Google and the University of Toronto.</p>
+<div id="advantages-of-transformers" class="section level3 hasAnchor" number="1.4.1">
+<h3><span class="header-section-number">1.4.1</span> Advantages of Transformers<a href="introduction-1.html#advantages-of-transformers" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p><strong>Efficient Scaling</strong>: Can be efficiently scaled to use multi-core GPUs.</p></li>
+<li><p><strong>Parallel Processing</strong>: Processes input data in parallel, allowing for the use of larger training datasets.</p></li>
+<li><p><strong>Attention Mechanism</strong>:</p>
+<ul>
+<li><p>Learns to pay attention to the meaning of words in context.</p></li>
+<li><p>Addresses the limitations of RNNs by considering the relevance of each word in the input sequence to every other word.</p></li>
+</ul></li>
+</ul>
+<p>The transformer architecture marked a significant breakthrough in natural language processing, enabling models to handle complex generative tasks more efficiently and accurately. The title of the influential paper, “Attention is All You Need,” underscores the importance of the attention mechanism in transforming the field of generative AI.</p>
+</div>
+</div>
+<div id="transformers" class="section level2 hasAnchor" number="1.5">
+<h2><span class="header-section-number">1.5</span> Transformers<a href="introduction-1.html#transformers" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="overview" class="section level3 hasAnchor" number="1.5.1">
+<h3><span class="header-section-number">1.5.1</span> Overview<a href="introduction-1.html#overview" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The transformer architecture significantly improved natural language processing tasks compared to earlier RNNs, enabling superior generative capabilities. Its power lies in learning the relevance and context of words across a sentence using attention mechanisms.</p>
+</div>
+<div id="attention-mechanisms" class="section level3 hasAnchor" number="1.5.2">
+<h3><span class="header-section-number">1.5.2</span> Attention Mechanisms<a href="introduction-1.html#attention-mechanisms" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p><strong>Self-Attention</strong>: This mechanism learns the relationships between all words in a sentence, allowing the model to understand the context and relevance of each word in relation to others.</p></li>
+<li><p><strong>Attention Map</strong>: A visual representation of the attention weights, showing how words relate to each other. For example, the word “book” might strongly connect with “teacher” and “student”.</p></li>
+</ul>
+</div>
+<div id="transformer-architecture" class="section level3 hasAnchor" number="1.5.3">
+<h3><span class="header-section-number">1.5.3</span> Transformer Architecture<a href="introduction-1.html#transformer-architecture" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The transformer model consists of two main components:</p>
+<ul>
+<li><p><strong>Encoder</strong>: Encodes input sequences into deep representations.</p></li>
+<li><p><strong>Decoder</strong>: Uses these representations to generate output sequences.</p></li>
+</ul>
+</div>
+<div id="tokenization" class="section level3 hasAnchor" number="1.5.4">
+<h3><span class="header-section-number">1.5.4</span> Tokenization<a href="introduction-1.html#tokenization" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>Converts words into numbers representing their positions in a dictionary.</p></li>
+<li><p>Tokenization methods can vary, representing whole words or parts of words.</p></li>
+<li><p>Consistent tokenization is essential for both training and generating text.</p></li>
+</ul>
+</div>
+<div id="embedding-layer" class="section level3 hasAnchor" number="1.5.5">
+<h3><span class="header-section-number">1.5.5</span> Embedding Layer<a href="introduction-1.html#embedding-layer" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>Transforms token IDs into high-dimensional vectors.</p></li>
+<li><p>Encodes the meaning and context of tokens in a vector space.</p></li>
+</ul>
+</div>
+<div id="positional-encoding" class="section level3 hasAnchor" number="1.5.6">
+<h3><span class="header-section-number">1.5.6</span> Positional Encoding<a href="introduction-1.html#positional-encoding" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li>Adds information about the position of words in a sentence, preserving word order relevance.</li>
+</ul>
+</div>
+<div id="self-attention-layer" class="section level3 hasAnchor" number="1.5.7">
+<h3><span class="header-section-number">1.5.7</span> Self-Attention Layer<a href="introduction-1.html#self-attention-layer" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>Analyzes relationships between tokens in the input sequence.</p></li>
+<li><p>Multi-headed self-attention means multiple sets of self-attention weights are learned in parallel.</p></li>
+<li><p>Each attention head learns different aspects of language, enhancing contextual understanding.</p></li>
+</ul>
+</div>
+<div id="feed-forward-network" class="section level3 hasAnchor" number="1.5.8">
+<h3><span class="header-section-number">1.5.8</span> Feed-Forward Network<a href="introduction-1.html#feed-forward-network" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>Processes outputs from the self-attention layer.</p></li>
+<li><p>Produces logits proportional to the probability of each token in the dictionary.</p></li>
+</ul>
+</div>
+<div id="softmax-layer" class="section level3 hasAnchor" number="1.5.9">
+<h3><span class="header-section-number">1.5.9</span> Softmax Layer<a href="introduction-1.html#softmax-layer" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>Normalizes logits into probability scores for each token.</p></li>
+<li><p>The highest probability token is selected as the next word in the sequence.</p></li>
+</ul>
+</div>
+<div id="prediction-process" class="section level3 hasAnchor" number="1.5.10">
+<h3><span class="header-section-number">1.5.10</span> Prediction Process<a href="introduction-1.html#prediction-process" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Let’s walk through a sequence-to-sequence task, such as translating a French phrase into English:</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Tokenize Input</strong>: The French phrase is tokenized using the same tokenizer that trained the network.</p></li>
+<li><p><strong>Encoder</strong>: Tokenized input is passed through the embedding layer and multi-headed attention layers, producing a deep representation of the input sequence.</p></li>
+<li><p><strong>Decoder</strong>:</p>
+<ul>
+<li><p>A start-of-sequence token triggers the decoder to predict the next token.</p></li>
+<li><p>The decoder uses the encoder’s contextual understanding to generate the output token.</p></li>
+</ul></li>
+<li><p><strong>Loop</strong>: The output token is fed back into the decoder to predict the next token until an end-of-sequence token is predicted.</p></li>
+<li><p><strong>Detokenization</strong>: The sequence of tokens is converted back into words to form the final output.</p></li>
+</ol>
+</div>
+<div id="example" class="section level3 hasAnchor" number="1.5.11">
+<h3><span class="header-section-number">1.5.11</span> Example<a href="introduction-1.html#example" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>Input: French phrase “Je t’aime la machine d’apprentissage”.</p></li>
+<li><p>Tokenized input is processed through the encoder and decoder.</p></li>
+<li><p>Output: “I love machine learning”.</p></li>
+</ul>
+</div>
+</div>
+<div id="transformer-architecture-1" class="section level2 hasAnchor" number="1.6">
+<h2><span class="header-section-number">1.6</span> Transformer Architecture<a href="introduction-1.html#transformer-architecture-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="overview-1" class="section level3 hasAnchor" number="1.6.1">
+<h3><span class="header-section-number">1.6.1</span> Overview<a href="introduction-1.html#overview-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The transformer architecture consists of <strong>encoder</strong> and <strong>decoder</strong> components, essential for various natural language processing tasks.</p>
+</div>
+<div id="encoder" class="section level3 hasAnchor" number="1.6.2">
+<h3><span class="header-section-number">1.6.2</span> Encoder<a href="introduction-1.html#encoder" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p><strong>Function</strong>: Encodes input sequences into a deep representation of their structure and meaning.</p></li>
+<li><p><strong>Usage</strong>:</p>
+<ul>
+<li><p>Encoder-only models, such as BERT, work as sequence-to-sequence models with equal input and output sequence lengths.</p></li>
+<li><p>With additional layers, they can perform classification tasks like sentiment analysis.</p></li>
+</ul></li>
+</ul>
+</div>
+<div id="decoder" class="section level3 hasAnchor" number="1.6.3">
+<h3><span class="header-section-number">1.6.3</span> Decoder<a href="introduction-1.html#decoder" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p><strong>Function</strong>: Uses the encoder’s contextual understanding to generate new tokens, operating in a loop until a stop condition is met.</p></li>
+<li><p><strong>Usage</strong>:</p>
+<ul>
+<li>Decoder-only models, such as the GPT family, BLOOM, Jurassic, and LLaMA, are commonly used today and can generalize to most tasks.</li>
+</ul></li>
+</ul>
+</div>
+<div id="encoder-decoder-models" class="section level3 hasAnchor" number="1.6.4">
+<h3><span class="header-section-number">1.6.4</span> Encoder-Decoder Models<a href="introduction-1.html#encoder-decoder-models" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p><strong>Function</strong>: Handle sequence-to-sequence tasks where input and output sequences can differ in length.</p></li>
+<li><p><strong>Examples</strong>: BART, T5.</p></li>
+<li><p><strong>Usage</strong>: Suitable for tasks like translation and general text generation.</p></li>
+</ul>
+</div>
+<div id="practical-application" class="section level3 hasAnchor" number="1.6.5">
+<h3><span class="header-section-number">1.6.5</span> Practical Application<a href="introduction-1.html#practical-application" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p><strong>Main Goal</strong>: Understand the differences between various models to read model documentation effectively.</p></li>
+<li><p><strong>Prompt Engineering</strong>: Interact with transformer models through natural language prompts, focusing on written words rather than code.</p></li>
+</ul>
+<p><strong>Transformers: Attention is all you need</strong></p>
+<p>“Attention is All You Need” is a research paper published in 2017 by Google researchers, which introduced the Transformer model, a novel architecture that revolutionized the field of natural language processing (NLP) and became the basis for the LLMs we now know - such as GPT, PaLM and others. The paper proposes a neural network architecture that replaces traditional recurrent neural networks (RNNs) and convolutional neural networks (CNNs) with an entirely attention-based mechanism.</p>
+<p>The Transformer model uses self-attention to compute representations of input sequences, which allows it to capture long-term dependencies and parallelize computation effectively. The authors demonstrate that their model achieves state-of-the-art performance on several machine translation tasks and outperforms previous models that rely on RNNs or CNNs.</p>
+<p>The Transformer architecture consists of an encoder and a decoder, each of which is composed of several layers. Each layer consists of two sub-layers: a multi-head self-attention mechanism and a feed-forward neural network. The multi-head self-attention mechanism allows the model to attend to different parts of the input sequence, while the feed-forward network applies a point-wise fully connected layer to each position separately and identically.</p>
+<p>The Transformer model also uses residual connections and layer normalization to facilitate training and prevent overfitting. In addition, the authors introduce a positional encoding scheme that encodes the position of each token in the input sequence, enabling the model to capture the order of the sequence without the need for recurrent or convolutional operations.</p>
+</div>
+</div>
+<div id="prompt-engineering" class="section level2 hasAnchor" number="1.7">
+<h2><span class="header-section-number">1.7</span> Prompt Engineering<a href="introduction-1.html#prompt-engineering" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Introduction</strong></p>
+<p>Prompt engineering involves crafting and refining the input text (prompt) fed to a model to influence its behavior during inference, resulting in desired output (completion). The total text available for the prompt is called the context window.</p>
+<div id="key-concepts" class="section level3 hasAnchor" number="1.7.1">
+<h3><span class="header-section-number">1.7.1</span> Key Concepts<a href="introduction-1.html#key-concepts" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><strong>Prompt Engineering</strong></p>
+<ul>
+<li><p><strong>Definition</strong>: The process of developing and improving the prompt to achieve desired model behavior.</p></li>
+<li><p><strong>Strategy</strong>: Including examples of the task within the prompt, known as in-context learning.</p></li>
+</ul>
+<p><strong>In-Context Learning</strong></p>
+<ul>
+<li><p><strong>Definition</strong>: Helping models learn the task by including examples in the prompt.</p></li>
+<li><p><strong>Example</strong>: For sentiment analysis, the prompt can include the instruction, review text, and an expected sentiment output.</p></li>
+</ul>
+<p><strong>Zero-Shot Inference</strong></p>
+<ul>
+<li><p><strong>Definition</strong>: Providing only the input data in the prompt without examples.</p></li>
+<li><p><strong>Effectiveness</strong>: Large models perform well; smaller models may struggle.</p></li>
+</ul>
+<p><strong>One-Shot Inference</strong></p>
+<ul>
+<li><strong>Definition</strong>: Including a single example in the prompt to guide the model.</li>
+<li><strong>Example</strong>: A sample review and sentiment analysis followed by the actual input review.</li>
+</ul>
+<p><strong>Few-Shot Inference</strong></p>
+<ul>
+<li><strong>Definition</strong>: Including multiple examples in the prompt to improve model understanding.</li>
+<li><strong>Example</strong>: A mix of positive and negative reviews to guide sentiment analysis.</li>
+</ul>
+<p><strong>Practical Considerations</strong></p>
+<p><strong>Context Window</strong></p>
+<ul>
+<li><strong>Limitation</strong>: There’s a limit on the amount of in-context learning that can be included.</li>
+<li><strong>Recommendation</strong>: If performance doesn’t improve with multiple examples, consider fine-tuning the model.</li>
+</ul>
+<p><strong>Fine-Tuning</strong></p>
+<ul>
+<li><strong>Definition</strong>: Additional training on the model with new data to improve task-specific performance.</li>
+<li><strong>Upcoming</strong>: Detailed exploration of fine-tuning will be covered in week 2 of the course.</li>
+</ul>
+<p><strong>Model Performance and Scale</strong></p>
+<ul>
+<li><strong>Observation</strong>: Model performance on various tasks depends on the scale (number of parameters).</li>
+<li><strong>Large Models</strong>: Good at zero-shot inference for multiple tasks.</li>
+<li><strong>Smaller Models</strong>: Generally limited to tasks similar to their training data.</li>
+</ul>
+<p><strong>Experimentation</strong></p>
+<ul>
+<li><strong>Recommendation</strong>: Experiment with different models and settings to find the best fit for your use case.</li>
+<li><strong>Next Steps</strong>: Explore configuration settings to influence the structure and style of model completions.</li>
+</ul>
+</div>
+</div>
+<div id="configuring-generative-ai-models" class="section level2 hasAnchor" number="1.8">
+<h2><span class="header-section-number">1.8</span> Configuring Generative AI Models<a href="introduction-1.html#configuring-generative-ai-models" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Overview</strong>
+This lecture examines methods and configuration parameters used to influence a model’s next-word generation during inference. Unlike training parameters, these settings are adjusted at inference time to control aspects like the maximum number of tokens generated and the creativity of the output.</p>
+<p><strong>Key Configuration Parameters</strong></p>
+<p><strong>Max New Tokens</strong>
+- <strong>Definition</strong>: Limits the number of tokens the model generates.
+- <strong>Usage</strong>: Set to values like 100, 150, or 200 to cap the generation process.
+- <strong>Example</strong>: If set to 200, the generation might end sooner if an end-of-sequence token is predicted.</p>
+<p><strong>Greedy Decoding</strong>
+- <strong>Definition</strong>: The model always selects the word with the highest probability.
+- <strong>Characteristics</strong>: Works well for short texts but can lead to repetitive outputs.</p>
+<p><strong>Random Sampling</strong>
+- <strong>Definition</strong>: Selects the next word based on the probability distribution.
+- <strong>Advantages</strong>: Introduces variability to avoid repetitive text.
+- <strong>Disadvantages</strong>: Can produce outputs that are too creative or nonsensical.
+- <strong>Implementation</strong>: In Hugging Face, set <code>do_sample=True</code>.</p>
+<p><strong>Top-k Sampling</strong>
+- <strong>Definition</strong>: Limits choices to the top k highest probability tokens.
+- <strong>Example</strong>: If k=3, the model selects from the top 3 probable words.
+- <strong>Benefit</strong>: Balances randomness and coherence in the output.</p>
+<p><strong>Top-p (Nucleus) Sampling</strong>
+- <strong>Definition</strong>: Chooses from tokens whose cumulative probability meets a threshold p.
+- <strong>Example</strong>: If p=0.3, selects from tokens that together have a probability of 0.3.
+- <strong>Benefit</strong>: Ensures sensible and coherent generation by limiting low-probability words.</p>
+<p><strong>Temperature</strong>
+- <strong>Definition</strong>: Controls the randomness by scaling the probability distribution.
+- <strong>Effect</strong>:
+- Low temperature (&lt;1): Concentrates probability on fewer words, producing less random and more predictable text.
+- High temperature (&gt;1): Spreads probability more evenly, increasing randomness and creativity.
+- Temperature=1: Uses the default probability distribution.</p>
+<p><strong>Conclusion</strong>
+This lecture covered various inference configuration parameter</p>
+</div>
+<div id="generative-ai-project-lifecycle" class="section level2 hasAnchor" number="1.9">
+<h2><span class="header-section-number">1.9</span> Generative AI project lifecycle<a href="introduction-1.html#generative-ai-project-lifecycle" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Introduction</strong></p>
+<p>Throughout this course, you’ll learn the techniques required to develop and deploy an LLM-powered application. This video introduces the generative AI project life cycle, guiding you from conception to launch.</p>
+<div id="project-life-cycle-stages" class="section level3 hasAnchor" number="1.9.1">
+<h3><span class="header-section-number">1.9.1</span> Project Life Cycle Stages<a href="introduction-1.html#project-life-cycle-stages" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="define-the-scope" class="section level4 hasAnchor" number="1.9.1.1">
+<h4><span class="header-section-number">1.9.1.1</span> Define the Scope<a href="introduction-1.html#define-the-scope" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><p><strong>Importance</strong>: Accurately and narrowly define the project’s scope.</p></li>
+<li><p><strong>Considerations</strong>:</p>
+<ul>
+<li>What specific function will the LLM serve in your application?</li>
+<li>Does the model need to perform various tasks or focus on one specific task (e.g., named entity recognition)?</li>
+</ul></li>
+<li><p><strong>Outcome</strong>: Save time and compute costs by clearly defining requirements.</p></li>
+</ul>
+</div>
+<div id="choose-a-model" class="section level4 hasAnchor" number="1.9.1.2">
+<h4><span class="header-section-number">1.9.1.2</span> Choose a Model<a href="introduction-1.html#choose-a-model" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><strong>Decision</strong>: Train your own model from scratch or use an existing base model.</li>
+<li><strong>Common Approach</strong>: Start with an existing model.</li>
+<li><strong>Considerations</strong>: Later in the course, you’ll learn rules of thumb to help estimate the feasibility of training your own model.</li>
+</ul>
+</div>
+<div id="assess-and-train-the-model" class="section level4 hasAnchor" number="1.9.1.3">
+<h4><span class="header-section-number">1.9.1.3</span> Assess and Train the Model<a href="introduction-1.html#assess-and-train-the-model" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><strong>Initial Steps</strong>: Use prompt engineering and in-context learning to improve model performance.</li>
+<li><strong>Fine-Tuning</strong>:
+<ul>
+<li>Necessary if prompt engineering is insufficient.</li>
+<li>Supervised learning process covered in Week 2.</li>
+</ul></li>
+<li><strong>Reinforcement Learning with Human Feedback (RLHF)</strong>:
+<ul>
+<li>Ensures the model behaves well and aligns with human preferences.</li>
+<li>Covered in Week 3.</li>
+</ul></li>
+</ul>
+</div>
+<div id="evaluate-the-model" class="section level4 hasAnchor" number="1.9.1.4">
+<h4><span class="header-section-number">1.9.1.4</span> Evaluate the Model<a href="introduction-1.html#evaluate-the-model" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><strong>Metrics and Benchmarks</strong>: Explore next week.</li>
+<li><strong>Iterative Process</strong>:
+<ul>
+<li>Start with prompt engineering.</li>
+<li>Evaluate outputs and fine-tune if necessary.</li>
+<li>Revisit and refine prompt engineering.</li>
+</ul></li>
+</ul>
+</div>
+<div id="deployment" class="section level4 hasAnchor" number="1.9.1.5">
+<h4><span class="header-section-number">1.9.1.5</span> Deployment<a href="introduction-1.html#deployment" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><strong>Final Steps</strong>:
+<ul>
+<li>Optimize the model for deployment.</li>
+<li>Integrate the model with your application.</li>
+<li>Ensure efficient use of compute resources for a better user experience.</li>
+</ul></li>
+</ul>
+</div>
+<div id="additional-infrastructure-considerations" class="section level4 hasAnchor" number="1.9.1.6">
+<h4><span class="header-section-number">1.9.1.6</span> Additional Infrastructure Considerations<a href="introduction-1.html#additional-infrastructure-considerations" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ul>
+<li><strong>Limitations of LLMs</strong>:
+<ul>
+<li>Tendency to invent information when unsure.</li>
+<li>Limited ability to perform complex reasoning and mathematics.</li>
+</ul></li>
+<li><strong>Overcoming Limitations</strong>:
+<ul>
+<li>Learn techniques to address these issues in the final part of the course.</li>
+</ul></li>
+</ul>
+</div>
+<div id="conclusion" class="section level4 hasAnchor" number="1.9.1.7">
+<h4><span class="header-section-number">1.9.1.7</span> Conclusion<a href="introduction-1.html#conclusion" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>This framework maps out the tasks required to take your project from conception to launch, providing insights into important decisions, potential difficulties, and necessary infrastructure for developing and deploying your application.</p>
+
+</div>
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="index.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["Generative AI.pdf", "Generative AI.epub"],
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

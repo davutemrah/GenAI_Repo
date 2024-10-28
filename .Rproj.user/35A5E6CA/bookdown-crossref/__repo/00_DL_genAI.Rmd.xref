@@ -1,0 +1,44 @@
+h1:introduction Introduction
+h2:generative-ai-overview Generative AI Overview
+h3:what-is-generative-ai What is Generative AI?
+h3:understanding-parameters Understanding Parameters
+h3:model-adaptation-and-use Model Adaptation and Use
+h3:interaction-with-llms Interaction with LLMs
+h2:use-cases-of-llm Use Cases of LLM
+h2:text-generation-before-transformers Text Generation before Transformers
+h3:recurrent-neural-networks-rnns Recurrent Neural Networks (RNNs)
+h3:example-of-rnn-in-action Example of RNN in Action
+h3:challenges-in-language-understanding Challenges in Language Understanding
+h2:introduction-of-transformer-architecture Introduction of Transformer Architecture
+h3:advantages-of-transformers Advantages of Transformers
+h2:transformers Transformers
+h3:overview Overview
+h3:attention-mechanisms Attention Mechanisms
+h3:transformer-architecture Transformer Architecture
+h3:tokenization Tokenization
+h3:embedding-layer Embedding Layer
+h3:positional-encoding Positional Encoding
+h3:self-attention-layer Self-Attention Layer
+h3:feed-forward-network Feed-Forward Network
+h3:softmax-layer Softmax Layer
+h3:prediction-process Prediction Process
+h3:example Example
+h2:transformer-architecture-1 Transformer Architecture
+h3:overview-1 Overview
+h3:encoder Encoder
+h3:decoder Decoder
+h3:encoder-decoder-models Encoder-Decoder Models
+h3:practical-application Practical Application
+h2:prompt-engineering Prompt Engineering
+h3:key-concepts Key Concepts
+h2:configuring-generative-ai-models Configuring Generative AI Models
+h2:generative-ai-project-lifecycle Generative AI project lifecycle
+h3:project-life-cycle-stages Project Life Cycle Stages
+h4:define-the-scope Define the Scope
+h4:choose-a-model Choose a Model
+h4:assess-and-train-the-model Assess and Train the Model
+h4:evaluate-the-model Evaluate the Model
+h4:deployment Deployment
+h4:additional-infrastructure-considerations Additional Infrastructure Considerations
+h4:conclusion Conclusion
+
