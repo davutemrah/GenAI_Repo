@@ -1,0 +1,184 @@
+## Pre-training large language models
+
+1. **Generative AI Project Life Cycle Overview**  
+  
+   - The process begins with scoping the use case and determining how an LLM will integrate into the application.
+  
+   - Next, choose a model: either use an existing model or train one from scratch (the latter is explored in detail later).
+
+2. **Choosing a Model**  
+  
+   - Start with existing foundation models available on hubs like Hugging Face or PyTorch, which include model cards detailing use cases, training processes, and limitations.
+  
+   - The model choice depends on the task and the architecture's strengths.
+
+3. **Transformer Model Variants**  
+  
+   - **Encoder-Only Models (Autoencoding Models):**  
+  
+     - Pre-trained with **masked language modeling** to reconstruct input by predicting masked tokens.  
+  
+     - Suited for **sentence classification** (e.g., sentiment analysis) and **token classification** (e.g., named entity recognition).  
+  
+     - Examples: **BERT**, **RoBERTa**.  
+  
+   - **Decoder-Only Models (Autoregressive Models):**  
+  
+     - Pre-trained with **causal language modeling** to predict the next token.  
+  
+     - Best for **text generation** and capable of zero-shot inference.  
+  
+     - Examples: **GPT**, **BLOOM**.  
+  
+   - **Sequence-to-Sequence Models:**  
+  
+     - Utilize both encoder and decoder components.  
+  
+     - Pre-trained with tasks like **span corruption** (e.g., T5) or other methods.  
+  
+     - Ideal for **translation**, **summarization**, and **question answering**.  
+  
+     - Examples: **T5**, **BART**.  
+
+4. **Pre-Training Process**  
+  
+   - LLMs are trained on large datasets using self-supervised learning to capture language patterns.  
+  
+   - Data preprocessing ensures quality and reduces bias, with only 1–3% of tokens retained for training.  
+  
+   - Large-scale compute resources and GPUs are required.
+
+5. **Model Size and Performance**  
+  
+   - Larger models exhibit better performance with reduced need for in-context learning or further training.  
+  
+   - Advances in transformers, data availability, and compute power have driven the creation of increasingly larger models.  
+  
+   - However, training large models is expensive and resource-intensive, raising challenges in scaling.
+
+
+## Computational Challenges of pre-training
+
+This detailed explanation of memory issues in large language models (LLMs) and the solutions available highlights several key points about quantization, precision, and distributed computing in the context of training large models. 
+
+
+Below is a structured summary of the information:
+
+- Quantization is essential for addressing memory constraints in training and fine-tuning LLMs.
+
+- BFLOAT16 offers an optimal trade-off between precision and memory savings and is increasingly used in modern GPUs.
+
+- Distributed computing enables scaling beyond GPU memory limits but incurs high costs and complexity.
+
+
+### Memory Challenges in Training LLMs
+
+1. **GPU Memory Limitations**:
+
+   - Storing model weights and additional overheads during training (e.g., gradients, optimizers) requires significant GPU memory.
+
+   - Example: A 1 billion parameter model needs ~24 GB of GPU RAM to train in 32-bit (FP32) precision.
+
+2. **Exponential Memory Requirements**:
+
+   - Large-scale models, often exceeding 50–100 billion parameters, demand tens of thousands of gigabytes of GPU memory, far exceeding single-GPU or consumer hardware capabilities.
+
+
+### Quantization Techniques
+
+1. **Concept**:
+
+   - Reduces the precision of floating-point numbers representing model weights and activations, minimizing memory usage while maintaining acceptable performance.
+
+2. **Popular Data Types**:
+
+   - **FP32** (Full Precision): 32 bits, highest precision; requires 4 bytes.
+
+   - **FP16** (Half Precision): 16 bits, uses 2 bytes; sacrifices precision.
+
+   - **BFLOAT16** (Brain Floating Point): A truncated 32-bit float using 16 bits, developed by Google Brain, offering a balance of precision and memory efficiency.
+
+   - **INT8**: 8-bit integers; extremely memory-efficient but with significant loss in precision.
+
+3. **Comparison of Precision**:
+
+   - **FP32**: Range \( -3 \times 10^{38} \) to \( 3 \times 10^{38} \).
+
+   - **FP16**: Range \( -65,504 \) to \( 65,504 \).
+
+   - **BFLOAT16**: Maintains the full dynamic range of FP32 but with only 7 bits for precision.
+
+   - **INT8**: Range \( -128 \) to \( 127 \); projects values like \( \pi \) to coarse approximations (e.g., 3).
+
+4. **Memory Savings**:
+
+   - **FP16**: Reduces memory by 50% compared to FP32.
+
+   - **INT8**: Reduces memory by 75%.
+
+
+### **Distributed Computing**
+
+1. **Scaling Beyond Single GPUs**:
+
+   - As model sizes grow, training on a single GPU becomes impractical.
+
+   - Distributed computing across hundreds of GPUs is required for training models with tens or hundreds of billions of parameters.
+
+   - Distributed setups are cost-prohibitive for many researchers, contributing to the dominance of pre-trained and fine-tuned models.
+
+
+### **Practical Use Cases of Quantization**
+
+1. **Fine-Tuning**:
+
+   - Even during fine-tuning, storing all model parameters in memory is necessary, making memory efficiency critical.
+
+   - Popular models like **FLAN-T5** are pre-trained with BFLOAT16, showcasing its widespread adoption.
+
+2. **Quantization-Aware Training (QAT)**:
+
+   - Modern frameworks support QAT, enabling scaling factors to be learned during training for optimal lower-precision projections.
+
+
+## Scaling Laws
+
+This content discusses research and insights into optimizing large language models by exploring the relationships between model size, training dataset size, and compute budget. 
+
+Here are the key points:
+
+1. **Pre-training Goals:** The goal of pre-training language models is to maximize performance by minimizing loss when predicting tokens. Improvements can be achieved by:
+
+   - Increasing the training dataset size.
+
+   - Increasing the number of model parameters.
+
+2. **Compute Budget Constraints:** Compute budgets, including hardware and time resources, are a practical constraint. A standard unit for compute resources is the *petaFLOP per second day*, which represents one quadrillion floating-point operations per second for one day.
+
+3. **Scaling Trade-Offs:** 
+
+   - Larger models and datasets generally require more compute resources to train effectively.
+
+   - There is a power-law relationship between compute budget, training dataset size, model size, and performance.
+
+4. **Research Insights:**
+
+   - OpenAI's research demonstrated how compute budget and training data size influence model performance, identifying clear trade-offs.
+
+   - With fixed compute budgets, optimizing dataset size and model parameters is key to improving performance.
+
+5. **Chinchilla Paper Findings:** 
+
+   - Many large language models (e.g., GPT-3) may be over-parameterized (too many parameters) and under-trained (not enough data).
+
+   - Optimal dataset size should be about 20 times the number of model parameters.
+
+   - Models like Chinchilla, trained optimally, outperform larger, non-optimal models such as GPT-3.
+
+6. **Trends and Industry Implications:** 
+
+   - The Chinchilla study indicates that focusing on optimal training (not just larger models) can yield better results.
+
+   - Models like Bloomberg GPT show that compute-efficient training can achieve excellent task-specific performance with smaller parameter sizes.
+
+The discussion points towards a shift away from the "bigger is better" trend to a focus on compute-efficient and optimally trained models.

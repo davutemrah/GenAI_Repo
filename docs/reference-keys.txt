@@ -29,6 +29,11 @@ encoder
 decoder
 encoder-decoder-models
 practical-application
+some-well-known-models
+bert
+key-details-about-bert
+bloom
+key-details-about-bloom
 prompt-engineering
 key-concepts
 configuring-generative-ai-models
@@ -41,3 +46,4 @@ evaluate-the-model
 deployment
 additional-infrastructure-considerations
 conclusion
+pre-training-large-language-models

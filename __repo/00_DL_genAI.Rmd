@@ -1,47 +1,46 @@
-
 # Introduction
 
 ## Generative AI Overview
+
 Generative AI tools have become widely accessible and are capable of creating content that mimics or approximates human ability. Examples include:
 
-- Chatbots
+-   Chatbots
 
-- Image generation from text
+-   Image generation from text
 
-- Code development plugins
+-   Code development plugins
 
 ### What is Generative AI?
 
-- **Subset of Traditional Machine Learning**: Generative AI models learn by finding statistical patterns in massive datasets originally created by humans.
+-   **Subset of Traditional Machine Learning**: Generative AI models learn by finding statistical patterns in massive datasets originally created by humans.
 
-- **Training**: Large language models (LLMs) are trained on trillions of words over many weeks or months using significant computational power.
+-   **Training**: Large language models (LLMs) are trained on trillions of words over many weeks or months using significant computational power.
 
-- **Foundation Models**: These models, sometimes called base models, have billions of parameters and exhibit emergent properties beyond language, including reasoning and problem-solving abilities.
+-   **Foundation Models**: These models, sometimes called base models, have billions of parameters and exhibit emergent properties beyond language, including reasoning and problem-solving abilities.
 
-    Bert, GPT, LLaMa,  BLOOM, PaLM, FLAN-T5
+    Bert, GPT, LLaMa, BLOOM, PaLM, FLAN-T5
 
 ### Understanding Parameters
 
-- **Parameters as Memory**: Think of parameters as the model's memory. More parameters mean more memory, which typically leads to the ability to perform more sophisticated tasks.
+-   **Parameters as Memory**: Think of parameters as the model's memory. More parameters mean more memory, which typically leads to the ability to perform more sophisticated tasks.
 
-- **Model Representation**: Throughout the course, LLMs will be represented by purple circles.
+-   **Model Representation**: Throughout the course, LLMs will be represented by purple circles.
 
-- **Example Model**: In the labs, you will use an open-source model called flan-T5 for language tasks.
+-   **Example Model**: In the labs, you will use an open-source model called flan-T5 for language tasks.
 
 ### Model Adaptation and Use
 
-- **Fine Tuning**: You can either use these models as they are or apply fine-tuning techniques to adapt them to specific use cases without the need to train a new model from scratch.
+-   **Fine Tuning**: You can either use these models as they are or apply fine-tuning techniques to adapt them to specific use cases without the need to train a new model from scratch.
 
-- **Multimodal Generative AI**: While generative AI models exist for images, video, audio, and speech, this course focuses on LLMs and natural language generation.
+-   **Multimodal Generative AI**: While generative AI models exist for images, video, audio, and speech, this course focuses on LLMs and natural language generation.
 
 ### Interaction with LLMs
 
-- **Natural Language Prompts**: Unlike traditional machine learning and programming paradigms that use formalized syntax, LLMs take natural language instructions (prompts) and perform tasks.
+-   **Natural Language Prompts**: Unlike traditional machine learning and programming paradigms that use formalized syntax, LLMs take natural language instructions (prompts) and perform tasks.
 
-- **Context Window**: The space available for a prompt is called the context window, typically large enough for a few thousand words.
+-   **Context Window**: The space available for a prompt is called the context window, typically large enough for a few thousand words.
 
-Prompt --> LLM --> Completion (generated text)
-
+Prompt --\> LLM --\> Completion (generated text)
 
 ## Use Cases of LLM
 
@@ -65,33 +64,33 @@ Generative algorithms have been a part of natural language processing for a long
 
 ### Recurrent Neural Networks (RNNs)
 
-- **Architecture**: RNNs process sequences of data by maintaining a hidden state that captures information from previous time steps.
+-   **Architecture**: RNNs process sequences of data by maintaining a hidden state that captures information from previous time steps.
 
-- **Limitations**: 
+-   **Limitations**:
 
-- **Computational and Memory Constraints**: RNNs require significant computational resources and memory to process long sequences.
+-   **Computational and Memory Constraints**: RNNs require significant computational resources and memory to process long sequences.
 
-  - **Short-Term Memory**: RNNs struggle with long-term dependencies due to vanishing gradients, leading to poor performance on tasks requiring an understanding of extended context.
+    -   **Short-Term Memory**: RNNs struggle with long-term dependencies due to vanishing gradients, leading to poor performance on tasks requiring an understanding of extended context.
 
 ### Example of RNN in Action
 
-- **Simple Next-Word Prediction Task**:
+-   **Simple Next-Word Prediction Task**:
 
-  - With only one preceding word, the RNN's prediction is not very accurate.
+    -   With only one preceding word, the RNN's prediction is not very accurate.
 
-  - Scaling the RNN to consider more preceding words increases computational complexity and resource usage.
+    -   Scaling the RNN to consider more preceding words increases computational complexity and resource usage.
 
-  - Despite scaling, the model often fails to capture enough context for accurate predictions.
+    -   Despite scaling, the model often fails to capture enough context for accurate predictions.
 
 ### Challenges in Language Understanding
 
-- **Context Requirement**: Successful next-word prediction requires understanding the entire sentence or document.
+-   **Context Requirement**: Successful next-word prediction requires understanding the entire sentence or document.
 
-- **Complexity of Language**:
+-   **Complexity of Language**:
 
-  - **Homonyms**: Words with multiple meanings depending on context (e.g., "bank" as a financial institution or the side of a river).
+    -   **Homonyms**: Words with multiple meanings depending on context (e.g., "bank" as a financial institution or the side of a river).
 
-  - **Syntactic Ambiguity**: Sentence structures can be ambiguous (e.g., "The teacher taught the students with the book" – did the teacher use the book or did the students have the book?).
+    -   **Syntactic Ambiguity**: Sentence structures can be ambiguous (e.g., "The teacher taught the students with the book" – did the teacher use the book or did the students have the book?).
 
 ## Introduction of Transformer Architecture
 
@@ -99,20 +98,17 @@ In 2017, the transformer architecture revolutionized generative AI with the publ
 
 ### Advantages of Transformers
 
-- **Efficient Scaling**: Can be efficiently scaled to use multi-core GPUs.
+-   **Efficient Scaling**: Can be efficiently scaled to use multi-core GPUs.
 
-- **Parallel Processing**: Processes input data in parallel, allowing for the use of larger training datasets.
+-   **Parallel Processing**: Processes input data in parallel, allowing for the use of larger training datasets.
 
-- **Attention Mechanism**: 
+-   **Attention Mechanism**:
 
-  - Learns to pay attention to the meaning of words in context.
+    -   Learns to pay attention to the meaning of words in context.
 
-  - Addresses the limitations of RNNs by considering the relevance of each word in the input sequence to every other word.
-
+    -   Addresses the limitations of RNNs by considering the relevance of each word in the input sequence to every other word.
 
 The transformer architecture marked a significant breakthrough in natural language processing, enabling models to handle complex generative tasks more efficiently and accurately. The title of the influential paper, "Attention is All You Need," underscores the importance of the attention mechanism in transforming the field of generative AI.
-
-
 
 ## Transformers
 
@@ -122,134 +118,183 @@ The transformer architecture significantly improved natural language processing 
 
 ### Attention Mechanisms
 
-- **Self-Attention**: This mechanism learns the relationships between all words in a sentence, allowing the model to understand the context and relevance of each word in relation to others.
+-   **Self-Attention**: This mechanism learns the relationships between all words in a sentence, allowing the model to understand the context and relevance of each word in relation to others.
 
-- **Attention Map**: A visual representation of the attention weights, showing how words relate to each other. For example, the word "book" might strongly connect with "teacher" and "student".
+-   **Attention Map**: A visual representation of the attention weights, showing how words relate to each other. For example, the word "book" might strongly connect with "teacher" and "student".
 
 ### Transformer Architecture
 
 The transformer model consists of two main components:
 
-- **Encoder**: Encodes input sequences into deep representations.
+-   **Encoder**: Encodes input sequences into deep representations.
 
-- **Decoder**: Uses these representations to generate output sequences.
+-   **Decoder**: Uses these representations to generate output sequences.
 
 ### Tokenization
 
-- Converts words into numbers representing their positions in a dictionary.
+-   Converts words into numbers representing their positions in a dictionary.
 
-- Tokenization methods can vary, representing whole words or parts of words.
+-   Tokenization methods can vary, representing whole words or parts of words.
 
-- Consistent tokenization is essential for both training and generating text.
+-   Consistent tokenization is essential for both training and generating text.
 
 ### Embedding Layer
 
-- Transforms token IDs into high-dimensional vectors.
+-   Transforms token IDs into high-dimensional vectors.
 
-- Encodes the meaning and context of tokens in a vector space.
+-   Encodes the meaning and context of tokens in a vector space.
 
 ### Positional Encoding
 
-- Adds information about the position of words in a sentence, preserving word order relevance.
+-   Adds information about the position of words in a sentence, preserving word order relevance.
 
 ### Self-Attention Layer
 
-- Analyzes relationships between tokens in the input sequence.
+-   Analyzes relationships between tokens in the input sequence.
 
-- Multi-headed self-attention means multiple sets of self-attention weights are learned in parallel.
+-   Multi-headed self-attention means multiple sets of self-attention weights are learned in parallel.
 
-- Each attention head learns different aspects of language, enhancing contextual understanding.
+-   Each attention head learns different aspects of language, enhancing contextual understanding.
 
 ### Feed-Forward Network
 
-- Processes outputs from the self-attention layer.
+-   Processes outputs from the self-attention layer.
 
-- Produces logits proportional to the probability of each token in the dictionary.
+-   Produces logits proportional to the probability of each token in the dictionary.
 
 ### Softmax Layer
 
-- Normalizes logits into probability scores for each token.
+-   Normalizes logits into probability scores for each token.
 
-- The highest probability token is selected as the next word in the sequence.
+-   The highest probability token is selected as the next word in the sequence.
 
 ### Prediction Process
 
 Let's walk through a sequence-to-sequence task, such as translating a French phrase into English:
 
-1. **Tokenize Input**: The French phrase is tokenized using the same tokenizer that trained the network.
+1.  **Tokenize Input**: The French phrase is tokenized using the same tokenizer that trained the network.
 
-2. **Encoder**: Tokenized input is passed through the embedding layer and multi-headed attention layers, producing a deep representation of the input sequence.
+2.  **Encoder**: Tokenized input is passed through the embedding layer and multi-headed attention layers, producing a deep representation of the input sequence.
 
-3. **Decoder**:
+3.  **Decoder**:
 
-   - A start-of-sequence token triggers the decoder to predict the next token.
+    -   A start-of-sequence token triggers the decoder to predict the next token.
 
-   - The decoder uses the encoder's contextual understanding to generate the output token.
+    -   The decoder uses the encoder's contextual understanding to generate the output token.
 
-4. **Loop**: The output token is fed back into the decoder to predict the next token until an end-of-sequence token is predicted.
+4.  **Loop**: The output token is fed back into the decoder to predict the next token until an end-of-sequence token is predicted.
 
-5. **Detokenization**: The sequence of tokens is converted back into words to form the final output.
+5.  **Detokenization**: The sequence of tokens is converted back into words to form the final output.
 
 ### Example
 
-- Input: French phrase "Je t'aime la machine d'apprentissage".
+-   Input: French phrase "Je t'aime la machine d'apprentissage".
 
-- Tokenized input is processed through the encoder and decoder.
+-   Tokenized input is processed through the encoder and decoder.
 
-- Output: "I love machine learning".
-
-
+-   Output: "I love machine learning".
 
 ## Transformer Architecture
 
 ### Overview
+
 The transformer architecture consists of **encoder** and **decoder** components, essential for various natural language processing tasks.
 
 ### Encoder
 
-- **Function**: Encodes input sequences into a deep representation of their structure and meaning.
+-   **Function**: Encodes input sequences into a deep representation of their structure and meaning.
 
-- **Usage**: 
+-   **Usage**:
 
-  - Encoder-only models, such as BERT, work as sequence-to-sequence models with equal input and output sequence lengths.
+    -   You can train encoder-only models to perform classification tasks such as sentiment analysis
 
-  - With additional layers, they can perform classification tasks like sentiment analysis.
+    -   Encoder-only models, such as BERT, work as sequence-to-sequence models with equal input and output sequence lengths.
+
+    -   With additional layers, you can train encoder-only models to perform classification tasks like sentiment analysis.
 
 ### Decoder
 
-- **Function**: Uses the encoder's contextual understanding to generate new tokens, operating in a loop until a stop condition is met.
+-   **Function**: Uses the encoder's contextual understanding to generate new tokens, operating in a loop until a stop condition is met.
 
-- **Usage**: 
+-   **Usage**:
 
-  - Decoder-only models, such as the GPT family, BLOOM, Jurassic, and LLaMA, are commonly used today and can generalize to most tasks.
+    -   Decoder-only models, such as the GPT family, BLOOM, Jurassic, and LLaMA, are commonly used today and can generalize to most tasks.
 
 ### Encoder-Decoder Models
 
-- **Function**: Handle sequence-to-sequence tasks where input and output sequences can differ in length.
+-   **Function**: Handle sequence-to-sequence tasks where input and output sequences can differ in length.
 
-- **Examples**: BART, T5.
+-   **Examples**: BART, T5.
 
-- **Usage**: Suitable for tasks like translation and general text generation.
-
-
-  
+-   **Usage**: Suitable for tasks like translation and general text generation.
 
 ### Practical Application
 
-- **Main Goal**: Understand the differences between various models to read model documentation effectively.
+-   **Main Goal**: Understand the differences between various models to read model documentation effectively.
 
-- **Prompt Engineering**: Interact with transformer models through natural language prompts, focusing on written words rather than code.
-
+-   **Prompt Engineering**: Interact with transformer models through natural language prompts, focusing on written words rather than code.
 
 **Transformers: Attention is all you need**
 
-"Attention is All You Need" is a research paper published in 2017 by Google researchers, which introduced the Transformer model, a novel architecture that revolutionized the field of natural language processing (NLP) and became the basis for the LLMs we  now know - such as GPT, PaLM and others. The paper proposes a neural network architecture that replaces traditional recurrent neural networks (RNNs) and convolutional neural networks (CNNs) with an entirely attention-based mechanism. 
+"Attention is All You Need" is a research paper published in 2017 by Google researchers, which introduced the Transformer model, a novel architecture that revolutionized the field of natural language processing (NLP) and became the basis for the LLMs we now know - such as GPT, PaLM and others. The paper proposes a neural network architecture that replaces traditional recurrent neural networks (RNNs) and convolutional neural networks (CNNs) with an entirely attention-based mechanism.
 
 The Transformer model uses self-attention to compute representations of input sequences, which allows it to capture long-term dependencies and parallelize computation effectively. The authors demonstrate that their model achieves state-of-the-art performance on several machine translation tasks and outperforms previous models that rely on RNNs or CNNs.
 
-The Transformer architecture consists of an encoder and a decoder, each of which is composed of several layers. Each layer consists of two sub-layers: a multi-head self-attention mechanism and a feed-forward neural network. The multi-head self-attention mechanism allows the model to attend to different parts of the input sequence, while the feed-forward network applies a point-wise fully connected layer to each position separately and identically. 
+The Transformer architecture consists of an encoder and a decoder, each of which is composed of several layers. Each layer consists of two sub-layers: a multi-head self-attention mechanism and a feed-forward neural network. The multi-head self-attention mechanism allows the model to attend to different parts of the input sequence, while the feed-forward network applies a point-wise fully connected layer to each position separately and identically.
 
 The Transformer model also uses residual connections and layer normalization to facilitate training and prevent overfitting. In addition, the authors introduce a positional encoding scheme that encodes the position of each token in the input sequence, enabling the model to capture the order of the sequence without the need for recurrent or convolutional operations.
+
+## Some well-known models
+
+### BERT
+
+**BERT** (Bidirectional Encoder Representations from Transformers) is a **transformer-based language model** developed by Google in 2018, designed specifically for natural language understanding (NLU) tasks. BERT differs from earlier models because of its **bidirectional training** approach, which allows it to understand context in a nuanced way by considering both the left and right context in a sentence.
+
+#### Key Details About BERT:
+
+1.  **Parameter Sizes**:
+
+    -   **BERT Base**: 110 million parameters (12 layers, 768 hidden units, 12 attention heads)
+
+    -   **BERT Large**: 340 million parameters (24 layers, 1024 hidden units, 16 attention heads)
+
+2.  **Bidirectional Training**: BERT’s bidirectional approach uses **masked language modeling** (MLM) during training. This means it randomly masks words in a sentence and trains the model to predict them based on the surrounding context, giving it a deeper understanding of word relationships.
+
+3.  **Pretraining Tasks**:
+
+    -   **Masked Language Modeling (MLM)**: BERT masks a portion of the words in a sentence and tries to predict the missing words.
+
+    -   **Next Sentence Prediction (NSP)**: BERT also learns to predict if one sentence logically follows another, which helps with tasks like question answering and sentence-pair classification.
+
+4.  **Fine-Tuning for Specific Tasks**: BERT’s architecture is flexible, allowing it to be fine-tuned for a range of NLP tasks with minimal additional training. Common tasks include:
+
+    -   **Sentiment Analysis**
+
+    -   **Named Entity Recognition (NER)**
+
+    -   **Question Answering (e.g., SQuAD benchmark)**
+
+    -   **Text Classification and Similarity Tasks**
+
+5.  **Impact and Variants**: BERT set a new benchmark in NLP, and its architecture has inspired many derivatives and improvements, including **RoBERTa** (by Facebook AI), **DistilBERT** (a smaller, faster BERT), and **ALBERT** (a more efficient BERT variant).
+
+BERT transformed NLP by demonstrating how powerful bidirectional transformers can be for understanding language context, which has since influenced other models like GPT, T5, and BLOOM.
+
+### BLOOM
+
+**BLOOM** (BigScience Large Open-science Open-access Multilingual Language Model) is a large language model created by the **BigScience** project, an open scientific collaboration led by Hugging Face with researchers worldwide. BLOOM is designed to handle multiple languages and tasks, such as text generation, summarization, and translation, in a way similar to models like GPT-3.
+
+#### Key Details About BLOOM:
+
+1.  **Parameter Size**: BLOOM has **176 billion parameters** in its largest version, making it one of the largest open-access language models available. There are smaller versions with fewer parameters, which are used for different applications requiring less computational power.
+
+2.  **Multilingual Capacity**: BLOOM was trained on **46 languages** and 13 programming languages, including English, French, Arabic, Spanish, Chinese, and more, making it versatile in multilingual NLP tasks.
+
+3.  **Training Data**: The model was trained on a vast, diverse dataset of over 1.5 terabytes of text data, which includes a variety of domains to help BLOOM perform across multiple contexts and languages.
+
+4.  **Open Access**: One of the primary goals of the BLOOM model is transparency and open accessibility for the AI research community, unlike other large models that are proprietary.
+
+If you’re working in NLP or language modeling, BLOOM is an excellent model to explore due to its openness, multilingual capabilities, and state-of-the-art performance across various tasks.
 
 ## Prompt Engineering
 
@@ -261,100 +306,121 @@ Prompt engineering involves crafting and refining the input text (prompt) fed to
 
 **Prompt Engineering**
 
-- **Definition**: The process of developing and improving the prompt to achieve desired model behavior.
+-   **Definition**: The process of developing and improving the prompt to achieve desired model behavior.
 
-- **Strategy**: Including examples of the task within the prompt, known as in-context learning.
+-   **Strategy**: Including examples of the task within the prompt, known as in-context learning.
 
 **In-Context Learning**
 
-- **Definition**: Helping models learn the task by including examples in the prompt.
+-   **Definition**: Helping models learn the task by including examples in the prompt.
 
-- **Example**: For sentiment analysis, the prompt can include the instruction, review text, and an expected sentiment output.
+-   **Example**: For sentiment analysis, the prompt can include the instruction, review text, and an expected sentiment output.
 
 **Zero-Shot Inference**
 
-- **Definition**: Providing only the input data in the prompt without examples.
+-   **Definition**: Providing only the input data in the prompt without examples.
 
-- **Effectiveness**: Large models perform well; smaller models may struggle.
+-   **Effectiveness**: Large models perform well; smaller models may struggle.
 
 **One-Shot Inference**
 
-- **Definition**: Including a single example in the prompt to guide the model.
-- **Example**: A sample review and sentiment analysis followed by the actual input review.
+-   **Definition**: Including a single example in the prompt to guide the model.
+
+-   **Example**: A sample review and sentiment analysis followed by the actual input review.
 
 **Few-Shot Inference**
 
-- **Definition**: Including multiple examples in the prompt to improve model understanding.
-- **Example**: A mix of positive and negative reviews to guide sentiment analysis.
+-   **Definition**: Including multiple examples in the prompt to improve model understanding.
+
+-   **Example**: A mix of positive and negative reviews to guide sentiment analysis.
 
 **Practical Considerations**
 
 **Context Window**
 
-- **Limitation**: There's a limit on the amount of in-context learning that can be included.
--
-**Recommendation**: If performance doesn’t improve with multiple examples, consider fine-tuning the model.
+-   **Limitation**: There's a limit on the amount of in-context learning that can be included.
+-   **Recommendation**: If performance doesn’t improve with multiple examples, consider fine-tuning the model.
 
 **Fine-Tuning**
 
-- **Definition**: Additional training on the model with new data to improve task-specific performance.
-- **Upcoming**: Detailed exploration of fine-tuning will be covered in week 2 of the course.
+-   **Definition**: Additional training on the model with new data to improve task-specific performance.
+-   **Upcoming**: Detailed exploration of fine-tuning will be covered in week 2 of the course.
 
 **Model Performance and Scale**
 
-- **Observation**: Model performance on various tasks depends on the scale (number of parameters).
-- **Large Models**: Good at zero-shot inference for multiple tasks.
-- **Smaller Models**: Generally limited to tasks similar to their training data.
+-   **Observation**: Model performance on various tasks depends on the scale (number of parameters).
+
+-   **Large Models**: Good at zero-shot inference for multiple tasks.
+
+-   **Smaller Models**: Generally limited to tasks similar to their training data.
 
 **Experimentation**
 
-- **Recommendation**: Experiment with different models and settings to find the best fit for your use case.
-- **Next Steps**: Explore configuration settings to influence the structure and style of model completions.
+-   **Recommendation**: Experiment with different models and settings to find the best fit for your use case.
 
-
+-   **Next Steps**: Explore configuration settings to influence the structure and style of model completions.
 
 ## Configuring Generative AI Models
 
 **Overview**
+
 This lecture examines methods and configuration parameters used to influence a model's next-word generation during inference. Unlike training parameters, these settings are adjusted at inference time to control aspects like the maximum number of tokens generated and the creativity of the output.
 
 **Key Configuration Parameters**
 
-**Max New Tokens**
-- **Definition**: Limits the number of tokens the model generates.
-- **Usage**: Set to values like 100, 150, or 200 to cap the generation process.
-- **Example**: If set to 200, the generation might end sooner if an end-of-sequence token is predicted.
+**1. Max New Tokens**
 
-**Greedy Decoding**
-- **Definition**: The model always selects the word with the highest probability.
-- **Characteristics**: Works well for short texts but can lead to repetitive outputs.
+-   **Definition**: Limits the number of tokens the model generates.
 
-**Random Sampling**
-- **Definition**: Selects the next word based on the probability distribution.
-- **Advantages**: Introduces variability to avoid repetitive text.
-- **Disadvantages**: Can produce outputs that are too creative or nonsensical.
-- **Implementation**: In Hugging Face, set `do_sample=True`.
+-   **Usage**: Set to values like 100, 150, or 200 to cap the generation process.
 
-**Top-k Sampling**
-- **Definition**: Limits choices to the top k highest probability tokens.
-- **Example**: If k=3, the model selects from the top 3 probable words.
-- **Benefit**: Balances randomness and coherence in the output.
+-   **Example**: If set to 200, the generation might end sooner if an end-of-sequence token is predicted.
 
-**Top-p (Nucleus) Sampling**
-- **Definition**: Chooses from tokens whose cumulative probability meets a threshold p.
-- **Example**: If p=0.3, selects from tokens that together have a probability of 0.3.
-- **Benefit**: Ensures sensible and coherent generation by limiting low-probability words.
+**2. Greedy Decoding**
 
-**Temperature**
-- **Definition**: Controls the randomness by scaling the probability distribution.
-- **Effect**: 
-  - Low temperature (<1): Concentrates probability on fewer words, producing less random and more predictable text.
-  - High temperature (>1): Spreads probability more evenly, increasing randomness and creativity.
-  - Temperature=1: Uses the default probability distribution.
+-   **Definition**: The model always selects the word with the highest probability.
 
-**Conclusion**
-This lecture covered various inference configuration parameter
+-   **Characteristics**: Works well for short texts but can lead to repetitive outputs.
 
+**3. Random Sampling**
+
+-   **Definition**: Selects the next word based on the probability distribution.
+
+-   **Advantages**: Introduces variability to avoid repetitive text.
+
+-   **Disadvantages**: Can produce outputs that are too creative or nonsensical.
+
+-   **Implementation**: In Hugging Face, set `do_sample=True`.
+
+**4. Top-k Sampling**
+
+-   **Definition**: Limits choices to the top k highest probability tokens.
+
+-   **Example**: If k=3, the model selects from the top 3 probable words.
+
+-   **Benefit**: Balances randomness and coherence in the output.
+
+**5. Top-p (Nucleus) Sampling**
+
+-   **Definition**: Chooses from tokens whose cumulative probability meets a threshold p.
+
+-   **Example**: If p=0.3, selects from tokens that together have a probability of 0.3.
+
+-   **Benefit**: Ensures sensible and coherent generation by limiting low-probability words.
+
+**6. Temperature**
+
+-   **Definition**: Controls the randomness by scaling the probability distribution.
+
+-   **Effect**:
+
+    -   Low temperature (\<1): Concentrates probability on fewer words, producing less random and more predictable text.
+
+    -   High temperature (\>1): Spreads probability more evenly, increasing randomness and creativity.
+
+    -   Temperature=1: Uses the default probability distribution.
+
+![](figures/parameter_temp.png)
 
 ## Generative AI project lifecycle
 
@@ -364,56 +430,65 @@ Throughout this course, you'll learn the techniques required to develop and depl
 
 ### Project Life Cycle Stages
 
+![](figures/project_life.png)
+
 #### Define the Scope
 
-- **Importance**: Accurately and narrowly define the project's scope.
+-   **Importance**: Accurately and narrowly define the project's scope.
 
-- **Considerations**:
-  - What specific function will the LLM serve in your application?
-  - Does the model need to perform various tasks or focus on one specific task (e.g., named entity recognition)?
-- **Outcome**: Save time and compute costs by clearly defining requirements.
+-   **Considerations**:
+
+-   What specific function will the LLM serve in your application?
+
+-   Does the model need to perform various tasks or focus on one specific task (e.g., named entity recognition)?
+
+-   **Outcome**: Save time and compute costs by clearly defining requirements.
 
 #### Choose a Model
 
-- **Decision**: Train your own model from scratch or use an existing base model.
-- **Common Approach**: Start with an existing model.
-- **Considerations**: Later in the course, you'll learn rules of thumb to help estimate the feasibility of training your own model.
+-   **Decision**: Train your own model from scratch or use an existing base model.
+
+-   **Common Approach**: Start with an existing model.
+
+-   **Considerations**: Later in the course, you'll learn rules of thumb to help estimate the feasibility of training your own model.
 
 #### Assess and Train the Model
 
-- **Initial Steps**: Use prompt engineering and in-context learning to improve model performance.
-- **Fine-Tuning**:
-  - Necessary if prompt engineering is insufficient.
-  - Supervised learning process covered in Week 2.
-- **Reinforcement Learning with Human Feedback (RLHF)**:
-  - Ensures the model behaves well and aligns with human preferences.
-  - Covered in Week 3.
+-   **Initial Steps**: Use prompt engineering and in-context learning to improve model performance.
+
+-   **Fine-Tuning**:
+
+-   Necessary if prompt engineering is insufficient.
+
+-   Supervised learning process covered in Week 2.
+
+-   **Reinforcement Learning with Human Feedback (RLHF)**:
+
+-   Ensures the model behaves well and aligns with human preferences. - Covered in Week 3.
 
 #### Evaluate the Model
 
-- **Metrics and Benchmarks**: Explore next week.
-- **Iterative Process**:
-  - Start with prompt engineering.
-  - Evaluate outputs and fine-tune if necessary.
-  - Revisit and refine prompt engineering.
+-   **Metrics and Benchmarks**: Explore next week.
+-   **Iterative Process**:
+    -   Start with prompt engineering.
+    -   Evaluate outputs and fine-tune if necessary.
+    -   Revisit and refine prompt engineering.
 
 #### Deployment
 
-- **Final Steps**:
-  - Optimize the model for deployment.
-  - Integrate the model with your application.
-  - Ensure efficient use of compute resources for a better user experience.
+-   **Final Steps**:
+    -   Optimize the model for deployment.
+    -   Integrate the model with your application.
+    -   Ensure efficient use of compute resources for a better user experience.
 
 #### Additional Infrastructure Considerations
 
-- **Limitations of LLMs**:
-  - Tendency to invent information when unsure.
-  - Limited ability to perform complex reasoning and mathematics.
-
-- **Overcoming Limitations**:
-  - Learn techniques to address these issues in the final part of the course.
+-   **Limitations of LLMs**:
+    -   Tendency to invent information when unsure.
+    -   Limited ability to perform complex reasoning and mathematics.
+-   **Overcoming Limitations**:
+    -   Learn techniques to address these issues in the final part of the course.
 
 #### Conclusion
 
 This framework maps out the tasks required to take your project from conception to launch, providing insights into important decisions, potential difficulties, and necessary infrastructure for developing and deploying your application.
-

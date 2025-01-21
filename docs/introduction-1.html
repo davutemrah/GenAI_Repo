@@ -23,7 +23,7 @@
 <meta name="author" content="DEA" />
 
 
-<meta name="date" content="2024-10-27" />
+<meta name="date" content="2025-01-10" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -119,15 +119,21 @@
 <li class="chapter" data-level="1.6.4" data-path="introduction-1.html"><a href="introduction-1.html#encoder-decoder-models"><i class="fa fa-check"></i><b>1.6.4</b> Encoder-Decoder Models</a></li>
 <li class="chapter" data-level="1.6.5" data-path="introduction-1.html"><a href="introduction-1.html#practical-application"><i class="fa fa-check"></i><b>1.6.5</b> Practical Application</a></li>
 </ul></li>
-<li class="chapter" data-level="1.7" data-path="introduction-1.html"><a href="introduction-1.html#prompt-engineering"><i class="fa fa-check"></i><b>1.7</b> Prompt Engineering</a>
+<li class="chapter" data-level="1.7" data-path="introduction-1.html"><a href="introduction-1.html#some-well-known-models"><i class="fa fa-check"></i><b>1.7</b> Some well-known models</a>
 <ul>
-<li class="chapter" data-level="1.7.1" data-path="introduction-1.html"><a href="introduction-1.html#key-concepts"><i class="fa fa-check"></i><b>1.7.1</b> Key Concepts</a></li>
+<li class="chapter" data-level="1.7.1" data-path="introduction-1.html"><a href="introduction-1.html#bert"><i class="fa fa-check"></i><b>1.7.1</b> BERT</a></li>
+<li class="chapter" data-level="1.7.2" data-path="introduction-1.html"><a href="introduction-1.html#bloom"><i class="fa fa-check"></i><b>1.7.2</b> BLOOM</a></li>
 </ul></li>
-<li class="chapter" data-level="1.8" data-path="introduction-1.html"><a href="introduction-1.html#configuring-generative-ai-models"><i class="fa fa-check"></i><b>1.8</b> Configuring Generative AI Models</a></li>
-<li class="chapter" data-level="1.9" data-path="introduction-1.html"><a href="introduction-1.html#generative-ai-project-lifecycle"><i class="fa fa-check"></i><b>1.9</b> Generative AI project lifecycle</a>
+<li class="chapter" data-level="1.8" data-path="introduction-1.html"><a href="introduction-1.html#prompt-engineering"><i class="fa fa-check"></i><b>1.8</b> Prompt Engineering</a>
 <ul>
-<li class="chapter" data-level="1.9.1" data-path="introduction-1.html"><a href="introduction-1.html#project-life-cycle-stages"><i class="fa fa-check"></i><b>1.9.1</b> Project Life Cycle Stages</a></li>
+<li class="chapter" data-level="1.8.1" data-path="introduction-1.html"><a href="introduction-1.html#key-concepts"><i class="fa fa-check"></i><b>1.8.1</b> Key Concepts</a></li>
 </ul></li>
+<li class="chapter" data-level="1.9" data-path="introduction-1.html"><a href="introduction-1.html#configuring-generative-ai-models"><i class="fa fa-check"></i><b>1.9</b> Configuring Generative AI Models</a></li>
+<li class="chapter" data-level="1.10" data-path="introduction-1.html"><a href="introduction-1.html#generative-ai-project-lifecycle"><i class="fa fa-check"></i><b>1.10</b> Generative AI project lifecycle</a>
+<ul>
+<li class="chapter" data-level="1.10.1" data-path="introduction-1.html"><a href="introduction-1.html#project-life-cycle-stages"><i class="fa fa-check"></i><b>1.10.1</b> Project Life Cycle Stages</a></li>
+</ul></li>
+<li class="chapter" data-level="1.11" data-path="introduction-1.html"><a href="introduction-1.html#pre-training-large-language-models"><i class="fa fa-check"></i><b>1.11</b> Pre-training large language models</a></li>
 </ul></li>
 <li class="divider"></li>
 <li><a href="https://davutemrah.github.io" target="blank">Back to Home Page</li>
@@ -357,8 +363,9 @@
 <li><p><strong>Function</strong>: Encodes input sequences into a deep representation of their structure and meaning.</p></li>
 <li><p><strong>Usage</strong>:</p>
 <ul>
+<li><p>You can train encoder-only models to perform classification tasks such as sentiment analysis</p></li>
 <li><p>Encoder-only models, such as BERT, work as sequence-to-sequence models with equal input and output sequence lengths.</p></li>
-<li><p>With additional layers, they can perform classification tasks like sentiment analysis.</p></li>
+<li><p>With additional layers, you can train encoder-only models to perform classification tasks like sentiment analysis.</p></li>
 </ul></li>
 </ul>
 </div>
@@ -393,12 +400,58 @@
 <p>The Transformer model also uses residual connections and layer normalization to facilitate training and prevent overfitting. In addition, the authors introduce a positional encoding scheme that encodes the position of each token in the input sequence, enabling the model to capture the order of the sequence without the need for recurrent or convolutional operations.</p>
 </div>
 </div>
-<div id="prompt-engineering" class="section level2 hasAnchor" number="1.7">
-<h2><span class="header-section-number">1.7</span> Prompt Engineering<a href="introduction-1.html#prompt-engineering" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="some-well-known-models" class="section level2 hasAnchor" number="1.7">
+<h2><span class="header-section-number">1.7</span> Some well-known models<a href="introduction-1.html#some-well-known-models" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="bert" class="section level3 hasAnchor" number="1.7.1">
+<h3><span class="header-section-number">1.7.1</span> BERT<a href="introduction-1.html#bert" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><strong>BERT</strong> (Bidirectional Encoder Representations from Transformers) is a <strong>transformer-based language model</strong> developed by Google in 2018, designed specifically for natural language understanding (NLU) tasks. BERT differs from earlier models because of its <strong>bidirectional training</strong> approach, which allows it to understand context in a nuanced way by considering both the left and right context in a sentence.</p>
+<div id="key-details-about-bert" class="section level4 hasAnchor" number="1.7.1.1">
+<h4><span class="header-section-number">1.7.1.1</span> Key Details About BERT:<a href="introduction-1.html#key-details-about-bert" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ol style="list-style-type: decimal">
+<li><p><strong>Parameter Sizes</strong>:</p>
+<ul>
+<li><p><strong>BERT Base</strong>: 110 million parameters (12 layers, 768 hidden units, 12 attention heads)</p></li>
+<li><p><strong>BERT Large</strong>: 340 million parameters (24 layers, 1024 hidden units, 16 attention heads)</p></li>
+</ul></li>
+<li><p><strong>Bidirectional Training</strong>: BERT’s bidirectional approach uses <strong>masked language modeling</strong> (MLM) during training. This means it randomly masks words in a sentence and trains the model to predict them based on the surrounding context, giving it a deeper understanding of word relationships.</p></li>
+<li><p><strong>Pretraining Tasks</strong>:</p>
+<ul>
+<li><p><strong>Masked Language Modeling (MLM)</strong>: BERT masks a portion of the words in a sentence and tries to predict the missing words.</p></li>
+<li><p><strong>Next Sentence Prediction (NSP)</strong>: BERT also learns to predict if one sentence logically follows another, which helps with tasks like question answering and sentence-pair classification.</p></li>
+</ul></li>
+<li><p><strong>Fine-Tuning for Specific Tasks</strong>: BERT’s architecture is flexible, allowing it to be fine-tuned for a range of NLP tasks with minimal additional training. Common tasks include:</p>
+<ul>
+<li><p><strong>Sentiment Analysis</strong></p></li>
+<li><p><strong>Named Entity Recognition (NER)</strong></p></li>
+<li><p><strong>Question Answering (e.g., SQuAD benchmark)</strong></p></li>
+<li><p><strong>Text Classification and Similarity Tasks</strong></p></li>
+</ul></li>
+<li><p><strong>Impact and Variants</strong>: BERT set a new benchmark in NLP, and its architecture has inspired many derivatives and improvements, including <strong>RoBERTa</strong> (by Facebook AI), <strong>DistilBERT</strong> (a smaller, faster BERT), and <strong>ALBERT</strong> (a more efficient BERT variant).</p></li>
+</ol>
+<p>BERT transformed NLP by demonstrating how powerful bidirectional transformers can be for understanding language context, which has since influenced other models like GPT, T5, and BLOOM.</p>
+</div>
+</div>
+<div id="bloom" class="section level3 hasAnchor" number="1.7.2">
+<h3><span class="header-section-number">1.7.2</span> BLOOM<a href="introduction-1.html#bloom" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><strong>BLOOM</strong> (BigScience Large Open-science Open-access Multilingual Language Model) is a large language model created by the <strong>BigScience</strong> project, an open scientific collaboration led by Hugging Face with researchers worldwide. BLOOM is designed to handle multiple languages and tasks, such as text generation, summarization, and translation, in a way similar to models like GPT-3.</p>
+<div id="key-details-about-bloom" class="section level4 hasAnchor" number="1.7.2.1">
+<h4><span class="header-section-number">1.7.2.1</span> Key Details About BLOOM:<a href="introduction-1.html#key-details-about-bloom" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<ol style="list-style-type: decimal">
+<li><p><strong>Parameter Size</strong>: BLOOM has <strong>176 billion parameters</strong> in its largest version, making it one of the largest open-access language models available. There are smaller versions with fewer parameters, which are used for different applications requiring less computational power.</p></li>
+<li><p><strong>Multilingual Capacity</strong>: BLOOM was trained on <strong>46 languages</strong> and 13 programming languages, including English, French, Arabic, Spanish, Chinese, and more, making it versatile in multilingual NLP tasks.</p></li>
+<li><p><strong>Training Data</strong>: The model was trained on a vast, diverse dataset of over 1.5 terabytes of text data, which includes a variety of domains to help BLOOM perform across multiple contexts and languages.</p></li>
+<li><p><strong>Open Access</strong>: One of the primary goals of the BLOOM model is transparency and open accessibility for the AI research community, unlike other large models that are proprietary.</p></li>
+</ol>
+<p>If you’re working in NLP or language modeling, BLOOM is an excellent model to explore due to its openness, multilingual capabilities, and state-of-the-art performance across various tasks.</p>
+</div>
+</div>
+</div>
+<div id="prompt-engineering" class="section level2 hasAnchor" number="1.8">
+<h2><span class="header-section-number">1.8</span> Prompt Engineering<a href="introduction-1.html#prompt-engineering" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p><strong>Introduction</strong></p>
 <p>Prompt engineering involves crafting and refining the input text (prompt) fed to a model to influence its behavior during inference, resulting in desired output (completion). The total text available for the prompt is called the context window.</p>
-<div id="key-concepts" class="section level3 hasAnchor" number="1.7.1">
-<h3><span class="header-section-number">1.7.1</span> Key Concepts<a href="introduction-1.html#key-concepts" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="key-concepts" class="section level3 hasAnchor" number="1.8.1">
+<h3><span class="header-section-number">1.8.1</span> Key Concepts<a href="introduction-1.html#key-concepts" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p><strong>Prompt Engineering</strong></p>
 <ul>
 <li><p><strong>Definition</strong>: The process of developing and improving the prompt to achieve desired model behavior.</p></li>
@@ -416,13 +469,13 @@
 </ul>
 <p><strong>One-Shot Inference</strong></p>
 <ul>
-<li><strong>Definition</strong>: Including a single example in the prompt to guide the model.</li>
-<li><strong>Example</strong>: A sample review and sentiment analysis followed by the actual input review.</li>
+<li><p><strong>Definition</strong>: Including a single example in the prompt to guide the model.</p></li>
+<li><p><strong>Example</strong>: A sample review and sentiment analysis followed by the actual input review.</p></li>
 </ul>
 <p><strong>Few-Shot Inference</strong></p>
 <ul>
-<li><strong>Definition</strong>: Including multiple examples in the prompt to improve model understanding.</li>
-<li><strong>Example</strong>: A mix of positive and negative reviews to guide sentiment analysis.</li>
+<li><p><strong>Definition</strong>: Including multiple examples in the prompt to improve model understanding.</p></li>
+<li><p><strong>Example</strong>: A mix of positive and negative reviews to guide sentiment analysis.</p></li>
 </ul>
 <p><strong>Practical Considerations</strong></p>
 <p><strong>Context Window</strong></p>
@@ -437,95 +490,103 @@
 </ul>
 <p><strong>Model Performance and Scale</strong></p>
 <ul>
-<li><strong>Observation</strong>: Model performance on various tasks depends on the scale (number of parameters).</li>
-<li><strong>Large Models</strong>: Good at zero-shot inference for multiple tasks.</li>
-<li><strong>Smaller Models</strong>: Generally limited to tasks similar to their training data.</li>
+<li><p><strong>Observation</strong>: Model performance on various tasks depends on the scale (number of parameters).</p></li>
+<li><p><strong>Large Models</strong>: Good at zero-shot inference for multiple tasks.</p></li>
+<li><p><strong>Smaller Models</strong>: Generally limited to tasks similar to their training data.</p></li>
 </ul>
 <p><strong>Experimentation</strong></p>
 <ul>
-<li><strong>Recommendation</strong>: Experiment with different models and settings to find the best fit for your use case.</li>
-<li><strong>Next Steps</strong>: Explore configuration settings to influence the structure and style of model completions.</li>
+<li><p><strong>Recommendation</strong>: Experiment with different models and settings to find the best fit for your use case.</p></li>
+<li><p><strong>Next Steps</strong>: Explore configuration settings to influence the structure and style of model completions.</p></li>
 </ul>
 </div>
 </div>
-<div id="configuring-generative-ai-models" class="section level2 hasAnchor" number="1.8">
-<h2><span class="header-section-number">1.8</span> Configuring Generative AI Models<a href="introduction-1.html#configuring-generative-ai-models" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p><strong>Overview</strong>
-This lecture examines methods and configuration parameters used to influence a model’s next-word generation during inference. Unlike training parameters, these settings are adjusted at inference time to control aspects like the maximum number of tokens generated and the creativity of the output.</p>
+<div id="configuring-generative-ai-models" class="section level2 hasAnchor" number="1.9">
+<h2><span class="header-section-number">1.9</span> Configuring Generative AI Models<a href="introduction-1.html#configuring-generative-ai-models" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Overview</strong></p>
+<p>This lecture examines methods and configuration parameters used to influence a model’s next-word generation during inference. Unlike training parameters, these settings are adjusted at inference time to control aspects like the maximum number of tokens generated and the creativity of the output.</p>
 <p><strong>Key Configuration Parameters</strong></p>
-<p><strong>Max New Tokens</strong>
-- <strong>Definition</strong>: Limits the number of tokens the model generates.
-- <strong>Usage</strong>: Set to values like 100, 150, or 200 to cap the generation process.
-- <strong>Example</strong>: If set to 200, the generation might end sooner if an end-of-sequence token is predicted.</p>
-<p><strong>Greedy Decoding</strong>
-- <strong>Definition</strong>: The model always selects the word with the highest probability.
-- <strong>Characteristics</strong>: Works well for short texts but can lead to repetitive outputs.</p>
-<p><strong>Random Sampling</strong>
-- <strong>Definition</strong>: Selects the next word based on the probability distribution.
-- <strong>Advantages</strong>: Introduces variability to avoid repetitive text.
-- <strong>Disadvantages</strong>: Can produce outputs that are too creative or nonsensical.
-- <strong>Implementation</strong>: In Hugging Face, set <code>do_sample=True</code>.</p>
-<p><strong>Top-k Sampling</strong>
-- <strong>Definition</strong>: Limits choices to the top k highest probability tokens.
-- <strong>Example</strong>: If k=3, the model selects from the top 3 probable words.
-- <strong>Benefit</strong>: Balances randomness and coherence in the output.</p>
-<p><strong>Top-p (Nucleus) Sampling</strong>
-- <strong>Definition</strong>: Chooses from tokens whose cumulative probability meets a threshold p.
-- <strong>Example</strong>: If p=0.3, selects from tokens that together have a probability of 0.3.
-- <strong>Benefit</strong>: Ensures sensible and coherent generation by limiting low-probability words.</p>
-<p><strong>Temperature</strong>
-- <strong>Definition</strong>: Controls the randomness by scaling the probability distribution.
-- <strong>Effect</strong>:
-- Low temperature (&lt;1): Concentrates probability on fewer words, producing less random and more predictable text.
-- High temperature (&gt;1): Spreads probability more evenly, increasing randomness and creativity.
-- Temperature=1: Uses the default probability distribution.</p>
-<p><strong>Conclusion</strong>
-This lecture covered various inference configuration parameter</p>
+<p><strong>1. Max New Tokens</strong></p>
+<ul>
+<li><p><strong>Definition</strong>: Limits the number of tokens the model generates.</p></li>
+<li><p><strong>Usage</strong>: Set to values like 100, 150, or 200 to cap the generation process.</p></li>
+<li><p><strong>Example</strong>: If set to 200, the generation might end sooner if an end-of-sequence token is predicted.</p></li>
+</ul>
+<p><strong>2. Greedy Decoding</strong></p>
+<ul>
+<li><p><strong>Definition</strong>: The model always selects the word with the highest probability.</p></li>
+<li><p><strong>Characteristics</strong>: Works well for short texts but can lead to repetitive outputs.</p></li>
+</ul>
+<p><strong>3. Random Sampling</strong></p>
+<ul>
+<li><p><strong>Definition</strong>: Selects the next word based on the probability distribution.</p></li>
+<li><p><strong>Advantages</strong>: Introduces variability to avoid repetitive text.</p></li>
+<li><p><strong>Disadvantages</strong>: Can produce outputs that are too creative or nonsensical.</p></li>
+<li><p><strong>Implementation</strong>: In Hugging Face, set <code>do_sample=True</code>.</p></li>
+</ul>
+<p><strong>4. Top-k Sampling</strong></p>
+<ul>
+<li><p><strong>Definition</strong>: Limits choices to the top k highest probability tokens.</p></li>
+<li><p><strong>Example</strong>: If k=3, the model selects from the top 3 probable words.</p></li>
+<li><p><strong>Benefit</strong>: Balances randomness and coherence in the output.</p></li>
+</ul>
+<p><strong>5. Top-p (Nucleus) Sampling</strong></p>
+<ul>
+<li><p><strong>Definition</strong>: Chooses from tokens whose cumulative probability meets a threshold p.</p></li>
+<li><p><strong>Example</strong>: If p=0.3, selects from tokens that together have a probability of 0.3.</p></li>
+<li><p><strong>Benefit</strong>: Ensures sensible and coherent generation by limiting low-probability words.</p></li>
+</ul>
+<p><strong>6. Temperature</strong></p>
+<ul>
+<li><p><strong>Definition</strong>: Controls the randomness by scaling the probability distribution.</p></li>
+<li><p><strong>Effect</strong>:</p>
+<ul>
+<li><p>Low temperature (&lt;1): Concentrates probability on fewer words, producing less random and more predictable text.</p></li>
+<li><p>High temperature (&gt;1): Spreads probability more evenly, increasing randomness and creativity.</p></li>
+<li><p>Temperature=1: Uses the default probability distribution.</p></li>
+</ul></li>
+</ul>
+<p><img src="figures/parameter_temp.png" /></p>
 </div>
-<div id="generative-ai-project-lifecycle" class="section level2 hasAnchor" number="1.9">
-<h2><span class="header-section-number">1.9</span> Generative AI project lifecycle<a href="introduction-1.html#generative-ai-project-lifecycle" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="generative-ai-project-lifecycle" class="section level2 hasAnchor" number="1.10">
+<h2><span class="header-section-number">1.10</span> Generative AI project lifecycle<a href="introduction-1.html#generative-ai-project-lifecycle" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p><strong>Introduction</strong></p>
 <p>Throughout this course, you’ll learn the techniques required to develop and deploy an LLM-powered application. This video introduces the generative AI project life cycle, guiding you from conception to launch.</p>
-<div id="project-life-cycle-stages" class="section level3 hasAnchor" number="1.9.1">
-<h3><span class="header-section-number">1.9.1</span> Project Life Cycle Stages<a href="introduction-1.html#project-life-cycle-stages" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div id="define-the-scope" class="section level4 hasAnchor" number="1.9.1.1">
-<h4><span class="header-section-number">1.9.1.1</span> Define the Scope<a href="introduction-1.html#define-the-scope" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div id="project-life-cycle-stages" class="section level3 hasAnchor" number="1.10.1">
+<h3><span class="header-section-number">1.10.1</span> Project Life Cycle Stages<a href="introduction-1.html#project-life-cycle-stages" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><img src="figures/project_life.png" /></p>
+<div id="define-the-scope" class="section level4 hasAnchor" number="1.10.1.1">
+<h4><span class="header-section-number">1.10.1.1</span> Define the Scope<a href="introduction-1.html#define-the-scope" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <ul>
 <li><p><strong>Importance</strong>: Accurately and narrowly define the project’s scope.</p></li>
-<li><p><strong>Considerations</strong>:</p>
-<ul>
-<li>What specific function will the LLM serve in your application?</li>
-<li>Does the model need to perform various tasks or focus on one specific task (e.g., named entity recognition)?</li>
-</ul></li>
+<li><p><strong>Considerations</strong>:</p></li>
+<li><p>What specific function will the LLM serve in your application?</p></li>
+<li><p>Does the model need to perform various tasks or focus on one specific task (e.g., named entity recognition)?</p></li>
 <li><p><strong>Outcome</strong>: Save time and compute costs by clearly defining requirements.</p></li>
 </ul>
 </div>
-<div id="choose-a-model" class="section level4 hasAnchor" number="1.9.1.2">
-<h4><span class="header-section-number">1.9.1.2</span> Choose a Model<a href="introduction-1.html#choose-a-model" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div id="choose-a-model" class="section level4 hasAnchor" number="1.10.1.2">
+<h4><span class="header-section-number">1.10.1.2</span> Choose a Model<a href="introduction-1.html#choose-a-model" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <ul>
-<li><strong>Decision</strong>: Train your own model from scratch or use an existing base model.</li>
-<li><strong>Common Approach</strong>: Start with an existing model.</li>
-<li><strong>Considerations</strong>: Later in the course, you’ll learn rules of thumb to help estimate the feasibility of training your own model.</li>
+<li><p><strong>Decision</strong>: Train your own model from scratch or use an existing base model.</p></li>
+<li><p><strong>Common Approach</strong>: Start with an existing model.</p></li>
+<li><p><strong>Considerations</strong>: Later in the course, you’ll learn rules of thumb to help estimate the feasibility of training your own model.</p></li>
 </ul>
 </div>
-<div id="assess-and-train-the-model" class="section level4 hasAnchor" number="1.9.1.3">
-<h4><span class="header-section-number">1.9.1.3</span> Assess and Train the Model<a href="introduction-1.html#assess-and-train-the-model" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div id="assess-and-train-the-model" class="section level4 hasAnchor" number="1.10.1.3">
+<h4><span class="header-section-number">1.10.1.3</span> Assess and Train the Model<a href="introduction-1.html#assess-and-train-the-model" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <ul>
-<li><strong>Initial Steps</strong>: Use prompt engineering and in-context learning to improve model performance.</li>
-<li><strong>Fine-Tuning</strong>:
-<ul>
-<li>Necessary if prompt engineering is insufficient.</li>
-<li>Supervised learning process covered in Week 2.</li>
-</ul></li>
-<li><strong>Reinforcement Learning with Human Feedback (RLHF)</strong>:
-<ul>
-<li>Ensures the model behaves well and aligns with human preferences.</li>
-<li>Covered in Week 3.</li>
-</ul></li>
+<li><p><strong>Initial Steps</strong>: Use prompt engineering and in-context learning to improve model performance.</p></li>
+<li><p><strong>Fine-Tuning</strong>:</p></li>
+<li><p>Necessary if prompt engineering is insufficient.</p></li>
+<li><p>Supervised learning process covered in Week 2.</p></li>
+<li><p><strong>Reinforcement Learning with Human Feedback (RLHF)</strong>:</p></li>
+<li><p>Ensures the model behaves well and aligns with human preferences.
+- Covered in Week 3.</p></li>
 </ul>
 </div>
-<div id="evaluate-the-model" class="section level4 hasAnchor" number="1.9.1.4">
-<h4><span class="header-section-number">1.9.1.4</span> Evaluate the Model<a href="introduction-1.html#evaluate-the-model" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div id="evaluate-the-model" class="section level4 hasAnchor" number="1.10.1.4">
+<h4><span class="header-section-number">1.10.1.4</span> Evaluate the Model<a href="introduction-1.html#evaluate-the-model" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <ul>
 <li><strong>Metrics and Benchmarks</strong>: Explore next week.</li>
 <li><strong>Iterative Process</strong>:
@@ -536,8 +597,8 @@ This lecture covered various inference configuration parameter</p>
 </ul></li>
 </ul>
 </div>
-<div id="deployment" class="section level4 hasAnchor" number="1.9.1.5">
-<h4><span class="header-section-number">1.9.1.5</span> Deployment<a href="introduction-1.html#deployment" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div id="deployment" class="section level4 hasAnchor" number="1.10.1.5">
+<h4><span class="header-section-number">1.10.1.5</span> Deployment<a href="introduction-1.html#deployment" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <ul>
 <li><strong>Final Steps</strong>:
 <ul>
@@ -547,8 +608,8 @@ This lecture covered various inference configuration parameter</p>
 </ul></li>
 </ul>
 </div>
-<div id="additional-infrastructure-considerations" class="section level4 hasAnchor" number="1.9.1.6">
-<h4><span class="header-section-number">1.9.1.6</span> Additional Infrastructure Considerations<a href="introduction-1.html#additional-infrastructure-considerations" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div id="additional-infrastructure-considerations" class="section level4 hasAnchor" number="1.10.1.6">
+<h4><span class="header-section-number">1.10.1.6</span> Additional Infrastructure Considerations<a href="introduction-1.html#additional-infrastructure-considerations" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <ul>
 <li><strong>Limitations of LLMs</strong>:
 <ul>
@@ -561,12 +622,62 @@ This lecture covered various inference configuration parameter</p>
 </ul></li>
 </ul>
 </div>
-<div id="conclusion" class="section level4 hasAnchor" number="1.9.1.7">
-<h4><span class="header-section-number">1.9.1.7</span> Conclusion<a href="introduction-1.html#conclusion" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div id="conclusion" class="section level4 hasAnchor" number="1.10.1.7">
+<h4><span class="header-section-number">1.10.1.7</span> Conclusion<a href="introduction-1.html#conclusion" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <p>This framework maps out the tasks required to take your project from conception to launch, providing insights into important decisions, potential difficulties, and necessary infrastructure for developing and deploying your application.</p>
 
 </div>
 </div>
+</div>
+<div id="pre-training-large-language-models" class="section level2 hasAnchor" number="1.11">
+<h2><span class="header-section-number">1.11</span> Pre-training large language models<a href="introduction-1.html#pre-training-large-language-models" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ol style="list-style-type: decimal">
+<li><p><strong>Generative AI Project Life Cycle Overview</strong></p>
+<ul>
+<li><p>The process begins with scoping the use case and determining how an LLM will integrate into the application.</p></li>
+<li><p>Next, choose a model: either use an existing model or train one from scratch (the latter is explored in detail later).</p></li>
+</ul></li>
+<li><p><strong>Choosing a Model</strong></p>
+<ul>
+<li><p>Start with existing foundation models available on hubs like Hugging Face or PyTorch, which include model cards detailing use cases, training processes, and limitations.</p></li>
+<li><p>The model choice depends on the task and the architecture’s strengths.</p></li>
+</ul></li>
+<li><p><strong>Transformer Model Variants</strong></p>
+<ul>
+<li><p><strong>Encoder-Only Models (Autoencoding Models):</strong></p>
+<ul>
+<li><p>Pre-trained with <strong>masked language modeling</strong> to reconstruct input by predicting masked tokens.</p></li>
+<li><p>Suited for <strong>sentence classification</strong> (e.g., sentiment analysis) and <strong>token classification</strong> (e.g., named entity recognition).</p></li>
+<li><p>Examples: <strong>BERT</strong>, <strong>RoBERTa</strong>.</p></li>
+</ul></li>
+<li><p><strong>Decoder-Only Models (Autoregressive Models):</strong></p>
+<ul>
+<li><p>Pre-trained with <strong>causal language modeling</strong> to predict the next token.</p></li>
+<li><p>Best for <strong>text generation</strong> and capable of zero-shot inference.</p></li>
+<li><p>Examples: <strong>GPT</strong>, <strong>BLOOM</strong>.</p></li>
+</ul></li>
+<li><p><strong>Sequence-to-Sequence Models:</strong></p>
+<ul>
+<li><p>Utilize both encoder and decoder components.</p></li>
+<li><p>Pre-trained with tasks like <strong>span corruption</strong> (e.g., T5) or other methods.</p></li>
+<li><p>Ideal for <strong>translation</strong>, <strong>summarization</strong>, and <strong>question answering</strong>.</p></li>
+<li><p>Examples: <strong>T5</strong>, <strong>BART</strong>.</p></li>
+</ul></li>
+</ul></li>
+<li><p><strong>Pre-Training Process</strong></p>
+<ul>
+<li><p>LLMs are trained on large datasets using self-supervised learning to capture language patterns.</p></li>
+<li><p>Data preprocessing ensures quality and reduces bias, with only 1–3% of tokens retained for training.</p></li>
+<li><p>Large-scale compute resources and GPUs are required.</p></li>
+</ul></li>
+<li><p><strong>Model Size and Performance</strong></p>
+<ul>
+<li><p>Larger models exhibit better performance with reduced need for in-context learning or further training.</p></li>
+<li><p>Advances in transformers, data availability, and compute power have driven the creation of increasingly larger models.</p></li>
+<li><p>However, training large models is expensive and resource-intensive, raising challenges in scaling.</p></li>
+</ul></li>
+</ol>
+
 </div>
 </div>
             </section>

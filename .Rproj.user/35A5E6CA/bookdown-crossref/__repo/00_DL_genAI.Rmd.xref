@@ -29,6 +29,11 @@ h3:encoder Encoder
 h3:decoder Decoder
 h3:encoder-decoder-models Encoder-Decoder Models
 h3:practical-application Practical Application
+h2:some-well-known-models Some well-known models
+h3:bert BERT
+h4:key-details-about-bert Key Details About BERT:
+h3:bloom BLOOM
+h4:key-details-about-bloom Key Details About BLOOM:
 h2:prompt-engineering Prompt Engineering
 h3:key-concepts Key Concepts
 h2:configuring-generative-ai-models Configuring Generative AI Models
