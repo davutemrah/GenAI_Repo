@@ -1,30 +1,212 @@
----
-title: "Untitled"
-author: "dea"
-date: "`r Sys.Date()`"
-output: html_document
----
+# Fine tuning LLMs with Instructions
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+1. **Prompt Engineering and Inference:**
 
-## R Markdown
+   - **Zero-shot:** Models respond to prompts without examples.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+   - **One/Few-shot:** Including example outputs improves performance, but it uses context window space and may not work for smaller models.
+   
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+**Drawbacks:** 
+    - In context learning may not work for smaller LLM models
+      
+    - Examples take up valuable space in the context window
 
-```{r cars}
-summary(cars)
-```
+2. **Fine-tuning Basics:**
 
-## Including Plots
+   - Unlike pre-training on vast data using self-supervised learning, **fine-tuning** uses labeled examples (prompt-completion pairs) via supervised learning to optimize model weights for specific tasks.
 
-You can also embed plots, for example:
+   - Instruction fine-tuning trains models with explicit instruction-based examples for tasks (e.g., "Summarize the following text").
+   
+   - Data sets of task-specific examples consists of PROMPT + COMPLETION couples
+   
+   - Full fine-tuning updates all parameters. 
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+3. **Instruction Fine-Tuning Process:**
+   
+   - Prepare labeled data with templates (e.g., using Amazon reviews to create classification or summarization prompts).
+   
+   - There are prompt template libraries turn existing unstructured datasets into instruction prompt datasets for fine tuning
+   
+   - Split data into training, validation, and test sets.
+   
+   - Train the model using cross-entropy loss and backpropagation.
+   
+   - Evaluate using validation and test datasets for accuracy.
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+4. **Outcome:**
+   
+   - The result is an updated model (instruct model) fine-tuned for your desired tasks.
+
+This approach is highly common in LLM optimization and essential for building task-specific solutions.
+
+
+## Fine-tuning on a single task
+
+While LLMs can handle multiple tasks, fine-tuning them for a single task can significantly improve performance, often with just 500–1,000 examples. However, this may result in **catastrophic forgetting**—the model improves at the fine-tuned task but loses its ability to perform other tasks it previously handled.  
+
+### Key Points:
+
+1. **Single-task Fine-tuning:**
+
+   - Focuses on one task (e.g., summarization or sentiment analysis) using task-specific examples.
+
+   - Effective for applications where only one task is required.
+
+2. **Catastrophic Forgetting:**
+
+   - Occurs because full fine-tuning modifies the original model's weights.
+   
+   - Catastrophic forgetting occurs when a machine learning model forgets previously learned information as it learns new information.
+   
+   - Catastrophic forgetting is a common problem in machine learning, especially in deep learning models.
+   
+   - One way to mitigate catastrophic forgetting is by using regularization techniques to limit the amount of change that can be made to the weights of the model during training.
+
+   - Example: A model fine-tuned for sentiment analysis may lose its ability to do named entity recognition.
+
+3. **Options to Mitigate Catastrophic Forgetting:**
+
+   - **Evaluate use case needs:** If only one task is needed, catastrophic forgetting may not be an issue.
+
+   - **Multitask Fine-tuning:** Train the model on multiple tasks using 50,000–100,000 examples to retain generalized capabilities. Requires more data and compute.
+
+   - **Parameter Efficient Fine-tuning (PEFT):** Modify only a small number of task-specific layers while preserving most of the original LLM weights. PEFT helps maintain robustness to catastrophic forgetting.
+
+These approaches enable tailoring LLMs while balancing task-specific optimization with multitask generalization. 
+
+
+## Multi-task, instruction fine-tuning
+
+
+  - Multitask fine-tuning trains a model on examples for multiple tasks (e.g., summarization, review rating, entity recognition).  
+
+  - Avoids **catastrophic forgetting** by improving performance across all tasks simultaneously.  
+
+- **Requirements:**  
+  
+  - Needs **50,000–100,000 examples** of high-quality data across tasks.  
+  
+  - Produces a general-purpose model capable of handling diverse tasks well.
+
+- **Example:**  
+  
+  - **FLAN Models (Fine-Tuned Language Net):**  
+  
+    - Family of models like FLAN-T5 and FLAN-PaLM are fine-tuned using 473 datasets across 146 tasks.  
+  
+    - SAMSum dataset (dialogue summaries) is one of the datasets used for fine-tuning FLAN-T5.  
+
+
+### Custom Fine-Tuning for Specific Use Cases
+
+1. **Scenario:**
+   - Example: Customer service teams using summaries of support chat conversations.  
+   - FLAN-T5 may struggle with domain-specific tasks (e.g., customer support chats) not covered in its training.
+
+2. **Solution:**  
+   - Use a domain-specific dataset, such as **DialogSum**, to fine-tune further.  
+   - DialogSum includes 13,000 support chat dialogues with summaries and helps FLAN-T5 better summarize customer service chats.
+
+3. **Benefits of Domain-Specific Fine-Tuning:**  
+   - Improves task performance on unique datasets (e.g., internal customer support chats).  
+   - Reduces fabricated information and adds accuracy, reflecting the specific context.
+
+
+### **Evaluation and Next Steps**
+- Evaluate the quality of fine-tuned model outputs using metrics and benchmarks.  
+- Internal, domain-specific datasets (e.g., customer service transcripts) can provide even better results tailored to the business needs.
+
+
+
+## Evaluating Model Performance in Language Tasks
+
+When assessing language model performance, statements like "the model showed improvement" need formalization through evaluation metrics. While traditional machine learning metrics (e.g., accuracy) are straightforward, evaluating language-based models involves additional challenges, particularly when outputs are non-deterministic.  
+
+Key Metrics:  
+
+1. **ROUGE (Recall-Oriented Understudy for Gisting Evaluation):**  
+
+   - Used for summarization tasks.
+
+   - Measures overlap between model-generated and reference text using:  
+
+     - **ROUGE-1**: Focus on unigram (single word) matches.  
+
+     - **ROUGE-2**: Incorporates bigram (two-word sequence) matches to account for word order.  
+
+     - **ROUGE-L**: Uses the longest common subsequence for recall, precision, and F1-score calculations.  
+
+   - Challenges include susceptibility to artificially high scores from repeated words or incorrect word orders. Solutions include unigram clipping and experimenting with n-gram sizes based on sentence structure and use cases.  
+
+2. **BLEU (Bilingual Evaluation Understudy):**  
+
+   - Designed for machine translation tasks.  
+
+   - Calculates precision over multiple n-gram sizes and averages them.  
+
+   - Example: A BLEU score of 0.495 reflects a moderate match, improving as generated text resembles the reference more closely.  
+
+**Best Practices:**  
+
+- ROUGE is ideal for diagnosing summarization performance.  
+
+- BLEU is suited for translation evaluation.  
+
+- Both are simple and computationally inexpensive but should not be the sole evaluation tools for large language models. 
+Use standardized benchmarks for comprehensive assessment.  
+
+Next steps often include benchmarking models against established datasets for a holistic evaluation. Many libraries (e.g., Hugging Face) provide pre-built implementations of these metrics for ease of use.
+
+
+## Benchmarks
+
+Large language models (LLMs) are complex, and traditional metrics like ROUGE and BLEU provide limited insights into their capabilities. To evaluate LLMs more holistically, researchers rely on specialized datasets and benchmarks, which assess various skills, risks, and limitations. Selecting appropriate datasets for evaluation is crucial for understanding an LLM’s performance, particularly on unseen data.
+
+### Key Benchmarks for LLM Evaluation:  
+
+1. **GLUE (General Language Understanding Evaluation):**  
+
+   - Introduced in 2018.  
+
+   - Focuses on generalization across tasks like sentiment analysis and question-answering.  
+
+   - Encourages the development of versatile models.
+
+2. **SuperGLUE:**  
+
+   - Introduced in 2019 to address GLUE’s limitations.  
+
+   - Adds tasks like multi-sentence reasoning and reading comprehension.  
+
+   - Features more challenging tests.  
+
+Both GLUE and SuperGLUE offer leaderboards to track and compare model performance. These benchmarks highlight that while models may reach human-level performance on specific tests, their general abilities still fall short of human expertise.
+
+3. **MMLU (Massive Multitask Language Understanding):**  
+
+   - Tests modern LLMs on diverse topics such as mathematics, history, law, and computer science.  
+
+   - Emphasizes advanced world knowledge and problem-solving.  
+
+4. **BIG-bench:**  
+
+   - Includes 204 tasks across disciplines like linguistics, common sense reasoning, software development, and biology.  
+   - Offers scalability with multiple size options to manage costs.  
+
+5. **HELM (Holistic Evaluation of Language Models):**  
+
+   - Focuses on model transparency and suitability for specific tasks.  
+
+   - Measures seven metrics (including fairness, bias, and toxicity) across 16 scenarios.  
+
+   - Goes beyond accuracy with multidimensional evaluation to reveal trade-offs.  
+
+HELM continuously evolves with new models, metrics, and scenarios, making it a dynamic resource for tracking progress in LLM capabilities.
+
+### Summary:  
+
+Modern LLM benchmarks like GLUE, SuperGLUE, MMLU, BIG-bench, and HELM provide essential tools for evaluating language models. They offer valuable insights into models' strengths, weaknesses, and performance across a variety of tasks and contexts, aiding both research and practical applications.
+
+
+
