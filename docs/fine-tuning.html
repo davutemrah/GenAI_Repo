@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Page not found | Generative AI with Large Language Models</title>
+  <title>Chapter 3 Fine Tuning | Generative AI with Large Language Models</title>
   <meta name="description" content="This is a collection of notes from open sources" />
   <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Page not found | Generative AI with Large Language Models" />
+  <meta property="og:title" content="Chapter 3 Fine Tuning | Generative AI with Large Language Models" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="This is a collection of notes from open sources" />
   <meta name="github-repo" content="rstudio/bookdown-demo" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Page not found | Generative AI with Large Language Models" />
+  <meta name="twitter:title" content="Chapter 3 Fine Tuning | Generative AI with Large Language Models" />
   
   <meta name="twitter:description" content="This is a collection of notes from open sources" />
   
@@ -30,7 +30,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
+<link rel="prev" href="fine-tuning-llms-with-instructions.html"/>
 
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
@@ -216,18 +216,156 @@
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="page-not-found" class="section level1">
-<h1>Page not found</h1>
-<p>The page you requested cannot be found (perhaps it was moved or renamed).</p>
-<p>You may want to try searching to find the page's new location, or use
-the table of contents to find the page you are looking for.</p>
+<div id="fine-tuning" class="section level1 hasAnchor" number="3">
+<h1><span class="header-section-number">Chapter 3</span> Fine Tuning<a href="fine-tuning.html#fine-tuning" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="intro" class="section level2 hasAnchor" number="3.1">
+<h2><span class="header-section-number">3.1</span> Intro<a href="fine-tuning.html#intro" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Instruction Fine-Tuning</strong></p>
+<ul>
+<li><p>Instruction fine-tuning adjusts a pre-trained model to better respond to specific prompts and tasks.</p></li>
+<li><p>It is a significant advancement, allowing models trained on vast datasets to learn how to follow instructions effectively.</p></li>
+</ul>
+<p><strong>Challenges in Fine-Tuning</strong></p>
+<ul>
+<li><p>Catastrophic forgetting can occur, where the model loses previously learned information during fine-tuning.</p></li>
+<li><p>Techniques to mitigate this include using a diverse range of instruction types during the fine-tuning process.</p></li>
+</ul>
+<p><strong>Parameter Efficient Fine-Tuning (PEFT)</strong></p>
+<ul>
+<li><p>PEFT methods allow for fine-tuning without adjusting all model parameters, reducing computational and memory costs.</p></li>
+<li><p>Techniques like LoRA (Low-Rank Adaptation) enable effective fine-tuning with minimal resource requirements, making it accessible for various applications.</p></li>
+</ul>
+</div>
+<div id="fine-tuning-overview" class="section level2 hasAnchor" number="3.2">
+<h2><span class="header-section-number">3.2</span> Fine-Tuning Overview<a href="fine-tuning.html#fine-tuning-overview" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ul>
+<li><p>Fine-tuning is a supervised learning process that updates the weights of a base model using a dataset of labeled examples.</p></li>
+<li><p>Instruction fine-tuning is a method that improves a model’s performance across various tasks by training it with examples that demonstrate how to respond to specific instructions.</p></li>
+</ul>
+<div id="preparing-training-data" class="section level3 hasAnchor" number="3.2.1">
+<h3><span class="header-section-number">3.2.1</span> Preparing Training Data<a href="fine-tuning.html#preparing-training-data" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>To fine-tune a model, you need to prepare a dataset of prompt-completion pairs, which includes instructions relevant to the task.</p></li>
+<li><p>Prompt template libraries can help convert existing datasets into instruction prompt datasets suitable for fine-tuning.</p></li>
+</ul>
+</div>
+<div id="fine-tuning-process" class="section level3 hasAnchor" number="3.2.2">
+<h3><span class="header-section-number">3.2.2</span> Fine-Tuning Process<a href="fine-tuning.html#fine-tuning-process" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>The fine-tuning process involves selecting prompts from the training dataset, generating completions with the LLM, and comparing these completions to the expected responses.</p></li>
+<li><p>The model’s weights are updated based on the calculated loss between the generated output and the training labels, improving its performance over multiple iterations.</p></li>
+</ul>
+</div>
+<div id="evaluation-and-results" class="section level3 hasAnchor" number="3.2.3">
+<h3><span class="header-section-number">3.2.3</span> Evaluation and Results<a href="fine-tuning.html#evaluation-and-results" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>After fine-tuning, the model’s performance is evaluated using validation and test datasets to measure accuracy.</p></li>
+<li><p>The outcome is a new version of the model, often referred to as an instruct model, which is better suited for the specific tasks you are interested in.</p></li>
+</ul>
+</div>
+</div>
+<div id="fine-tuning-of-large-language-models-llms-and-the-associated-challenges" class="section level2 hasAnchor" number="3.3">
+<h2><span class="header-section-number">3.3</span> Fine-tuning of large language models (LLMs) and the associated challenges<a href="fine-tuning.html#fine-tuning-of-large-language-models-llms-and-the-associated-challenges" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="fine-tuning-for-specific-tasks" class="section level3 hasAnchor" number="3.3.1">
+<h3><span class="header-section-number">3.3.1</span> Fine-Tuning for Specific Tasks<a href="fine-tuning.html#fine-tuning-for-specific-tasks" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>Fine-tuning a pre-trained model can significantly improve its performance on a specific task, such as summarization, using a limited dataset of 500-1,000 examples.</p></li>
+<li><p>A downside is catastrophic forgetting, where the model loses its ability to perform other tasks it was trained on.</p></li>
+</ul>
+</div>
+<div id="strategies-to-avoid-catastrophic-forgetting" class="section level3 hasAnchor" number="3.3.2">
+<h3><span class="header-section-number">3.3.2</span> Strategies to Avoid Catastrophic Forgetting<a href="fine-tuning.html#strategies-to-avoid-catastrophic-forgetting" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>Determine if catastrophic forgetting impacts your application; if only one task is needed, it may not be an issue.</p></li>
+<li><p>For maintaining multitask capabilities, consider fine-tuning on multiple tasks at once, which requires a larger dataset of 50-100,000 examples.</p></li>
+</ul>
+</div>
+<div id="parameter-efficient-fine-tuning-peft" class="section level3 hasAnchor" number="3.3.3">
+<h3><span class="header-section-number">3.3.3</span> Parameter Efficient Fine-Tuning (PEFT)<a href="fine-tuning.html#parameter-efficient-fine-tuning-peft" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>PEFT techniques focus on preserving the original model’s weights while training a small number of task-specific parameters, which helps mitigate catastrophic forgetting.</p></li>
+<li><p>This area is actively researched and will be discussed in more detail later in the course.</p></li>
+</ul>
+</div>
+</div>
+<div id="multitask-fine-tuning" class="section level2 hasAnchor" number="3.4">
+<h2><span class="header-section-number">3.4</span> Multitask Fine-Tuning<a href="fine-tuning.html#multitask-fine-tuning" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ul>
+<li><p>It involves training a model on a dataset that includes multiple tasks, such as summarization, review rating, code translation, and entity recognition.</p></li>
+<li><p>This approach helps improve the model’s performance across all tasks simultaneously and mitigates the issue of catastrophic forgetting.</p></li>
+</ul>
+<div id="flan-models" class="section level3 hasAnchor" number="3.4.1">
+<h3><span class="header-section-number">3.4.1</span> FLAN Models<a href="fine-tuning.html#flan-models" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>The FLAN family of models, which stands for fine-tuned language net, is an example of models trained using multitask instruction fine-tuning.</p></li>
+<li><p>FLAN-T5 and FLAN-PALM are specific instruct versions of the T5 and PALM foundation models, respectively, fine-tuned on numerous datasets.</p></li>
+</ul>
+</div>
+<div id="example-dataset-samsum" class="section level3 hasAnchor" number="3.4.2">
+<h3><span class="header-section-number">3.4.2</span> Example Dataset: SAMSum<a href="fine-tuning.html#example-dataset-samsum" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>SAMSum is a dataset used for training models to summarize dialogues, containing 16,000 conversations with human-crafted summaries.</p></li>
+<li><p>The dataset is designed to reflect real-life messenger conversations, ensuring high-quality training data for language models.</p></li>
+</ul>
+</div>
+<div id="fine-tuning-for-specific-use-cases" class="section level3 hasAnchor" number="3.4.3">
+<h3><span class="header-section-number">3.4.3</span> Fine-Tuning for Specific Use Cases<a href="fine-tuning.html#fine-tuning-for-specific-use-cases" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>Additional fine-tuning can be performed on models like FLAN-T5 using domain-specific datasets, such as dialogsum, to improve performance in particular contexts, like customer service chats.</p></li>
+<li><p>The importance of using internal company data for fine-tuning is emphasized to tailor the model to specific summarization needs.</p></li>
+</ul>
+</div>
+<div id="evaluation-of-model-performance" class="section level3 hasAnchor" number="3.4.4">
+<h3><span class="header-section-number">3.4.4</span> Evaluation of Model Performance<a href="fine-tuning.html#evaluation-of-model-performance" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li>The content highlights the need to evaluate the quality of model outputs after fine-tuning, which will be discussed in the next video.</li>
+</ul>
+</div>
+<div id="what-is-the-purpose-of-fine-tuning-with-prompt-datasets" class="section level3 hasAnchor" number="3.4.5">
+<h3><span class="header-section-number">3.4.5</span> What is the purpose of fine-tuning with prompt datasets?<a href="fine-tuning.html#what-is-the-purpose-of-fine-tuning-with-prompt-datasets" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>To improve the performance and adaptability of a pre-trained language model for specific tasks. This option accurately describes the purpose of fine-tuning with prompt datasets. It aims to improve the performance and adaptability of a pre-trained language model by training it on specific tasks using instruction prompts.</p>
+</div>
+</div>
+<div id="evaluating-the-performance-of-large-language-models" class="section level2 hasAnchor" number="3.5">
+<h2><span class="header-section-number">3.5</span> Evaluating the performance of large language models<a href="fine-tuning.html#evaluating-the-performance-of-large-language-models" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Since, LLM are probabilictic and there are millions of results to evaluate, human evaluation is not possible and requires a systematic solution.</p>
+<div id="evaluation-metrics" class="section level3 hasAnchor" number="3.5.1">
+<h3><span class="header-section-number">3.5.1</span> Evaluation Metrics<a href="fine-tuning.html#evaluation-metrics" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>ROUGE (Recall-Oriented Understudy for Gisting Evaluation) is used to assess the quality of automatically generated summaries by comparing them to human-generated references.</p></li>
+<li><p>BLEU (Bilingual Evaluation Understudy) evaluates the quality of machine-translated text by comparing n-grams in the generated translation to those in a reference translation.</p></li>
+</ul>
+</div>
+<div id="understanding-rouge" class="section level3 hasAnchor" number="3.5.2">
+<h3><span class="header-section-number">3.5.2</span> Understanding ROUGE<a href="fine-tuning.html#understanding-rouge" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>ROUGE-1 measures unigram matches (single words) between generated and reference sentences, calculating recall, precision, and F1 scores.</p></li>
+<li><p>ROUGE-2 extends this by considering bigrams (pairs of words), which helps account for word order.</p></li>
+</ul>
+</div>
+<div id="limitations-and-improvements" class="section level3 hasAnchor" number="3.5.3">
+<h3><span class="header-section-number">3.5.3</span> Limitations and Improvements<a href="fine-tuning.html#limitations-and-improvements" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>Simple ROUGE scores can be misleading, as they may yield high scores for poor outputs. Clipping functions can be used to limit unigram matches to their maximum count in the reference.</p></li>
+<li><p>The ROUGE-L score uses the longest common subsequence to provide a more nuanced evaluation.</p></li>
+</ul>
+</div>
+<div id="using-bleu-score" class="section level3 hasAnchor" number="3.5.4">
+<h3><span class="header-section-number">3.5.4</span> Using BLEU Score<a href="fine-tuning.html#using-bleu-score" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><p>The BLEU score averages precision across multiple n-gram sizes, providing a comprehensive measure of translation quality.</p></li>
+<li><p>Both ROUGE and BLEU are low-cost metrics useful for iterative model evaluation, but should not be the sole indicators of model performance.</p></li>
+</ul>
+
+</div>
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
+<a href="fine-tuning-llms-with-instructions.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 
     </div>
   </div>

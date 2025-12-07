@@ -1,4 +1,48 @@
+
 # Introduction
+
+These **6 repositories**, **5 courses**, and **4 books** on AI Agents
+are all you need to go from **0 → Production Level**.
+
+These resources are the best I've seen so far. 👇
+
+
+## **Level 1: GenAI & LLMs Basics**
+
+* **Generative AI for Everyone** — [Course](https://lnkd.in/eK3ApY_s)
+
+* **Large Language Models (LLMs) – Level 1** — [Course](https://lnkd.in/eVgYg_Sn)
+
+* **Hands-On LLMs** — [Book](https://lnkd.in/eFR7xhhR)
+
+* **LLM Course** — [Repo](https://lnkd.in/eg9JzpF8)
+
+* **Prompt Engineering Guide** — [Repo](https://lnkd.in/eeftKQGd)
+
+## **Level 2: AI Agent Development**
+
+* **Introduction to RAG** — [Course](https://lnkd.in/ebRTW3C3)
+
+* **RAG Techniques** — [Repo](https://lnkd.in/e9YbJN8Q)
+
+* **GenAI Agents** — [Repo](https://lnkd.in/euAyXsnQ)
+
+
+* **AI Agents in Practice** — [Book](https://lnkd.in/euAyXsnQ)
+
+* **Agentic Design Patterns** — [Book](https://lnkd.in/e6uQm2i2)
+
+## **Level 3: AI Agents in Production + Multi-Agents**
+
+
+* **Agents Towards Production** — [Repo](https://lnkd.in/eW5A5GrT)
+
+* **LLMs in Enterprise** — [Book](https://lnkd.in/epmXKaTa)
+
+* **Multi-AI Agent Systems with crewAI** — [Course](https://lnkd.in/dTudrD55)
+
+
+
 
 ## Generative AI Overview
 

@@ -1,0 +1,142 @@
+# Fine Tuning
+
+## Intro
+
+**Instruction Fine-Tuning**
+
+- Instruction fine-tuning adjusts a pre-trained model to better respond to specific prompts and tasks.
+
+- It is a significant advancement, allowing models trained on vast datasets to learn how to follow instructions effectively.
+
+**Challenges in Fine-Tuning**
+
+- Catastrophic forgetting can occur, where the model loses previously learned information during fine-tuning.
+
+- Techniques to mitigate this include using a diverse range of instruction types during the fine-tuning process.
+
+**Parameter Efficient Fine-Tuning (PEFT)**
+
+- PEFT methods allow for fine-tuning without adjusting all model parameters, reducing computational and memory costs.
+
+- Techniques like LoRA (Low-Rank Adaptation) enable effective fine-tuning with minimal resource requirements, making it accessible for various applications.
+
+
+
+## Fine-Tuning Overview
+
+- Fine-tuning is a supervised learning process that updates the weights of a base model using a dataset of labeled examples.
+
+- Instruction fine-tuning is a method that improves a model's performance across various tasks by training it with examples that demonstrate how to respond to specific instructions.
+
+### Preparing Training Data
+
+- To fine-tune a model, you need to prepare a dataset of prompt-completion pairs, which includes instructions relevant to the task.
+
+- Prompt template libraries can help convert existing datasets into instruction prompt datasets suitable for fine-tuning.
+
+### Fine-Tuning Process
+
+- The fine-tuning process involves selecting prompts from the training dataset, generating completions with the LLM, and comparing these completions to the expected responses.
+
+- The model's weights are updated based on the calculated loss between the generated output and the training labels, improving its performance over multiple iterations.
+
+### Evaluation and Results
+
+- After fine-tuning, the model's performance is evaluated using validation and test datasets to measure accuracy.
+
+- The outcome is a new version of the model, often referred to as an instruct model, which is better suited for the specific tasks you are interested in.
+
+
+
+## Fine-tuning of large language models (LLMs) and the associated challenges
+
+### Fine-Tuning for Specific Tasks
+
+- Fine-tuning a pre-trained model can significantly improve its performance on a specific task, such as summarization, using a limited dataset of 500-1,000 examples.
+
+- A downside is catastrophic forgetting, where the model loses its ability to perform other tasks it was trained on.
+
+### Strategies to Avoid Catastrophic Forgetting
+
+- Determine if catastrophic forgetting impacts your application; if only one task is needed, it may not be an issue.
+
+- For maintaining multitask capabilities, consider fine-tuning on multiple tasks at once, which requires a larger dataset of 50-100,000 examples.
+
+### Parameter Efficient Fine-Tuning (PEFT)
+
+- PEFT techniques focus on preserving the original model's weights while training a small number of task-specific parameters, which helps mitigate catastrophic forgetting.
+
+- This area is actively researched and will be discussed in more detail later in the course.
+
+
+
+## Multitask Fine-Tuning
+
+- It involves training a model on a dataset that includes multiple tasks, such as summarization, review rating, code translation, and entity recognition.
+
+- This approach helps improve the model's performance across all tasks simultaneously and mitigates the issue of catastrophic forgetting.
+
+### FLAN Models
+
+- The FLAN family of models, which stands for fine-tuned language net, is an example of models trained using multitask instruction fine-tuning.
+
+- FLAN-T5 and FLAN-PALM are specific instruct versions of the T5 and PALM foundation models, respectively, fine-tuned on numerous datasets.
+
+### Example Dataset: SAMSum
+
+- SAMSum is a dataset used for training models to summarize dialogues, containing 16,000 conversations with human-crafted summaries.
+
+- The dataset is designed to reflect real-life messenger conversations, ensuring high-quality training data for language models.
+
+### Fine-Tuning for Specific Use Cases
+
+- Additional fine-tuning can be performed on models like FLAN-T5 using domain-specific datasets, such as dialogsum, to improve performance in particular contexts, like customer service chats.
+
+- The importance of using internal company data for fine-tuning is emphasized to tailor the model to specific summarization needs.
+
+### Evaluation of Model Performance
+
+- The content highlights the need to evaluate the quality of model outputs after fine-tuning, which will be discussed in the next video.
+
+
+### What is the purpose of fine-tuning with prompt datasets?
+
+To improve the performance and adaptability of a pre-trained language model for specific tasks. This option accurately describes the purpose of fine-tuning with prompt datasets. It aims to improve the performance and adaptability of a pre-trained language model by training it on specific tasks using instruction prompts.
+
+
+
+
+
+## Evaluating the performance of large language models
+
+Since, LLM are probabilictic and there are millions of results to evaluate, human evaluation is not possible and requires a systematic solution.
+
+### Evaluation Metrics
+
+- ROUGE (Recall-Oriented Understudy for Gisting Evaluation) is used to assess the quality of automatically generated summaries by comparing them to human-generated references.
+
+- BLEU (Bilingual Evaluation Understudy) evaluates the quality of machine-translated text by comparing n-grams in the generated translation to those in a reference translation.
+
+### Understanding ROUGE
+
+- ROUGE-1 measures unigram matches (single words) between generated and reference sentences, calculating recall, precision, and F1 scores.
+
+- ROUGE-2 extends this by considering bigrams (pairs of words), which helps account for word order.
+
+### Limitations and Improvements
+
+- Simple ROUGE scores can be misleading, as they may yield high scores for poor outputs. Clipping functions can be used to limit unigram matches to their maximum count in the reference.
+
+- The ROUGE-L score uses the longest common subsequence to provide a more nuanced evaluation.
+
+### Using BLEU Score
+
+- The BLEU score averages precision across multiple n-gram sizes, providing a comprehensive measure of translation quality.
+
+- Both ROUGE and BLEU are low-cost metrics useful for iterative model evaluation, but should not be the sole indicators of model performance.
+
+
+
+
+
+

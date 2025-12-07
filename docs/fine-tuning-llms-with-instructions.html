@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Page not found | Generative AI with Large Language Models</title>
+  <title>Chapter 2 Fine tuning LLMs with Instructions | Generative AI with Large Language Models</title>
   <meta name="description" content="This is a collection of notes from open sources" />
   <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Page not found | Generative AI with Large Language Models" />
+  <meta property="og:title" content="Chapter 2 Fine tuning LLMs with Instructions | Generative AI with Large Language Models" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="This is a collection of notes from open sources" />
   <meta name="github-repo" content="rstudio/bookdown-demo" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Page not found | Generative AI with Large Language Models" />
+  <meta name="twitter:title" content="Chapter 2 Fine tuning LLMs with Instructions | Generative AI with Large Language Models" />
   
   <meta name="twitter:description" content="This is a collection of notes from open sources" />
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-
+<link rel="prev" href="introduction-1.html"/>
+<link rel="next" href="fine-tuning.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -216,19 +216,207 @@
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="page-not-found" class="section level1">
-<h1>Page not found</h1>
-<p>The page you requested cannot be found (perhaps it was moved or renamed).</p>
-<p>You may want to try searching to find the page's new location, or use
-the table of contents to find the page you are looking for.</p>
+<div id="fine-tuning-llms-with-instructions" class="section level1 hasAnchor" number="2">
+<h1><span class="header-section-number">Chapter 2</span> Fine tuning LLMs with Instructions<a href="fine-tuning-llms-with-instructions.html#fine-tuning-llms-with-instructions" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<ol style="list-style-type: decimal">
+<li><p><strong>Prompt Engineering and Inference:</strong></p>
+<ul>
+<li><p><strong>Zero-shot:</strong> Models respond to prompts without examples.</p></li>
+<li><p><strong>One/Few-shot:</strong> Including example outputs improves performance, but it uses context window space and may not work for smaller models.</p></li>
+</ul></li>
+</ol>
+<p><strong>Drawbacks:</strong>
+- In context learning may not work for smaller LLM models</p>
+<pre><code>- Examples take up valuable space in the context window</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li><p><strong>Fine-tuning Basics:</strong></p>
+<ul>
+<li><p>Unlike pre-training on vast data using self-supervised learning, <strong>fine-tuning</strong> uses labeled examples (prompt-completion pairs) via supervised learning to optimize model weights for specific tasks.</p></li>
+<li><p>Instruction fine-tuning trains models with explicit instruction-based examples for tasks (e.g., “Summarize the following text”).</p></li>
+<li><p>Data sets of task-specific examples consists of PROMPT + COMPLETION couples</p></li>
+<li><p>Full fine-tuning updates all parameters.</p></li>
+</ul></li>
+<li><p><strong>Instruction Fine-Tuning Process:</strong></p>
+<ul>
+<li><p>Prepare labeled data with templates (e.g., using Amazon reviews to create classification or summarization prompts).</p></li>
+<li><p>There are prompt template libraries turn existing unstructured datasets into instruction prompt datasets for fine tuning</p></li>
+<li><p>Split data into training, validation, and test sets.</p></li>
+<li><p>Train the model using cross-entropy loss and backpropagation.</p></li>
+<li><p>Evaluate using validation and test datasets for accuracy.</p></li>
+</ul></li>
+<li><p><strong>Outcome:</strong></p>
+<ul>
+<li>The result is an updated model (instruct model) fine-tuned for your desired tasks.</li>
+</ul></li>
+</ol>
+<p>This approach is highly common in LLM optimization and essential for building task-specific solutions.</p>
+<div id="fine-tuning-on-a-single-task" class="section level2 hasAnchor" number="2.1">
+<h2><span class="header-section-number">2.1</span> Fine-tuning on a single task<a href="fine-tuning-llms-with-instructions.html#fine-tuning-on-a-single-task" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>While LLMs can handle multiple tasks, fine-tuning them for a single task can significantly improve performance, often with just 500–1,000 examples. However, this may result in <strong>catastrophic forgetting</strong>—the model improves at the fine-tuned task but loses its ability to perform other tasks it previously handled.</p>
+<div id="key-points" class="section level3 hasAnchor" number="2.1.1">
+<h3><span class="header-section-number">2.1.1</span> Key Points:<a href="fine-tuning-llms-with-instructions.html#key-points" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ol style="list-style-type: decimal">
+<li><p><strong>Single-task Fine-tuning:</strong></p>
+<ul>
+<li><p>Focuses on one task (e.g., summarization or sentiment analysis) using task-specific examples.</p></li>
+<li><p>Effective for applications where only one task is required.</p></li>
+</ul></li>
+<li><p><strong>Catastrophic Forgetting:</strong></p>
+<ul>
+<li><p>Occurs because full fine-tuning modifies the original model’s weights.</p></li>
+<li><p>Catastrophic forgetting occurs when a machine learning model forgets previously learned information as it learns new information.</p></li>
+<li><p>Catastrophic forgetting is a common problem in machine learning, especially in deep learning models.</p></li>
+<li><p>One way to mitigate catastrophic forgetting is by using regularization techniques to limit the amount of change that can be made to the weights of the model during training.</p></li>
+<li><p>Example: A model fine-tuned for sentiment analysis may lose its ability to do named entity recognition.</p></li>
+</ul></li>
+<li><p><strong>Options to Mitigate Catastrophic Forgetting:</strong></p>
+<ul>
+<li><p><strong>Evaluate use case needs:</strong> If only one task is needed, catastrophic forgetting may not be an issue.</p></li>
+<li><p><strong>Multitask Fine-tuning:</strong> Train the model on multiple tasks using 50,000–100,000 examples to retain generalized capabilities. Requires more data and compute.</p></li>
+<li><p><strong>Parameter Efficient Fine-tuning (PEFT):</strong> Modify only a small number of task-specific layers while preserving most of the original LLM weights. PEFT helps maintain robustness to catastrophic forgetting.</p></li>
+</ul></li>
+</ol>
+<p>These approaches enable tailoring LLMs while balancing task-specific optimization with multitask generalization.</p>
+</div>
+</div>
+<div id="multi-task-instruction-fine-tuning" class="section level2 hasAnchor" number="2.2">
+<h2><span class="header-section-number">2.2</span> Multi-task, instruction fine-tuning<a href="fine-tuning-llms-with-instructions.html#multi-task-instruction-fine-tuning" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ul>
+<li><p>Multitask fine-tuning trains a model on examples for multiple tasks (e.g., summarization, review rating, entity recognition).</p></li>
+<li><p>Avoids <strong>catastrophic forgetting</strong> by improving performance across all tasks simultaneously.</p></li>
+<li><p><strong>Requirements:</strong></p>
+<ul>
+<li><p>Needs <strong>50,000–100,000 examples</strong> of high-quality data across tasks.</p></li>
+<li><p>Produces a general-purpose model capable of handling diverse tasks well.</p></li>
+</ul></li>
+<li><p><strong>Example:</strong></p>
+<ul>
+<li><p><strong>FLAN Models (Fine-Tuned Language Net):</strong></p>
+<ul>
+<li><p>Family of models like FLAN-T5 and FLAN-PaLM are fine-tuned using 473 datasets across 146 tasks.</p></li>
+<li><p>SAMSum dataset (dialogue summaries) is one of the datasets used for fine-tuning FLAN-T5.</p></li>
+</ul></li>
+</ul></li>
+</ul>
+<div id="custom-fine-tuning-for-specific-use-cases" class="section level3 hasAnchor" number="2.2.1">
+<h3><span class="header-section-number">2.2.1</span> Custom Fine-Tuning for Specific Use Cases<a href="fine-tuning-llms-with-instructions.html#custom-fine-tuning-for-specific-use-cases" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ol style="list-style-type: decimal">
+<li><strong>Scenario:</strong>
+<ul>
+<li>Example: Customer service teams using summaries of support chat conversations.<br />
+</li>
+<li>FLAN-T5 may struggle with domain-specific tasks (e.g., customer support chats) not covered in its training.</li>
+</ul></li>
+<li><strong>Solution:</strong>
+<ul>
+<li>Use a domain-specific dataset, such as <strong>DialogSum</strong>, to fine-tune further.<br />
+</li>
+<li>DialogSum includes 13,000 support chat dialogues with summaries and helps FLAN-T5 better summarize customer service chats.</li>
+</ul></li>
+<li><strong>Benefits of Domain-Specific Fine-Tuning:</strong>
+<ul>
+<li>Improves task performance on unique datasets (e.g., internal customer support chats).<br />
+</li>
+<li>Reduces fabricated information and adds accuracy, reflecting the specific context.</li>
+</ul></li>
+</ol>
+</div>
+<div id="evaluation-and-next-steps" class="section level3 hasAnchor" number="2.2.2">
+<h3><span class="header-section-number">2.2.2</span> <strong>Evaluation and Next Steps</strong><a href="fine-tuning-llms-with-instructions.html#evaluation-and-next-steps" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li>Evaluate the quality of fine-tuned model outputs using metrics and benchmarks.<br />
+</li>
+<li>Internal, domain-specific datasets (e.g., customer service transcripts) can provide even better results tailored to the business needs.</li>
+</ul>
+</div>
+</div>
+<div id="evaluating-model-performance-in-language-tasks" class="section level2 hasAnchor" number="2.3">
+<h2><span class="header-section-number">2.3</span> Evaluating Model Performance in Language Tasks<a href="fine-tuning-llms-with-instructions.html#evaluating-model-performance-in-language-tasks" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>When assessing language model performance, statements like “the model showed improvement” need formalization through evaluation metrics. While traditional machine learning metrics (e.g., accuracy) are straightforward, evaluating language-based models involves additional challenges, particularly when outputs are non-deterministic.</p>
+<p>Key Metrics:</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>ROUGE (Recall-Oriented Understudy for Gisting Evaluation):</strong></p>
+<ul>
+<li><p>Used for summarization tasks.</p></li>
+<li><p>Measures overlap between model-generated and reference text using:</p>
+<ul>
+<li><p><strong>ROUGE-1</strong>: Focus on unigram (single word) matches.</p></li>
+<li><p><strong>ROUGE-2</strong>: Incorporates bigram (two-word sequence) matches to account for word order.</p></li>
+<li><p><strong>ROUGE-L</strong>: Uses the longest common subsequence for recall, precision, and F1-score calculations.</p></li>
+</ul></li>
+<li><p>Challenges include susceptibility to artificially high scores from repeated words or incorrect word orders. Solutions include unigram clipping and experimenting with n-gram sizes based on sentence structure and use cases.</p></li>
+</ul></li>
+<li><p><strong>BLEU (Bilingual Evaluation Understudy):</strong></p>
+<ul>
+<li><p>Designed for machine translation tasks.</p></li>
+<li><p>Calculates precision over multiple n-gram sizes and averages them.</p></li>
+<li><p>Example: A BLEU score of 0.495 reflects a moderate match, improving as generated text resembles the reference more closely.</p></li>
+</ul></li>
+</ol>
+<p><strong>Best Practices:</strong></p>
+<ul>
+<li><p>ROUGE is ideal for diagnosing summarization performance.</p></li>
+<li><p>BLEU is suited for translation evaluation.</p></li>
+<li><p>Both are simple and computationally inexpensive but should not be the sole evaluation tools for large language models.
+Use standardized benchmarks for comprehensive assessment.</p></li>
+</ul>
+<p>Next steps often include benchmarking models against established datasets for a holistic evaluation. Many libraries (e.g., Hugging Face) provide pre-built implementations of these metrics for ease of use.</p>
+</div>
+<div id="benchmarks" class="section level2 hasAnchor" number="2.4">
+<h2><span class="header-section-number">2.4</span> Benchmarks<a href="fine-tuning-llms-with-instructions.html#benchmarks" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Large language models (LLMs) are complex, and traditional metrics like ROUGE and BLEU provide limited insights into their capabilities. To evaluate LLMs more holistically, researchers rely on specialized datasets and benchmarks, which assess various skills, risks, and limitations. Selecting appropriate datasets for evaluation is crucial for understanding an LLM’s performance, particularly on unseen data.</p>
+<div id="key-benchmarks-for-llm-evaluation" class="section level3 hasAnchor" number="2.4.1">
+<h3><span class="header-section-number">2.4.1</span> Key Benchmarks for LLM Evaluation:<a href="fine-tuning-llms-with-instructions.html#key-benchmarks-for-llm-evaluation" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ol style="list-style-type: decimal">
+<li><p><strong>GLUE (General Language Understanding Evaluation):</strong></p>
+<ul>
+<li><p>Introduced in 2018.</p></li>
+<li><p>Focuses on generalization across tasks like sentiment analysis and question-answering.</p></li>
+<li><p>Encourages the development of versatile models.</p></li>
+</ul></li>
+<li><p><strong>SuperGLUE:</strong></p>
+<ul>
+<li><p>Introduced in 2019 to address GLUE’s limitations.</p></li>
+<li><p>Adds tasks like multi-sentence reasoning and reading comprehension.</p></li>
+<li><p>Features more challenging tests.</p></li>
+</ul></li>
+</ol>
+<p>Both GLUE and SuperGLUE offer leaderboards to track and compare model performance. These benchmarks highlight that while models may reach human-level performance on specific tests, their general abilities still fall short of human expertise.</p>
+<ol start="3" style="list-style-type: decimal">
+<li><p><strong>MMLU (Massive Multitask Language Understanding):</strong></p>
+<ul>
+<li><p>Tests modern LLMs on diverse topics such as mathematics, history, law, and computer science.</p></li>
+<li><p>Emphasizes advanced world knowledge and problem-solving.</p></li>
+</ul></li>
+<li><p><strong>BIG-bench:</strong></p>
+<ul>
+<li>Includes 204 tasks across disciplines like linguistics, common sense reasoning, software development, and biology.<br />
+</li>
+<li>Offers scalability with multiple size options to manage costs.</li>
+</ul></li>
+<li><p><strong>HELM (Holistic Evaluation of Language Models):</strong></p>
+<ul>
+<li><p>Focuses on model transparency and suitability for specific tasks.</p></li>
+<li><p>Measures seven metrics (including fairness, bias, and toxicity) across 16 scenarios.</p></li>
+<li><p>Goes beyond accuracy with multidimensional evaluation to reveal trade-offs.</p></li>
+</ul></li>
+</ol>
+<p>HELM continuously evolves with new models, metrics, and scenarios, making it a dynamic resource for tracking progress in LLM capabilities.</p>
+</div>
+<div id="summary" class="section level3 hasAnchor" number="2.4.2">
+<h3><span class="header-section-number">2.4.2</span> Summary:<a href="fine-tuning-llms-with-instructions.html#summary" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Modern LLM benchmarks like GLUE, SuperGLUE, MMLU, BIG-bench, and HELM provide essential tools for evaluating language models. They offer valuable insights into models’ strengths, weaknesses, and performance across a variety of tasks and contexts, aiding both research and practical applications.</p>
+
+</div>
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-
+<a href="introduction-1.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="fine-tuning.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
