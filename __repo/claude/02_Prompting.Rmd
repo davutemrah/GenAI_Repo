@@ -1,0 +1,291 @@
+# Prompting Strategies: Ask Better Questions {#prompting}
+
+## The Principle: Clarity Improves Controllability
+
+Clear goals, relevant context, examples, constraints, and verification criteria
+usually make an answer easier to evaluate and refine. Detail is useful only when
+it is relevant; a longer prompt does not guarantee a better result.
+
+```
+Vague request → many plausible interpretations
+Scoped request → fewer interpretations
+Scoped request + checks → an answer you can verify
+```
+
+## Structure of a Good Question
+
+Many strong requests include these elements:
+
+### 1. **What (What do you want?)**
+
+Be specific. "Write a function" is vague. "Write a Python function that validates email addresses" is clear.
+
+### 2. **Why (Why do you need it?)**
+
+Context helps Claude understand intent. "I need to validate emails for a signup form" helps Claude suggest better solutions.
+
+### 3. **How (How should it work?)**
+
+Constraints and requirements. "It should accept common email formats but reject obvious spam patterns" guides the implementation.
+
+### 4. **Constraints (What are the limits?)**
+
+Languages, frameworks, performance needs. "Use Python 3.11, must be under 50 lines, no external libraries" keeps answers practical.
+
+## A CLEAR Working Mnemonic
+
+The following mnemonic is used in this guide; it is not an Anthropic product
+feature or an empirical guarantee:
+
+**C**ontext - What's the background?  
+**L**evel - What's your skill level?  
+**E**xample - Can you show an example?  
+**A**ction - What exactly do you want?  
+**R**esult - What's the expected outcome?
+
+## Comparison: Bad vs. Good Questions
+
+### ❌ Bad Question
+
+```
+How do I write a function?
+```
+
+**Problem:** Too vague. What kind of function? What language? What should it do?
+
+### ✅ Good Question
+
+```
+I need a Python function that:
+- Takes a list of dictionaries with 'date' and 'amount' fields
+- Groups transactions by month
+- Returns a dictionary with month as key and total amount as value
+- Should handle dates in YYYY-MM-DD format
+- Performance isn't critical, clarity matters more
+
+Can you write this with clear variable names?
+```
+
+**Why it's better:**
+- Specific about input/output
+- Clear requirements
+- Shows format expectations
+- States preferences (clarity over performance)
+
+## Question Templates You'll Use Often
+
+### Template 1: Code Generation
+
+```
+I need to [action] in [language].
+
+Requirements:
+- [Requirement 1]
+- [Requirement 2]
+- [Requirement 3]
+
+Input: [example input]
+Output: [example output]
+
+Constraints: [any limits or preferences]
+```
+
+### Template 2: Code Explanation
+
+```
+I have this code: [paste code]
+
+Explain:
+1. What does it do?
+2. What's the time complexity?
+3. What could break?
+4. How would you improve it?
+```
+
+### Template 3: Debugging
+
+```
+I'm trying to [what you're doing].
+
+My code: [paste relevant code]
+
+The error: [paste full error message]
+
+What I've tried: [what you already attempted]
+
+Expected behavior: [what should happen instead]
+```
+
+### Template 4: Learning
+
+```
+I'm trying to understand [concept].
+
+Context: [what you know already]
+
+Can you explain:
+1. How it works simply
+2. When to use it
+3. A practical example
+```
+
+## Prompting Tips & Tricks
+
+### ✅ DO: Provide Context
+
+```
+I'm building a data pipeline for marketing data.
+I need to [...]
+```
+
+Better than: "I need a function"
+
+### ✅ DO: Show Your Attempt
+
+```
+I tried this approach: [code]
+But it's slow. Can you optimize it?
+```
+
+Better than: "Make this faster"
+
+### ✅ DO: Be Specific About Format
+
+```
+Return the result as JSON with keys: 'status', 'data', 'timestamp'
+```
+
+Better than: "Return the result"
+
+### ✅ DO: Mention Constraints
+
+```
+Use only built-in Python libraries (no pandas or numpy)
+```
+
+Better than: No constraints
+
+### ✅ DO: Ask Follow-up Questions
+
+```
+Why is that approach better?
+Can you show an alternative?
+How would this scale to 1M rows?
+```
+
+Better than: Single question only
+
+## ❌ DON'T: Common Mistakes
+
+### ❌ DON'T: Provide Indiscriminate Context
+
+```
+Here is a large dump from several unrelated files. What's wrong?
+```
+
+**Better:** In chat, provide the smallest relevant excerpt and enough surrounding
+context to interpret it. In a coding agent, point to the relevant files and let
+the agent inspect dependencies as needed.
+
+### ❌ DON'T: Vague Requirements
+
+```
+Make it better
+Optimize this
+Fix the issue
+```
+
+**Better:** "Make it 50% faster while keeping the code readable"
+
+### ❌ DON'T: Expect Perfect First Answer
+
+```
+Generate this once and I'll use it exactly
+```
+
+**Better:** Expect to iterate and refine
+
+### ❌ DON'T: Skip Error Messages
+
+```
+It doesn't work
+```
+
+**Better:** Paste the full error including traceback
+
+### ❌ DON'T: Ignore Language Versions
+
+```
+Write me a regex
+```
+
+**Better:** "Write me a Python 3.11 regex using the re module"
+
+## The Iteration Loop
+
+Good prompting is **iterative**:
+
+```
+1. Ask Claude
+2. Review the response
+3. Provide feedback ("It needs to handle edge case X")
+4. Claude refines
+5. Repeat until satisfied
+```
+
+**Example:**
+- You: "Write a function that validates email"
+- Claude: [Response]
+- You: "Good, but also reject emails from temporary services"
+- Claude: [Improved response]
+- You: "Perfect, now add error handling"
+- Claude: [Final version]
+
+## Pro Tip: Use Comments as Instructions
+
+When pasting code, add comments showing what you want:
+
+```python
+def analyze_data(df):
+    # TODO: Filter for active users only
+    # TODO: Group by region
+    # TODO: Calculate total spending per region
+    # TODO: Sort by spending descending
+    pass
+```
+
+Claude will often see these comments and implement them!
+
+## Exercise: Write Better Questions
+
+Take one of your typical tasks. Write it both ways:
+
+**Bad version (vague):**
+
+```
+Write me a Python script
+```
+
+**Good version (clear):**
+
+```
+I need a Python script that:
+- Reads data from CSV file
+- Filters transactions > $100
+- Groups by customer
+- Exports results to new CSV
+
+Format should be: [description of format]
+I'm using Python 3.10
+```
+
+Notice how much more likely you are to get a useful answer with the good version!
+
+## Key Takeaways
+
+✅ Specific questions get better answers  
+✅ Include context, examples, and constraints  
+✅ Use the CLEAR framework  
+✅ Expect to iterate  
+✅ Show your attempt, not just the final goal  
+✅ Be precise about language versions and formats  

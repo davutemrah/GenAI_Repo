@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Page not found | Generative AI, Large Language Models, and Coding Agents</title>
+  <title>Chapter 4 Claude Fundamentals and Product Context | Generative AI, Large Language Models, and Coding Agents</title>
   <meta name="description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Page not found | Generative AI, Large Language Models, and Coding Agents" />
+  <meta property="og:title" content="Chapter 4 Claude Fundamentals and Product Context | Generative AI, Large Language Models, and Coding Agents" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   <meta name="github-repo" content="davutemrah/GenAI_Repo" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Page not found | Generative AI, Large Language Models, and Coding Agents" />
+  <meta name="twitter:title" content="Chapter 4 Claude Fundamentals and Product Context | Generative AI, Large Language Models, and Coding Agents" />
   
   <meta name="twitter:description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-
+<link rel="prev" href="instruction-fine-tuning-and-evaluation.html"/>
+<link rel="next" href="prompting.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -496,19 +496,159 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="page-not-found" class="section level1">
-<h1>Page not found</h1>
-<p>The page you requested cannot be found (perhaps it was moved or renamed).</p>
-<p>You may want to try searching to find the page's new location, or use
-the table of contents to find the page you are looking for.</p>
+<div id="claude-fundamentals" class="section level1 hasAnchor" number="4">
+<h1><span class="header-section-number">Chapter 4</span> Claude Fundamentals and Product Context<a href="claude-fundamentals.html#claude-fundamentals" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="claude-is-a-model-family-not-one-fixed-interface" class="section level2 hasAnchor" number="4.1">
+<h2><span class="header-section-number">4.1</span> Claude is a model family, not one fixed interface<a href="claude-fundamentals.html#claude-is-a-model-family-not-one-fixed-interface" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Claude is a family of language models developed by Anthropic. The capabilities
+available in a session depend on both the selected model and the product that
+hosts it. Claude.ai, Claude Code, an API integration, and a third-party product
+can expose different tools, permissions, context, and data-retention policies.</p>
+<p>Claude can work with text, code, and images. When a host provides tools, it may
+also search the web, read and edit files, execute commands or code, and connect
+to external systems. Do not infer available capabilities from the model name
+alone; inspect the current product, tool list, and permission settings.</p>
+<p>Primary references:</p>
+<ul>
+<li><a href="https://platform.claude.com/docs/">Claude documentation</a></li>
+<li><a href="https://code.claude.com/docs/en/overview">Claude Code overview</a></li>
+<li><a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview">Claude tool-use overview</a></li>
+</ul>
+</div>
+<div id="a-practical-mental-model" class="section level2 hasAnchor" number="4.2">
+<h2><span class="header-section-number">4.2</span> A practical mental model<a href="claude-fundamentals.html#a-practical-mental-model" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>For most tasks, treat the system as four layers:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Model</strong> — generates and interprets language, code, and structured content.</li>
+<li><strong>Context</strong> — the instructions, conversation, files, and tool results visible
+during the current request.</li>
+<li><strong>Tools</strong> — capabilities supplied by the host, such as file editing, Bash,
+web search, or code execution.</li>
+<li><strong>Permissions and environment</strong> — boundaries controlling what tools can read,
+change, or communicate externally.</li>
+</ol>
+<p>This distinction prevents common mistakes. For example, a chat session without
+a code tool cannot execute a program, while Claude Code can run project commands
+when its environment and permissions allow it.</p>
+</div>
+<div id="useful-strengths" class="section level2 hasAnchor" number="4.3">
+<h2><span class="header-section-number">4.3</span> Useful strengths<a href="claude-fundamentals.html#useful-strengths" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Claude is often useful for:</p>
+<ul>
+<li>explaining unfamiliar code and technical concepts;</li>
+<li>drafting, refactoring, and documenting code;</li>
+<li>proposing tests, edge cases, and alternative designs;</li>
+<li>synthesizing information supplied in the current context;</li>
+<li>exploring a repository and carrying out multi-step work when tools are
+available; and</li>
+<li>translating ambiguous goals into a concrete plan for human review.</li>
+</ul>
+<p>These are capabilities, not guarantees. Output quality depends on the task,
+context, model, tools, and verification process.</p>
+</div>
+<div id="important-limitations" class="section level2 hasAnchor" number="4.4">
+<h2><span class="header-section-number">4.4</span> Important limitations<a href="claude-fundamentals.html#important-limitations" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="outputs-can-be-wrong" class="section level3 hasAnchor" number="4.4.1">
+<h3><span class="header-section-number">4.4.1</span> Outputs can be wrong<a href="claude-fundamentals.html#outputs-can-be-wrong" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Claude can produce plausible but incorrect facts, citations, assumptions, code,
+or calculations. Verify consequential claims against primary sources and verify
+code with tests, builds, static analysis, or direct inspection.</p>
+</div>
+<div id="product-capabilities-vary" class="section level3 hasAnchor" number="4.4.2">
+<h3><span class="header-section-number">4.4.2</span> Product capabilities vary<a href="claude-fundamentals.html#product-capabilities-vary" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Web access, code execution, file access, memory, and integrations are not
+universal. A feature may be unavailable, disabled, permission-gated, or supplied
+by a third-party host. State the environment when documenting a workflow.</p>
+</div>
+<div id="context-is-finite" class="section level3 hasAnchor" number="4.4.3">
+<h3><span class="header-section-number">4.4.3</span> Context is finite<a href="claude-fundamentals.html#context-is-finite" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Long conversations, large files, and verbose tool output consume context. As
+context fills, earlier detail may be summarized or receive less attention.
+Provide focused evidence, keep durable project rules in repository instructions,
+and begin a fresh session when the task changes substantially.</p>
+</div>
+<div id="current-information-requires-retrieval" class="section level3 hasAnchor" number="4.4.4">
+<h3><span class="header-section-number">4.4.4</span> Current information requires retrieval<a href="claude-fundamentals.html#current-information-requires-retrieval" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Model training knowledge is not a substitute for current documentation. For
+changing APIs, models, prices, regulations, or library behavior, use an enabled
+retrieval tool and cite an authoritative source. If retrieval is unavailable,
+label the information as unverified rather than guessing.</p>
+</div>
+<div id="tool-use-creates-real-risk" class="section level3 hasAnchor" number="4.4.5">
+<h3><span class="header-section-number">4.4.5</span> Tool use creates real risk<a href="claude-fundamentals.html#tool-use-creates-real-risk" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>An agent with file, shell, browser, or external-service access can change state.
+Use least privilege, protect secrets, review destructive commands, preserve
+unrelated work, and require explicit approval for publishing or external actions.</p>
+</div>
+</div>
+<div id="a-verification-centered-partnership" class="section level2 hasAnchor" number="4.5">
+<h2><span class="header-section-number">4.5</span> A verification-centered partnership<a href="claude-fundamentals.html#a-verification-centered-partnership" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Divide responsibilities deliberately:</p>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Human responsibility</th>
+<th>Agent contribution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Define goals, risk tolerance, and factual constraints</td>
+<td>Explore, draft, compare, and implement</td>
+</tr>
+<tr>
+<td>Supply domain and organizational context</td>
+<td>Surface assumptions and missing information</td>
+</tr>
+<tr>
+<td>Approve consequential or external actions</td>
+<td>Run authorized checks and report evidence</td>
+</tr>
+<tr>
+<td>Judge whether the result is useful and correct</td>
+<td>Iterate in response to test results and review</td>
+</tr>
+</tbody>
+</table>
+<p>The agent should show evidence rather than merely announce success. Appropriate
+evidence might include a passing test, a clean build, a rendered screenshot, a
+query result, or a primary-source link.</p>
+</div>
+<div id="exercise-compare-environments" class="section level2 hasAnchor" number="4.6">
+<h2><span class="header-section-number">4.6</span> Exercise: compare environments<a href="claude-fundamentals.html#exercise-compare-environments" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Choose one task and try it in two Claude environments, such as a chat interface
+and Claude Code.</p>
+<ol style="list-style-type: decimal">
+<li>Record which model and tools are visible.</li>
+<li>Ask each environment to explain a small local function.</li>
+<li>Ask whether it can run the function and verify the answer.</li>
+<li>Compare what each environment can actually inspect or execute.</li>
+<li>Write down which claims were generated and which were verified.</li>
+</ol>
+</div>
+<div id="key-takeaways" class="section level2 hasAnchor" number="4.7">
+<h2><span class="header-section-number">4.7</span> Key takeaways<a href="claude-fundamentals.html#key-takeaways" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ul>
+<li>Separate the model from the host product, tools, and permissions.</li>
+<li>Never assume web, file, memory, or execution capabilities are present.</li>
+<li>Treat fluent output as a candidate result until evidence validates it.</li>
+<li>Use current primary documentation for changing product behavior.</li>
+<li>Keep humans responsible for goals, risk, and consequential decisions.</li>
+</ul>
+
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-
+<a href="instruction-fine-tuning-and-evaluation.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="prompting.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

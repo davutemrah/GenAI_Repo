@@ -1,0 +1,302 @@
+# Code Best Practices: Generate & Review Code {#code-practices}
+
+## The Generate-Review-Refine Workflow
+
+Every time you ask Claude for code:
+
+```
+GENERATE → REVIEW → REFINE
+```
+
+**Don't use first answer immediately.**
+
+## Phase 1: Generate
+
+Ask Claude for code with full context:
+
+```
+Language: Python 3.10
+Task: Function to calculate customer lifetime value
+
+Requirements:
+- Input: list of transaction amounts
+- Output: single float (LTV)
+- Exclude transactions: < $0, > $10000 (likely errors)
+- Calculation: sum of valid transactions * 12 months
+
+Example:
+Input: [100, 150, 90, -50, 15000]
+Output: 3420.0  (sum of [100,150,90] * 12)
+```
+
+## Phase 2: Review - The Quality Checklist
+
+After Claude generates code, ask yourself:
+
+### ✅ Does It Work?
+
+```python
+# Copy the code
+# Run it immediately
+# Test with examples
+```
+
+### ✅ Is It Readable?
+
+**Good variable names?**
+```python
+# GOOD
+def calculate_customer_ltv(transactions):
+    valid = [t for t in transactions if 0 <= t <= 10000]
+    return sum(valid) * 12
+
+# BAD
+def f(x):
+    y = [a for a in x if a > 0 and a < 10000]
+    return sum(y) * 12
+```
+
+**Clear logic?**
+```python
+# GOOD - steps are obvious
+transactions = read_transactions()
+valid_transactions = filter_outliers(transactions)
+ltv = calculate_ltv(valid_transactions)
+return ltv
+
+# BAD - what's happening?
+return sum([t for t in read_transactions() if 0<t<10000])*12
+```
+
+### ✅ Does It Handle Edge Cases?
+
+Ask yourself:
+- What if input is empty? → errors or returns None?
+- What if input is invalid type? → crashes or handles gracefully?
+- What if numbers are very large? → overflow issues?
+- What if data is missing? → NaN/None handling?
+
+**Example:**
+```python
+# WORSE - no error handling
+def calculate_ltv(transactions):
+    return sum(transactions) * 12
+
+# BETTER - handles edge cases
+def calculate_ltv(transactions):
+    """Calculate customer lifetime value."""
+    if not transactions:
+        return None
+    
+    if not isinstance(transactions, (list, tuple)):
+        raise TypeError("transactions must be list or tuple")
+    
+    valid = [
+        t for t in transactions 
+        if isinstance(t, (int, float)) and 0 <= t <= 10000
+    ]
+    
+    return sum(valid) * 12 if valid else None
+```
+
+### ✅ Is It Efficient?
+
+- Does it make unnecessary loops?
+- Could it use built-in functions?
+- Will it work with large datasets?
+
+```python
+# INEFFICIENT
+def clean_data(df):
+    for i in range(len(df)):
+        df.iloc[i, 0] = df.iloc[i, 0].lower()
+
+# EFFICIENT
+def clean_data(df):
+    df[df.columns[0]] = df[df.columns[0]].str.lower()
+```
+
+### ✅ Is It Documented?
+
+```python
+# GOOD
+def calculate_ltv(transactions: list[float]) -> float:
+    """
+    Calculate customer lifetime value from transaction history.
+    
+    Args:
+        transactions: List of transaction amounts (floats)
+        
+    Returns:
+        float: Estimated annual value (sum * 12)
+        
+    Raises:
+        TypeError: If transactions is not a list
+        
+    Example:
+        >>> calculate_ltv([100, 150, 90])
+        4440.0
+    """
+    ...
+
+# OKAY
+def calculate_ltv(transactions):
+    # Returns annual LTV
+    return sum(transactions) * 12
+
+# BAD
+def f(x):
+    return sum(x) * 12
+```
+
+### ✅ Does It Follow Standards?
+
+Check your team/project standards:
+- Naming conventions? (snake_case vs camelCase)
+- Type hints?
+- Comments on complex logic?
+- Docstring style?
+
+## Phase 3: Refine
+
+Ask Claude to improve it:
+
+```
+Good start! Can you:
+1. Add error handling for edge cases
+2. Add type hints
+3. Add docstring with examples
+4. Make it more efficient
+5. Add logging for debugging
+```
+
+## Code Quality Checklist
+
+Before shipping code, verify:
+
+### Functionality ✓
+- [ ] Code runs without errors
+- [ ] Handles all expected inputs
+- [ ] Produces correct outputs
+- [ ] Edge cases handled
+
+### Readability ✓
+- [ ] Variable names are clear
+- [ ] Logic is straightforward
+- [ ] No magic numbers
+- [ ] Comments explain "why", not "what"
+
+### Robustness ✓
+- [ ] Error handling present
+- [ ] Input validation
+- [ ] Graceful failure
+- [ ] Appropriate logging
+
+### Documentation ✓
+- [ ] Function has docstring
+- [ ] Parameters documented
+- [ ] Return values documented
+- [ ] Examples included
+
+### Performance ✓
+- [ ] Appropriate algorithm
+- [ ] No unnecessary loops
+- [ ] Handles large data
+- [ ] No memory leaks
+
+### Maintainability ✓
+- [ ] Follows project standards
+- [ ] Tests included
+- [ ] Dependencies clear
+- [ ] Easy to debug
+
+## Common Code Problems Claude Might Miss
+
+### ❌ Problem 1: Mutating Input
+
+```python
+# WRONG - modifies input list!
+def process(items):
+    items.sort()
+    return items[0]
+
+# RIGHT - works on copy
+def process(items):
+    sorted_items = sorted(items)
+    return sorted_items[0]
+```
+
+### ❌ Problem 2: Hardcoded Paths
+
+```python
+# WRONG - only works on one computer
+df = pd.read_csv('/Users/name/data.csv')
+
+# RIGHT - relative path
+df = pd.read_csv('../data/customers.csv')
+```
+
+### ❌ Problem 3: Missing Imports
+
+```python
+# Claude writes code using 'os'
+# But forgot to import it
+import pandas as pd
+# missing: import os
+
+file_path = os.path.join('data', 'file.csv')  # ERROR!
+```
+
+### ❌ Problem 4: Silent Failures
+
+```python
+# WRONG - silently returns None if error
+def get_value(data, key):
+    try:
+        return data[key]
+    except:
+        pass  # What error? Where? Lost forever.
+
+# RIGHT - logs or raises
+def get_value(data, key):
+    try:
+        return data[key]
+    except KeyError as e:
+        raise ValueError(f"Missing required key: {key}") from e
+```
+
+## Asking Claude for Code Review
+
+```
+I have this function:
+
+[paste code]
+
+Code review:
+1. Does it work correctly?
+2. What edge cases am I missing?
+3. How would you improve it?
+4. Any performance concerns?
+5. Any security concerns?
+```
+
+## Exercise: Review Real Code
+
+Take code Claude generated for you:
+
+1. **Run it** - Does it work?
+2. **Check readability** - Would others understand it?
+3. **Test edge cases** - Does it break?
+4. **Review documentation** - Is it clear?
+5. **Ask Claude to improve** - Iterate
+
+Save the before/after. Notice the improvements!
+
+## Key Takeaways
+
+✅ Generate → Review → Refine workflow  
+✅ Don't use first answer immediately  
+✅ Check: Works? Readable? Robust? Documented?  
+✅ Test edge cases actively  
+✅ Follow your team's standards  
+✅ Ask Claude to iterate  

@@ -1,15 +1,14 @@
 --- 
-title: "Generative AI with Large Language Models"
-author: "DEA"
+title: "Generative AI, Large Language Models, and Coding Agents"
+subtitle: "Foundations, adaptation, evaluation, and practical Claude workflows"
+author: "Davut Ayan"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
 output: bookdown::gitbook
 documentclass: book
-#bibliography: [book.bib, packages.bib]
-#biblio-style: apalike
 link-citations: yes
-github-repo: rstudio/bookdown-demo
-description: "This is a collection of notes from open sources"
+github-repo: davutemrah/GenAI_Repo
+description: "Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents."
 ---
 
 <style> 
@@ -20,9 +19,29 @@ body {text-align: justify}
 
 <div class="boxy">
 
-
-
-
+This book combines two formerly separate sets of study notes: foundations of
+generative AI and large language models, and practical workflows for working
+with Claude and AI coding agents. The goal is to connect model concepts with
+safe, reproducible practice for data science and software work.
 
 </div>
 
+The book has two complementary tracks:
+
+1. **LLM foundations** — transformers, pre-training, adaptation, instruction
+   fine-tuning, and evaluation.
+2. **Applied agent workflows** — prompting, code review, verification loops,
+   Claude Code hooks and skills, and reproducible notebooks.
+
+These are educational notes, not vendor certification material. Product
+features change quickly, so product-specific chapters link to primary vendor
+documentation and should be checked against the installed product version.
+
+## How to use this book {-}
+
+- Read the LLM chapters in sequence when learning the underlying concepts.
+- Use the Claude chapters as practical references for agent-assisted work.
+- Run and inspect generated code; do not treat model output as validated merely
+  because it is fluent.
+- Protect secrets and private data, use least-privilege tool permissions, and
+  keep a human reviewer responsible for consequential decisions.

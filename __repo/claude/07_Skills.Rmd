@@ -1,0 +1,162 @@
+# Claude Code Skills: Reusable Procedures {#claude-code-skills}
+
+## What a skill is
+
+A Claude Code skill is a directory whose required `SKILL.md` file describes a
+reusable procedure. Claude can load a skill when its description matches the
+task, or the user can invoke it directly. Skills are useful when the same
+instructions, checklist, or multi-step workflow would otherwise be pasted into
+many conversations.
+
+Claude Code skills follow the Agent Skills open standard and add product-specific
+features. Review the current [Claude Code skills documentation](https://code.claude.com/docs/en/skills)
+before depending on invocation or frontmatter behavior.
+
+## Where skills live
+
+Common locations are:
+
+| Scope | Location | Intended use |
+|---|---|---|
+| Personal | `~/.claude/skills/<skill-name>/SKILL.md` | Available across the user's projects |
+| Project | `.claude/skills/<skill-name>/SKILL.md` | Shared rules for one repository |
+| Plugin | `<plugin>/skills/<skill-name>/SKILL.md` | Distributed as part of a plugin |
+
+Use project scope for procedures that depend on repository-specific commands,
+paths, or standards. Do not put personal credentials or machine-specific secrets
+inside a shared skill.
+
+## Minimal structure
+
+```text
+.claude/
+└── skills/
+    └── summarize-changes/
+        └── SKILL.md
+```
+
+A minimal `SKILL.md` contains YAML frontmatter and instructions:
+
+```markdown
+---
+description: Summarize uncommitted changes and flag security, privacy, testing,
+  or deployment risks. Use when reviewing a diff before a commit.
+---
+
+# Review procedure
+
+1. Inspect repository instructions and Git status.
+2. Review source and generated-output diffs separately.
+3. Identify secrets, personal data, large files, and unrelated changes.
+4. Run the smallest relevant validation.
+5. Report evidence, uncertainty, and remaining risks.
+```
+
+The directory name normally supplies the command name. The description should
+state both what the skill does and when it applies; vague descriptions lead to
+missed or inappropriate activation.
+
+## Progressive disclosure
+
+Keep the main skill focused on routing and procedure. Put long examples,
+schemas, or domain references in supporting files and tell the skill exactly
+when to read them.
+
+```text
+model-review/
+├── SKILL.md
+├── references/
+│   ├── classification.md
+│   └── regression.md
+└── scripts/
+    └── validate_metrics.R
+```
+
+This design reduces unnecessary context while keeping important detail
+available. Supporting scripts should be deterministic, reviewed, and narrowly
+scoped.
+
+## Methodologically sound data-science skills
+
+A skill should encode decisions that remain valid across the intended tasks and
+surface decisions that depend on context. Avoid hard-coding one universal model,
+split ratio, imputation rule, or metric.
+
+For a model-development skill, require the agent to:
+
+1. Define the prediction target, observation unit, decision use, and costs of
+   errors.
+2. Inspect data provenance, sampling, missingness, and temporal structure.
+3. Choose a split strategy before fitting transformations; use temporal or
+   grouped splitting when random splitting would leak information.
+4. Fit preprocessing only on training data, preferably inside a pipeline.
+5. Establish a simple baseline before tuning complex models.
+6. Select metrics that match the use case and class distribution.
+7. Preserve a held-out test set for final evaluation.
+8. Report uncertainty, subgroup behavior, assumptions, and limitations.
+9. Save reproducibility information such as seeds, package versions, and data
+   snapshot identifiers.
+
+The skill should request missing context instead of silently inventing it.
+
+## Example skill: notebook review
+
+```markdown
+---
+description: Review a data-science notebook for reproducibility, leakage,
+  methodological validity, privacy, and clear communication.
+---
+
+# Procedure
+
+1. Read the notebook from top to bottom and identify its analytical objective.
+2. Check whether a clean kernel can run all cells in order.
+3. Trace data splits and ensure preprocessing is learned from training data only.
+4. Check metrics against the decision problem and baseline.
+5. Identify secrets, personal data, absolute paths, or uncontrolled downloads.
+6. Separate exploratory conclusions from validated findings.
+7. Run the notebook only when execution is authorized and dependencies are safe.
+8. Report findings by severity with file or cell references.
+```
+
+## Evaluation and maintenance
+
+Test a skill with representative prompts, borderline prompts, and prompts where
+it should not activate. Review whether it:
+
+- loads at the right time;
+- requests necessary information;
+- follows project safety rules;
+- produces a consistent, useful artifact;
+- runs only authorized tools; and
+- remains understandable to another maintainer.
+
+Version skills in Git when they are part of a project. Review them after tool,
+workflow, or product changes, and remove instructions that duplicate higher
+priority repository policy.
+
+## Skills are not enforcement
+
+A skill supplies instructions and optional resources; it is not a security
+boundary. Use permissions, protected branches, CI checks, secrets management,
+and narrowly scoped hooks for controls that must be enforced independently of
+model behavior.
+
+## Exercise: create one project skill
+
+Choose a repeated, bounded procedure such as validating a book build:
+
+1. Define the trigger in one sentence.
+2. Write a minimal `SKILL.md` with expected evidence and stop conditions.
+3. Add only the references or scripts the procedure genuinely needs.
+4. Test correct activation, non-activation, and a failure case.
+5. Ask another reviewer to follow the skill without additional explanation.
+
+## Key takeaways
+
+- A skill is a scoped directory with a required `SKILL.md`, not an arbitrary
+  saved-prompt folder.
+- Put repository-specific procedures in project scope and keep secrets out.
+- Encode invariant safeguards; ask for context-dependent methodological choices.
+- Evaluate activation, output quality, safety, and failure behavior.
+- Use permissions, CI, and hooks when instructions alone are insufficient.

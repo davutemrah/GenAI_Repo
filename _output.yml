@@ -3,17 +3,8 @@ bookdown::gitbook:
   config:
     toc:
       before: |
-        <li><a href="./">Generative AI Notes</a></li>
+        <li><a href="./">GenAI &amp; Coding Agents</a></li>
       after: |
-        <li><a href="https://davutemrah.github.io" target="blank">Back to Home Page</li>
-        <li><a href="https://davutemrah.github.io/notebooks/" target="blank">Back to Collections</li>
+        <li><a href="https://davutemrah.github.io" target="_blank" rel="noopener">Back to Portfolio</a></li>
+        <li><a href="https://davutemrah.github.io/notebooks/" target="_blank" rel="noopener">Back to Learning Library</a></li>
 #    edit: https://github.com/rstudio/bookdown-demo/edit/master/%s
-    download: ["pdf", "epub"]
-bookdown::pdf_book:
-  includes:
-    in_header: preamble.tex
-  latex_engine: xelatex
-  citation_package: natbib
-  keep_tex: yes
-bookdown::epub_book: default
-bookdown::bs4_book: default

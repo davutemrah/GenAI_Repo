@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Page not found | Generative AI, Large Language Models, and Coding Agents</title>
+  <title>Chapter 7 Advanced Techniques: Power User Features | Generative AI, Large Language Models, and Coding Agents</title>
   <meta name="description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Page not found | Generative AI, Large Language Models, and Coding Agents" />
+  <meta property="og:title" content="Chapter 7 Advanced Techniques: Power User Features | Generative AI, Large Language Models, and Coding Agents" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   <meta name="github-repo" content="davutemrah/GenAI_Repo" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Page not found | Generative AI, Large Language Models, and Coding Agents" />
+  <meta name="twitter:title" content="Chapter 7 Advanced Techniques: Power User Features | Generative AI, Large Language Models, and Coding Agents" />
   
   <meta name="twitter:description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-
+<link rel="prev" href="code-practices.html"/>
+<link rel="next" href="real-world.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -496,19 +496,320 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="page-not-found" class="section level1">
-<h1>Page not found</h1>
-<p>The page you requested cannot be found (perhaps it was moved or renamed).</p>
-<p>You may want to try searching to find the page's new location, or use
-the table of contents to find the page you are looking for.</p>
+<div id="advanced" class="section level1 hasAnchor" number="7">
+<h1><span class="header-section-number">Chapter 7</span> Advanced Techniques: Power User Features<a href="advanced.html#advanced" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="when-to-use-advanced-techniques" class="section level2 hasAnchor" number="7.1">
+<h2><span class="header-section-number">7.1</span> When to Use Advanced Techniques<a href="advanced.html#when-to-use-advanced-techniques" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>You’ve mastered the basics. Now:
+- ✓ Tackle complex problems
+- ✓ Work more efficiently
+- ✓ Get better answers
+- ✓ Build sophisticated systems</p>
+<p>These patterns complement Anthropic’s current
+<a href="https://code.claude.com/docs/en/best-practices">Claude Code best practices</a>.
+They are starting points to test, not guarantees of output quality.</p>
+</div>
+<div id="technique-1-plan-before-implementation" class="section level2 hasAnchor" number="7.2">
+<h2><span class="header-section-number">7.2</span> Technique 1: Plan Before Implementation<a href="advanced.html#technique-1-plan-before-implementation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Problem:</strong> Claude rushes to answers, misses nuance</p>
+<p><strong>Solution:</strong> Ask for an inspectable plan, assumptions, and verification strategy
+before implementation. Evaluate the plan itself rather than relying on an
+unverifiable claim that the model “thought harder.”</p>
+<pre><code>Problem: Build a data pipeline that:
+- Reads from 3 sources
+- Cleans inconsistent data
+- Validates quality
+- Outputs to database
+
+Before asking for code, ask:
+
+&quot;Before you write code, walk me through:
+1. Data source details (formats, schemas, sizes)
+2. How you&#39;d validate consistency
+3. Error handling strategy
+4. Performance considerations
+5. Testing approach
+
+Then show me the implementation.&quot;</code></pre>
+</div>
+<div id="technique-2-context-stacking" class="section level2 hasAnchor" number="7.3">
+<h2><span class="header-section-number">7.3</span> Technique 2: Context Stacking<a href="advanced.html#technique-2-context-stacking" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Problem:</strong> Claude forgets earlier context</p>
+<p><strong>Solution:</strong> Explicitly reference previous decisions</p>
+<pre><code>Earlier we decided:
+- Use pandas for data processing
+- Write to PostgreSQL
+- Handle nulls by forward-fill
+- Validate row counts match source
+
+Now implement step 4: [your step]
+Keep these decisions in mind.</code></pre>
+</div>
+<div id="technique-3-role-based-prompting" class="section level2 hasAnchor" number="7.4">
+<h2><span class="header-section-number">7.4</span> Technique 3: Role-Based Prompting<a href="advanced.html#technique-3-role-based-prompting" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Problem:</strong> Generic answers that don’t fit your context</p>
+<p><strong>Solution:</strong> Tell Claude what role to play</p>
+<pre><code>Review this from the perspective of a senior data scientist at a marketing agency.
+
+I&#39;m building a customer segmentation model.
+The stakeholders are:
+- VP Marketing (needs actionable segments)
+- Data Engineering (needs reproducible pipeline)
+- Analytics (needs SQL-friendly outputs)
+
+Design the segmentation approach that satisfies all three.</code></pre>
+</div>
+<div id="technique-4-constraint-based-design" class="section level2 hasAnchor" number="7.5">
+<h2><span class="header-section-number">7.5</span> Technique 4: Constraint-Based Design<a href="advanced.html#technique-4-constraint-based-design" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Problem:</strong> Solutions don’t fit real constraints</p>
+<p><strong>Solution:</strong> State constraints explicitly upfront</p>
+<pre><code>Design a recommendation system with these constraints:
+- Python 3.10 (the version pinned in production)
+- No TensorFlow/PyTorch (not allowed in company)
+- Must run on company GPU (NVIDIA A100)
+- Must score 1M items in &lt; 2 seconds
+- Storage limited to 100GB
+
+What&#39;s the approach?</code></pre>
+</div>
+<div id="technique-5-assumption-surfacing" class="section level2 hasAnchor" number="7.6">
+<h2><span class="header-section-number">7.6</span> Technique 5: Assumption Surfacing<a href="advanced.html#technique-5-assumption-surfacing" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Problem:</strong> Claude makes wrong assumptions about your needs</p>
+<p><strong>Solution:</strong> Have Claude list assumptions, then validate</p>
+<pre><code>&quot;Before you build this, list all your assumptions about:
+1. Data shape and size
+2. Performance requirements
+3. Error tolerance
+4. Team skill level
+5. Business constraints
+
+I&#39;ll tell you which are wrong so you adjust.&quot;</code></pre>
+</div>
+<div id="technique-6-comparative-analysis" class="section level2 hasAnchor" number="7.7">
+<h2><span class="header-section-number">7.7</span> Technique 6: Comparative Analysis<a href="advanced.html#technique-6-comparative-analysis" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Problem:</strong> One solution might not be best</p>
+<p><strong>Solution:</strong> Ask Claude for multiple approaches</p>
+<pre><code>&quot;Show me 3 different ways to [task]:
+
+Approach A: [description]
+- Pros:
+- Cons:
+
+Approach B: [description]
+- Pros:
+- Cons:
+
+Approach C: [description]
+- Pros:
+- Cons:
+
+Which would you recommend for [specific context]?&quot;</code></pre>
+</div>
+<div id="technique-7-systematic-testing-strategy" class="section level2 hasAnchor" number="7.8">
+<h2><span class="header-section-number">7.8</span> Technique 7: Systematic Testing Strategy<a href="advanced.html#technique-7-systematic-testing-strategy" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Problem:</strong> Incomplete test coverage</p>
+<p><strong>Solution:</strong> Ask Claude to design test strategy first</p>
+<pre><code>&quot;Design a comprehensive test strategy for [function]:
+
+1. What are the possible inputs?
+2. What could go wrong?
+3. What edge cases exist?
+4. How do you test robustness?
+5. How do you test performance?
+6. How do you test failure modes?
+
+Then write tests for all categories.&quot;</code></pre>
+</div>
+<div id="technique-8-documentation-first-design" class="section level2 hasAnchor" number="7.9">
+<h2><span class="header-section-number">7.9</span> Technique 8: Documentation-First Design<a href="advanced.html#technique-8-documentation-first-design" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Problem:</strong> Code without clear purpose</p>
+<p><strong>Solution:</strong> Have Claude write documentation first</p>
+<pre><code>&quot;Write the documentation for this feature first:
+
+Title: [what it does]
+Purpose: [why it matters]
+How to use: [examples]
+Inputs: [types and formats]
+Outputs: [expected results]
+Edge cases: [special handling]
+Performance: [expected runtime]
+
+Then implement code that matches this documentation.&quot;</code></pre>
+</div>
+<div id="technique-9-architectural-review" class="section level2 hasAnchor" number="7.10">
+<h2><span class="header-section-number">7.10</span> Technique 9: Architectural Review<a href="advanced.html#technique-9-architectural-review" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Problem:</strong> Missing the big picture</p>
+<p><strong>Solution:</strong> Have Claude diagram/explain architecture</p>
+<pre><code>&quot;Draw (in ASCII or describe) the architecture for:
+
+1. Data inputs (where from?)
+2. Processing stages (what happens when?)
+3. Storage (where does it live?)
+4. Outputs (where does it go?)
+5. Monitoring (how do we know it works?)
+6. Failure handling (what if it breaks?)
+7. Scaling (what if data grows 100x?)
+
+Then show the implementation.&quot;</code></pre>
+</div>
+<div id="technique-10-iterative-refinement" class="section level2 hasAnchor" number="7.11">
+<h2><span class="header-section-number">7.11</span> Technique 10: Iterative Refinement<a href="advanced.html#technique-10-iterative-refinement" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Problem:</strong> One pass isn’t perfect</p>
+<p><strong>Solution:</strong> Use feedback loops</p>
+<pre><code>Round 1: &quot;Give me a basic implementation&quot;
+         [you review]
+
+Round 2: &quot;Add error handling for [issues found]&quot;
+         [you review]
+
+Round 3: &quot;Optimize for [performance issue]&quot;
+         [you review]
+
+Round 4: &quot;Add docs and tests&quot;
+         [you test]
+
+Round 5: &quot;Final review - anything missing?&quot;
+         [ready for production]</code></pre>
+</div>
+<div id="advanced-pattern-complete-system-design" class="section level2 hasAnchor" number="7.12">
+<h2><span class="header-section-number">7.12</span> Advanced Pattern: Complete System Design<a href="advanced.html#advanced-pattern-complete-system-design" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Combine techniques for major projects:</p>
+<pre><code>Step 1: UNDERSTAND
+&quot;I need to build [system].
+Constraints: [list]
+Team: [size and skills]
+Timeline: [how long]&quot;
+
+Step 2: DESIGN
+&quot;Before coding, design the architecture.
+Show: inputs → processing → outputs&quot;
+
+Step 3: ASSUMPTIONS
+&quot;What assumptions are you making?
+Let me validate them.&quot;
+
+Step 4: COMPONENTS
+&quot;Break it into 4-5 key components.
+For each: purpose, inputs, outputs.&quot;
+
+Step 5: TESTING
+&quot;Design the test strategy.
+What could fail? How do we prevent it?&quot;
+
+Step 6: IMPLEMENTATION
+&quot;Now implement [Component 1] with full docs and tests&quot;
+
+Step 7: INTEGRATION
+&quot;Connect [Component 1] to [Component 2].
+Show integration points.&quot;
+
+Step 8: FINAL REVIEW
+&quot;Review the complete system.
+Any performance or robustness issues?&quot;
+
+Step 9: DEPLOYMENT
+&quot;How do we deploy this safely?
+What monitoring do we need?&quot;</code></pre>
+</div>
+<div id="when-to-use-each-technique" class="section level2 hasAnchor" number="7.13">
+<h2><span class="header-section-number">7.13</span> When to Use Each Technique<a href="advanced.html#when-to-use-each-technique" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Use This</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Simple task, clear requirements</td>
+<td>Basic prompting</td>
+</tr>
+<tr>
+<td>Complex problem</td>
+<td>Multi-step thinking</td>
+</tr>
+<tr>
+<td>Need consistent context</td>
+<td>Context stacking</td>
+</tr>
+<tr>
+<td>Domain-specific needs</td>
+<td>Role-based prompting</td>
+</tr>
+<tr>
+<td>Real-world constraints</td>
+<td>Constraint-based design</td>
+</tr>
+<tr>
+<td>Unsure of requirements</td>
+<td>Assumption surfacing</td>
+</tr>
+<tr>
+<td>Choosing approach</td>
+<td>Comparative analysis</td>
+</tr>
+<tr>
+<td>Quality concerns</td>
+<td>Systematic testing</td>
+</tr>
+<tr>
+<td>Unclear purpose</td>
+<td>Documentation first</td>
+</tr>
+<tr>
+<td>Large system</td>
+<td>Architectural review</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="asking-claude-about-advanced-techniques" class="section level2 hasAnchor" number="7.14">
+<h2><span class="header-section-number">7.14</span> Asking Claude About Advanced Techniques<a href="advanced.html#asking-claude-about-advanced-techniques" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<pre><code>I&#39;m building [system].
+
+Current challenge: [specific problem]
+
+I want to use [technique name] to solve it.
+
+Here&#39;s my context: [describe situation]
+
+Can you:
+1. Help me apply [technique] correctly
+2. Show me the process
+3. Help me think through the problem
+4. Suggest what I might be missing</code></pre>
+</div>
+<div id="exercise-practice-advanced-techniques" class="section level2 hasAnchor" number="7.15">
+<h2><span class="header-section-number">7.15</span> Exercise: Practice Advanced Techniques<a href="advanced.html#exercise-practice-advanced-techniques" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Pick one technique and use it for your next project:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Chosen technique:</strong> [name]</li>
+<li><strong>Your problem:</strong> [description]</li>
+<li><strong>Apply the technique:</strong> [work through steps]</li>
+<li><strong>Result:</strong> [what improved?]</li>
+</ol>
+<p>Track what changed. Most people find techniques save time and improve quality.</p>
+</div>
+<div id="key-takeaways-3" class="section level2 hasAnchor" number="7.16">
+<h2><span class="header-section-number">7.16</span> Key Takeaways<a href="advanced.html#key-takeaways-3" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>✅ Multi-step thinking = better solutions<br />
+✅ Role-based prompting = relevant answers<br />
+✅ Constraint design = practical solutions<br />
+✅ Comparative analysis = better choices<br />
+✅ Architecture first = fewer rewrites<br />
+✅ Testing strategy = robust code<br />
+✅ Combine techniques for complex work</p>
+
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-
+<a href="code-practices.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="real-world.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

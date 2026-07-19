@@ -1,0 +1,118 @@
+# Claude Fundamentals and Product Context {#claude-fundamentals}
+
+## Claude is a model family, not one fixed interface
+
+Claude is a family of language models developed by Anthropic. The capabilities
+available in a session depend on both the selected model and the product that
+hosts it. Claude.ai, Claude Code, an API integration, and a third-party product
+can expose different tools, permissions, context, and data-retention policies.
+
+Claude can work with text, code, and images. When a host provides tools, it may
+also search the web, read and edit files, execute commands or code, and connect
+to external systems. Do not infer available capabilities from the model name
+alone; inspect the current product, tool list, and permission settings.
+
+Primary references:
+
+- [Claude documentation](https://platform.claude.com/docs/)
+- [Claude Code overview](https://code.claude.com/docs/en/overview)
+- [Claude tool-use overview](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
+
+## A practical mental model
+
+For most tasks, treat the system as four layers:
+
+1. **Model** — generates and interprets language, code, and structured content.
+2. **Context** — the instructions, conversation, files, and tool results visible
+   during the current request.
+3. **Tools** — capabilities supplied by the host, such as file editing, Bash,
+   web search, or code execution.
+4. **Permissions and environment** — boundaries controlling what tools can read,
+   change, or communicate externally.
+
+This distinction prevents common mistakes. For example, a chat session without
+a code tool cannot execute a program, while Claude Code can run project commands
+when its environment and permissions allow it.
+
+## Useful strengths
+
+Claude is often useful for:
+
+- explaining unfamiliar code and technical concepts;
+- drafting, refactoring, and documenting code;
+- proposing tests, edge cases, and alternative designs;
+- synthesizing information supplied in the current context;
+- exploring a repository and carrying out multi-step work when tools are
+  available; and
+- translating ambiguous goals into a concrete plan for human review.
+
+These are capabilities, not guarantees. Output quality depends on the task,
+context, model, tools, and verification process.
+
+## Important limitations
+
+### Outputs can be wrong
+
+Claude can produce plausible but incorrect facts, citations, assumptions, code,
+or calculations. Verify consequential claims against primary sources and verify
+code with tests, builds, static analysis, or direct inspection.
+
+### Product capabilities vary
+
+Web access, code execution, file access, memory, and integrations are not
+universal. A feature may be unavailable, disabled, permission-gated, or supplied
+by a third-party host. State the environment when documenting a workflow.
+
+### Context is finite
+
+Long conversations, large files, and verbose tool output consume context. As
+context fills, earlier detail may be summarized or receive less attention.
+Provide focused evidence, keep durable project rules in repository instructions,
+and begin a fresh session when the task changes substantially.
+
+### Current information requires retrieval
+
+Model training knowledge is not a substitute for current documentation. For
+changing APIs, models, prices, regulations, or library behavior, use an enabled
+retrieval tool and cite an authoritative source. If retrieval is unavailable,
+label the information as unverified rather than guessing.
+
+### Tool use creates real risk
+
+An agent with file, shell, browser, or external-service access can change state.
+Use least privilege, protect secrets, review destructive commands, preserve
+unrelated work, and require explicit approval for publishing or external actions.
+
+## A verification-centered partnership
+
+Divide responsibilities deliberately:
+
+| Human responsibility | Agent contribution |
+|---|---|
+| Define goals, risk tolerance, and factual constraints | Explore, draft, compare, and implement |
+| Supply domain and organizational context | Surface assumptions and missing information |
+| Approve consequential or external actions | Run authorized checks and report evidence |
+| Judge whether the result is useful and correct | Iterate in response to test results and review |
+
+The agent should show evidence rather than merely announce success. Appropriate
+evidence might include a passing test, a clean build, a rendered screenshot, a
+query result, or a primary-source link.
+
+## Exercise: compare environments
+
+Choose one task and try it in two Claude environments, such as a chat interface
+and Claude Code.
+
+1. Record which model and tools are visible.
+2. Ask each environment to explain a small local function.
+3. Ask whether it can run the function and verify the answer.
+4. Compare what each environment can actually inspect or execute.
+5. Write down which claims were generated and which were verified.
+
+## Key takeaways
+
+- Separate the model from the host product, tools, and permissions.
+- Never assume web, file, memory, or execution capabilities are present.
+- Treat fluent output as a candidate result until evidence validates it.
+- Use current primary documentation for changing product behavior.
+- Keep humans responsible for goals, risk, and consequential decisions.

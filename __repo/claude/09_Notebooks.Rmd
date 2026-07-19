@@ -1,0 +1,394 @@
+# Interactive Notebooks: Professional Data Science Workflows {#notebooks}
+
+## Why Professional Notebooks Matter
+
+Notebooks can be:
+- ❌ **Bad:** Messy, unexplainable, breaks every run
+- ✅ **Professional:** Reproducible, documented, production-quality
+
+This chapter shows you how to build the professional kind.
+
+## The 3-Section Notebook Structure
+
+Every professional notebook has this structure:
+
+```
+SECTION 1: SETUP
+- Imports
+- Configuration
+- Data loading
+
+SECTION 2: ANALYSIS
+- Exploration
+- Transformation
+- Modeling
+
+SECTION 3: OUTPUTS
+- Results
+- Visualizations
+- Save/export
+```
+
+### Section 1: Setup
+
+**Purpose:** Everything needed to run the notebook
+
+```python
+# SECTION 1: SETUP
+# ====================================
+
+# 1.1 Imports
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from pathlib import Path
+from sklearn.dummy import DummyClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import balanced_accuracy_score, classification_report
+from sklearn.model_selection import train_test_split
+
+# 1.2 Configuration
+CONFIG = {
+    'random_state': 42,
+    'test_size': 0.2,
+    'figsize': (12, 8),
+    'data_path': Path('../data/customers.csv'),
+    'output_dir': Path('../output')
+}
+
+# 1.3 Load Data
+df_raw = pd.read_csv(CONFIG['data_path'])
+
+# 1.4 Quick sanity check
+print(f"Data shape: {df_raw.shape}")
+print(f"Missing values:\n{df_raw.isnull().sum()}")
+```
+
+**Key Principle:** Someone should be able to run Section 1 and have everything working.
+
+### Section 2: Analysis
+
+**Purpose:** Your actual work (exploration, modeling, analysis)
+
+```python
+# SECTION 2: ANALYSIS
+# ====================================
+
+# 2.1 Data Exploration
+print("=" * 50)
+print("EXPLORATORY DATA ANALYSIS")
+print("=" * 50)
+
+# Describe the data
+print("\nNumerical Summary:")
+print(df_raw.describe())
+
+# Check distributions
+df_raw.hist(figsize=CONFIG['figsize'])
+plt.tight_layout()
+plt.show()
+
+# 2.2 Data Preparation
+print("\n" + "=" * 50)
+print("DATA PREPARATION")
+print("=" * 50)
+
+# Feature engineering
+df_model = df_raw.copy()
+source_required = {
+    'customer_id', 'days_since_purchase',
+    'transactions_last_90_days', 'purchased_flag'
+}
+missing_columns = source_required.difference(df_model.columns)
+if missing_columns:
+    raise ValueError(f"Missing required columns: {sorted(missing_columns)}")
+
+# These example features must be measured before the prediction outcome window.
+df_model['recency'] = df_model['days_since_purchase'].astype(float)
+df_model['frequency'] = df_model['transactions_last_90_days'].astype(float)
+
+# Handle missing values
+required_columns = ['customer_id', 'recency', 'frequency', 'purchased_flag']
+df_model = df_model[required_columns].dropna().copy()
+
+# 2.3 Modeling
+print("\n" + "=" * 50)
+print("MODEL TRAINING")
+print("=" * 50)
+
+# Prepare features and target
+X = df_model[['recency', 'frequency']]
+y = df_model['purchased_flag']
+
+# Split before fitting any learned preprocessing or model.
+# Use a temporal or grouped split instead when random rows would leak information.
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=CONFIG['test_size'],
+    random_state=CONFIG['random_state'],
+    stratify=y
+)
+
+# Establish a simple benchmark.
+baseline = DummyClassifier(strategy='most_frequent')
+baseline.fit(X_train, y_train)
+baseline_predictions = baseline.predict(X_test)
+baseline_score = balanced_accuracy_score(y_test, baseline_predictions)
+
+# Train model
+model = RandomForestClassifier(
+    n_estimators=100,
+    random_state=CONFIG['random_state']
+)
+model.fit(X_train, y_train)
+test_predictions = model.predict(X_test)
+test_score = balanced_accuracy_score(y_test, test_predictions)
+
+print("\nModel trained and evaluated on held-out data.")
+print(f"Baseline balanced accuracy: {baseline_score:.3f}")
+print(f"Model balanced accuracy: {test_score:.3f}")
+print(classification_report(y_test, test_predictions, zero_division=0))
+```
+
+### Section 3: Outputs
+
+**Purpose:** Results, visualizations, saved files
+
+```python
+# SECTION 3: OUTPUTS
+# ====================================
+
+# 3.1 Results Summary
+print("=" * 50)
+print("RESULTS SUMMARY")
+print("=" * 50)
+
+results = {
+    'rows_processed': len(df_model),
+    'features_used': len(X.columns),
+    'baseline_balanced_accuracy': baseline_score,
+    'test_balanced_accuracy': test_score,
+    'feature_importance': pd.DataFrame({
+        'feature': X.columns,
+        'importance': model.feature_importances_
+    }).sort_values('importance', ascending=False)
+}
+
+print(f"\nRows processed: {results['rows_processed']}")
+print(f"Baseline balanced accuracy: {results['baseline_balanced_accuracy']:.3f}")
+print(f"Test balanced accuracy: {results['test_balanced_accuracy']:.3f}")
+print(f"\nTop features:\n{results['feature_importance']}")
+
+# 3.2 Visualizations
+fig, axes = plt.subplots(1, 2, figsize=CONFIG['figsize'])
+
+# Feature importance
+results['feature_importance'].plot(
+    x='feature', y='importance', kind='barh', ax=axes[0]
+)
+axes[0].set_title('Feature Importance')
+
+# Model performance
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(y_test, test_predictions)
+axes[1].imshow(cm, cmap='Blues')
+axes[1].set_title('Confusion Matrix')
+plt.tight_layout()
+plt.show()
+
+# 3.3 Save Results
+output_results = pd.DataFrame({
+    'customer_id': df_model.loc[X_test.index, 'customer_id'],
+    'actual_purchase': y_test,
+    'predicted_purchase': test_predictions,
+    'confidence': model.predict_proba(X_test).max(axis=1)
+})
+
+CONFIG['output_dir'].mkdir(parents=True, exist_ok=True)
+output_path = CONFIG['output_dir'] / 'test_predictions.csv'
+output_results.to_csv(output_path, index=False)
+print(f"\nHeld-out predictions saved to '{output_path}'")
+```
+
+## Best Practices for Each Section
+
+### Section 1: Setup Best Practices
+
+✅ **DO:**
+- ✓ Import only what you need
+- ✓ Use `CONFIG` dict for paths, parameters
+- ✓ Set random seeds for reproducibility
+- ✓ Add quick sanity checks
+- ✓ Document data sources
+- ✓ Record package versions and a data snapshot or version identifier
+
+❌ **DON'T:**
+- ✗ Install packages in notebooks (do it separately)
+- ✗ Hardcode paths (use CONFIG)
+- ✗ Scatter imports throughout
+- ✗ Load data multiple times
+
+### Section 2: Analysis Best Practices
+
+✅ **DO:**
+- ✓ Add section headers
+- ✓ Print progress ("Starting model training...")
+- ✓ Show intermediate results
+- ✓ Use meaningful variable names
+- ✓ Add markdown cells explaining what you're doing
+- ✓ Split data before fitting preprocessing or models
+- ✓ Compare against a meaningful baseline
+- ✓ Match the split strategy and metrics to the decision problem
+
+❌ **DON'T:**
+- ✗ Hide long-running cells without progress, caching, or documentation
+- ✗ Modify input dataframes (use copies)
+- ✗ Use magic numbers (put in CONFIG)
+- ✗ Skip validation checks
+- ✗ Report training-set performance as evidence of generalization
+- ✗ Fit transformations on the complete dataset before splitting
+
+### Section 3: Outputs Best Practices
+
+✅ **DO:**
+- ✓ Print summary statistics
+- ✓ Create visualizations
+- ✓ Save results to files
+- ✓ Document what was saved and where
+- ✓ Include metrics, uncertainty, and relevant subgroup diagnostics
+
+❌ **DON'T:**
+- ✗ Leave outputs scattered in cells
+- ✗ Save without documenting
+- ✗ Create messy visualizations
+- ✗ Forget to save key results
+
+## Debugging Notebook Issues
+
+### Issue: Notebook "works" first run, then fails
+
+**Cause:** Cells run out of order, or state isn't clean
+
+**Fix:**
+1. `Kernel → Restart Kernel`
+2. `Run All` (Ctrl+Shift+Enter)
+3. If still fails, there's an order dependency
+
+**Prevention:**
+- Design for top-to-bottom execution
+- Clear Section 1 handles all setup
+- Don't rely on cell order
+
+### Issue: Notebook runs slow
+
+**Cause:** Section 2 has expensive operations
+
+**Fix:**
+```python
+# Before: Load full dataset (1M rows)
+df = pd.read_csv('data.csv')
+
+# After: Sample for development
+df = pd.read_csv('data.csv', nrows=10000)
+# Change back to full data when finalizing
+```
+
+### Issue: Results don't match when rerun
+
+**Cause:** Missing random seed setting
+
+**Fix:**
+```python
+# In Section 1 Setup
+import random
+np.random.seed(CONFIG['random_state'])
+random.seed(CONFIG['random_state'])
+
+# In model training
+model = RandomForestClassifier(
+    random_state=CONFIG['random_state']
+)
+```
+
+## Asking Claude About Notebooks
+
+```
+I'm building a data science notebook for [task].
+
+Current structure:
+SECTION 1: [what's in setup]
+SECTION 2: [what's in analysis]
+SECTION 3: [what's in outputs]
+
+Requirements:
+- [feature 1]
+- [feature 2]
+- [must be reproducible]
+
+Can you:
+1. Review the structure
+2. Suggest improvements
+3. Show example cells
+
+Keep it professional and well-commented.
+```
+
+## Exercise: Restructure an Existing Notebook
+
+Take one of your notebooks:
+
+1. **Identify the sections** (setup, analysis, outputs)
+2. **Reorganize by section** (even if messy)
+3. **Add CONFIG dict** with all paths and parameters
+4. **Add section headers** (markdown cells)
+5. **Test:** Restart kernel, run all, verify it works
+
+Compare before/after. Notice how much more organized it is!
+
+## Performance Tips
+
+### Tip 1: Use Sampling for Development
+
+```python
+# Quick iteration
+df_work = df.sample(n=10000, random_state=42)
+
+# Final run
+df_work = df.copy()
+```
+
+### Tip 2: Cache Expensive Operations
+
+```python
+# First time: compute
+if not os.path.exists('processed_data.csv'):
+    df_processed = expensive_operation(df)
+    df_processed.to_csv('processed_data.csv')
+else:
+    # Subsequent times: load cached version
+    df_processed = pd.read_csv('processed_data.csv')
+```
+
+### Tip 3: Profile Slow Code
+
+```python
+import time
+
+start = time.time()
+# your code
+end = time.time()
+print(f"Took {end - start:.2f} seconds")
+```
+
+## Key Takeaways
+
+✅ Use 3-section structure (Setup, Analysis, Output)  
+✅ Make Section 1 complete and standalone  
+✅ Run all from top every time  
+✅ Set random seeds and record environment versions for reproducibility  
+✅ Prevent leakage by splitting before learned preprocessing  
+✅ Compare held-out performance with a baseline  
+✅ Add progress messages and headers  
+✅ Save and document outputs  
+✅ Test with "Restart & Run All"  

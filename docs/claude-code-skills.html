@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Page not found | Generative AI, Large Language Models, and Coding Agents</title>
+  <title>Chapter 10 Claude Code Skills: Reusable Procedures | Generative AI, Large Language Models, and Coding Agents</title>
   <meta name="description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Page not found | Generative AI, Large Language Models, and Coding Agents" />
+  <meta property="og:title" content="Chapter 10 Claude Code Skills: Reusable Procedures | Generative AI, Large Language Models, and Coding Agents" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   <meta name="github-repo" content="davutemrah/GenAI_Repo" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Page not found | Generative AI, Large Language Models, and Coding Agents" />
+  <meta name="twitter:title" content="Chapter 10 Claude Code Skills: Reusable Procedures | Generative AI, Large Language Models, and Coding Agents" />
   
   <meta name="twitter:description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-
+<link rel="prev" href="claude-code-hooks.html"/>
+<link rel="next" href="verification-loops.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -496,19 +496,190 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="page-not-found" class="section level1">
-<h1>Page not found</h1>
-<p>The page you requested cannot be found (perhaps it was moved or renamed).</p>
-<p>You may want to try searching to find the page's new location, or use
-the table of contents to find the page you are looking for.</p>
+<div id="claude-code-skills" class="section level1 hasAnchor" number="10">
+<h1><span class="header-section-number">Chapter 10</span> Claude Code Skills: Reusable Procedures<a href="claude-code-skills.html#claude-code-skills" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="what-a-skill-is" class="section level2 hasAnchor" number="10.1">
+<h2><span class="header-section-number">10.1</span> What a skill is<a href="claude-code-skills.html#what-a-skill-is" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>A Claude Code skill is a directory whose required <code>SKILL.md</code> file describes a
+reusable procedure. Claude can load a skill when its description matches the
+task, or the user can invoke it directly. Skills are useful when the same
+instructions, checklist, or multi-step workflow would otherwise be pasted into
+many conversations.</p>
+<p>Claude Code skills follow the Agent Skills open standard and add product-specific
+features. Review the current <a href="https://code.claude.com/docs/en/skills">Claude Code skills documentation</a>
+before depending on invocation or frontmatter behavior.</p>
+</div>
+<div id="where-skills-live" class="section level2 hasAnchor" number="10.2">
+<h2><span class="header-section-number">10.2</span> Where skills live<a href="claude-code-skills.html#where-skills-live" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Common locations are:</p>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Location</th>
+<th>Intended use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Personal</td>
+<td><code>~/.claude/skills/&lt;skill-name&gt;/SKILL.md</code></td>
+<td>Available across the user’s projects</td>
+</tr>
+<tr>
+<td>Project</td>
+<td><code>.claude/skills/&lt;skill-name&gt;/SKILL.md</code></td>
+<td>Shared rules for one repository</td>
+</tr>
+<tr>
+<td>Plugin</td>
+<td><code>&lt;plugin&gt;/skills/&lt;skill-name&gt;/SKILL.md</code></td>
+<td>Distributed as part of a plugin</td>
+</tr>
+</tbody>
+</table>
+<p>Use project scope for procedures that depend on repository-specific commands,
+paths, or standards. Do not put personal credentials or machine-specific secrets
+inside a shared skill.</p>
+</div>
+<div id="minimal-structure" class="section level2 hasAnchor" number="10.3">
+<h2><span class="header-section-number">10.3</span> Minimal structure<a href="claude-code-skills.html#minimal-structure" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<pre class="text"><code>.claude/
+└── skills/
+    └── summarize-changes/
+        └── SKILL.md</code></pre>
+<p>A minimal <code>SKILL.md</code> contains YAML frontmatter and instructions:</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb57-1"><a href="claude-code-skills.html#cb57-1" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb57-2"><a href="claude-code-skills.html#cb57-2" tabindex="-1"></a><span class="an">description:</span><span class="co"> Summarize uncommitted changes and flag security, privacy, testing,</span></span>
+<span id="cb57-3"><a href="claude-code-skills.html#cb57-3" tabindex="-1"></a><span class="co">  or deployment risks. Use when reviewing a diff before a commit.</span></span>
+<span id="cb57-4"><a href="claude-code-skills.html#cb57-4" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb57-5"><a href="claude-code-skills.html#cb57-5" tabindex="-1"></a></span>
+<span id="cb57-6"><a href="claude-code-skills.html#cb57-6" tabindex="-1"></a><span class="fu"># Review procedure</span></span>
+<span id="cb57-7"><a href="claude-code-skills.html#cb57-7" tabindex="-1"></a></span>
+<span id="cb57-8"><a href="claude-code-skills.html#cb57-8" tabindex="-1"></a><span class="ss">1. </span>Inspect repository instructions and Git status.</span>
+<span id="cb57-9"><a href="claude-code-skills.html#cb57-9" tabindex="-1"></a><span class="ss">2. </span>Review source and generated-output diffs separately.</span>
+<span id="cb57-10"><a href="claude-code-skills.html#cb57-10" tabindex="-1"></a><span class="ss">3. </span>Identify secrets, personal data, large files, and unrelated changes.</span>
+<span id="cb57-11"><a href="claude-code-skills.html#cb57-11" tabindex="-1"></a><span class="ss">4. </span>Run the smallest relevant validation.</span>
+<span id="cb57-12"><a href="claude-code-skills.html#cb57-12" tabindex="-1"></a><span class="ss">5. </span>Report evidence, uncertainty, and remaining risks.</span></code></pre></div>
+<p>The directory name normally supplies the command name. The description should
+state both what the skill does and when it applies; vague descriptions lead to
+missed or inappropriate activation.</p>
+</div>
+<div id="progressive-disclosure" class="section level2 hasAnchor" number="10.4">
+<h2><span class="header-section-number">10.4</span> Progressive disclosure<a href="claude-code-skills.html#progressive-disclosure" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Keep the main skill focused on routing and procedure. Put long examples,
+schemas, or domain references in supporting files and tell the skill exactly
+when to read them.</p>
+<pre class="text"><code>model-review/
+├── SKILL.md
+├── references/
+│   ├── classification.md
+│   └── regression.md
+└── scripts/
+    └── validate_metrics.R</code></pre>
+<p>This design reduces unnecessary context while keeping important detail
+available. Supporting scripts should be deterministic, reviewed, and narrowly
+scoped.</p>
+</div>
+<div id="methodologically-sound-data-science-skills" class="section level2 hasAnchor" number="10.5">
+<h2><span class="header-section-number">10.5</span> Methodologically sound data-science skills<a href="claude-code-skills.html#methodologically-sound-data-science-skills" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>A skill should encode decisions that remain valid across the intended tasks and
+surface decisions that depend on context. Avoid hard-coding one universal model,
+split ratio, imputation rule, or metric.</p>
+<p>For a model-development skill, require the agent to:</p>
+<ol style="list-style-type: decimal">
+<li>Define the prediction target, observation unit, decision use, and costs of
+errors.</li>
+<li>Inspect data provenance, sampling, missingness, and temporal structure.</li>
+<li>Choose a split strategy before fitting transformations; use temporal or
+grouped splitting when random splitting would leak information.</li>
+<li>Fit preprocessing only on training data, preferably inside a pipeline.</li>
+<li>Establish a simple baseline before tuning complex models.</li>
+<li>Select metrics that match the use case and class distribution.</li>
+<li>Preserve a held-out test set for final evaluation.</li>
+<li>Report uncertainty, subgroup behavior, assumptions, and limitations.</li>
+<li>Save reproducibility information such as seeds, package versions, and data
+snapshot identifiers.</li>
+</ol>
+<p>The skill should request missing context instead of silently inventing it.</p>
+</div>
+<div id="example-skill-notebook-review" class="section level2 hasAnchor" number="10.6">
+<h2><span class="header-section-number">10.6</span> Example skill: notebook review<a href="claude-code-skills.html#example-skill-notebook-review" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb59"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb59-1"><a href="claude-code-skills.html#cb59-1" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb59-2"><a href="claude-code-skills.html#cb59-2" tabindex="-1"></a><span class="an">description:</span><span class="co"> Review a data-science notebook for reproducibility, leakage,</span></span>
+<span id="cb59-3"><a href="claude-code-skills.html#cb59-3" tabindex="-1"></a><span class="co">  methodological validity, privacy, and clear communication.</span></span>
+<span id="cb59-4"><a href="claude-code-skills.html#cb59-4" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb59-5"><a href="claude-code-skills.html#cb59-5" tabindex="-1"></a></span>
+<span id="cb59-6"><a href="claude-code-skills.html#cb59-6" tabindex="-1"></a><span class="fu"># Procedure</span></span>
+<span id="cb59-7"><a href="claude-code-skills.html#cb59-7" tabindex="-1"></a></span>
+<span id="cb59-8"><a href="claude-code-skills.html#cb59-8" tabindex="-1"></a><span class="ss">1. </span>Read the notebook from top to bottom and identify its analytical objective.</span>
+<span id="cb59-9"><a href="claude-code-skills.html#cb59-9" tabindex="-1"></a><span class="ss">2. </span>Check whether a clean kernel can run all cells in order.</span>
+<span id="cb59-10"><a href="claude-code-skills.html#cb59-10" tabindex="-1"></a><span class="ss">3. </span>Trace data splits and ensure preprocessing is learned from training data only.</span>
+<span id="cb59-11"><a href="claude-code-skills.html#cb59-11" tabindex="-1"></a><span class="ss">4. </span>Check metrics against the decision problem and baseline.</span>
+<span id="cb59-12"><a href="claude-code-skills.html#cb59-12" tabindex="-1"></a><span class="ss">5. </span>Identify secrets, personal data, absolute paths, or uncontrolled downloads.</span>
+<span id="cb59-13"><a href="claude-code-skills.html#cb59-13" tabindex="-1"></a><span class="ss">6. </span>Separate exploratory conclusions from validated findings.</span>
+<span id="cb59-14"><a href="claude-code-skills.html#cb59-14" tabindex="-1"></a><span class="ss">7. </span>Run the notebook only when execution is authorized and dependencies are safe.</span>
+<span id="cb59-15"><a href="claude-code-skills.html#cb59-15" tabindex="-1"></a><span class="ss">8. </span>Report findings by severity with file or cell references.</span></code></pre></div>
+</div>
+<div id="evaluation-and-maintenance" class="section level2 hasAnchor" number="10.7">
+<h2><span class="header-section-number">10.7</span> Evaluation and maintenance<a href="claude-code-skills.html#evaluation-and-maintenance" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Test a skill with representative prompts, borderline prompts, and prompts where
+it should not activate. Review whether it:</p>
+<ul>
+<li>loads at the right time;</li>
+<li>requests necessary information;</li>
+<li>follows project safety rules;</li>
+<li>produces a consistent, useful artifact;</li>
+<li>runs only authorized tools; and</li>
+<li>remains understandable to another maintainer.</li>
+</ul>
+<p>Version skills in Git when they are part of a project. Review them after tool,
+workflow, or product changes, and remove instructions that duplicate higher
+priority repository policy.</p>
+</div>
+<div id="skills-are-not-enforcement" class="section level2 hasAnchor" number="10.8">
+<h2><span class="header-section-number">10.8</span> Skills are not enforcement<a href="claude-code-skills.html#skills-are-not-enforcement" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>A skill supplies instructions and optional resources; it is not a security
+boundary. Use permissions, protected branches, CI checks, secrets management,
+and narrowly scoped hooks for controls that must be enforced independently of
+model behavior.</p>
+</div>
+<div id="exercise-create-one-project-skill" class="section level2 hasAnchor" number="10.9">
+<h2><span class="header-section-number">10.9</span> Exercise: create one project skill<a href="claude-code-skills.html#exercise-create-one-project-skill" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Choose a repeated, bounded procedure such as validating a book build:</p>
+<ol style="list-style-type: decimal">
+<li>Define the trigger in one sentence.</li>
+<li>Write a minimal <code>SKILL.md</code> with expected evidence and stop conditions.</li>
+<li>Add only the references or scripts the procedure genuinely needs.</li>
+<li>Test correct activation, non-activation, and a failure case.</li>
+<li>Ask another reviewer to follow the skill without additional explanation.</li>
+</ol>
+</div>
+<div id="key-takeaways-6" class="section level2 hasAnchor" number="10.10">
+<h2><span class="header-section-number">10.10</span> Key takeaways<a href="claude-code-skills.html#key-takeaways-6" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ul>
+<li>A skill is a scoped directory with a required <code>SKILL.md</code>, not an arbitrary
+saved-prompt folder.</li>
+<li>Put repository-specific procedures in project scope and keep secrets out.</li>
+<li>Encode invariant safeguards; ask for context-dependent methodological choices.</li>
+<li>Evaluate activation, output quality, safety, and failure behavior.</li>
+<li>Use permissions, CI, and hooks when instructions alone are insufficient.</li>
+</ul>
+
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-
+<a href="claude-code-hooks.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="verification-loops.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

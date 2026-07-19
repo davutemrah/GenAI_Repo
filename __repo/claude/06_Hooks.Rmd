@@ -1,0 +1,137 @@
+# Claude Code Hooks: Deterministic Automation {#claude-code-hooks}
+
+## What hooks are
+
+Claude Code hooks are user-defined commands or evaluations that run at specific
+points in the agent lifecycle. They can format files after edits, block unsafe
+operations, run checks, send notifications, or add context. Unlike a prompt that
+asks the model to remember a rule, a command hook provides deterministic control
+whenever its configured event fires.
+
+This chapter is about **Claude Code hooks**, not React hooks. Product behavior
+changes over time; consult Anthropic's current [hooks guide](https://code.claude.com/docs/en/hooks-guide)
+and [hooks reference](https://code.claude.com/docs/en/hooks) before adopting an
+example.
+
+## When a hook is appropriate
+
+Use a hook when all three conditions hold:
+
+1. A lifecycle event can identify when the check should run.
+2. A command or structured evaluation can decide the result reliably.
+3. Running automatically is safer or more consistent than relying on memory.
+
+Good candidates include formatting edited files, rejecting writes to protected
+paths, checking generated output, or notifying the user that input is required.
+Do not use a hook for subjective decisions that need rich context unless a
+prompt- or agent-based hook is explicitly appropriate and its uncertainty is
+acceptable.
+
+## Core lifecycle pattern
+
+Common events include:
+
+- `SessionStart` — when a session begins or resumes;
+- `UserPromptSubmit` — before Claude processes a submitted prompt;
+- `PreToolUse` — before a matching tool call executes;
+- `PostToolUse` — after a matching tool call succeeds;
+- `Stop` — when Claude is preparing to finish; and
+- `Notification` — when Claude needs attention or permission.
+
+The exact event set and schemas are versioned product behavior. Verify event
+names in the current reference rather than copying an old list into production.
+
+Command hooks normally receive JSON on standard input. Their standard output,
+standard error, exit code, and—in some cases—structured JSON tell Claude Code
+what happened. An exit code of zero does not automatically grant permission to
+a tool; the normal permission flow still applies unless the event supports and
+receives an explicit decision.
+
+## Example: format edited Python files
+
+The following project setting illustrates a narrowly scoped post-edit hook:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/format_python.py"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+The script should read the event JSON from standard input, validate the supplied
+path, do nothing for non-Python files, and invoke the project's pinned formatter.
+Avoid interpolating untrusted paths directly into a shell command. Prefer a
+small script that parses JSON and passes arguments to a subprocess without a
+shell.
+
+## Example: protect sensitive paths
+
+A `PreToolUse` hook can inspect an impending edit and block access to paths such
+as `.env`, credential stores, or `.git/`. A robust implementation should:
+
+- parse the documented JSON field rather than scrape text;
+- canonicalize and validate the path;
+- compare against a small explicit denylist or allowlist;
+- return the documented blocking result; and
+- explain the reason without printing secret contents.
+
+Hooks supplement permissions and repository policy; they are not a complete
+security boundary. A configuration mistake, unmatched tool, indirect command,
+or future schema change can bypass an incomplete rule.
+
+## Safe design checklist
+
+Before enabling a hook:
+
+- Pin or verify every external command it invokes.
+- Quote paths safely and avoid `eval` or shell construction from event input.
+- Keep matchers narrow so unrelated tools do not trigger side effects.
+- Make repeated execution idempotent where possible.
+- Bound runtime and output volume.
+- Do not print tokens, environment secrets, or private file contents.
+- Test allow, deny, malformed-input, and missing-dependency cases.
+- Document whether failure blocks work or only reports a warning.
+- Review project-level hooks before running an unfamiliar repository.
+
+## Choosing between instructions, skills, and hooks
+
+| Mechanism | Best use |
+|---|---|
+| `CLAUDE.md` or project instructions | Durable facts, conventions, and commands Claude should know |
+| Skill | Reusable, on-demand procedure with instructions and supporting resources |
+| Command hook | Deterministic action tied to a lifecycle event |
+| Prompt/agent hook | Judgment-based event evaluation where model uncertainty is acceptable |
+
+Start with the least complex mechanism that solves the problem. A short project
+instruction is easier to inspect than a hook; a hook is valuable when reliable
+automatic enforcement justifies its operational risk.
+
+## Exercise: design before enabling
+
+Design a hook on paper for one repeated task:
+
+1. Name the exact lifecycle event and matcher.
+2. Specify the JSON fields the handler needs.
+3. Define success, warning, and blocking outcomes.
+4. List side effects and secrets the handler must not expose.
+5. Write test cases before enabling the hook.
+6. Compare the configuration with the current official reference.
+
+## Key takeaways
+
+- Claude Code hooks are lifecycle automation, not React state-management hooks.
+- Use command hooks for narrow, deterministic checks and actions.
+- Treat hook input as untrusted and keep permissions least-privileged.
+- Test failure behavior and idempotency before relying on a hook.
+- Recheck official documentation because event schemas and capabilities evolve.

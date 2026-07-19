@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Page not found | Generative AI, Large Language Models, and Coding Agents</title>
+  <title>Chapter 8 Real-World Patterns: Practical Scenarios | Generative AI, Large Language Models, and Coding Agents</title>
   <meta name="description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Page not found | Generative AI, Large Language Models, and Coding Agents" />
+  <meta property="og:title" content="Chapter 8 Real-World Patterns: Practical Scenarios | Generative AI, Large Language Models, and Coding Agents" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   <meta name="github-repo" content="davutemrah/GenAI_Repo" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Page not found | Generative AI, Large Language Models, and Coding Agents" />
+  <meta name="twitter:title" content="Chapter 8 Real-World Patterns: Practical Scenarios | Generative AI, Large Language Models, and Coding Agents" />
   
   <meta name="twitter:description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-
+<link rel="prev" href="advanced.html"/>
+<link rel="next" href="claude-code-hooks.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -496,19 +496,283 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="page-not-found" class="section level1">
-<h1>Page not found</h1>
-<p>The page you requested cannot be found (perhaps it was moved or renamed).</p>
-<p>You may want to try searching to find the page's new location, or use
-the table of contents to find the page you are looking for.</p>
+<div id="real-world" class="section level1 hasAnchor" number="8">
+<h1><span class="header-section-number">Chapter 8</span> Real-World Patterns: Practical Scenarios<a href="real-world.html#real-world" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="introduction-1" class="section level2 hasAnchor" number="8.1">
+<h2><span class="header-section-number">8.1</span> Introduction<a href="real-world.html#introduction-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Theory is great. Reality is messier. This chapter shows 5 real scenarios and how to handle them.</p>
+</div>
+<div id="pattern-1-the-it-works-in-dev-fails-in-prod-problem" class="section level2 hasAnchor" number="8.2">
+<h2><span class="header-section-number">8.2</span> Pattern 1: The “It Works in Dev, Fails in Prod” Problem<a href="real-world.html#pattern-1-the-it-works-in-dev-fails-in-prod-problem" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="the-scenario" class="section level3 hasAnchor" number="8.2.1">
+<h3><span class="header-section-number">8.2.1</span> The Scenario<a href="real-world.html#the-scenario" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>You built a model in a notebook. It works beautifully. You deploy it. It fails.</p>
+<p><strong>Common causes:</strong>
+- Dev data is different from production data
+- Python versions differ
+- Dependencies have different versions
+- Paths are hardcoded
+- Random seeds not set</p>
+</div>
+<div id="the-solution" class="section level3 hasAnchor" number="8.2.2">
+<h3><span class="header-section-number">8.2.2</span> The Solution<a href="real-world.html#the-solution" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Ask Claude for help preparing for production:</p>
+<pre><code>I have a model that works in development.
+
+Dev environment:
+- Python 3.10
+- pandas 2.0
+- scikit-learn 1.3
+- Data: CSV with 10K rows
+
+Production environment:
+- Python 3.9
+- Hosted on AWS Lambda
+- Data: 1M rows from database
+- Must process in &lt; 30 seconds
+
+Help me:
+1. Test on production-like data
+2. Handle version differences
+3. Optimize for speed
+4. Add monitoring
+5. Create fallback behavior</code></pre>
+</div>
+<div id="key-practices" class="section level3 hasAnchor" number="8.2.3">
+<h3><span class="header-section-number">8.2.3</span> Key Practices<a href="real-world.html#key-practices" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li>✓ Test with production-sized data</li>
+<li>✓ Set all random seeds</li>
+<li>✓ Use relative paths</li>
+<li>✓ Version your dependencies (requirements.txt)</li>
+<li>✓ Add logging</li>
+<li>✓ Monitor in production</li>
+</ul>
+</div>
+</div>
+<div id="pattern-2-the-colleague-cant-understand-my-code-problem" class="section level2 hasAnchor" number="8.3">
+<h2><span class="header-section-number">8.3</span> Pattern 2: The “Colleague Can’t Understand My Code” Problem<a href="real-world.html#pattern-2-the-colleague-cant-understand-my-code-problem" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="the-scenario-1" class="section level3 hasAnchor" number="8.3.1">
+<h3><span class="header-section-number">8.3.1</span> The Scenario<a href="real-world.html#the-scenario-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>You wrote Python code. Your colleague opens it. They’re confused. This happens all the time in teams.</p>
+</div>
+<div id="the-solution-1" class="section level3 hasAnchor" number="8.3.2">
+<h3><span class="header-section-number">8.3.2</span> The Solution<a href="real-world.html#the-solution-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Ask Claude to improve for clarity:</p>
+<pre><code>My colleague says this code is hard to understand:
+
+[paste code]
+
+Can you:
+1. Add clear variable names
+2. Break into smaller functions
+3. Add comments explaining the logic
+4. Add docstrings with examples
+5. Simplify the logic if possible
+
+Make it understandable for a junior data scientist.</code></pre>
+</div>
+<div id="key-practices-1" class="section level3 hasAnchor" number="8.3.3">
+<h3><span class="header-section-number">8.3.3</span> Key Practices<a href="real-world.html#key-practices-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li>✓ Write for humans first, computers second</li>
+<li>✓ Name variables clearly</li>
+<li>✓ Keep functions small (&lt; 15 lines)</li>
+<li>✓ Comment the “why”, not the “what”</li>
+<li>✓ Include examples</li>
+</ul>
+</div>
+</div>
+<div id="pattern-3-the-model-performance-degradation-problem" class="section level2 hasAnchor" number="8.4">
+<h2><span class="header-section-number">8.4</span> Pattern 3: The “Model Performance Degradation” Problem<a href="real-world.html#pattern-3-the-model-performance-degradation-problem" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="the-scenario-2" class="section level3 hasAnchor" number="8.4.1">
+<h3><span class="header-section-number">8.4.1</span> The Scenario<a href="real-world.html#the-scenario-2" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Your model works great for 3 months. Then performance drops. Why?</p>
+<p><strong>Common causes:</strong>
+- Data distribution shifted
+- Seasonal effects
+- New data patterns
+- Bugs in data pipeline
+- Model training issues</p>
+</div>
+<div id="the-solution-2" class="section level3 hasAnchor" number="8.4.2">
+<h3><span class="header-section-number">8.4.2</span> The Solution<a href="real-world.html#the-solution-2" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Ask Claude to help diagnose:</p>
+<pre><code>My model&#39;s accuracy dropped from 92% to 78%.
+
+Setup:
+- Built 3 months ago
+- Retrained monthly
+- Current data: [sample]
+- Previous data: [sample]
+
+Can you:
+1. Compare the data distributions
+2. Show which features changed
+3. Suggest what went wrong
+4. Recommend fixes
+5. Show how to detect this early
+
+What monitoring should I add?</code></pre>
+</div>
+<div id="key-practices-2" class="section level3 hasAnchor" number="8.4.3">
+<h3><span class="header-section-number">8.4.3</span> Key Practices<a href="real-world.html#key-practices-2" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li>✓ Monitor model performance continuously</li>
+<li>✓ Track data quality metrics</li>
+<li>✓ Compare current vs historical data</li>
+<li>✓ Set up alerts for performance drops</li>
+<li>✓ Retrain regularly</li>
+</ul>
+</div>
+</div>
+<div id="pattern-4-the-we-need-to-scale-this-problem" class="section level2 hasAnchor" number="8.5">
+<h2><span class="header-section-number">8.5</span> Pattern 4: The “We Need to Scale This” Problem<a href="real-world.html#pattern-4-the-we-need-to-scale-this-problem" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="the-scenario-3" class="section level3 hasAnchor" number="8.5.1">
+<h3><span class="header-section-number">8.5.1</span> The Scenario<a href="real-world.html#the-scenario-3" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Your analysis works on 100K rows. Now you need to handle 100M rows. How?</p>
+<p><strong>Common approaches:</strong>
+- Use Spark instead of Pandas
+- Use databases for filtering
+- Parallelize computation
+- Sample data for exploration</p>
+</div>
+<div id="the-solution-3" class="section level3 hasAnchor" number="8.5.2">
+<h3><span class="header-section-number">8.5.2</span> The Solution<a href="real-world.html#the-solution-3" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Ask Claude for scaling strategy:</p>
+<pre><code>My analysis currently:
+- Processes 100K rows in 5 minutes
+- Uses pandas, single machine
+- Loads entire dataset into memory
+
+Now I need to handle 100M rows.
+
+Options to consider:
+- Spark on cluster
+- DuckDB for SQL
+- Pandas with chunking
+- Cloud processing (BigQuery)
+
+Which is best for:
+1. One-time analysis?
+2. Daily pipeline?
+3. Interactive exploration?
+
+Show example implementation for option [your choice].</code></pre>
+</div>
+<div id="key-practices-3" class="section level3 hasAnchor" number="8.5.3">
+<h3><span class="header-section-number">8.5.3</span> Key Practices<a href="real-world.html#key-practices-3" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li>✓ Profile first (where’s the bottleneck?)</li>
+<li>✓ Sample for development</li>
+<li>✓ Use databases for filtering</li>
+<li>✓ Parallelize where possible</li>
+<li>✓ Choose right tools (Spark, DuckDB, etc)</li>
+</ul>
+</div>
+</div>
+<div id="pattern-5-the-unclear-requirements-problem" class="section level2 hasAnchor" number="8.6">
+<h2><span class="header-section-number">8.6</span> Pattern 5: The “Unclear Requirements” Problem<a href="real-world.html#pattern-5-the-unclear-requirements-problem" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="the-scenario-4" class="section level3 hasAnchor" number="8.6.1">
+<h3><span class="header-section-number">8.6.1</span> The Scenario<a href="real-world.html#the-scenario-4" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Your manager says “build a dashboard” but you’re not sure what they want.</p>
+</div>
+<div id="the-solution-4" class="section level3 hasAnchor" number="8.6.2">
+<h3><span class="header-section-number">8.6.2</span> The Solution<a href="real-world.html#the-solution-4" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Use Claude to help clarify:</p>
+<pre><code>I need to build a dashboard for [domain].
+
+Requirements (unclear):
+- &quot;Show the data&quot;
+- &quot;Make it easy to understand&quot;
+- &quot;Something executives will like&quot;
+
+Who are the users?
+- [Describe them]
+
+What decisions will they make?
+- [List decisions]
+
+What data is available?
+- [List sources]
+
+Can you:
+1. Help me ask clarifying questions
+2. Define realistic requirements
+3. Suggest what metrics matter
+4. Show a prototype dashboard
+5. Create a checklist for success</code></pre>
+</div>
+<div id="key-practices-4" class="section level3 hasAnchor" number="8.6.3">
+<h3><span class="header-section-number">8.6.3</span> Key Practices<a href="real-world.html#key-practices-4" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li>✓ Clarify who the users are</li>
+<li>✓ Understand what decisions they’ll make</li>
+<li>✓ Know success criteria upfront</li>
+<li>✓ Iterate with feedback</li>
+<li>✓ Start simple, add complexity</li>
+</ul>
+</div>
+</div>
+<div id="general-approach-for-any-situation" class="section level2 hasAnchor" number="8.7">
+<h2><span class="header-section-number">8.7</span> General Approach for Any Situation<a href="real-world.html#general-approach-for-any-situation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>When stuck, use this framework:</p>
+<pre><code>1. DESCRIBE THE PROBLEM
+   - What are you trying to do?
+   - What&#39;s not working?
+   - What have you tried?
+
+2. PROVIDE CONTEXT
+   - Environment (language, libraries, data size)
+   - Constraints (time, money, skill level)
+   - Success criteria (what does &quot;solved&quot; look like?)
+
+3. SHOW EXAMPLES
+   - Sample data
+   - Expected output
+   - Error messages
+
+4. ASK SPECIFICALLY
+   - &quot;What&#39;s the root cause?&quot;
+   - &quot;How would you approach this?&quot;
+   - &quot;What am I missing?&quot;
+   - &quot;How do I test this?&quot;
+
+5. ITERATE
+   - Try the solution
+   - Report what happened
+   - Get refined answer</code></pre>
+</div>
+<div id="exercise-handle-a-real-problem" class="section level2 hasAnchor" number="8.8">
+<h2><span class="header-section-number">8.8</span> Exercise: Handle a Real Problem<a href="real-world.html#exercise-handle-a-real-problem" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Take a current problem you’re facing:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Describe it</strong> following the framework above</li>
+<li><strong>Ask Claude</strong> with full context</li>
+<li><strong>Try the solution</strong></li>
+<li><strong>Report back</strong> (what worked, what didn’t)</li>
+<li><strong>Iterate</strong> until solved</li>
+</ol>
+</div>
+<div id="key-takeaways-4" class="section level2 hasAnchor" number="8.9">
+<h2><span class="header-section-number">8.9</span> Key Takeaways<a href="real-world.html#key-takeaways-4" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>✅ Production is different from development<br />
+✅ Write code for humans to understand<br />
+✅ Monitor model performance continuously<br />
+✅ Profile before optimizing<br />
+✅ Clarify requirements early<br />
+✅ Always provide context<br />
+✅ Iterate when stuck</p>
+
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-
+<a href="advanced.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="claude-code-hooks.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

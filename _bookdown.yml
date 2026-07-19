@@ -1,7 +1,20 @@
-book_filename: "Generative AI"
+book_filename: "generative-ai-and-agents"
 language:
   ui:
     chapter_name: "Chapter "
 delete_merged_file: true
-rmd_subdir: true
+rmd_files:
+  - index.Rmd
+  - __repo/00_DL_genAI.Rmd
+  - __repo/01_DL_genAI.Rmd
+  - __repo/02_00_DL_genAI.Rmd
+  - __repo/claude/01_Fundamentals.Rmd
+  - __repo/claude/02_Prompting.Rmd
+  - __repo/claude/03_Code-Best-Practices.Rmd
+  - __repo/claude/04_Advanced.Rmd
+  - __repo/claude/05_Real-World.Rmd
+  - __repo/claude/06_Hooks.Rmd
+  - __repo/claude/07_Skills.Rmd
+  - __repo/claude/08_Loops.Rmd
+  - __repo/claude/09_Notebooks.Rmd
 output_dir: "docs"

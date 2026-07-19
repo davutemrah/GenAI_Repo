@@ -1,4 +1,14 @@
-.Rproj.user
+.Rproj.user/
 .Rhistory
 .RData
 .Ruserdata
+.DS_Store
+_bookdown_files/
+*.utf8.md
+*.knit.md
+*.log
+*.tex
+
+# Local source references retained outside the published book
+__repo/DL w1/
+__repo/Scaling instruct models.docx

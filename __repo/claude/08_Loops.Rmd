@@ -1,0 +1,300 @@
+# Verification Loops for Agent-Assisted Work {#verification-loops}
+
+## What Are Quality Loops?
+
+Loops are **systematic processes that improve work quality over time**.
+
+```
+First Pass → Review → Feedback → Improvement → Next Pass
+```
+
+Three useful levels are:
+1. **Execution loop** — make the smallest checkable unit run.
+2. **Quality loop** — review robustness, clarity, tests, security, and maintainability.
+3. **Outcome-validation loop** — determine whether the result works for the real use case.
+
+These levels are conceptual, not fixed schedules. The time and evidence required
+depend on risk, complexity, reversibility, and the cost of error.
+
+## Loop 1: Execution Loop
+
+**Purpose:** Produce the smallest runnable increment and obtain direct evidence.  
+**Cycle:** Generate → Test → Refine
+
+### The execution-loop process
+
+```
+1. Ask Claude for code
+   ↓
+2. Run it (test immediately)
+   ↓
+3. Does it work?
+   ├─ YES → keep it
+   └─ NO → tell Claude the error
+   ↓
+4. Claude fixes it
+   ↓
+5. Test again (repeat until working)
+```
+
+### Execution-loop checklist
+
+**Generation Phase:**
+- ✓ Provide clear requirements
+- ✓ Include examples if possible
+- ✓ Specify constraints (language, libraries)
+
+**Testing Phase:**
+- ✓ Run the code immediately
+- ✓ Test with actual data
+- ✓ Check edge cases
+
+**Refinement Phase:**
+- ✓ Share exact error messages
+- ✓ Explain what's wrong
+- ✓ Ask for specific fixes
+
+### Example: execution loop in action
+
+```
+You: "Write a function that validates email addresses"
+
+Claude: [Response with regex function]
+
+You: [Run function] 
+     "Error: It rejects valid emails like test+tag@gmail.com"
+
+Claude: [Updates regex to handle plus sign]
+
+You: [Run again]
+     "The examples now pass. Add a docstring and property-based tests for edge cases."
+
+Claude: [Adds documentation]
+
+You: [Final test]
+     "Great, this works!"
+```
+
+## Loop 2: Quality Loop
+
+**Purpose:** Make code production-ready  
+**Cycle:** Working → Review → Improve → Test
+
+### Quality Loop Process
+
+```
+Working code
+    ↓
+Code review checklist
+    ↓
+Ask Claude for improvements
+    ↓
+Error handling added
+    ↓
+Edge cases handled
+    ↓
+Documentation complete
+    ↓
+Performance acceptable
+    ↓
+Production-ready code
+```
+
+### Quality Loop Checklist
+
+**Error Handling:**
+- ✓ What if input is wrong type?
+- ✓ What if input is missing?
+- ✓ What if data is empty?
+- ✓ Graceful error messages
+
+**Robustness:**
+- ✓ Edge cases (boundaries, empty input)
+- ✓ Large inputs (performance)
+- ✓ Unusual inputs (null, negative, etc)
+
+**Code Quality:**
+- ✓ Readable variable names
+- ✓ Clear logic, simple flow
+- ✓ DRY (Don't Repeat Yourself)
+- ✓ Follows team standards
+
+**Documentation:**
+- ✓ Function docstring
+- ✓ Parameters explained
+- ✓ Return values explained
+- ✓ Example usage
+
+**Testing:**
+- ✓ Unit tests included
+- ✓ Tests cover edge cases
+- ✓ Tests pass
+
+### Example: Quality Loop
+
+```
+Working function:
+def calculate_roi(investment, return_value):
+    profit = return_value - investment
+    roi = (profit / investment) * 100
+    return roi
+
+You ask Claude:
+"Make this production-ready.
+Add:
+1. Error handling for invalid inputs
+2. Docstring
+3. Unit tests
+4. Handle edge cases (zero investment, negative values)"
+
+Claude improves it with:
+- Input validation
+- Clear docstring with examples
+- Type hints
+- Unit tests
+- Edge case handling
+```
+
+## Loop 3: Outcome-Validation Loop
+
+**Purpose:** Verify solution solves real problem  
+**Cycle:** Deploy → Monitor → Collect feedback → Improve
+
+### Validation Loop Process
+
+```
+Deploy to staging
+    ↓
+Collect real usage data
+    ↓
+Measure performance/quality
+    ↓
+Gather user feedback
+    ↓
+Identify issues
+    ↓
+Ask Claude to fix
+    ↓
+Re-test
+    ↓
+Deploy to production
+```
+
+### Validation Loop Checklist
+
+**Pre-Deployment:**
+- ✓ Works in staging environment
+- ✓ Performance acceptable
+- ✓ Data looks correct
+- ✓ Team has reviewed
+
+**During Testing:**
+- ✓ Monitor for errors
+- ✓ Track performance metrics
+- ✓ Get user feedback
+- ✓ Watch for edge cases
+
+**Post-Feedback:**
+- ✓ Document issues found
+- ✓ Prioritize fixes
+- ✓ Ask Claude to improve
+- ✓ Re-test improvements
+
+**Validation Questions:**
+- ✓ Does it solve the original problem?
+- ✓ Do real users find it useful?
+- ✓ Does it handle real data well?
+- ✓ Are there unexpected issues?
+
+### Example: Validation Loop
+
+```
+Deployed customer segmentation model...
+
+Initial real-data validation
+- Result: Model works but misses 15% of high-value customers
+- Action: Tell Claude "The model misses high-value customers with unusual purchase patterns"
+
+Claude improves feature engineering...
+
+Next validation cycle: Re-test
+- Result: Better, but still has issues
+- Action: Gather feedback from domain experts
+
+Final pre-release cycle
+- Claude tunes model based on expert feedback
+- Record remaining limitations and obtain the required release approval
+- Deploy through the normal controlled process
+```
+
+## Combining All Three Loops
+
+```
+EXECUTION LOOP             QUALITY LOOP                 OUTCOME-VALIDATION LOOP
+Get it working       →     Make it robust          →    Verify it solves problem
+Test immediately           Review comprehensively       Monitor real world
+Iterate fast              Test edge cases             Collect feedback
+Fix errors quickly        Add docs/tests             Improve based on use
+```
+
+## Tips for Effective Loops
+
+### ✅ Execution-loop tips
+- Run code immediately after Claude generates it
+- Share exact error messages (copy-paste full traceback)
+- Test with real data, not just examples
+
+### ✅ Quality Loop Tips
+- Use checklists (helps catch issues)
+- Ask Claude: "What could go wrong here?"
+- Write tests while code is fresh
+- Have Claude add docstrings
+
+### ✅ Validation Loop Tips
+- Start with staging/test environment
+- Monitor real usage, not test data
+- Collect specific feedback ("when X happens...")
+- Document issues for Claude to fix
+
+## Common Mistakes
+
+### ❌ Skipping execution-loop testing
+```
+You: "Write me a function"
+Claude: [Response]
+You: Never run it, just use it immediately
+Problem: Hidden bugs appear in production
+```
+
+### ❌ Skipping Quality Loop
+```
+You: Code works, ship it!
+Problem: Missing error handling, no docs, fails on edge cases
+```
+
+### ❌ Skipping Validation Loop
+```
+You: Model looks good, deploy to production
+Problem: Real data behaves differently than test data
+```
+
+## Exercise: Practice Loops
+
+Take a small project:
+1. **Execution Loop**: Generate → Test → Fix
+2. **Quality Loop**: Add error handling, documentation, review, and tests
+3. **Validation Loop**: Test with real data, get feedback
+
+Record the evidence from each loop. Notice how:
+- Code loop catches syntax/logic errors fast
+- Quality review reduces avoidable production risk
+- Validation loop catches real-world issues
+
+## Key Takeaways
+
+✅ Execution loop = direct evidence that the increment runs  
+✅ Quality loop = evidence about robustness and maintainability  
+✅ Outcome-validation loop = evidence about usefulness under realistic conditions  
+✅ Use all three for best results  
+✅ Follow the checklists  
+✅ Test at every stage  

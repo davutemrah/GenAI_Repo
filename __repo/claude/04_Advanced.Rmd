@@ -1,0 +1,312 @@
+# Advanced Techniques: Power User Features {#advanced}
+
+## When to Use Advanced Techniques
+
+You've mastered the basics. Now:
+- ✓ Tackle complex problems
+- ✓ Work more efficiently
+- ✓ Get better answers
+- ✓ Build sophisticated systems
+
+These patterns complement Anthropic's current
+[Claude Code best practices](https://code.claude.com/docs/en/best-practices).
+They are starting points to test, not guarantees of output quality.
+
+## Technique 1: Plan Before Implementation
+
+**Problem:** Claude rushes to answers, misses nuance
+
+**Solution:** Ask for an inspectable plan, assumptions, and verification strategy
+before implementation. Evaluate the plan itself rather than relying on an
+unverifiable claim that the model "thought harder."
+
+```
+Problem: Build a data pipeline that:
+- Reads from 3 sources
+- Cleans inconsistent data
+- Validates quality
+- Outputs to database
+
+Before asking for code, ask:
+
+"Before you write code, walk me through:
+1. Data source details (formats, schemas, sizes)
+2. How you'd validate consistency
+3. Error handling strategy
+4. Performance considerations
+5. Testing approach
+
+Then show me the implementation."
+```
+
+## Technique 2: Context Stacking
+
+**Problem:** Claude forgets earlier context
+
+**Solution:** Explicitly reference previous decisions
+
+```
+Earlier we decided:
+- Use pandas for data processing
+- Write to PostgreSQL
+- Handle nulls by forward-fill
+- Validate row counts match source
+
+Now implement step 4: [your step]
+Keep these decisions in mind.
+```
+
+## Technique 3: Role-Based Prompting
+
+**Problem:** Generic answers that don't fit your context
+
+**Solution:** Tell Claude what role to play
+
+```
+Review this from the perspective of a senior data scientist at a marketing agency.
+
+I'm building a customer segmentation model.
+The stakeholders are:
+- VP Marketing (needs actionable segments)
+- Data Engineering (needs reproducible pipeline)
+- Analytics (needs SQL-friendly outputs)
+
+Design the segmentation approach that satisfies all three.
+```
+
+## Technique 4: Constraint-Based Design
+
+**Problem:** Solutions don't fit real constraints
+
+**Solution:** State constraints explicitly upfront
+
+```
+Design a recommendation system with these constraints:
+- Python 3.10 (the version pinned in production)
+- No TensorFlow/PyTorch (not allowed in company)
+- Must run on company GPU (NVIDIA A100)
+- Must score 1M items in < 2 seconds
+- Storage limited to 100GB
+
+What's the approach?
+```
+
+## Technique 5: Assumption Surfacing
+
+**Problem:** Claude makes wrong assumptions about your needs
+
+**Solution:** Have Claude list assumptions, then validate
+
+```
+"Before you build this, list all your assumptions about:
+1. Data shape and size
+2. Performance requirements
+3. Error tolerance
+4. Team skill level
+5. Business constraints
+
+I'll tell you which are wrong so you adjust."
+```
+
+## Technique 6: Comparative Analysis
+
+**Problem:** One solution might not be best
+
+**Solution:** Ask Claude for multiple approaches
+
+```
+"Show me 3 different ways to [task]:
+
+Approach A: [description]
+- Pros:
+- Cons:
+
+Approach B: [description]
+- Pros:
+- Cons:
+
+Approach C: [description]
+- Pros:
+- Cons:
+
+Which would you recommend for [specific context]?"
+```
+
+## Technique 7: Systematic Testing Strategy
+
+**Problem:** Incomplete test coverage
+
+**Solution:** Ask Claude to design test strategy first
+
+```
+"Design a comprehensive test strategy for [function]:
+
+1. What are the possible inputs?
+2. What could go wrong?
+3. What edge cases exist?
+4. How do you test robustness?
+5. How do you test performance?
+6. How do you test failure modes?
+
+Then write tests for all categories."
+```
+
+## Technique 8: Documentation-First Design
+
+**Problem:** Code without clear purpose
+
+**Solution:** Have Claude write documentation first
+
+```
+"Write the documentation for this feature first:
+
+Title: [what it does]
+Purpose: [why it matters]
+How to use: [examples]
+Inputs: [types and formats]
+Outputs: [expected results]
+Edge cases: [special handling]
+Performance: [expected runtime]
+
+Then implement code that matches this documentation."
+```
+
+## Technique 9: Architectural Review
+
+**Problem:** Missing the big picture
+
+**Solution:** Have Claude diagram/explain architecture
+
+```
+"Draw (in ASCII or describe) the architecture for:
+
+1. Data inputs (where from?)
+2. Processing stages (what happens when?)
+3. Storage (where does it live?)
+4. Outputs (where does it go?)
+5. Monitoring (how do we know it works?)
+6. Failure handling (what if it breaks?)
+7. Scaling (what if data grows 100x?)
+
+Then show the implementation."
+```
+
+## Technique 10: Iterative Refinement
+
+**Problem:** One pass isn't perfect
+
+**Solution:** Use feedback loops
+
+```
+Round 1: "Give me a basic implementation"
+         [you review]
+
+Round 2: "Add error handling for [issues found]"
+         [you review]
+
+Round 3: "Optimize for [performance issue]"
+         [you review]
+
+Round 4: "Add docs and tests"
+         [you test]
+
+Round 5: "Final review - anything missing?"
+         [ready for production]
+```
+
+## Advanced Pattern: Complete System Design
+
+Combine techniques for major projects:
+
+```
+Step 1: UNDERSTAND
+"I need to build [system].
+Constraints: [list]
+Team: [size and skills]
+Timeline: [how long]"
+
+Step 2: DESIGN
+"Before coding, design the architecture.
+Show: inputs → processing → outputs"
+
+Step 3: ASSUMPTIONS
+"What assumptions are you making?
+Let me validate them."
+
+Step 4: COMPONENTS
+"Break it into 4-5 key components.
+For each: purpose, inputs, outputs."
+
+Step 5: TESTING
+"Design the test strategy.
+What could fail? How do we prevent it?"
+
+Step 6: IMPLEMENTATION
+"Now implement [Component 1] with full docs and tests"
+
+Step 7: INTEGRATION
+"Connect [Component 1] to [Component 2].
+Show integration points."
+
+Step 8: FINAL REVIEW
+"Review the complete system.
+Any performance or robustness issues?"
+
+Step 9: DEPLOYMENT
+"How do we deploy this safely?
+What monitoring do we need?"
+```
+
+## When to Use Each Technique
+
+| Situation | Use This |
+|-----------|----------|
+| Simple task, clear requirements | Basic prompting |
+| Complex problem | Multi-step thinking |
+| Need consistent context | Context stacking |
+| Domain-specific needs | Role-based prompting |
+| Real-world constraints | Constraint-based design |
+| Unsure of requirements | Assumption surfacing |
+| Choosing approach | Comparative analysis |
+| Quality concerns | Systematic testing |
+| Unclear purpose | Documentation first |
+| Large system | Architectural review |
+
+## Asking Claude About Advanced Techniques
+
+```
+I'm building [system].
+
+Current challenge: [specific problem]
+
+I want to use [technique name] to solve it.
+
+Here's my context: [describe situation]
+
+Can you:
+1. Help me apply [technique] correctly
+2. Show me the process
+3. Help me think through the problem
+4. Suggest what I might be missing
+```
+
+## Exercise: Practice Advanced Techniques
+
+Pick one technique and use it for your next project:
+
+1. **Chosen technique:** [name]
+2. **Your problem:** [description]
+3. **Apply the technique:** [work through steps]
+4. **Result:** [what improved?]
+
+Track what changed. Most people find techniques save time and improve quality.
+
+## Key Takeaways
+
+✅ Multi-step thinking = better solutions  
+✅ Role-based prompting = relevant answers  
+✅ Constraint design = practical solutions  
+✅ Comparative analysis = better choices  
+✅ Architecture first = fewer rewrites  
+✅ Testing strategy = robust code  
+✅ Combine techniques for complex work  
