@@ -1,0 +1,419 @@
+# Model Context Protocol (MCP): Connecting Agents to Data and Tools {#model-context-protocol}
+
+## Why this chapter exists
+
+Earlier chapters treated tools as something the host application "supplies."
+The Model Context Protocol (MCP) is the most widely adopted open standard for
+*how* those tools, data sources, and reusable prompts get supplied. For a data
+scientist, MCP is the bridge between a foundation model and the governed
+tables, models, jobs, and dashboards that already exist.
+
+MCP is evolving quickly. This chapter separates stable concepts from
+version-specific details. Check the
+[MCP documentation](https://modelcontextprotocol.io/docs/learn/architecture)
+and the [specification](https://modelcontextprotocol.io/specification/latest)
+before relying on any wire-level behavior. When this chapter was reviewed
+(October 2026), the latest protocol version was `2026-07-28`.
+
+## The problem MCP solves
+
+Without a standard, every pairing of an AI application and a data system needs
+its own integration. With *M* AI applications (Claude Code, a Streamlit
+assistant, a Databricks agent, an IDE) and *N* systems (Unity Catalog, Jira,
+Google Drive, an internal API), you face roughly *M × N* custom connectors.
+
+MCP turns this into *M + N*: each system exposes one **MCP server**, and each
+AI application implements one **MCP client**. Any compliant client can then use
+any compliant server. A common analogy is USB-C for AI applications: one
+connector shape, many devices.
+
+**Interview framing:** MCP is a *protocol*, not a model, framework, or agent.
+It standardizes how context and capabilities are discovered and invoked. It
+does not decide which model you use or how the model reasons.
+
+## Core architecture
+
+| Role | What it is | Example |
+|---|---|---|
+| **Host** | The AI application the user interacts with; it coordinates the model and one or more clients | Claude Code, Claude Desktop, VS Code, your own Streamlit app |
+| **Client** | A connector inside the host that holds one connection to one server | The object Claude Code creates for each configured server |
+| **Server** | A program that exposes tools, resources, and prompts | Databricks managed SQL server, GitHub server, your own `audience-tools` server |
+
+A host creates one client per server. The model never talks to a server
+directly: the model proposes a tool call, the host routes it through the right
+client, the server executes it, and the result returns to the model as context.
+
+```text
+ User ──► Host (app + LLM)
+            ├── MCP client ──► MCP server: Databricks SQL   ──► SQL warehouse
+            ├── MCP client ──► MCP server: UC functions     ──► governed functions
+            └── MCP client ──► MCP server: custom (Apps)    ──► Jobs API, models
+```
+
+### Two layers
+
+- **Data layer** — JSON-RPC 2.0 messages that define discovery, the
+  primitives below, and notifications.
+- **Transport layer** — how the messages travel:
+  - **stdio**: the host launches the server as a local subprocess and talks over
+    standard input and output. Best for personal, local tools.
+  - **Streamable HTTP**: the server runs remotely and is reached over HTTP, with
+    standard authentication (OAuth is recommended). Best for shared, governed,
+    team-wide servers. An older SSE transport is deprecated.
+
+A practical stdio pitfall: never write to stdout from a stdio server (for
+example with `print()`), because stdout carries the protocol messages. Log to
+stderr instead.
+
+## The primitives
+
+The primitives are the most important concept to learn. Servers expose three:
+
+| Primitive | Who controls it | Purpose | Marketing-analytics example |
+|---|---|---|---|
+| **Tools** | The model decides when to call (with host approval) | Executable actions with a JSON Schema for inputs | `audience_overlap(segment_a, segment_b)`, `submit_lookalike_job(seed_table)` |
+| **Resources** | The application or user decides what to attach | Read-only context identified by a URI | A table schema, a metric glossary, a campaign brief |
+| **Prompts** | The user chooses, often as a slash command | Reusable, parameterized templates | "Explain this basket-analysis output to a client" |
+
+Each primitive has list and get or call methods (for example `tools/list` and
+`tools/call`), so a client can discover capabilities at run time instead of
+having them hard-coded.
+
+Clients can also offer capabilities to servers. The main one is
+**elicitation**: a server can ask the user for missing input or confirmation
+through the host. Sampling (a server requesting an LLM completion from the
+client) is deprecated as of protocol version `2026-07-28`.
+
+### What a tool definition looks like
+
+A server advertises each tool with a name, a description, and an input schema.
+Simplified:
+
+```json
+{
+  "name": "audience_overlap",
+  "description": "Count users in two audience segments and their Jaccard overlap. Use when the user asks how much two audiences overlap.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "segment_a": {"type": "string", "description": "First segment ID"},
+      "segment_b": {"type": "string", "description": "Second segment ID"}
+    },
+    "required": ["segment_a", "segment_b"]
+  }
+}
+```
+
+The description is effectively a prompt. The model chooses tools based on it,
+so a clear statement of *what* the tool does and *when* to use it matters as
+much as the code.
+
+## MCP compared with related ideas
+
+| Concept | What it is | Relationship to MCP |
+|---|---|---|
+| **Function or tool calling** | A model API feature: the model emits a structured call | MCP standardizes where tool definitions come from and how calls are executed |
+| **REST API** | A service interface for programs | An MCP server often *wraps* a REST API with model-friendly names, descriptions, and narrower inputs |
+| **Skills** (Chapter \@ref(claude-code-skills)) | Instructions and procedures loaded into context | A skill tells the agent *how* to do a task; MCP gives it *access* to systems. They work well together |
+| **RAG** | Retrieving documents into context | A vector-search MCP server is one way to deliver RAG |
+| **Agent frameworks** | Orchestration code (LangGraph, the Agent SDK, Mosaic AI Agent Framework) | Frameworks can act as MCP hosts or clients |
+
+A useful rule: **skills encode know-how, MCP servers expose capabilities, and
+permissions or hooks enforce boundaries.**
+
+## Common examples
+
+Typical servers you will meet:
+
+- **Developer tools**: GitHub (issues, pull requests), Sentry (errors), the
+  local filesystem.
+- **Knowledge and collaboration**: Notion, Google Drive, Slack, Atlassian.
+- **Data platforms**: Databricks, BigQuery, Snowflake, Postgres, often with
+  schema browsing and query tools.
+- **Documentation**: vendor documentation servers that let an agent search
+  current docs instead of relying on training data.
+
+In Claude Code, adding servers looks like this (see the
+[Claude Code MCP documentation](https://code.claude.com/docs/en/mcp)):
+
+```bash
+# Remote server over HTTP
+claude mcp add --transport http notion https://mcp.notion.com/mcp
+
+# Local stdio server; everything after -- is the server command
+claude mcp add --transport stdio audience-tools -- uv run server.py
+
+# Share a server with the team through .mcp.json in the repo
+claude mcp add --transport http shared-sql --scope project https://example.com/mcp
+
+claude mcp list      # inspect configured servers
+```
+
+Project scope writes to `.mcp.json`, which can reference environment variables
+such as `${DATABRICKS_TOKEN}` so that secrets never enter version control.
+
+## MCP in a Databricks marketing-analytics stack
+
+This section maps MCP onto a typical agency setup: Streamlit analytical apps,
+reusable Databricks jobs (lookalike modeling, audience overlap, basket
+analysis), and assistants built on Databricks-hosted foundation models.
+
+### Three ways Databricks supports MCP
+
+Based on the [Databricks MCP documentation](https://docs.databricks.com/aws/en/agents/mcp-tools/)
+(reviewed October 2026; most features were in **Public Preview**):
+
+1. **Managed MCP servers**: Databricks hosts the server, and Unity Catalog
+   permissions apply automatically.
+
+   | Server | URL pattern | Use |
+   |---|---|---|
+   | Databricks SQL | `https://<workspace-hostname>/api/2.0/mcp/sql` | Ad hoc SQL against warehouses |
+   | Unity Catalog functions | `https://<workspace-hostname>/api/2.0/mcp/functions/{catalog}/{schema}/{function_name}` | Governed, predefined logic as tools |
+   | Genie | `https://<workspace-hostname>/api/2.0/mcp/genie/{genie_space_id}` | Natural-language analytics over a curated Genie space |
+   | AI Search (vector search) | `https://<workspace-hostname>/api/2.0/mcp/ai-search/{catalog}/{schema}/{index_name}` | Retrieval over documents such as briefs and reports |
+
+2. **External MCP servers registered in Unity Catalog** (for example Slack,
+   GitHub, or Google Drive), so access is governed centrally.
+
+3. **Custom MCP servers hosted as Databricks Apps**, reachable at
+   `https://<app-url>/mcp` over Streamable HTTP, with access controlled by
+   Databricks Apps permissions. See
+   [custom MCP servers](https://docs.databricks.com/aws/en/agents/mcp-tools/custom-mcp).
+
+Exact URLs, scopes, and preview status change. Confirm them in your
+workspace's documentation before building on them.
+
+### Pattern 1: Governed analytics as Unity Catalog functions
+
+The lowest-effort, best-governed option is to package your *reusable,
+validated* logic as Unity Catalog SQL functions and expose them through the
+managed functions server. The agent can only run what you defined, under the
+caller's permissions.
+
+An illustrative audience-overlap function (table and column names are
+hypothetical):
+
+```sql
+CREATE OR REPLACE FUNCTION marketing.analytics.audience_overlap(
+  segment_a STRING COMMENT 'First segment ID',
+  segment_b STRING COMMENT 'Second segment ID'
+)
+RETURNS TABLE (size_a BIGINT, size_b BIGINT, overlap BIGINT, jaccard DOUBLE)
+COMMENT 'Sizes of two audience segments, their shared users, and Jaccard overlap. Use for audience-overlap questions.'
+RETURN
+  WITH a AS (
+    SELECT DISTINCT user_id FROM marketing.analytics.segment_members
+    WHERE segment_id = segment_a
+  ),
+  b AS (
+    SELECT DISTINCT user_id FROM marketing.analytics.segment_members
+    WHERE segment_id = segment_b
+  ),
+  counts AS (
+    SELECT
+      (SELECT COUNT(*) FROM a) AS size_a,
+      (SELECT COUNT(*) FROM b) AS size_b,
+      (SELECT COUNT(*) FROM a JOIN b USING (user_id)) AS overlap
+  )
+  SELECT size_a, size_b, overlap,
+         try_divide(overlap, size_a + size_b - overlap) AS jaccard
+  FROM counts;
+```
+
+The function and parameter comments become the tool description that the model
+reads. The same pattern fits **basket analysis**, for example
+`top_associations(category, min_support)` returning precomputed support,
+confidence, and lift from a table that a scheduled job refreshes.
+
+Why this is a strong default:
+
+- The logic is reviewed once and reused by every app and agent.
+- Unity Catalog lineage, permissions, and auditing apply.
+- The model cannot invent a different overlap definition from one run to the next.
+
+### Pattern 2: A custom server for long-running jobs
+
+Lookalike modeling is not a quick query. It trains or scores a model over
+large data and can run for minutes or hours. Do not make the model wait on a
+synchronous tool call. Instead, expose a small custom server with *job-shaped*
+tools:
+
+- `submit_lookalike_job(seed_audience_id, expansion_pct)` triggers an existing,
+  parameterized Databricks Job and returns a `run_id`;
+- `get_job_status(run_id)` reports state and, when finished, output table
+  names and validation metrics;
+- `describe_lookalike_output(run_id)` summarizes the audience size, score
+  distribution, and holdout performance recorded by the job.
+
+A minimal local sketch using the official Python SDK (install with
+`uv add "mcp[cli]"`). This is an instructional example, not tested
+production code. In practice the tools would call the Databricks Jobs API
+through the Databricks SDK:
+
+```python
+import logging
+
+from mcp.server import MCPServer
+
+logging.basicConfig(level=logging.INFO)  # stderr; never print() in stdio servers
+logger = logging.getLogger(__name__)
+
+mcp = MCPServer("audience-tools")
+
+ALLOWED_EXPANSION = {1, 3, 5, 10}  # percentages the job was validated for
+
+
+@mcp.tool()
+def submit_lookalike_job(seed_audience_id: str, expansion_pct: int) -> str:
+    """Start the validated lookalike-modeling Databricks Job for a seed audience.
+
+    Use only when the user explicitly asks to build a lookalike audience.
+    Returns a run ID; call get_job_status to follow progress.
+
+    Args:
+        seed_audience_id: Registered seed audience ID, for example "aud_123".
+        expansion_pct: Target audience size as a percent of the reference
+            population. One of 1, 3, 5, or 10.
+    """
+    if expansion_pct not in ALLOWED_EXPANSION:
+        return f"expansion_pct must be one of {sorted(ALLOWED_EXPANSION)}."
+    logger.info("Submitting lookalike job for %s", seed_audience_id)
+    run_id = trigger_databricks_job(seed_audience_id, expansion_pct)  # your wrapper
+    return f"Submitted. run_id={run_id}"
+
+
+@mcp.tool()
+def get_job_status(run_id: str) -> str:
+    """Return the state of a lookalike job run and, if finished, its outputs."""
+    return fetch_run_summary(run_id)  # your wrapper around the Jobs API
+
+
+if __name__ == "__main__":
+    mcp.run(transport="stdio")  # use Streamable HTTP when hosting on Databricks Apps
+```
+
+Design choices worth noting:
+
+- The server **calls an existing, versioned job**. It does not let the model
+  write modeling code at run time.
+- Inputs are **narrow and validated** (an allow-list of expansion sizes) rather
+  than free-form.
+- The tool description says **when not** to call it, because submitting a job
+  costs money.
+- Outputs include **validation evidence** recorded by the job, so the assistant
+  reports holdout metrics instead of guessing quality.
+
+### Pattern 3: An AI-assisted Streamlit app as an MCP host
+
+Your Streamlit app can be the host. Its loop is:
+
+1. The user asks a question, for example "How much do our sports-fans and
+   new-parents segments overlap, and what do they buy together?"
+2. The app sends the conversation and the MCP tool list to a Databricks
+   foundation-model serving endpoint.
+3. The model returns tool calls (`audience_overlap`, `top_associations`).
+4. The app's MCP client executes them against the managed or custom servers,
+   using the signed-in user's identity where possible (on-behalf-of-user
+   authentication) so Unity Catalog permissions apply per user.
+5. Results go back to the model, which writes the explanation, while the app
+   renders the *actual numbers* in tables and charts from the tool output.
+
+Rendering numbers from tool results, not from the model's prose, is a simple
+and important guard against hallucinated metrics.
+
+Databricks also provides client helpers for connecting agent code to its MCP
+servers. Follow
+[Use MCP servers in agents](https://docs.databricks.com/aws/en/agents/mcp-tools/use-mcp-in-agents)
+for the currently supported library and authentication pattern rather than
+copying older snippets.
+
+### Pattern 4: Coding agents connected to the workspace
+
+Connecting Claude Code to the managed Databricks SQL server lets a coding agent
+inspect schemas and run read-only exploratory queries while you build a job or
+app. Point it at a development catalog, prefer a role with read-only access,
+and treat its query results as exploration, not validated analysis.
+
+## Choosing the right integration
+
+| Need | Prefer |
+|---|---|
+| Stable, reusable metric or analysis | Unity Catalog function via the managed server |
+| Business users asking questions of curated tables | Genie space via the managed server |
+| Search over briefs, decks, or research | Vector (AI) Search via the managed server |
+| Long-running or multi-step workflows (lookalike, scoring) | Custom server on Databricks Apps wrapping existing Jobs |
+| One-off personal automation on a laptop | Local stdio server |
+| A fixed pipeline with no model in the loop | No MCP; a scheduled Databricks Job is simpler |
+
+MCP adds value when a *model* must choose among capabilities at run time. If
+the sequence of steps is fixed, ordinary code or orchestration is simpler,
+cheaper, and easier to test.
+
+## Security, governance, and failure modes
+
+MCP servers give a model real access, so treat them as production integrations.
+
+- **Least privilege.** Use dedicated service principals or on-behalf-of-user
+  authentication, restrict servers to the catalogs and schemas they need, and
+  prefer read-only access for exploration.
+- **Prompt injection.** Content returned by a tool (documents, web pages,
+  free-text table fields) can contain instructions. Treat tool output as data,
+  and keep humans approving actions that write, spend, or send.
+- **Trust in third-party servers.** A server runs code and sees your data.
+  Install only from trusted publishers, pin versions, and review what each tool
+  can do.
+- **Secrets.** Keep tokens in environment variables or secret scopes, never in
+  `.mcp.json`, notebooks, or prompts.
+- **Too many tools.** Dozens of overlapping tools confuse tool selection and
+  consume context. Expose a small set of well-described, task-shaped tools.
+- **Privacy.** Audience data can be personal data. Return aggregates, enforce
+  minimum cell sizes, and avoid passing user-level identifiers to a model
+  unless that use is approved.
+- **Cost.** Tools that trigger clusters or jobs should require confirmation and
+  report expected cost or runtime.
+- **Version drift.** The protocol, SDKs, and vendor servers change. Pin
+  versions and recheck documentation when something breaks.
+
+As with skills, MCP is not itself a security boundary. Enforcement belongs in
+Unity Catalog permissions, Apps permissions, host approval settings, and hooks.
+
+## Exercise: expose one analysis as a governed tool
+
+1. Pick one analysis you repeat often, such as audience overlap.
+2. Write it as a Unity Catalog SQL function with clear function and parameter
+   comments.
+3. Test it directly in SQL with known segments, including empty and identical
+   segments.
+4. Connect a host (Claude Code or a small Streamlit prototype) to the managed
+   functions server for that function.
+5. Ask questions that *should* trigger the tool, questions that should not, and
+   an ambiguous question. Record whether tool selection and answers were
+   correct.
+6. Check that numbers in the final answer match the tool output exactly.
+
+## Key takeaways
+
+- MCP is an open protocol that lets any compliant AI application use any
+  compliant data source or tool, turning M × N integrations into M + N.
+- Hosts contain clients; each client connects to one server; servers expose
+  tools, resources, and prompts.
+- Use stdio for local, personal servers and Streamable HTTP for shared, remote,
+  governed servers.
+- On Databricks, start with managed servers and Unity Catalog functions for
+  reusable logic, and add a custom server on Databricks Apps for job-shaped
+  workflows such as lookalike modeling.
+- Tool descriptions are prompts: say what a tool does, when to use it, and when
+  not to.
+- Apply least privilege, guard against prompt injection, protect personal data,
+  and render reported numbers from tool output.
+
+## References
+
+- [MCP architecture overview](https://modelcontextprotocol.io/docs/learn/architecture)
+- [MCP specification](https://modelcontextprotocol.io/specification/latest)
+- [Build an MCP server (official quickstart)](https://modelcontextprotocol.io/docs/develop/build-server)
+- [Claude Code: connect tools via MCP](https://code.claude.com/docs/en/mcp)
+- [Databricks: MCP on Databricks](https://docs.databricks.com/aws/en/agents/mcp-tools/)
+- [Databricks: managed MCP servers](https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp)
+- [Databricks: custom MCP servers on Databricks Apps](https://docs.databricks.com/aws/en/agents/mcp-tools/custom-mcp)

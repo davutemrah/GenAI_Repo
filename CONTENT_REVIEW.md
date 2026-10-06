@@ -64,3 +64,6 @@ not be described as tested production implementations.
 - [Claude tool use](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)
 - [Claude code execution tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/code-execution-tool)
 
+- [Model Context Protocol architecture](https://modelcontextprotocol.io/docs/learn/architecture)
+- [Claude Code MCP](https://code.claude.com/docs/en/mcp)
+- [Databricks MCP](https://docs.databricks.com/aws/en/agents/mcp-tools/)

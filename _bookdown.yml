@@ -17,4 +17,5 @@ rmd_files:
   - __repo/claude/07_Skills.Rmd
   - __repo/claude/08_Loops.Rmd
   - __repo/claude/09_Notebooks.Rmd
+  - __repo/claude/10_MCP.Rmd
 output_dir: "docs"

@@ -10,7 +10,8 @@ Published book: <https://davutemrah.github.io/GenAI_Repo/>
 
 - `index.Rmd` — book title, scope, and reader guidance.
 - `__repo/*.Rmd` — LLM foundations, pre-training, fine-tuning, and evaluation.
-- `__repo/claude/*.Rmd` — Claude, coding-agent, verification, and notebook chapters.
+- `__repo/claude/*.Rmd` — Claude, coding-agent, verification, notebook, and
+  Model Context Protocol (MCP) chapters.
 - `_bookdown.yml` — explicit chapter order and `docs/` publication target.
 - `_output.yml` — GitBook presentation and navigation.
 - `style.css` — book-specific styling.

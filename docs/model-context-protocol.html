@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 1 Foundations of Generative AI and LLMs | Generative AI, Large Language Models, and Coding Agents</title>
+  <title>Chapter 13 Model Context Protocol (MCP): Connecting Agents to Data and Tools | Generative AI, Large Language Models, and Coding Agents</title>
   <meta name="description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 1 Foundations of Generative AI and LLMs | Generative AI, Large Language Models, and Coding Agents" />
+  <meta property="og:title" content="Chapter 13 Model Context Protocol (MCP): Connecting Agents to Data and Tools | Generative AI, Large Language Models, and Coding Agents" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   <meta name="github-repo" content="davutemrah/GenAI_Repo" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 1 Foundations of Generative AI and LLMs | Generative AI, Large Language Models, and Coding Agents" />
+  <meta name="twitter:title" content="Chapter 13 Model Context Protocol (MCP): Connecting Agents to Data and Tools | Generative AI, Large Language Models, and Coding Agents" />
   
   <meta name="twitter:description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="index.html"/>
-<link rel="next" href="pre-training-and-scaling-large-language-models.html"/>
+<link rel="prev" href="notebooks.html"/>
+
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -524,511 +524,554 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="foundations-of-generative-ai-and-llms" class="section level1 hasAnchor" number="1">
-<h1><span class="header-section-number">Chapter 1</span> Foundations of Generative AI and LLMs<a href="foundations-of-generative-ai-and-llms.html#foundations-of-generative-ai-and-llms" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<div id="generative-ai-overview" class="section level2 hasAnchor" number="1.1">
-<h2><span class="header-section-number">1.1</span> Generative AI Overview<a href="foundations-of-generative-ai-and-llms.html#generative-ai-overview" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Generative models learn statistical structure from observed data and generate
-new samples under that learned distribution. Depending on the model and
-interface, outputs can include text, images, audio, video, structured data, or
-code. Common applications include:</p>
-<ul>
-<li><p>Chatbots</p></li>
-<li><p>Image generation from text</p></li>
-<li><p>Code development plugins</p></li>
-</ul>
-<div id="what-is-generative-ai" class="section level3 hasAnchor" number="1.1.1">
-<h3><span class="header-section-number">1.1.1</span> What is Generative AI?<a href="foundations-of-generative-ai-and-llms.html#what-is-generative-ai" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<ul>
-<li><p><strong>Statistical learning</strong>: Generative models learn patterns in training data
-and use them to produce new outputs. They do not retrieve a guaranteed fact
-simply because an answer sounds confident.</p></li>
-<li><p><strong>Training</strong>: Modern LLMs are commonly pre-trained on large token corpora
-using substantial compute, then adapted or aligned for intended interactions.
-Dataset size and training recipe vary by model.</p></li>
-<li><p><strong>Foundation models</strong>: Broadly trained models can be adapted to many
-downstream tasks. Capabilities and limitations must be measured; parameter
-count alone does not establish reasoning quality or task suitability.</p>
-<p>Examples include BERT, GPT-family models, Llama, BLOOM, PaLM, and FLAN-T5.</p></li>
-</ul>
+<div id="model-context-protocol" class="section level1 hasAnchor" number="13">
+<h1><span class="header-section-number">Chapter 13</span> Model Context Protocol (MCP): Connecting Agents to Data and Tools<a href="model-context-protocol.html#model-context-protocol" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="why-this-chapter-exists" class="section level2 hasAnchor" number="13.1">
+<h2><span class="header-section-number">13.1</span> Why this chapter exists<a href="model-context-protocol.html#why-this-chapter-exists" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Earlier chapters treated tools as something the host application “supplies.”
+The Model Context Protocol (MCP) is the most widely adopted open standard for
+<em>how</em> those tools, data sources, and reusable prompts get supplied. For a data
+scientist, MCP is the bridge between a foundation model and the governed
+tables, models, jobs, and dashboards that already exist.</p>
+<p>MCP is evolving quickly. This chapter separates stable concepts from
+version-specific details. Check the
+<a href="https://modelcontextprotocol.io/docs/learn/architecture">MCP documentation</a>
+and the <a href="https://modelcontextprotocol.io/specification/latest">specification</a>
+before relying on any wire-level behavior. When this chapter was reviewed
+(October 2026), the latest protocol version was <code>2026-07-28</code>.</p>
 </div>
-<div id="understanding-parameters" class="section level3 hasAnchor" number="1.1.2">
-<h3><span class="header-section-number">1.1.2</span> Understanding Parameters<a href="foundations-of-generative-ai-and-llms.html#understanding-parameters" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<ul>
-<li><p><strong>Learned values</strong>: Parameters are numerical values updated during training.
-They encode distributed statistical structure, but they are not a database
-of exact memories.</p></li>
-<li><p><strong>Scale is one factor</strong>: More parameters can increase representational
-capacity, but performance also depends on data, architecture, optimization,
-inference strategy, adaptation, and evaluation domain.</p></li>
-<li><p><strong>Model Representation</strong>: Throughout the course, LLMs will be represented by purple circles.</p></li>
-<li><p><strong>Example Model</strong>: In the labs, you will use an open-source model called flan-T5 for language tasks.</p></li>
-</ul>
+<div id="the-problem-mcp-solves" class="section level2 hasAnchor" number="13.2">
+<h2><span class="header-section-number">13.2</span> The problem MCP solves<a href="model-context-protocol.html#the-problem-mcp-solves" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Without a standard, every pairing of an AI application and a data system needs
+its own integration. With <em>M</em> AI applications (Claude Code, a Streamlit
+assistant, a Databricks agent, an IDE) and <em>N</em> systems (Unity Catalog, Jira,
+Google Drive, an internal API), you face roughly <em>M × N</em> custom connectors.</p>
+<p>MCP turns this into <em>M + N</em>: each system exposes one <strong>MCP server</strong>, and each
+AI application implements one <strong>MCP client</strong>. Any compliant client can then use
+any compliant server. A common analogy is USB-C for AI applications: one
+connector shape, many devices.</p>
+<p><strong>Interview framing:</strong> MCP is a <em>protocol</em>, not a model, framework, or agent.
+It standardizes how context and capabilities are discovered and invoked. It
+does not decide which model you use or how the model reasons.</p>
 </div>
-<div id="model-adaptation-and-use" class="section level3 hasAnchor" number="1.1.3">
-<h3><span class="header-section-number">1.1.3</span> Model Adaptation and Use<a href="foundations-of-generative-ai-and-llms.html#model-adaptation-and-use" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="core-architecture" class="section level2 hasAnchor" number="13.3">
+<h2><span class="header-section-number">13.3</span> Core architecture<a href="model-context-protocol.html#core-architecture" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Role</th>
+<th>What it is</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Host</strong></td>
+<td>The AI application the user interacts with; it coordinates the model and one or more clients</td>
+<td>Claude Code, Claude Desktop, VS Code, your own Streamlit app</td>
+</tr>
+<tr>
+<td><strong>Client</strong></td>
+<td>A connector inside the host that holds one connection to one server</td>
+<td>The object Claude Code creates for each configured server</td>
+</tr>
+<tr>
+<td><strong>Server</strong></td>
+<td>A program that exposes tools, resources, and prompts</td>
+<td>Databricks managed SQL server, GitHub server, your own <code>audience-tools</code> server</td>
+</tr>
+</tbody>
+</table>
+<p>A host creates one client per server. The model never talks to a server
+directly: the model proposes a tool call, the host routes it through the right
+client, the server executes it, and the result returns to the model as context.</p>
+<pre class="text"><code> User ──► Host (app + LLM)
+            ├── MCP client ──► MCP server: Databricks SQL   ──► SQL warehouse
+            ├── MCP client ──► MCP server: UC functions     ──► governed functions
+            └── MCP client ──► MCP server: custom (Apps)    ──► Jobs API, models</code></pre>
+<div id="two-layers" class="section level3 hasAnchor" number="13.3.1">
+<h3><span class="header-section-number">13.3.1</span> Two layers<a href="model-context-protocol.html#two-layers" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <ul>
-<li><p><strong>Fine Tuning</strong>: You can either use these models as they are or apply fine-tuning techniques to adapt them to specific use cases without the need to train a new model from scratch.</p></li>
-<li><p><strong>Multimodal Generative AI</strong>: While generative AI models exist for images, video, audio, and speech, this course focuses on LLMs and natural language generation.</p></li>
-</ul>
-</div>
-<div id="interaction-with-llms" class="section level3 hasAnchor" number="1.1.4">
-<h3><span class="header-section-number">1.1.4</span> Interaction with LLMs<a href="foundations-of-generative-ai-and-llms.html#interaction-with-llms" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<li><strong>Data layer</strong> — JSON-RPC 2.0 messages that define discovery, the
+primitives below, and notifications.</li>
+<li><strong>Transport layer</strong> — how the messages travel:
 <ul>
-<li><p><strong>Natural Language Prompts</strong>: Unlike traditional machine learning and programming paradigms that use formalized syntax, LLMs take natural language instructions (prompts) and perform tasks.</p></li>
-<li><p><strong>Context window</strong>: The context window bounds the tokens available for
-instructions, conversation, supplied content, and tool results. Its size
-varies by model and product and should be checked in current documentation.</p></li>
-</ul>
-<p>Prompt –&gt; LLM –&gt; Completion (generated text)</p>
-</div>
-</div>
-<div id="use-cases-of-llm" class="section level2 hasAnchor" number="1.2">
-<h2><span class="header-section-number">1.2</span> Use Cases of LLM<a href="foundations-of-generative-ai-and-llms.html#use-cases-of-llm" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>The broader applications of large language models (LLMs) and generative AI beyond chatbots. It highlights that while chatbots are prominent, LLMs can also perform diverse tasks, such as:</p>
-<p><strong>Text Generation:</strong> LLMs can generate essays based on prompts and summarize dialogues.</p>
-<p><strong>Translation:</strong> They can translate between different languages and convert natural language into machine code, such as generating Python code.</p>
-<p><strong>Information extraction:</strong> LLMs can extract or classify spans such as people,
-organizations, and places. Retrieval of external information is a separate
-system capability that requires a data source or retrieval tool.</p>
-<p><strong>Augmentation:</strong> There’s ongoing development in connecting LLMs to external data sources and APIs to enhance their capabilities and access real-time information.</p>
-<p>Scale can improve some capabilities under suitable data and training regimes,
-while smaller or specialized models may be preferable for cost, latency,
-privacy, or task-specific performance. Model selection requires direct
-evaluation on the intended use case.</p>
-</div>
-<div id="text-generation-before-transformers" class="section level2 hasAnchor" number="1.3">
-<h2><span class="header-section-number">1.3</span> Text Generation before Transformers<a href="foundations-of-generative-ai-and-llms.html#text-generation-before-transformers" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p><strong>Introduction to Generative Algorithms</strong></p>
-<p>Generative algorithms have been a part of natural language processing for a long time. Before the advent of transformer models, the primary architecture used for generative tasks was recurrent neural networks (RNNs).</p>
-<div id="recurrent-neural-networks-rnns" class="section level3 hasAnchor" number="1.3.1">
-<h3><span class="header-section-number">1.3.1</span> Recurrent Neural Networks (RNNs)<a href="foundations-of-generative-ai-and-llms.html#recurrent-neural-networks-rnns" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<ul>
-<li><p><strong>Architecture</strong>: RNNs process sequences of data by maintaining a hidden state that captures information from previous time steps.</p></li>
-<li><p><strong>Limitations</strong>:</p></li>
-<li><p><strong>Computational and Memory Constraints</strong>: RNNs require significant computational resources and memory to process long sequences.</p>
-<ul>
-<li><strong>Short-Term Memory</strong>: RNNs struggle with long-term dependencies due to vanishing gradients, leading to poor performance on tasks requiring an understanding of extended context.</li>
+<li><strong>stdio</strong>: the host launches the server as a local subprocess and talks over
+standard input and output. Best for personal, local tools.</li>
+<li><strong>Streamable HTTP</strong>: the server runs remotely and is reached over HTTP, with
+standard authentication (OAuth is recommended). Best for shared, governed,
+team-wide servers. An older SSE transport is deprecated.</li>
 </ul></li>
 </ul>
+<p>A practical stdio pitfall: never write to stdout from a stdio server (for
+example with <code>print()</code>), because stdout carries the protocol messages. Log to
+stderr instead.</p>
 </div>
-<div id="example-of-rnn-in-action" class="section level3 hasAnchor" number="1.3.2">
-<h3><span class="header-section-number">1.3.2</span> Example of RNN in Action<a href="foundations-of-generative-ai-and-llms.html#example-of-rnn-in-action" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+</div>
+<div id="the-primitives" class="section level2 hasAnchor" number="13.4">
+<h2><span class="header-section-number">13.4</span> The primitives<a href="model-context-protocol.html#the-primitives" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The primitives are the most important concept to learn. Servers expose three:</p>
+<table>
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>Who controls it</th>
+<th>Purpose</th>
+<th>Marketing-analytics example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tools</strong></td>
+<td>The model decides when to call (with host approval)</td>
+<td>Executable actions with a JSON Schema for inputs</td>
+<td><code>audience_overlap(segment_a, segment_b)</code>, <code>submit_lookalike_job(seed_table)</code></td>
+</tr>
+<tr>
+<td><strong>Resources</strong></td>
+<td>The application or user decides what to attach</td>
+<td>Read-only context identified by a URI</td>
+<td>A table schema, a metric glossary, a campaign brief</td>
+</tr>
+<tr>
+<td><strong>Prompts</strong></td>
+<td>The user chooses, often as a slash command</td>
+<td>Reusable, parameterized templates</td>
+<td>“Explain this basket-analysis output to a client”</td>
+</tr>
+</tbody>
+</table>
+<p>Each primitive has list and get or call methods (for example <code>tools/list</code> and
+<code>tools/call</code>), so a client can discover capabilities at run time instead of
+having them hard-coded.</p>
+<p>Clients can also offer capabilities to servers. The main one is
+<strong>elicitation</strong>: a server can ask the user for missing input or confirmation
+through the host. Sampling (a server requesting an LLM completion from the
+client) is deprecated as of protocol version <code>2026-07-28</code>.</p>
+<div id="what-a-tool-definition-looks-like" class="section level3 hasAnchor" number="13.4.1">
+<h3><span class="header-section-number">13.4.1</span> What a tool definition looks like<a href="model-context-protocol.html#what-a-tool-definition-looks-like" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>A server advertises each tool with a name, a description, and an input schema.
+Simplified:</p>
+<div class="sourceCode" id="cb82"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb82-1"><a href="model-context-protocol.html#cb82-1" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb82-2"><a href="model-context-protocol.html#cb82-2" tabindex="-1"></a>  <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;audience_overlap&quot;</span><span class="fu">,</span></span>
+<span id="cb82-3"><a href="model-context-protocol.html#cb82-3" tabindex="-1"></a>  <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Count users in two audience segments and their Jaccard overlap. Use when the user asks how much two audiences overlap.&quot;</span><span class="fu">,</span></span>
+<span id="cb82-4"><a href="model-context-protocol.html#cb82-4" tabindex="-1"></a>  <span class="dt">&quot;inputSchema&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb82-5"><a href="model-context-protocol.html#cb82-5" tabindex="-1"></a>    <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span></span>
+<span id="cb82-6"><a href="model-context-protocol.html#cb82-6" tabindex="-1"></a>    <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb82-7"><a href="model-context-protocol.html#cb82-7" tabindex="-1"></a>      <span class="dt">&quot;segment_a&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;First segment ID&quot;</span><span class="fu">},</span></span>
+<span id="cb82-8"><a href="model-context-protocol.html#cb82-8" tabindex="-1"></a>      <span class="dt">&quot;segment_b&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Second segment ID&quot;</span><span class="fu">}</span></span>
+<span id="cb82-9"><a href="model-context-protocol.html#cb82-9" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb82-10"><a href="model-context-protocol.html#cb82-10" tabindex="-1"></a>    <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;segment_a&quot;</span><span class="ot">,</span> <span class="st">&quot;segment_b&quot;</span><span class="ot">]</span></span>
+<span id="cb82-11"><a href="model-context-protocol.html#cb82-11" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb82-12"><a href="model-context-protocol.html#cb82-12" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>The description is effectively a prompt. The model chooses tools based on it,
+so a clear statement of <em>what</em> the tool does and <em>when</em> to use it matters as
+much as the code.</p>
+</div>
+</div>
+<div id="mcp-compared-with-related-ideas" class="section level2 hasAnchor" number="13.5">
+<h2><span class="header-section-number">13.5</span> MCP compared with related ideas<a href="model-context-protocol.html#mcp-compared-with-related-ideas" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Concept</th>
+<th>What it is</th>
+<th>Relationship to MCP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Function or tool calling</strong></td>
+<td>A model API feature: the model emits a structured call</td>
+<td>MCP standardizes where tool definitions come from and how calls are executed</td>
+</tr>
+<tr>
+<td><strong>REST API</strong></td>
+<td>A service interface for programs</td>
+<td>An MCP server often <em>wraps</em> a REST API with model-friendly names, descriptions, and narrower inputs</td>
+</tr>
+<tr>
+<td><strong>Skills</strong> (Chapter <a href="claude-code-skills.html#claude-code-skills">10</a>)</td>
+<td>Instructions and procedures loaded into context</td>
+<td>A skill tells the agent <em>how</em> to do a task; MCP gives it <em>access</em> to systems. They work well together</td>
+</tr>
+<tr>
+<td><strong>RAG</strong></td>
+<td>Retrieving documents into context</td>
+<td>A vector-search MCP server is one way to deliver RAG</td>
+</tr>
+<tr>
+<td><strong>Agent frameworks</strong></td>
+<td>Orchestration code (LangGraph, the Agent SDK, Mosaic AI Agent Framework)</td>
+<td>Frameworks can act as MCP hosts or clients</td>
+</tr>
+</tbody>
+</table>
+<p>A useful rule: <strong>skills encode know-how, MCP servers expose capabilities, and
+permissions or hooks enforce boundaries.</strong></p>
+</div>
+<div id="common-examples" class="section level2 hasAnchor" number="13.6">
+<h2><span class="header-section-number">13.6</span> Common examples<a href="model-context-protocol.html#common-examples" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Typical servers you will meet:</p>
 <ul>
-<li><p><strong>Simple Next-Word Prediction Task</strong>:</p>
-<ul>
-<li><p>With only one preceding word, the RNN’s prediction is not very accurate.</p></li>
-<li><p>Scaling the RNN to consider more preceding words increases computational complexity and resource usage.</p></li>
-<li><p>Despite scaling, the model often fails to capture enough context for accurate predictions.</p></li>
-</ul></li>
+<li><strong>Developer tools</strong>: GitHub (issues, pull requests), Sentry (errors), the
+local filesystem.</li>
+<li><strong>Knowledge and collaboration</strong>: Notion, Google Drive, Slack, Atlassian.</li>
+<li><strong>Data platforms</strong>: Databricks, BigQuery, Snowflake, Postgres, often with
+schema browsing and query tools.</li>
+<li><strong>Documentation</strong>: vendor documentation servers that let an agent search
+current docs instead of relying on training data.</li>
 </ul>
+<p>In Claude Code, adding servers looks like this (see the
+<a href="https://code.claude.com/docs/en/mcp">Claude Code MCP documentation</a>):</p>
+<div class="sourceCode" id="cb83"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb83-1"><a href="model-context-protocol.html#cb83-1" tabindex="-1"></a><span class="co"># Remote server over HTTP</span></span>
+<span id="cb83-2"><a href="model-context-protocol.html#cb83-2" tabindex="-1"></a><span class="ex">claude</span> mcp add <span class="at">--transport</span> http notion https://mcp.notion.com/mcp</span>
+<span id="cb83-3"><a href="model-context-protocol.html#cb83-3" tabindex="-1"></a></span>
+<span id="cb83-4"><a href="model-context-protocol.html#cb83-4" tabindex="-1"></a><span class="co"># Local stdio server; everything after -- is the server command</span></span>
+<span id="cb83-5"><a href="model-context-protocol.html#cb83-5" tabindex="-1"></a><span class="ex">claude</span> mcp add <span class="at">--transport</span> stdio audience-tools <span class="at">--</span> uv run server.py</span>
+<span id="cb83-6"><a href="model-context-protocol.html#cb83-6" tabindex="-1"></a></span>
+<span id="cb83-7"><a href="model-context-protocol.html#cb83-7" tabindex="-1"></a><span class="co"># Share a server with the team through .mcp.json in the repo</span></span>
+<span id="cb83-8"><a href="model-context-protocol.html#cb83-8" tabindex="-1"></a><span class="ex">claude</span> mcp add <span class="at">--transport</span> http shared-sql <span class="at">--scope</span> project https://example.com/mcp</span>
+<span id="cb83-9"><a href="model-context-protocol.html#cb83-9" tabindex="-1"></a></span>
+<span id="cb83-10"><a href="model-context-protocol.html#cb83-10" tabindex="-1"></a><span class="ex">claude</span> mcp list      <span class="co"># inspect configured servers</span></span></code></pre></div>
+<p>Project scope writes to <code>.mcp.json</code>, which can reference environment variables
+such as <code>${DATABRICKS_TOKEN}</code> so that secrets never enter version control.</p>
 </div>
-<div id="challenges-in-language-understanding" class="section level3 hasAnchor" number="1.3.3">
-<h3><span class="header-section-number">1.3.3</span> Challenges in Language Understanding<a href="foundations-of-generative-ai-and-llms.html#challenges-in-language-understanding" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<ul>
-<li><p><strong>Context Requirement</strong>: Successful next-word prediction requires understanding the entire sentence or document.</p></li>
-<li><p><strong>Complexity of Language</strong>:</p>
-<ul>
-<li><p><strong>Homonyms</strong>: Words with multiple meanings depending on context (e.g., “bank” as a financial institution or the side of a river).</p></li>
-<li><p><strong>Syntactic Ambiguity</strong>: Sentence structures can be ambiguous (e.g., “The teacher taught the students with the book” – did the teacher use the book or did the students have the book?).</p></li>
-</ul></li>
-</ul>
-</div>
-</div>
-<div id="introduction-of-transformer-architecture" class="section level2 hasAnchor" number="1.4">
-<h2><span class="header-section-number">1.4</span> Introduction of Transformer Architecture<a href="foundations-of-generative-ai-and-llms.html#introduction-of-transformer-architecture" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>In 2017, the transformer architecture revolutionized generative AI with the publication of the paper “Attention is All You Need” by researchers from Google and the University of Toronto.</p>
-<div id="advantages-of-transformers" class="section level3 hasAnchor" number="1.4.1">
-<h3><span class="header-section-number">1.4.1</span> Advantages of Transformers<a href="foundations-of-generative-ai-and-llms.html#advantages-of-transformers" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<ul>
-<li><p><strong>Efficient Scaling</strong>: Can be efficiently scaled to use multi-core GPUs.</p></li>
-<li><p><strong>Parallel Processing</strong>: Processes input data in parallel, allowing for the use of larger training datasets.</p></li>
-<li><p><strong>Attention Mechanism</strong>:</p>
-<ul>
-<li><p>Learns to pay attention to the meaning of words in context.</p></li>
-<li><p>Addresses the limitations of RNNs by considering the relevance of each word in the input sequence to every other word.</p></li>
-</ul></li>
-</ul>
-<p>The transformer architecture marked a significant breakthrough in natural language processing, enabling models to handle complex generative tasks more efficiently and accurately. The title of the influential paper, “Attention is All You Need,” underscores the importance of the attention mechanism in transforming the field of generative AI.</p>
-</div>
-</div>
-<div id="transformers" class="section level2 hasAnchor" number="1.5">
-<h2><span class="header-section-number">1.5</span> Transformers<a href="foundations-of-generative-ai-and-llms.html#transformers" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<div id="overview" class="section level3 hasAnchor" number="1.5.1">
-<h3><span class="header-section-number">1.5.1</span> Overview<a href="foundations-of-generative-ai-and-llms.html#overview" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>The transformer architecture significantly improved natural language processing tasks compared to earlier RNNs, enabling superior generative capabilities. Its power lies in learning the relevance and context of words across a sentence using attention mechanisms.</p>
-</div>
-<div id="attention-mechanisms" class="section level3 hasAnchor" number="1.5.2">
-<h3><span class="header-section-number">1.5.2</span> Attention Mechanisms<a href="foundations-of-generative-ai-and-llms.html#attention-mechanisms" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<ul>
-<li><p><strong>Self-Attention</strong>: This mechanism learns the relationships between all words in a sentence, allowing the model to understand the context and relevance of each word in relation to others.</p></li>
-<li><p><strong>Attention Map</strong>: A visual representation of the attention weights, showing how words relate to each other. For example, the word “book” might strongly connect with “teacher” and “student”.</p></li>
-</ul>
-</div>
-<div id="transformer-architecture" class="section level3 hasAnchor" number="1.5.3">
-<h3><span class="header-section-number">1.5.3</span> Transformer Architecture<a href="foundations-of-generative-ai-and-llms.html#transformer-architecture" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>The transformer model consists of two main components:</p>
-<ul>
-<li><p><strong>Encoder</strong>: Encodes input sequences into deep representations.</p></li>
-<li><p><strong>Decoder</strong>: Uses these representations to generate output sequences.</p></li>
-</ul>
-</div>
-<div id="tokenization" class="section level3 hasAnchor" number="1.5.4">
-<h3><span class="header-section-number">1.5.4</span> Tokenization<a href="foundations-of-generative-ai-and-llms.html#tokenization" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<ul>
-<li><p>Segments text into tokens and maps each token to an identifier in the
-tokenizer vocabulary. Tokens may represent whole words, subwords,
-characters, bytes, or other learned units.</p></li>
-<li><p>Tokenization methods can vary, representing whole words or parts of words.</p></li>
-<li><p>Consistent tokenization is essential for both training and generating text.</p></li>
-</ul>
-</div>
-<div id="embedding-layer" class="section level3 hasAnchor" number="1.5.5">
-<h3><span class="header-section-number">1.5.5</span> Embedding Layer<a href="foundations-of-generative-ai-and-llms.html#embedding-layer" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<ul>
-<li><p>Transforms token IDs into high-dimensional vectors.</p></li>
-<li><p>Encodes the meaning and context of tokens in a vector space.</p></li>
-</ul>
-</div>
-<div id="positional-encoding" class="section level3 hasAnchor" number="1.5.6">
-<h3><span class="header-section-number">1.5.6</span> Positional Encoding<a href="foundations-of-generative-ai-and-llms.html#positional-encoding" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<ul>
-<li>Adds information about the position of words in a sentence, preserving word order relevance.</li>
-</ul>
-</div>
-<div id="self-attention-layer" class="section level3 hasAnchor" number="1.5.7">
-<h3><span class="header-section-number">1.5.7</span> Self-Attention Layer<a href="foundations-of-generative-ai-and-llms.html#self-attention-layer" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<ul>
-<li><p>Analyzes relationships between tokens in the input sequence.</p></li>
-<li><p>Multi-headed self-attention means multiple sets of self-attention weights are learned in parallel.</p></li>
-<li><p>Each attention head learns different aspects of language, enhancing contextual understanding.</p></li>
-</ul>
-</div>
-<div id="feed-forward-network" class="section level3 hasAnchor" number="1.5.8">
-<h3><span class="header-section-number">1.5.8</span> Feed-Forward Network<a href="foundations-of-generative-ai-and-llms.html#feed-forward-network" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<ul>
-<li><p>Processes outputs from the self-attention layer.</p></li>
-<li><p>Applies position-wise nonlinear transformations within each transformer
-block. A later output projection maps final hidden states to vocabulary
-logits.</p></li>
-</ul>
-</div>
-<div id="softmax-layer" class="section level3 hasAnchor" number="1.5.9">
-<h3><span class="header-section-number">1.5.9</span> Softmax Layer<a href="foundations-of-generative-ai-and-llms.html#softmax-layer" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<ul>
-<li><p>Normalizes logits into probability scores for each token.</p></li>
-<li><p>Converts vocabulary logits into probabilities. The decoder may select the
-highest-probability token under greedy decoding or sample according to a
-configured decoding strategy.</p></li>
-</ul>
-</div>
-<div id="prediction-process" class="section level3 hasAnchor" number="1.5.10">
-<h3><span class="header-section-number">1.5.10</span> Prediction Process<a href="foundations-of-generative-ai-and-llms.html#prediction-process" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>Let’s walk through a sequence-to-sequence task, such as translating a French phrase into English:</p>
+<div id="mcp-in-a-databricks-marketing-analytics-stack" class="section level2 hasAnchor" number="13.7">
+<h2><span class="header-section-number">13.7</span> MCP in a Databricks marketing-analytics stack<a href="model-context-protocol.html#mcp-in-a-databricks-marketing-analytics-stack" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>This section maps MCP onto a typical agency setup: Streamlit analytical apps,
+reusable Databricks jobs (lookalike modeling, audience overlap, basket
+analysis), and assistants built on Databricks-hosted foundation models.</p>
+<div id="three-ways-databricks-supports-mcp" class="section level3 hasAnchor" number="13.7.1">
+<h3><span class="header-section-number">13.7.1</span> Three ways Databricks supports MCP<a href="model-context-protocol.html#three-ways-databricks-supports-mcp" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Based on the <a href="https://docs.databricks.com/aws/en/agents/mcp-tools/">Databricks MCP documentation</a>
+(reviewed October 2026; most features were in <strong>Public Preview</strong>):</p>
 <ol style="list-style-type: decimal">
-<li><p><strong>Tokenize Input</strong>: The French phrase is tokenized using the same tokenizer that trained the network.</p></li>
-<li><p><strong>Encoder</strong>: Tokenized input is passed through the embedding layer and multi-headed attention layers, producing a deep representation of the input sequence.</p></li>
-<li><p><strong>Decoder</strong>:</p>
+<li><p><strong>Managed MCP servers</strong>: Databricks hosts the server, and Unity Catalog
+permissions apply automatically.</p>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Server</th>
+<th>URL pattern</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Databricks SQL</td>
+<td><code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/sql</code></td>
+<td>Ad hoc SQL against warehouses</td>
+</tr>
+<tr>
+<td>Unity Catalog functions</td>
+<td><code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/functions/{catalog}/{schema}/{function_name}</code></td>
+<td>Governed, predefined logic as tools</td>
+</tr>
+<tr>
+<td>Genie</td>
+<td><code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/genie/{genie_space_id}</code></td>
+<td>Natural-language analytics over a curated Genie space</td>
+</tr>
+<tr>
+<td>AI Search (vector search)</td>
+<td><code>https://&lt;workspace-hostname&gt;/api/2.0/mcp/ai-search/{catalog}/{schema}/{index_name}</code></td>
+<td>Retrieval over documents such as briefs and reports</td>
+</tr>
+</tbody>
+</table></li>
+<li><p><strong>External MCP servers registered in Unity Catalog</strong> (for example Slack,
+GitHub, or Google Drive), so access is governed centrally.</p></li>
+<li><p><strong>Custom MCP servers hosted as Databricks Apps</strong>, reachable at
+<code>https://&lt;app-url&gt;/mcp</code> over Streamable HTTP, with access controlled by
+Databricks Apps permissions. See
+<a href="https://docs.databricks.com/aws/en/agents/mcp-tools/custom-mcp">custom MCP servers</a>.</p></li>
+</ol>
+<p>Exact URLs, scopes, and preview status change. Confirm them in your
+workspace’s documentation before building on them.</p>
+</div>
+<div id="pattern-1-governed-analytics-as-unity-catalog-functions" class="section level3 hasAnchor" number="13.7.2">
+<h3><span class="header-section-number">13.7.2</span> Pattern 1: Governed analytics as Unity Catalog functions<a href="model-context-protocol.html#pattern-1-governed-analytics-as-unity-catalog-functions" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The lowest-effort, best-governed option is to package your <em>reusable,
+validated</em> logic as Unity Catalog SQL functions and expose them through the
+managed functions server. The agent can only run what you defined, under the
+caller’s permissions.</p>
+<p>An illustrative audience-overlap function (table and column names are
+hypothetical):</p>
+<div class="sourceCode" id="cb84"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb84-1"><a href="model-context-protocol.html#cb84-1" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">OR</span> <span class="kw">REPLACE</span> <span class="kw">FUNCTION</span> marketing.analytics.audience_overlap(</span>
+<span id="cb84-2"><a href="model-context-protocol.html#cb84-2" tabindex="-1"></a>  segment_a STRING <span class="kw">COMMENT</span> <span class="st">&#39;First segment ID&#39;</span>,</span>
+<span id="cb84-3"><a href="model-context-protocol.html#cb84-3" tabindex="-1"></a>  segment_b STRING <span class="kw">COMMENT</span> <span class="st">&#39;Second segment ID&#39;</span></span>
+<span id="cb84-4"><a href="model-context-protocol.html#cb84-4" tabindex="-1"></a>)</span>
+<span id="cb84-5"><a href="model-context-protocol.html#cb84-5" tabindex="-1"></a>RETURNS <span class="kw">TABLE</span> (size_a BIGINT, size_b BIGINT, overlap BIGINT, jaccard <span class="dt">DOUBLE</span>)</span>
+<span id="cb84-6"><a href="model-context-protocol.html#cb84-6" tabindex="-1"></a><span class="kw">COMMENT</span> <span class="st">&#39;Sizes of two audience segments, their shared users, and Jaccard overlap. Use for audience-overlap questions.&#39;</span></span>
+<span id="cb84-7"><a href="model-context-protocol.html#cb84-7" tabindex="-1"></a><span class="kw">RETURN</span></span>
+<span id="cb84-8"><a href="model-context-protocol.html#cb84-8" tabindex="-1"></a>  <span class="kw">WITH</span> a <span class="kw">AS</span> (</span>
+<span id="cb84-9"><a href="model-context-protocol.html#cb84-9" tabindex="-1"></a>    <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> user_id <span class="kw">FROM</span> marketing.analytics.segment_members</span>
+<span id="cb84-10"><a href="model-context-protocol.html#cb84-10" tabindex="-1"></a>    <span class="kw">WHERE</span> segment_id <span class="op">=</span> segment_a</span>
+<span id="cb84-11"><a href="model-context-protocol.html#cb84-11" tabindex="-1"></a>  ),</span>
+<span id="cb84-12"><a href="model-context-protocol.html#cb84-12" tabindex="-1"></a>  b <span class="kw">AS</span> (</span>
+<span id="cb84-13"><a href="model-context-protocol.html#cb84-13" tabindex="-1"></a>    <span class="kw">SELECT</span> <span class="kw">DISTINCT</span> user_id <span class="kw">FROM</span> marketing.analytics.segment_members</span>
+<span id="cb84-14"><a href="model-context-protocol.html#cb84-14" tabindex="-1"></a>    <span class="kw">WHERE</span> segment_id <span class="op">=</span> segment_b</span>
+<span id="cb84-15"><a href="model-context-protocol.html#cb84-15" tabindex="-1"></a>  ),</span>
+<span id="cb84-16"><a href="model-context-protocol.html#cb84-16" tabindex="-1"></a>  counts <span class="kw">AS</span> (</span>
+<span id="cb84-17"><a href="model-context-protocol.html#cb84-17" tabindex="-1"></a>    <span class="kw">SELECT</span></span>
+<span id="cb84-18"><a href="model-context-protocol.html#cb84-18" tabindex="-1"></a>      (<span class="kw">SELECT</span> <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">FROM</span> a) <span class="kw">AS</span> size_a,</span>
+<span id="cb84-19"><a href="model-context-protocol.html#cb84-19" tabindex="-1"></a>      (<span class="kw">SELECT</span> <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">FROM</span> b) <span class="kw">AS</span> size_b,</span>
+<span id="cb84-20"><a href="model-context-protocol.html#cb84-20" tabindex="-1"></a>      (<span class="kw">SELECT</span> <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">FROM</span> a <span class="kw">JOIN</span> b <span class="kw">USING</span> (user_id)) <span class="kw">AS</span> overlap</span>
+<span id="cb84-21"><a href="model-context-protocol.html#cb84-21" tabindex="-1"></a>  )</span>
+<span id="cb84-22"><a href="model-context-protocol.html#cb84-22" tabindex="-1"></a>  <span class="kw">SELECT</span> size_a, size_b, overlap,</span>
+<span id="cb84-23"><a href="model-context-protocol.html#cb84-23" tabindex="-1"></a>         try_divide(overlap, size_a <span class="op">+</span> size_b <span class="op">-</span> overlap) <span class="kw">AS</span> jaccard</span>
+<span id="cb84-24"><a href="model-context-protocol.html#cb84-24" tabindex="-1"></a>  <span class="kw">FROM</span> counts;</span></code></pre></div>
+<p>The function and parameter comments become the tool description that the model
+reads. The same pattern fits <strong>basket analysis</strong>, for example
+<code>top_associations(category, min_support)</code> returning precomputed support,
+confidence, and lift from a table that a scheduled job refreshes.</p>
+<p>Why this is a strong default:</p>
 <ul>
-<li><p>A start-of-sequence token triggers the decoder to predict the next token.</p></li>
-<li><p>The decoder uses the encoder’s contextual understanding to generate the output token.</p></li>
-</ul></li>
-<li><p><strong>Loop</strong>: The output token is fed back into the decoder to predict the next token until an end-of-sequence token is predicted.</p></li>
-<li><p><strong>Detokenization</strong>: The sequence of tokens is converted back into words to form the final output.</p></li>
+<li>The logic is reviewed once and reused by every app and agent.</li>
+<li>Unity Catalog lineage, permissions, and auditing apply.</li>
+<li>The model cannot invent a different overlap definition from one run to the next.</li>
+</ul>
+</div>
+<div id="pattern-2-a-custom-server-for-long-running-jobs" class="section level3 hasAnchor" number="13.7.3">
+<h3><span class="header-section-number">13.7.3</span> Pattern 2: A custom server for long-running jobs<a href="model-context-protocol.html#pattern-2-a-custom-server-for-long-running-jobs" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Lookalike modeling is not a quick query. It trains or scores a model over
+large data and can run for minutes or hours. Do not make the model wait on a
+synchronous tool call. Instead, expose a small custom server with <em>job-shaped</em>
+tools:</p>
+<ul>
+<li><code>submit_lookalike_job(seed_audience_id, expansion_pct)</code> triggers an existing,
+parameterized Databricks Job and returns a <code>run_id</code>;</li>
+<li><code>get_job_status(run_id)</code> reports state and, when finished, output table
+names and validation metrics;</li>
+<li><code>describe_lookalike_output(run_id)</code> summarizes the audience size, score
+distribution, and holdout performance recorded by the job.</li>
+</ul>
+<p>A minimal local sketch using the official Python SDK (install with
+<code>uv add "mcp[cli]"</code>). This is an instructional example, not tested
+production code. In practice the tools would call the Databricks Jobs API
+through the Databricks SDK:</p>
+<div class="sourceCode" id="cb85"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb85-1"><a href="model-context-protocol.html#cb85-1" tabindex="-1"></a><span class="im">import</span> logging</span>
+<span id="cb85-2"><a href="model-context-protocol.html#cb85-2" tabindex="-1"></a></span>
+<span id="cb85-3"><a href="model-context-protocol.html#cb85-3" tabindex="-1"></a><span class="im">from</span> mcp.server <span class="im">import</span> MCPServer</span>
+<span id="cb85-4"><a href="model-context-protocol.html#cb85-4" tabindex="-1"></a></span>
+<span id="cb85-5"><a href="model-context-protocol.html#cb85-5" tabindex="-1"></a>logging.basicConfig(level<span class="op">=</span>logging.INFO)  <span class="co"># stderr; never print() in stdio servers</span></span>
+<span id="cb85-6"><a href="model-context-protocol.html#cb85-6" tabindex="-1"></a>logger <span class="op">=</span> logging.getLogger(<span class="va">__name__</span>)</span>
+<span id="cb85-7"><a href="model-context-protocol.html#cb85-7" tabindex="-1"></a></span>
+<span id="cb85-8"><a href="model-context-protocol.html#cb85-8" tabindex="-1"></a>mcp <span class="op">=</span> MCPServer(<span class="st">&quot;audience-tools&quot;</span>)</span>
+<span id="cb85-9"><a href="model-context-protocol.html#cb85-9" tabindex="-1"></a></span>
+<span id="cb85-10"><a href="model-context-protocol.html#cb85-10" tabindex="-1"></a>ALLOWED_EXPANSION <span class="op">=</span> {<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">10</span>}  <span class="co"># percentages the job was validated for</span></span>
+<span id="cb85-11"><a href="model-context-protocol.html#cb85-11" tabindex="-1"></a></span>
+<span id="cb85-12"><a href="model-context-protocol.html#cb85-12" tabindex="-1"></a></span>
+<span id="cb85-13"><a href="model-context-protocol.html#cb85-13" tabindex="-1"></a><span class="at">@mcp.tool</span>()</span>
+<span id="cb85-14"><a href="model-context-protocol.html#cb85-14" tabindex="-1"></a><span class="kw">def</span> submit_lookalike_job(seed_audience_id: <span class="bu">str</span>, expansion_pct: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb85-15"><a href="model-context-protocol.html#cb85-15" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Start the validated lookalike-modeling Databricks Job for a seed audience.</span></span>
+<span id="cb85-16"><a href="model-context-protocol.html#cb85-16" tabindex="-1"></a></span>
+<span id="cb85-17"><a href="model-context-protocol.html#cb85-17" tabindex="-1"></a><span class="co">    Use only when the user explicitly asks to build a lookalike audience.</span></span>
+<span id="cb85-18"><a href="model-context-protocol.html#cb85-18" tabindex="-1"></a><span class="co">    Returns a run ID; call get_job_status to follow progress.</span></span>
+<span id="cb85-19"><a href="model-context-protocol.html#cb85-19" tabindex="-1"></a></span>
+<span id="cb85-20"><a href="model-context-protocol.html#cb85-20" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb85-21"><a href="model-context-protocol.html#cb85-21" tabindex="-1"></a><span class="co">        seed_audience_id: Registered seed audience ID, for example &quot;aud_123&quot;.</span></span>
+<span id="cb85-22"><a href="model-context-protocol.html#cb85-22" tabindex="-1"></a><span class="co">        expansion_pct: Target audience size as a percent of the reference</span></span>
+<span id="cb85-23"><a href="model-context-protocol.html#cb85-23" tabindex="-1"></a><span class="co">            population. One of 1, 3, 5, or 10.</span></span>
+<span id="cb85-24"><a href="model-context-protocol.html#cb85-24" tabindex="-1"></a><span class="co">    &quot;&quot;&quot;</span></span>
+<span id="cb85-25"><a href="model-context-protocol.html#cb85-25" tabindex="-1"></a>    <span class="cf">if</span> expansion_pct <span class="kw">not</span> <span class="kw">in</span> ALLOWED_EXPANSION:</span>
+<span id="cb85-26"><a href="model-context-protocol.html#cb85-26" tabindex="-1"></a>        <span class="cf">return</span> <span class="ss">f&quot;expansion_pct must be one of </span><span class="sc">{</span><span class="bu">sorted</span>(ALLOWED_EXPANSION)<span class="sc">}</span><span class="ss">.&quot;</span></span>
+<span id="cb85-27"><a href="model-context-protocol.html#cb85-27" tabindex="-1"></a>    logger.info(<span class="st">&quot;Submitting lookalike job for </span><span class="sc">%s</span><span class="st">&quot;</span>, seed_audience_id)</span>
+<span id="cb85-28"><a href="model-context-protocol.html#cb85-28" tabindex="-1"></a>    run_id <span class="op">=</span> trigger_databricks_job(seed_audience_id, expansion_pct)  <span class="co"># your wrapper</span></span>
+<span id="cb85-29"><a href="model-context-protocol.html#cb85-29" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f&quot;Submitted. run_id=</span><span class="sc">{</span>run_id<span class="sc">}</span><span class="ss">&quot;</span></span>
+<span id="cb85-30"><a href="model-context-protocol.html#cb85-30" tabindex="-1"></a></span>
+<span id="cb85-31"><a href="model-context-protocol.html#cb85-31" tabindex="-1"></a></span>
+<span id="cb85-32"><a href="model-context-protocol.html#cb85-32" tabindex="-1"></a><span class="at">@mcp.tool</span>()</span>
+<span id="cb85-33"><a href="model-context-protocol.html#cb85-33" tabindex="-1"></a><span class="kw">def</span> get_job_status(run_id: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb85-34"><a href="model-context-protocol.html#cb85-34" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Return the state of a lookalike job run and, if finished, its outputs.&quot;&quot;&quot;</span></span>
+<span id="cb85-35"><a href="model-context-protocol.html#cb85-35" tabindex="-1"></a>    <span class="cf">return</span> fetch_run_summary(run_id)  <span class="co"># your wrapper around the Jobs API</span></span>
+<span id="cb85-36"><a href="model-context-protocol.html#cb85-36" tabindex="-1"></a></span>
+<span id="cb85-37"><a href="model-context-protocol.html#cb85-37" tabindex="-1"></a></span>
+<span id="cb85-38"><a href="model-context-protocol.html#cb85-38" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&quot;__main__&quot;</span>:</span>
+<span id="cb85-39"><a href="model-context-protocol.html#cb85-39" tabindex="-1"></a>    mcp.run(transport<span class="op">=</span><span class="st">&quot;stdio&quot;</span>)  <span class="co"># use Streamable HTTP when hosting on Databricks Apps</span></span></code></pre></div>
+<p>Design choices worth noting:</p>
+<ul>
+<li>The server <strong>calls an existing, versioned job</strong>. It does not let the model
+write modeling code at run time.</li>
+<li>Inputs are <strong>narrow and validated</strong> (an allow-list of expansion sizes) rather
+than free-form.</li>
+<li>The tool description says <strong>when not</strong> to call it, because submitting a job
+costs money.</li>
+<li>Outputs include <strong>validation evidence</strong> recorded by the job, so the assistant
+reports holdout metrics instead of guessing quality.</li>
+</ul>
+</div>
+<div id="pattern-3-an-ai-assisted-streamlit-app-as-an-mcp-host" class="section level3 hasAnchor" number="13.7.4">
+<h3><span class="header-section-number">13.7.4</span> Pattern 3: An AI-assisted Streamlit app as an MCP host<a href="model-context-protocol.html#pattern-3-an-ai-assisted-streamlit-app-as-an-mcp-host" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Your Streamlit app can be the host. Its loop is:</p>
+<ol style="list-style-type: decimal">
+<li>The user asks a question, for example “How much do our sports-fans and
+new-parents segments overlap, and what do they buy together?”</li>
+<li>The app sends the conversation and the MCP tool list to a Databricks
+foundation-model serving endpoint.</li>
+<li>The model returns tool calls (<code>audience_overlap</code>, <code>top_associations</code>).</li>
+<li>The app’s MCP client executes them against the managed or custom servers,
+using the signed-in user’s identity where possible (on-behalf-of-user
+authentication) so Unity Catalog permissions apply per user.</li>
+<li>Results go back to the model, which writes the explanation, while the app
+renders the <em>actual numbers</em> in tables and charts from the tool output.</li>
+</ol>
+<p>Rendering numbers from tool results, not from the model’s prose, is a simple
+and important guard against hallucinated metrics.</p>
+<p>Databricks also provides client helpers for connecting agent code to its MCP
+servers. Follow
+<a href="https://docs.databricks.com/aws/en/agents/mcp-tools/use-mcp-in-agents">Use MCP servers in agents</a>
+for the currently supported library and authentication pattern rather than
+copying older snippets.</p>
+</div>
+<div id="pattern-4-coding-agents-connected-to-the-workspace" class="section level3 hasAnchor" number="13.7.5">
+<h3><span class="header-section-number">13.7.5</span> Pattern 4: Coding agents connected to the workspace<a href="model-context-protocol.html#pattern-4-coding-agents-connected-to-the-workspace" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Connecting Claude Code to the managed Databricks SQL server lets a coding agent
+inspect schemas and run read-only exploratory queries while you build a job or
+app. Point it at a development catalog, prefer a role with read-only access,
+and treat its query results as exploration, not validated analysis.</p>
+</div>
+</div>
+<div id="choosing-the-right-integration" class="section level2 hasAnchor" number="13.8">
+<h2><span class="header-section-number">13.8</span> Choosing the right integration<a href="model-context-protocol.html#choosing-the-right-integration" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Need</th>
+<th>Prefer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stable, reusable metric or analysis</td>
+<td>Unity Catalog function via the managed server</td>
+</tr>
+<tr>
+<td>Business users asking questions of curated tables</td>
+<td>Genie space via the managed server</td>
+</tr>
+<tr>
+<td>Search over briefs, decks, or research</td>
+<td>Vector (AI) Search via the managed server</td>
+</tr>
+<tr>
+<td>Long-running or multi-step workflows (lookalike, scoring)</td>
+<td>Custom server on Databricks Apps wrapping existing Jobs</td>
+</tr>
+<tr>
+<td>One-off personal automation on a laptop</td>
+<td>Local stdio server</td>
+</tr>
+<tr>
+<td>A fixed pipeline with no model in the loop</td>
+<td>No MCP; a scheduled Databricks Job is simpler</td>
+</tr>
+</tbody>
+</table>
+<p>MCP adds value when a <em>model</em> must choose among capabilities at run time. If
+the sequence of steps is fixed, ordinary code or orchestration is simpler,
+cheaper, and easier to test.</p>
+</div>
+<div id="security-governance-and-failure-modes" class="section level2 hasAnchor" number="13.9">
+<h2><span class="header-section-number">13.9</span> Security, governance, and failure modes<a href="model-context-protocol.html#security-governance-and-failure-modes" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>MCP servers give a model real access, so treat them as production integrations.</p>
+<ul>
+<li><strong>Least privilege.</strong> Use dedicated service principals or on-behalf-of-user
+authentication, restrict servers to the catalogs and schemas they need, and
+prefer read-only access for exploration.</li>
+<li><strong>Prompt injection.</strong> Content returned by a tool (documents, web pages,
+free-text table fields) can contain instructions. Treat tool output as data,
+and keep humans approving actions that write, spend, or send.</li>
+<li><strong>Trust in third-party servers.</strong> A server runs code and sees your data.
+Install only from trusted publishers, pin versions, and review what each tool
+can do.</li>
+<li><strong>Secrets.</strong> Keep tokens in environment variables or secret scopes, never in
+<code>.mcp.json</code>, notebooks, or prompts.</li>
+<li><strong>Too many tools.</strong> Dozens of overlapping tools confuse tool selection and
+consume context. Expose a small set of well-described, task-shaped tools.</li>
+<li><strong>Privacy.</strong> Audience data can be personal data. Return aggregates, enforce
+minimum cell sizes, and avoid passing user-level identifiers to a model
+unless that use is approved.</li>
+<li><strong>Cost.</strong> Tools that trigger clusters or jobs should require confirmation and
+report expected cost or runtime.</li>
+<li><strong>Version drift.</strong> The protocol, SDKs, and vendor servers change. Pin
+versions and recheck documentation when something breaks.</li>
+</ul>
+<p>As with skills, MCP is not itself a security boundary. Enforcement belongs in
+Unity Catalog permissions, Apps permissions, host approval settings, and hooks.</p>
+</div>
+<div id="exercise-expose-one-analysis-as-a-governed-tool" class="section level2 hasAnchor" number="13.10">
+<h2><span class="header-section-number">13.10</span> Exercise: expose one analysis as a governed tool<a href="model-context-protocol.html#exercise-expose-one-analysis-as-a-governed-tool" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ol style="list-style-type: decimal">
+<li>Pick one analysis you repeat often, such as audience overlap.</li>
+<li>Write it as a Unity Catalog SQL function with clear function and parameter
+comments.</li>
+<li>Test it directly in SQL with known segments, including empty and identical
+segments.</li>
+<li>Connect a host (Claude Code or a small Streamlit prototype) to the managed
+functions server for that function.</li>
+<li>Ask questions that <em>should</em> trigger the tool, questions that should not, and
+an ambiguous question. Record whether tool selection and answers were
+correct.</li>
+<li>Check that numbers in the final answer match the tool output exactly.</li>
 </ol>
 </div>
-<div id="example" class="section level3 hasAnchor" number="1.5.11">
-<h3><span class="header-section-number">1.5.11</span> Example<a href="foundations-of-generative-ai-and-llms.html#example" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="key-takeaways-9" class="section level2 hasAnchor" number="13.11">
+<h2><span class="header-section-number">13.11</span> Key takeaways<a href="model-context-protocol.html#key-takeaways-9" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <ul>
-<li><p>Input: French phrase “Je t’aime la machine d’apprentissage”.</p></li>
-<li><p>Tokenized input is processed through the encoder and decoder.</p></li>
-<li><p>Output: “I love machine learning”.</p></li>
+<li>MCP is an open protocol that lets any compliant AI application use any
+compliant data source or tool, turning M × N integrations into M + N.</li>
+<li>Hosts contain clients; each client connects to one server; servers expose
+tools, resources, and prompts.</li>
+<li>Use stdio for local, personal servers and Streamable HTTP for shared, remote,
+governed servers.</li>
+<li>On Databricks, start with managed servers and Unity Catalog functions for
+reusable logic, and add a custom server on Databricks Apps for job-shaped
+workflows such as lookalike modeling.</li>
+<li>Tool descriptions are prompts: say what a tool does, when to use it, and when
+not to.</li>
+<li>Apply least privilege, guard against prompt injection, protect personal data,
+and render reported numbers from tool output.</li>
 </ul>
 </div>
-</div>
-<div id="transformer-architecture-1" class="section level2 hasAnchor" number="1.6">
-<h2><span class="header-section-number">1.6</span> Transformer Architecture<a href="foundations-of-generative-ai-and-llms.html#transformer-architecture-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<div id="overview-1" class="section level3 hasAnchor" number="1.6.1">
-<h3><span class="header-section-number">1.6.1</span> Overview<a href="foundations-of-generative-ai-and-llms.html#overview-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>The transformer architecture consists of <strong>encoder</strong> and <strong>decoder</strong> components, essential for various natural language processing tasks.</p>
-</div>
-<div id="encoder" class="section level3 hasAnchor" number="1.6.2">
-<h3><span class="header-section-number">1.6.2</span> Encoder<a href="foundations-of-generative-ai-and-llms.html#encoder" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="references" class="section level2 hasAnchor" number="13.12">
+<h2><span class="header-section-number">13.12</span> References<a href="model-context-protocol.html#references" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <ul>
-<li><p><strong>Function</strong>: Encodes input sequences into a deep representation of their structure and meaning.</p></li>
-<li><p><strong>Usage</strong>:</p>
-<ul>
-<li><p>You can train encoder-only models to perform classification tasks such as sentiment analysis</p></li>
-<li><p>Encoder-only models such as BERT produce contextual representations for
-input tokens. A task head can produce sequence-level outputs (for example,
-classification) or token-level outputs (for example, named-entity labels).</p></li>
-<li><p>With additional layers, you can train encoder-only models to perform classification tasks like sentiment analysis.</p></li>
-</ul></li>
+<li><a href="https://modelcontextprotocol.io/docs/learn/architecture">MCP architecture overview</a></li>
+<li><a href="https://modelcontextprotocol.io/specification/latest">MCP specification</a></li>
+<li><a href="https://modelcontextprotocol.io/docs/develop/build-server">Build an MCP server (official quickstart)</a></li>
+<li><a href="https://code.claude.com/docs/en/mcp">Claude Code: connect tools via MCP</a></li>
+<li><a href="https://docs.databricks.com/aws/en/agents/mcp-tools/">Databricks: MCP on Databricks</a></li>
+<li><a href="https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp">Databricks: managed MCP servers</a></li>
+<li><a href="https://docs.databricks.com/aws/en/agents/mcp-tools/custom-mcp">Databricks: custom MCP servers on Databricks Apps</a></li>
 </ul>
-</div>
-<div id="decoder" class="section level3 hasAnchor" number="1.6.3">
-<h3><span class="header-section-number">1.6.3</span> Decoder<a href="foundations-of-generative-ai-and-llms.html#decoder" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<ul>
-<li><p><strong>Function</strong>: In an encoder-decoder model, the decoder conditions on encoder
-representations and previously generated tokens. In a decoder-only model,
-generation conditions on the preceding token sequence without a separate
-encoder.</p></li>
-<li><p><strong>Usage</strong>:</p>
-<ul>
-<li>Decoder-only models, such as GPT-family, BLOOM, and Llama models, are
-widely used for generative tasks. Their performance varies by model,
-prompting or adaptation method, and evaluation domain.</li>
-</ul></li>
-</ul>
-</div>
-<div id="encoder-decoder-models" class="section level3 hasAnchor" number="1.6.4">
-<h3><span class="header-section-number">1.6.4</span> Encoder-Decoder Models<a href="foundations-of-generative-ai-and-llms.html#encoder-decoder-models" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<ul>
-<li><p><strong>Function</strong>: Handle sequence-to-sequence tasks where input and output sequences can differ in length.</p></li>
-<li><p><strong>Examples</strong>: BART, T5.</p></li>
-<li><p><strong>Usage</strong>: Suitable for tasks like translation and general text generation.</p></li>
-</ul>
-</div>
-<div id="practical-application" class="section level3 hasAnchor" number="1.6.5">
-<h3><span class="header-section-number">1.6.5</span> Practical Application<a href="foundations-of-generative-ai-and-llms.html#practical-application" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<ul>
-<li><p><strong>Main Goal</strong>: Understand the differences between various models to read model documentation effectively.</p></li>
-<li><p><strong>Prompt Engineering</strong>: Interact with transformer models through natural language prompts, focusing on written words rather than code.</p></li>
-</ul>
-<p><strong>Transformers: Attention is all you need</strong></p>
-<p>“Attention is All You Need” is a research paper published in 2017 by Google researchers, which introduced the Transformer model, a novel architecture that revolutionized the field of natural language processing (NLP) and became the basis for the LLMs we now know - such as GPT, PaLM and others. The paper proposes a neural network architecture that replaces traditional recurrent neural networks (RNNs) and convolutional neural networks (CNNs) with an entirely attention-based mechanism.</p>
-<p>The Transformer model uses self-attention to compute representations of input sequences, which allows it to capture long-term dependencies and parallelize computation effectively. The authors demonstrate that their model achieves state-of-the-art performance on several machine translation tasks and outperforms previous models that rely on RNNs or CNNs.</p>
-<p>The Transformer architecture consists of an encoder and a decoder, each of which is composed of several layers. Each layer consists of two sub-layers: a multi-head self-attention mechanism and a feed-forward neural network. The multi-head self-attention mechanism allows the model to attend to different parts of the input sequence, while the feed-forward network applies a point-wise fully connected layer to each position separately and identically.</p>
-<p>The Transformer model also uses residual connections and layer normalization to facilitate training and prevent overfitting. In addition, the authors introduce a positional encoding scheme that encodes the position of each token in the input sequence, enabling the model to capture the order of the sequence without the need for recurrent or convolutional operations.</p>
-</div>
-</div>
-<div id="some-well-known-models" class="section level2 hasAnchor" number="1.7">
-<h2><span class="header-section-number">1.7</span> Some well-known models<a href="foundations-of-generative-ai-and-llms.html#some-well-known-models" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<div id="bert" class="section level3 hasAnchor" number="1.7.1">
-<h3><span class="header-section-number">1.7.1</span> BERT<a href="foundations-of-generative-ai-and-llms.html#bert" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p><strong>BERT</strong> (Bidirectional Encoder Representations from Transformers) is a <strong>transformer-based language model</strong> developed by Google in 2018, designed specifically for natural language understanding (NLU) tasks. BERT differs from earlier models because of its <strong>bidirectional training</strong> approach, which allows it to understand context in a nuanced way by considering both the left and right context in a sentence.</p>
-<div id="key-details-about-bert" class="section level4 hasAnchor" number="1.7.1.1">
-<h4><span class="header-section-number">1.7.1.1</span> Key Details About BERT:<a href="foundations-of-generative-ai-and-llms.html#key-details-about-bert" class="anchor-section" aria-label="Anchor link to header"></a></h4>
-<ol style="list-style-type: decimal">
-<li><p><strong>Parameter Sizes</strong>:</p>
-<ul>
-<li><p><strong>BERT Base</strong>: 110 million parameters (12 layers, 768 hidden units, 12 attention heads)</p></li>
-<li><p><strong>BERT Large</strong>: 340 million parameters (24 layers, 1024 hidden units, 16 attention heads)</p></li>
-</ul></li>
-<li><p><strong>Bidirectional Training</strong>: BERT’s bidirectional approach uses <strong>masked language modeling</strong> (MLM) during training. This means it randomly masks words in a sentence and trains the model to predict them based on the surrounding context, giving it a deeper understanding of word relationships.</p></li>
-<li><p><strong>Pretraining Tasks</strong>:</p>
-<ul>
-<li><p><strong>Masked Language Modeling (MLM)</strong>: BERT masks a portion of the words in a sentence and tries to predict the missing words.</p></li>
-<li><p><strong>Next Sentence Prediction (NSP)</strong>: BERT also learns to predict if one sentence logically follows another, which helps with tasks like question answering and sentence-pair classification.</p></li>
-</ul></li>
-<li><p><strong>Fine-Tuning for Specific Tasks</strong>: BERT’s architecture is flexible, allowing it to be fine-tuned for a range of NLP tasks with minimal additional training. Common tasks include:</p>
-<ul>
-<li><p><strong>Sentiment Analysis</strong></p></li>
-<li><p><strong>Named Entity Recognition (NER)</strong></p></li>
-<li><p><strong>Question Answering (e.g., SQuAD benchmark)</strong></p></li>
-<li><p><strong>Text Classification and Similarity Tasks</strong></p></li>
-</ul></li>
-<li><p><strong>Impact and Variants</strong>: BERT set a new benchmark in NLP, and its architecture has inspired many derivatives and improvements, including <strong>RoBERTa</strong> (by Facebook AI), <strong>DistilBERT</strong> (a smaller, faster BERT), and <strong>ALBERT</strong> (a more efficient BERT variant).</p></li>
-</ol>
-<p>BERT transformed NLP by demonstrating how powerful bidirectional transformers can be for understanding language context, which has since influenced other models like GPT, T5, and BLOOM.</p>
-</div>
-</div>
-<div id="bloom" class="section level3 hasAnchor" number="1.7.2">
-<h3><span class="header-section-number">1.7.2</span> BLOOM<a href="foundations-of-generative-ai-and-llms.html#bloom" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p><strong>BLOOM</strong> (BigScience Large Open-science Open-access Multilingual Language Model) is a large language model created by the <strong>BigScience</strong> project, an open scientific collaboration led by Hugging Face with researchers worldwide. BLOOM is designed to handle multiple languages and tasks, such as text generation, summarization, and translation, in a way similar to models like GPT-3.</p>
-<div id="key-details-about-bloom" class="section level4 hasAnchor" number="1.7.2.1">
-<h4><span class="header-section-number">1.7.2.1</span> Key Details About BLOOM:<a href="foundations-of-generative-ai-and-llms.html#key-details-about-bloom" class="anchor-section" aria-label="Anchor link to header"></a></h4>
-<ol style="list-style-type: decimal">
-<li><p><strong>Parameter Size</strong>: BLOOM has <strong>176 billion parameters</strong> in its largest version, making it one of the largest open-access language models available. There are smaller versions with fewer parameters, which are used for different applications requiring less computational power.</p></li>
-<li><p><strong>Multilingual Capacity</strong>: BLOOM was trained on <strong>46 languages</strong> and 13 programming languages, including English, French, Arabic, Spanish, Chinese, and more, making it versatile in multilingual NLP tasks.</p></li>
-<li><p><strong>Training Data</strong>: The model was trained on a vast, diverse dataset of over 1.5 terabytes of text data, which includes a variety of domains to help BLOOM perform across multiple contexts and languages.</p></li>
-<li><p><strong>Open Access</strong>: One of the primary goals of the BLOOM model is transparency and open accessibility for the AI research community, unlike other large models that are proprietary.</p></li>
-</ol>
-<p>If you’re working in NLP or language modeling, BLOOM is an excellent model to explore due to its openness, multilingual capabilities, and state-of-the-art performance across various tasks.</p>
-</div>
-</div>
-</div>
-<div id="prompt-engineering" class="section level2 hasAnchor" number="1.8">
-<h2><span class="header-section-number">1.8</span> Prompt Engineering<a href="foundations-of-generative-ai-and-llms.html#prompt-engineering" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p><strong>Introduction</strong></p>
-<p>Prompt engineering involves crafting and refining the input text (prompt) fed to a model to influence its behavior during inference, resulting in desired output (completion). The total text available for the prompt is called the context window.</p>
-<div id="key-concepts" class="section level3 hasAnchor" number="1.8.1">
-<h3><span class="header-section-number">1.8.1</span> Key Concepts<a href="foundations-of-generative-ai-and-llms.html#key-concepts" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p><strong>Prompt Engineering</strong></p>
-<ul>
-<li><p><strong>Definition</strong>: The process of developing and improving the prompt to achieve desired model behavior.</p></li>
-<li><p><strong>Strategy</strong>: Including examples of the task within the prompt, known as in-context learning.</p></li>
-</ul>
-<p><strong>In-Context Learning</strong></p>
-<ul>
-<li><p><strong>Definition</strong>: Helping models learn the task by including examples in the prompt.</p></li>
-<li><p><strong>Example</strong>: For sentiment analysis, the prompt can include the instruction, review text, and an expected sentiment output.</p></li>
-</ul>
-<p><strong>Zero-Shot Inference</strong></p>
-<ul>
-<li><p><strong>Definition</strong>: Providing only the input data in the prompt without examples.</p></li>
-<li><p><strong>Effectiveness</strong>: Large models perform well; smaller models may struggle.</p></li>
-</ul>
-<p><strong>One-Shot Inference</strong></p>
-<ul>
-<li><p><strong>Definition</strong>: Including a single example in the prompt to guide the model.</p></li>
-<li><p><strong>Example</strong>: A sample review and sentiment analysis followed by the actual input review.</p></li>
-</ul>
-<p><strong>Few-Shot Inference</strong></p>
-<ul>
-<li><p><strong>Definition</strong>: Including multiple examples in the prompt to improve model understanding.</p></li>
-<li><p><strong>Example</strong>: A mix of positive and negative reviews to guide sentiment analysis.</p></li>
-</ul>
-<p><strong>Practical Considerations</strong></p>
-<p><strong>Context Window</strong></p>
-<ul>
-<li><strong>Limitation</strong>: There’s a limit on the amount of in-context learning that can be included.</li>
-<li><strong>Recommendation</strong>: If performance doesn’t improve with multiple examples, consider fine-tuning the model.</li>
-</ul>
-<p><strong>Fine-Tuning</strong></p>
-<ul>
-<li><strong>Definition</strong>: Additional training on the model with new data to improve task-specific performance.</li>
-<li><strong>Upcoming</strong>: Detailed exploration of fine-tuning will be covered in week 2 of the course.</li>
-</ul>
-<p><strong>Model Performance and Scale</strong></p>
-<ul>
-<li><p><strong>Observation</strong>: Model performance on various tasks depends on the scale (number of parameters).</p></li>
-<li><p><strong>Large Models</strong>: Good at zero-shot inference for multiple tasks.</p></li>
-<li><p><strong>Smaller Models</strong>: Generally limited to tasks similar to their training data.</p></li>
-</ul>
-<p><strong>Experimentation</strong></p>
-<ul>
-<li><p><strong>Recommendation</strong>: Experiment with different models and settings to find the best fit for your use case.</p></li>
-<li><p><strong>Next Steps</strong>: Explore configuration settings to influence the structure and style of model completions.</p></li>
-</ul>
-</div>
-</div>
-<div id="configuring-generative-ai-models" class="section level2 hasAnchor" number="1.9">
-<h2><span class="header-section-number">1.9</span> Configuring Generative AI Models<a href="foundations-of-generative-ai-and-llms.html#configuring-generative-ai-models" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p><strong>Overview</strong></p>
-<p>This lecture examines methods and configuration parameters used to influence a model’s next-word generation during inference. Unlike training parameters, these settings are adjusted at inference time to control aspects like the maximum number of tokens generated and the creativity of the output.</p>
-<p><strong>Key Configuration Parameters</strong></p>
-<p><strong>1. Max New Tokens</strong></p>
-<ul>
-<li><p><strong>Definition</strong>: Limits the number of tokens the model generates.</p></li>
-<li><p><strong>Usage</strong>: Set to values like 100, 150, or 200 to cap the generation process.</p></li>
-<li><p><strong>Example</strong>: If set to 200, the generation might end sooner if an end-of-sequence token is predicted.</p></li>
-</ul>
-<p><strong>2. Greedy Decoding</strong></p>
-<ul>
-<li><p><strong>Definition</strong>: The model always selects the word with the highest probability.</p></li>
-<li><p><strong>Characteristics</strong>: Works well for short texts but can lead to repetitive outputs.</p></li>
-</ul>
-<p><strong>3. Random Sampling</strong></p>
-<ul>
-<li><p><strong>Definition</strong>: Selects the next word based on the probability distribution.</p></li>
-<li><p><strong>Advantages</strong>: Introduces variability to avoid repetitive text.</p></li>
-<li><p><strong>Disadvantages</strong>: Can produce outputs that are too creative or nonsensical.</p></li>
-<li><p><strong>Implementation</strong>: In Hugging Face, set <code>do_sample=True</code>.</p></li>
-</ul>
-<p><strong>4. Top-k Sampling</strong></p>
-<ul>
-<li><p><strong>Definition</strong>: Limits choices to the top k highest probability tokens.</p></li>
-<li><p><strong>Example</strong>: If k=3, the model selects from the top 3 probable words.</p></li>
-<li><p><strong>Benefit</strong>: Balances randomness and coherence in the output.</p></li>
-</ul>
-<p><strong>5. Top-p (Nucleus) Sampling</strong></p>
-<ul>
-<li><p><strong>Definition</strong>: Chooses from tokens whose cumulative probability meets a threshold p.</p></li>
-<li><p><strong>Example</strong>: If p=0.3, selects from tokens that together have a probability of 0.3.</p></li>
-<li><p><strong>Benefit</strong>: Ensures sensible and coherent generation by limiting low-probability words.</p></li>
-</ul>
-<p><strong>6. Temperature</strong></p>
-<ul>
-<li><p><strong>Definition</strong>: Controls the randomness by scaling the probability distribution.</p></li>
-<li><p><strong>Effect</strong>:</p>
-<ul>
-<li><p>Low temperature (&lt;1): Concentrates probability on fewer words, producing less random and more predictable text.</p></li>
-<li><p>High temperature (&gt;1): Spreads probability more evenly, increasing randomness and creativity.</p></li>
-<li><p>Temperature=1: Uses the default probability distribution.</p></li>
-</ul></li>
-</ul>
-<p><img src="figures/parameter_temp.png" /></p>
-</div>
-<div id="generative-ai-project-lifecycle" class="section level2 hasAnchor" number="1.10">
-<h2><span class="header-section-number">1.10</span> Generative AI project lifecycle<a href="foundations-of-generative-ai-and-llms.html#generative-ai-project-lifecycle" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p><strong>Introduction</strong></p>
-<p>Throughout this course, you’ll learn the techniques required to develop and deploy an LLM-powered application. This video introduces the generative AI project life cycle, guiding you from conception to launch.</p>
-<div id="project-life-cycle-stages" class="section level3 hasAnchor" number="1.10.1">
-<h3><span class="header-section-number">1.10.1</span> Project Life Cycle Stages<a href="foundations-of-generative-ai-and-llms.html#project-life-cycle-stages" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p><img src="figures/project_life.png" /></p>
-<div id="define-the-scope" class="section level4 hasAnchor" number="1.10.1.1">
-<h4><span class="header-section-number">1.10.1.1</span> Define the Scope<a href="foundations-of-generative-ai-and-llms.html#define-the-scope" class="anchor-section" aria-label="Anchor link to header"></a></h4>
-<ul>
-<li><p><strong>Importance</strong>: Accurately and narrowly define the project’s scope.</p></li>
-<li><p><strong>Considerations</strong>:</p></li>
-<li><p>What specific function will the LLM serve in your application?</p></li>
-<li><p>Does the model need to perform various tasks or focus on one specific task (e.g., named entity recognition)?</p></li>
-<li><p><strong>Outcome</strong>: Save time and compute costs by clearly defining requirements.</p></li>
-</ul>
-</div>
-<div id="choose-a-model" class="section level4 hasAnchor" number="1.10.1.2">
-<h4><span class="header-section-number">1.10.1.2</span> Choose a Model<a href="foundations-of-generative-ai-and-llms.html#choose-a-model" class="anchor-section" aria-label="Anchor link to header"></a></h4>
-<ul>
-<li><p><strong>Decision</strong>: Train your own model from scratch or use an existing base model.</p></li>
-<li><p><strong>Common Approach</strong>: Start with an existing model.</p></li>
-<li><p><strong>Considerations</strong>: Later in the course, you’ll learn rules of thumb to help estimate the feasibility of training your own model.</p></li>
-</ul>
-</div>
-<div id="assess-and-train-the-model" class="section level4 hasAnchor" number="1.10.1.3">
-<h4><span class="header-section-number">1.10.1.3</span> Assess and Train the Model<a href="foundations-of-generative-ai-and-llms.html#assess-and-train-the-model" class="anchor-section" aria-label="Anchor link to header"></a></h4>
-<ul>
-<li><p><strong>Initial Steps</strong>: Use prompt engineering and in-context learning to improve model performance.</p></li>
-<li><p><strong>Fine-Tuning</strong>:</p></li>
-<li><p>Necessary if prompt engineering is insufficient.</p></li>
-<li><p>Supervised learning process covered in Week 2.</p></li>
-<li><p><strong>Reinforcement Learning with Human Feedback (RLHF)</strong>:</p></li>
-<li><p>Ensures the model behaves well and aligns with human preferences. - Covered in Week 3.</p></li>
-</ul>
-</div>
-<div id="evaluate-the-model" class="section level4 hasAnchor" number="1.10.1.4">
-<h4><span class="header-section-number">1.10.1.4</span> Evaluate the Model<a href="foundations-of-generative-ai-and-llms.html#evaluate-the-model" class="anchor-section" aria-label="Anchor link to header"></a></h4>
-<ul>
-<li><strong>Metrics and Benchmarks</strong>: Explore next week.</li>
-<li><strong>Iterative Process</strong>:
-<ul>
-<li>Start with prompt engineering.</li>
-<li>Evaluate outputs and fine-tune if necessary.</li>
-<li>Revisit and refine prompt engineering.</li>
-</ul></li>
-</ul>
-</div>
-<div id="deployment" class="section level4 hasAnchor" number="1.10.1.5">
-<h4><span class="header-section-number">1.10.1.5</span> Deployment<a href="foundations-of-generative-ai-and-llms.html#deployment" class="anchor-section" aria-label="Anchor link to header"></a></h4>
-<ul>
-<li><strong>Final Steps</strong>:
-<ul>
-<li>Optimize the model for deployment.</li>
-<li>Integrate the model with your application.</li>
-<li>Ensure efficient use of compute resources for a better user experience.</li>
-</ul></li>
-</ul>
-</div>
-<div id="additional-infrastructure-considerations" class="section level4 hasAnchor" number="1.10.1.6">
-<h4><span class="header-section-number">1.10.1.6</span> Additional Infrastructure Considerations<a href="foundations-of-generative-ai-and-llms.html#additional-infrastructure-considerations" class="anchor-section" aria-label="Anchor link to header"></a></h4>
-<ul>
-<li><strong>Limitations of LLMs</strong>:
-<ul>
-<li>Tendency to invent information when unsure.</li>
-<li>Limited ability to perform complex reasoning and mathematics.</li>
-</ul></li>
-<li><strong>Overcoming Limitations</strong>:
-<ul>
-<li>Learn techniques to address these issues in the final part of the course.</li>
-</ul></li>
-</ul>
-</div>
-<div id="conclusion" class="section level4 hasAnchor" number="1.10.1.7">
-<h4><span class="header-section-number">1.10.1.7</span> Conclusion<a href="foundations-of-generative-ai-and-llms.html#conclusion" class="anchor-section" aria-label="Anchor link to header"></a></h4>
-<p>This framework maps out the tasks required to take your project from conception to launch, providing insights into important decisions, potential difficulties, and necessary infrastructure for developing and deploying your application.</p>
 
-</div>
-</div>
 </div>
 </div>
             </section>
@@ -1036,8 +1079,8 @@ prompting or adaptation method, and evaluation domain.</li>
           </div>
         </div>
       </div>
-<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="pre-training-and-scaling-large-language-models.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="notebooks.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
