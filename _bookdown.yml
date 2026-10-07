@@ -21,4 +21,5 @@ rmd_files:
   - __repo/claude/11_Context_Harness_Engineering.Rmd
   - __repo/claude/12_AI_Marketing_Analytics.Rmd
   - __repo/claude/13_Classification_Lookalike.Rmd
+  - __repo/claude/14_Supervisor_Agents.Rmd
 output_dir: "docs"

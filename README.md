@@ -12,7 +12,7 @@ Published book: <https://davutemrah.github.io/GenAI_Repo/>
 - `__repo/*.Rmd` — LLM foundations, pre-training, fine-tuning, and evaluation.
 - `__repo/claude/*.Rmd` — Claude, coding-agent, verification, notebook, MCP,
   context- and harness-engineering, AI-in-marketing-analytics, and
-  classification/lookalike-modeling chapters.
+  classification/lookalike-modeling, and supervisor-agent chapters.
 - `_bookdown.yml` — explicit chapter order and `docs/` publication target.
 - `_output.yml` — GitBook presentation and navigation.
 - `style.css` — book-specific styling.

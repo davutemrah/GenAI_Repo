@@ -1,0 +1,363 @@
+# Supervisor Agents and Multi-Agent Systems on Databricks {#supervisor-agents}
+
+## Introduction
+
+A single agent with a few tools can answer many questions. Real analytics
+questions often cross domains, though: *"Why did conversions drop for the
+spring campaign, and which audience should we test next?"* needs campaign
+metrics, audience overlap, research reports, and perhaps a modeling job. A
+**supervisor agent** handles this by coordinating specialized agents and tools.
+It decides who should answer each part, delegates, and combines the results.
+
+This chapter covers:
+
+1. the supervisor pattern and when multiple agents help or hurt;
+2. Databricks **Supervisor Agent**: how it works and how to build one;
+3. what Databricks recommends for new work as of October 2026; and
+4. a marketing-analytics example with descriptions, test questions, and
+   evaluation.
+
+It builds on MCP (Chapter \@ref(model-context-protocol)), context and harness
+engineering (Chapter \@ref(context-harness-engineering)), and the analytics
+tools in Chapter \@ref(classification-lookalike).
+
+> **Status check (October 2026).** On 6 October 2026 the Databricks
+> documentation labeled **Supervisor Agent a legacy offering**. For new low-code
+> agents it recommends **Genie Agents**. To coordinate multiple agents in code
+> it recommends the **Agent Bricks CLI**, which was in Beta at the time of
+> writing. The related **Supervisor API** (Beta) was deprecated, with end of life
+> on 30 September 2026. The *supervisor pattern* in this chapter remains
+> current; the specific product is likely to change. Check the
+> [Supervisor Agent page](https://docs.databricks.com/aws/en/agents/agent-bricks/multi-agent-supervisor)
+> and [What is Agent Bricks?](https://docs.databricks.com/aws/en/agents/concepts)
+> before building.
+
+## The supervisor pattern
+
+### What a supervisor does
+
+A supervisor is an agent whose tools are *other agents* (and ordinary tools).
+For each request it:
+
+1. **interprets** the question and breaks it into parts;
+2. **routes** each part to the subagent or tool whose description fits best;
+3. **delegates** and collects the answers; and
+4. **synthesizes** one response, or asks the user to clarify.
+
+Anthropic describes the same idea as the *orchestrator–workers* workflow: a
+central model breaks down a task, delegates subtasks to workers, and
+synthesizes their results
+([Building effective agents](https://www.anthropic.com/engineering/building-effective-agents)).
+
+### Common multi-agent shapes
+
+| Pattern | How it works | Good for |
+|---|---|---|
+| **Router** | Sends the whole request to one specialist | Clearly separable domains (billing vs. analytics) |
+| **Supervisor** | Splits the request, calls several specialists, combines results | Cross-domain questions |
+| **Hierarchical** | A supervisor calls other supervisors | Large organizations with domain teams |
+| **Pipeline** | Fixed sequence of steps | Repeatable workflows; often better as ordinary code |
+
+### When multiple agents help, and when they hurt
+
+**They help when:**
+
+- domains have different data, permissions, and owners (each team curates its
+  own Genie Agent);
+- a specialist needs a focused context, which is the *isolate* technique from
+  Chapter \@ref(context-harness-engineering); and
+- subtasks can run independently and be combined.
+
+**They hurt when:**
+
+- the task needs one shared, detailed understanding that gets lost in
+  handoffs;
+- latency and cost matter, because every delegation adds model calls; and
+- a fixed workflow would do. A scheduled job is simpler, cheaper, and easier to
+  test than an agent deciding the steps each time.
+
+A good rule: **start with one well-scoped agent, and add a supervisor only when
+routing between distinct, well-defined specialists is the actual problem.**
+
+## Databricks Supervisor Agent
+
+The facts in this section come from the
+[Supervisor Agent documentation](https://docs.databricks.com/aws/en/agents/agent-bricks/multi-agent-supervisor)
+as of 6 October 2026.
+
+### What it provides
+
+Supervisor Agent builds a supervisor system that coordinates Genie Agents,
+agent endpoints, Unity Catalog functions, MCP servers, and custom agents. It
+produces a serving endpoint that you can query from AI Playground, the API, or
+a Databricks App. Domain experts can improve its routing with
+natural-language feedback. Databricks lists use cases such as market analysis
+across research reports and usage data, internal-process questions, and
+customer-service answers.
+
+### Requirements
+
+- Serverless compute and Unity Catalog enabled, in a supported region.
+- Access to Model Serving and to a serverless usage policy with a nonzero
+  budget.
+- At least one subagent ready to use.
+- End users need explicit access to each subagent (next table).
+
+### Supported subagents and required end-user permissions
+
+| Subagent or tool | Required end-user permission |
+|---|---|
+| Genie Agent | Access to the Genie Agent and its underlying Unity Catalog objects |
+| Published dashboard | `CAN VIEW` on the dashboard |
+| Knowledge Assistant endpoint | `CAN QUERY` on the endpoint |
+| Model serving endpoint | `CAN QUERY` on the endpoint |
+| Unity Catalog function | `EXECUTE` on the function |
+| Unity Catalog table | `SELECT`, plus `USE CATALOG` and `USE SCHEMA` |
+| Unity Catalog volume | `READ VOLUME`, plus `USE CATALOG` and `USE SCHEMA` |
+| AI Search index (Delta Sync only) | `SELECT`, plus `USE CATALOG` and `USE SCHEMA` |
+| Another Supervisor Agent | `CAN QUERY` on it |
+| Unity Catalog MCP Service | `EXECUTE`, plus `USE CATALOG` and `USE SCHEMA` |
+| Custom MCP server or custom agent on Databricks Apps | `CAN_USE` on the app |
+| Web search (built in) | No extra permission; the user approves each search |
+
+A supervisor can use **up to 50 agents and tools**.
+
+**Access control is per user.** End users reach only the subagents and data
+they are allowed to use. If a user can access none of the subagents, the
+supervisor ends the conversation. If they can access only some, it steers away
+from the others. This is the behavior an agency needs when different teams may
+see different clients' data.
+
+### Built-in code execution
+
+Every supervisor includes a code execution tool. It runs model-generated
+Python (default), SQL, or shell commands in a sandboxed serverless session with
+**no internet access**. Its only data access is read-only access to the Unity
+Catalog tables and volumes added as tools, subject to the end user's
+permissions. Databricks warns that running arbitrary code can expose data the
+agent can reach, so permissions and guardrails remain the customer's
+responsibility.
+
+### Web search
+
+Web search uses the `databricks-gpt-5` Foundation Model API regardless of the
+model that powers the supervisor. The workspace must allow that model, and web
+search is unavailable in some regions and in workspaces with the Enhanced
+Security and Compliance add-on. The supervisor asks the user to approve each
+search before sending the query to the public web. Never let client data
+appear in a web query.
+
+### Building one: five steps
+
+1. **Configure.** Go to **Agents → Create Agent → Supervisor Agent**. Add tools
+   and subagents, and write a **description for each one**; the supervisor
+   routes based on these descriptions. Optionally add supervisor-level
+   **Instructions** and a user-facing **Description**.
+2. **Test.** Chat in the right pane, or open the endpoint in AI Playground,
+   where AI Judge and synthetic task generation may be available. Check that
+   each question reaches the right subagent.
+3. **Improve.** In the **Examples** tab, add representative questions. Share
+   the configuration page with subject-matter experts (they need Can Manage on
+   the agent and access to the subagents). Experts attach natural-language
+   **Guidelines** to questions, and guidelines take effect when saved.
+4. **Manage permissions.** Grant **Can Manage** (edit and improve) or **Can
+   Query** (use the endpoint only) to users, groups, or service principals.
+5. **Query the endpoint.** From AI Playground, **Get code** provides curl and
+   Python examples for applications such as a Streamlit app on Databricks Apps.
+
+### Managing supervisors with the SDK (Beta)
+
+The Databricks SDK for Python can create supervisors and manage their tools.
+From the documentation:
+
+```python
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.supervisoragents import SupervisorAgent
+
+w = WorkspaceClient()
+supervisor_agent = SupervisorAgent(
+    display_name="<display-name>",
+    description="<description>",
+    instructions="<instructions>",
+)
+created = w.supervisor_agents.create_supervisor_agent(supervisor_agent=supervisor_agent)
+print(created)
+```
+
+Tools (subagents) are added with `w.supervisor_agents.create_tool(...)`, and
+their descriptions can be updated with `update_tool`. This lets a team keep
+supervisor configurations in version control and recreate them across
+workspaces. See the documentation for the tool types and fields.
+
+### Limitations
+
+- At most 50 agents and tools per supervisor.
+- AI Search subagents support only Delta Sync indexes.
+- Web search has the regional and compliance restrictions above.
+- It is a legacy offering, so plan for migration.
+
+## What to use for new work (October 2026)
+
+| Need | Databricks recommendation | Notes |
+|---|---|---|
+| Low-code agent over tables and documents | **Genie Agents** | Curated with Unity Catalog metadata, example SQL, instructions, and trusted assets |
+| Business users exploring data, dashboards, apps | **Genie One** | Can also be called as a tool by custom agents |
+| Custom agent in code, including multi-agent coordination | **Agent Bricks CLI** (Beta) deploying to Agent Runtime | Scaffolds a project, runs locally, deploys with managed memory, sessions, tools, and MLflow tracing |
+| Composing several agents, such as coding agents | **Omnigent** | Described by Databricks as a meta-harness |
+| Existing Supervisor Agent | Keep running, plan migration | Legacy; no new investment |
+
+Sources: [What is Agent Bricks?](https://docs.databricks.com/aws/en/agents/concepts),
+[September 2026 release notes](https://docs.databricks.com/aws/en/release-notes/product/2026/september).
+
+In code, the pattern stays the same. Databricks' multi-agent app template
+builds an **orchestrator that treats each subagent as a tool**: Genie Agents
+reached through their MCP server, other agents on Databricks Apps, and serving
+endpoints. Each subagent has a name, an endpoint, and a detailed description
+to improve routing
+([multi-agent apps](https://docs.databricks.com/aws/en/agents/custom-agents/multi-agent-apps)).
+That page uses the legacy agent server; follow the Agent Bricks CLI
+documentation for new deployments.
+
+**What carries over regardless of product:** clear subagent descriptions,
+per-user permissions, a labeled set of test questions, and expert guidelines.
+Building these now is not wasted if the product changes.
+
+## Worked example: a campaign insights supervisor
+
+An agency team wants one assistant for account leads that answers
+cross-domain questions about a client's campaigns.
+
+### The specialists
+
+| Subagent or tool | Type | What it covers |
+|---|---|---|
+| `campaign_performance` | Genie Agent over campaign metric views | Spend, impressions, reach, conversions, CPA by channel, market, and week |
+| `audience_overlap` | Unity Catalog function | Size and overlap of two audience segments |
+| `basket_affinity` | Unity Catalog function | Precomputed support, confidence, and lift for product pairs |
+| `lookalike_jobs` | Custom MCP server on Databricks Apps | Start the validated lookalike job; check status and results |
+| `research_library` | Document Q&A (Knowledge Assistant or AI Search index) | Client briefs, research reports, past campaign learnings |
+
+### Write descriptions that route well
+
+The supervisor routes on descriptions, so treat them as prompts. Compare:
+
+> *Weak:* "Campaign data."
+
+> *Strong:* "Answers quantitative questions about this client's paid-media
+> campaigns: spend, impressions, reach, clicks, conversions, CPA, and ROAS by
+> channel, market, campaign, and week, from 2024 onward. Use for 'how much',
+> 'how did it change', and 'which channel' questions. Does not contain
+> audience membership, product purchases, or research documents."
+
+A strong description says **what the tool covers, when to use it, and what it
+does not cover**. The "does not" part prevents many routing errors.
+
+### Test questions and expected routing
+
+| Question | Expected route |
+|---|---|
+| "What was CPA by channel last month in Germany?" | `campaign_performance` |
+| "How much do our sports-fans and new-parents segments overlap?" | `audience_overlap` |
+| "Which products are most often bought with running shoes?" | `basket_affinity` |
+| "Why did spring conversions drop, and what did last year's brief say about seasonality?" | `campaign_performance` + `research_library` |
+| "Build a 3% lookalike from the loyalty seed." | `lookalike_jobs`, after confirmation |
+| "What's the weather in Paris?" | Politely decline (out of scope) |
+| "Show me individual customer emails in the seed." | Decline (personal data) |
+
+### Expert guidelines
+
+Account leads and analysts add guidelines to example questions, such as:
+
+- "When reporting CPA, always state the date range and currency."
+- "Do not compare markets with different currencies without converting."
+- "For lookalike requests, confirm the seed, size, and client before starting a
+  job."
+- "Overlap results come from the function; never estimate overlap from
+  memory."
+- "If a question mixes two clients, ask which client is meant."
+
+### Agency-specific design choices
+
+- **Client separation.** Use one supervisor per client, or Unity Catalog row
+  filters and per-user permissions, so that no conversation can mix clients'
+  data. Test this explicitly with users who lack access.
+- **Numbers from tools.** Display numeric results from tool outputs, not from
+  the model's prose. Apply the number-check sensor from Chapter
+  \@ref(context-harness-engineering).
+- **Actions need confirmation.** Starting a job costs money; require explicit
+  user confirmation and log who approved it.
+- **Web search off or tightly scoped.** Client names or results must not appear
+  in public web queries.
+
+## Evaluating a supervisor
+
+Evaluate two things separately:
+
+1. **Routing accuracy.** For each labeled question, did the supervisor call the
+   expected subagents, and avoid the wrong ones? Trace data in MLflow shows
+   which tools were called.
+2. **Answer quality.** Are the numbers correct (they should match the tool
+   output exactly), is the answer grounded, and did the supervisor clarify or
+   decline when it should?
+
+Practical steps:
+
+- Build 30 to 50 labeled questions covering every subagent, multi-domain
+  questions, out-of-scope requests, and permission edge cases.
+- Run each question several times and report pass^k (all runs correct), not
+  just one lucky run.
+- Re-run the set after every change to descriptions, guidelines, or subagents.
+  A better description for one tool can steal traffic from another.
+- Use [MLflow GenAI evaluation](https://docs.databricks.com/aws/en/mlflow3/genai/eval-monitor)
+  with code-based checks for routing and number matching, and LLM judges or
+  expert review for answer quality.
+
+## Common pitfalls
+
+| Pitfall | Symptom | Fix |
+|---|---|---|
+| Overlapping descriptions | Questions bounce between two subagents | Make scopes exclusive; add "does not cover" lines |
+| Too many subagents | Slow, inconsistent routing | Merge narrow tools; add a supervisor only where domains truly differ |
+| Missing user permissions | "I can't help with that" for some users | Grant access to each subagent, or explain the restriction |
+| Synthesized numbers | The answer contains figures not in any tool output | Render numbers from tool outputs; add a number check |
+| Silent actions | Jobs started without approval | Require confirmation for writing or spending actions |
+| Untested changes | Quality drops after an edit | Re-run the labeled question set after every change |
+
+## Exercise: design a supervisor on paper
+
+1. List three to five specialists you already have or could build (a Genie
+   Agent, two Unity Catalog functions, a document index).
+2. Write a strong description for each, including what it does *not* cover.
+3. Write 15 test questions with expected routes, including two multi-domain
+   questions, two out-of-scope requests, and one permission edge case.
+4. Write five expert guidelines.
+5. Decide whether you need a supervisor at all, or whether one Genie Agent or a
+   scheduled job would do.
+
+## Key takeaways
+
+- A supervisor routes, delegates, and synthesizes across specialists; it is the
+  orchestrator–workers pattern.
+- Use multiple agents only when distinct domains, permissions, or contexts
+  justify them; otherwise one agent or a fixed workflow is simpler.
+- Databricks Supervisor Agent coordinates up to 50 agents and tools, enforces
+  per-user access, includes sandboxed code execution, and improves through
+  expert guidelines.
+- As of October 2026, Supervisor Agent is legacy. Use Genie Agents for low-code
+  work and the Agent Bricks CLI for custom multi-agent code.
+- Descriptions, permissions, labeled test questions, and guidelines are durable
+  assets that survive product changes.
+- Evaluate routing and answer quality separately, repeatedly, and after every
+  change.
+
+## References
+
+- [Databricks: Use Supervisor Agent to create a coordinated multi-agent system](https://docs.databricks.com/aws/en/agents/agent-bricks/multi-agent-supervisor)
+- [Databricks: What is Agent Bricks?](https://docs.databricks.com/aws/en/agents/concepts)
+- [Databricks: Create and manage a Genie Agent](https://docs.databricks.com/aws/en/genie-agents/set-up)
+- [Databricks: Curate an effective Genie Agent](https://docs.databricks.com/aws/en/genie-agents/best-practices)
+- [Databricks: Build a multi-agent system on Databricks Apps](https://docs.databricks.com/aws/en/agents/custom-agents/multi-agent-apps)
+- [Databricks: Supervisor API (deprecated)](https://docs.databricks.com/aws/en/agents/agent-bricks/supervisor-api)
+- [Databricks: September 2026 release notes](https://docs.databricks.com/aws/en/release-notes/product/2026/september)
+- [Databricks: MLflow GenAI evaluation](https://docs.databricks.com/aws/en/mlflow3/genai/eval-monitor)
+- [Anthropic: Building effective agents](https://www.anthropic.com/engineering/building-effective-agents)

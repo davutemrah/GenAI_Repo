@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 14 Context Engineering and Harness Engineering | Generative AI, Large Language Models, and Coding Agents</title>
+  <title>Chapter 17 Supervisor Agents and Multi-Agent Systems on Databricks | Generative AI, Large Language Models, and Coding Agents</title>
   <meta name="description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 14 Context Engineering and Harness Engineering | Generative AI, Large Language Models, and Coding Agents" />
+  <meta property="og:title" content="Chapter 17 Supervisor Agents and Multi-Agent Systems on Databricks | Generative AI, Large Language Models, and Coding Agents" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   <meta name="github-repo" content="davutemrah/GenAI_Repo" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 14 Context Engineering and Harness Engineering | Generative AI, Large Language Models, and Coding Agents" />
+  <meta name="twitter:title" content="Chapter 17 Supervisor Agents and Multi-Agent Systems on Databricks | Generative AI, Large Language Models, and Coding Agents" />
   
   <meta name="twitter:description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="model-context-protocol.html"/>
-<link rel="next" href="ai-marketing-analytics.html"/>
+<link rel="prev" href="classification-lookalike.html"/>
+
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -660,652 +660,594 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="context-harness-engineering" class="section level1 hasAnchor" number="14">
-<h1><span class="header-section-number">Chapter 14</span> Context Engineering and Harness Engineering<a href="context-harness-engineering.html#context-harness-engineering" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<div id="why-these-two-terms-matter" class="section level2 hasAnchor" number="14.1">
-<h2><span class="header-section-number">14.1</span> Why these two terms matter<a href="context-harness-engineering.html#why-these-two-terms-matter" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Earlier chapters covered prompting, verification loops, hooks, skills, and MCP
-as separate techniques. Two newer terms give those techniques a common frame:</p>
-<ul>
-<li><strong>Context engineering</strong> asks: <em>which tokens should the model see at this
-step?</em> It covers instructions, retrieved data, tool definitions, tool
-outputs, conversation history, and memory.</li>
-<li><strong>Harness engineering</strong> asks: <em>what system around the model makes it reliable
-over many steps?</em> It covers the agent loop, tools, sandbox, state files,
-hooks, permissions, tests, and evaluation.</li>
-</ul>
-<p>Both terms are young, and their boundaries are still debated. This chapter
-separates three kinds of claim: concepts that are likely to last, vendor
-practices and features that change quickly, and evidence. The evidence is
-labeled by strength throughout.</p>
-<p><strong>Source labels used in this chapter</strong></p>
-<ul>
-<li><strong>[Vendor]</strong>: an organization reporting on its own product or results.</li>
-<li><strong>[Secondary]</strong>: the original could not be read; the claim comes from a
-mirror, summary, or aggregator.</li>
-<li><strong>[Unverified]</strong>: no primary source was found.</li>
-</ul>
-<p>Product names, API identifiers, and preview status are as of October 2026.</p>
-</div>
-<div id="where-the-terms-came-from" class="section level2 hasAnchor" number="14.2">
-<h2><span class="header-section-number">14.2</span> Where the terms came from<a href="context-harness-engineering.html#where-the-terms-came-from" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<div id="context-engineering-mid-2025" class="section level3 hasAnchor" number="14.2.1">
-<h3><span class="header-section-number">14.2.1</span> Context engineering (mid-2025)<a href="context-harness-engineering.html#context-engineering-mid-2025" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>The term spread through a cluster of posts in June and July 2025. No single
-person has a verified claim to coining it, so “popularized by” is the accurate
-phrasing.</p>
-<ul>
-<li>Shopify CEO Tobi Lütke described it as “the art of providing all the context
-for the task to be plausibly solvable by the LLM” (June 2025, quoted by
-<a href="https://simonwillison.net/2025/Jun/27/context-engineering/">Simon Willison</a>).</li>
-<li>Harrison Chase of LangChain defined it as building dynamic systems that give
-the model “the right information and tools in the right format,” and credited
-earlier practitioners
-(<a href="https://www.langchain.com/blog/the-rise-of-context-engineering">LangChain</a>).</li>
-<li>Andrej Karpathy called it “the delicate art and science of filling the context
-window with just the right information for the next step.” He compared the
-model to a CPU and the context window to its RAM (June 2025, quoted by
-<a href="https://simonwillison.net/2025/Jun/27/context-engineering/">Simon Willison</a>).</li>
-<li>Drew Breunig named common ways long contexts fail
-(<a href="https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html">How contexts fail</a>;
-<a href="https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html">How to fix your context</a>).</li>
-<li>Manus published lessons from running a production agent
-(<a href="https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus">Manus, July 2025</a>).</li>
-<li>Anthropic’s engineering guide (29 September 2025) gave the most-cited
-definition: strategies for curating and maintaining the optimal set of tokens
-during LLM inference
-(<a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Anthropic</a>).</li>
-</ul>
-</div>
-<div id="harness-engineering-early-2026" class="section level3 hasAnchor" number="14.2.2">
-<h3><span class="header-section-number">14.2.2</span> Harness engineering (early 2026)<a href="context-harness-engineering.html#harness-engineering-early-2026" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>“Harness” and “scaffold” already meant the code around a model. The phrase
-<em>harness engineering</em> became common in early 2026.</p>
-<ul>
-<li>Phil Schmid (January 2026) described the agent harness as the infrastructure
-that wraps a model to manage long-running tasks, and said it is not the agent
-itself. He extended Karpathy’s analogy: model = CPU, context = RAM,
-harness = operating system, agent = application
-(<a href="https://www.philschmid.de/agent-harness-2026">philschmid.de</a>).</li>
-<li>Mitchell Hashimoto (February 2026) gave the most practical definition:
-whenever an agent makes a mistake, engineer a fix so it never makes that
-mistake again. His fixes were updates to <code>AGENTS.md</code> plus small,
-purpose-built scripts
-(<a href="https://mitchellh.com/writing/my-ai-adoption-journey">mitchellh.com</a>).</li>
-<li>OpenAI published “Harness engineering: leveraging Codex in an agent-first
-world” (February 2026). It describes a team that designs the environment
-while agents write the code
-(<a href="https://openai.com/index/harness-engineering/">OpenAI</a>). <strong>[Secondary]</strong>:
-the page could not be read for this chapter. Its widely repeated figures
-(code volume, team size, number of pull requests) are therefore not
-reproduced here.</li>
-<li>LangChain summarized the idea as “Agent = Model + Harness”
-(<a href="https://www.langchain.com/blog/the-anatomy-of-an-agent-harness">LangChain, March 2026</a>).</li>
-<li>Birgitta Böckeler’s article on martinfowler.com (April 2026) reframed harness
-engineering for teams that <em>use</em> coding agents
-(<a href="https://martinfowler.com/articles/exploring-gen-ai/harness-engineering.html">martinfowler.com</a>).</li>
-<li>Anthropic documented harness patterns for long-running agents
-(<a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents">November 2025</a>;
-<a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">March 2026</a>)
-<strong>[Vendor]</strong>.</li>
-</ul>
-<p>These definitions emphasize different things. Hashimoto’s is incremental,
-OpenAI’s is organizational, Schmid’s and LangChain’s are architectural, and
-Böckeler’s treats the harness as a control system.</p>
-</div>
-</div>
-<div id="how-prompt-context-and-harness-relate" class="section level2 hasAnchor" number="14.3">
-<h2><span class="header-section-number">14.3</span> How prompt, context, and harness relate<a href="context-harness-engineering.html#how-prompt-context-and-harness-relate" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<table>
-<colgroup>
-<col width="33%" />
-<col width="33%" />
-<col width="33%" />
-</colgroup>
-<thead>
-<tr>
-<th>Layer</th>
-<th>Question it answers</th>
-<th>Typical artifacts</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Prompt engineering</td>
-<td>How should the instruction be worded?</td>
-<td>System prompt, few-shot examples</td>
-</tr>
-<tr>
-<td>Context engineering</td>
-<td>Which tokens should the model see at this step?</td>
-<td>Retrieval, tool selection, compaction, memory files, sub-agent summaries</td>
-</tr>
-<tr>
-<td>Harness engineering</td>
-<td>What system makes the model reliable over many steps?</td>
-<td>Agent loop, sandbox, hooks, tests and linters, evaluator agents, state logs, permissions</td>
-</tr>
-</tbody>
-</table>
-<p>LangChain calls prompt engineering “a subset of context engineering,” and
-Anthropic calls context engineering its “natural progression.” Treat the chain
-<em>prompt ⊂ context ⊂ harness</em> as a <strong>teaching heuristic</strong>, not a settled
-taxonomy: it appears mostly in explainers, not in primary lab writing.</p>
-<p>The more precise statement is that the harness <em>contains</em> context management,
-but it also includes deterministic machinery, such as linters, sandboxes, and
-permission checks. That machinery affects the model only when its output is
-fed back into the context.</p>
-<p><strong>Is it just a rebrand?</strong> In part. Retrieval, summarization, and RAG all
-predate the label, and some experienced developers dismiss the term as
-rebranded prompt engineering
-(<a href="https://addyo.substack.com/p/context-engineering-bringing-engineering">Addy Osmani</a>).
-What is new is treating these techniques as <strong>one budgeted design problem for
-multi-step agents</strong>, which a prompt-only view hides.</p>
-</div>
-<div id="context-engineering" class="section level2 hasAnchor" number="14.4">
-<h2><span class="header-section-number">14.4</span> Context engineering<a href="context-harness-engineering.html#context-engineering" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<div id="context-is-a-finite-attention-budget" class="section level3 hasAnchor" number="14.4.1">
-<h3><span class="header-section-number">14.4.1</span> Context is a finite attention budget<a href="context-harness-engineering.html#context-is-a-finite-attention-budget" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>The founding premise is that <em>more context can make results worse</em>. Anthropic
-describes a finite “attention budget” and names <strong>context rot</strong>: recall falls
-as the token count grows. The goal it sets is “the smallest set of high-signal
-tokens” that makes the desired outcome likely.</p>
-<p>Evidence:</p>
-<ul>
-<li><strong>Lost in the middle.</strong> Accuracy was highest when the relevant information sat
-at the beginning or end of a long input, and worse in the middle
-(<a href="https://arxiv.org/abs/2307.03172">Liu et al., arXiv 2307.03172</a>).</li>
-<li><strong>Context rot.</strong> Across 18 models, performance degraded as input length grew,
-often unevenly
-(<a href="https://www.trychroma.com/research/context-rot">Chroma, July 2025</a>).
-<strong>[Vendor]</strong>: Chroma sells retrieval infrastructure, and the study is not peer
-reviewed.</li>
-</ul>
-<p>A practical consequence: a larger advertised context window is a capacity
-limit, not a promise that the model will use every token equally well.</p>
-</div>
-<div id="four-ways-context-fails" class="section level3 hasAnchor" number="14.4.2">
-<h3><span class="header-section-number">14.4.2</span> Four ways context fails<a href="context-harness-engineering.html#four-ways-context-fails" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>Breunig’s taxonomy pairs each failure with a fix. The examples he cites are
-secondhand and were not checked against the original papers for this chapter.</p>
-<table>
-<colgroup>
-<col width="33%" />
-<col width="33%" />
-<col width="33%" />
-</colgroup>
-<thead>
-<tr>
-<th>Failure</th>
-<th>What happens</th>
-<th>Typical fix</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Poisoning</strong></td>
-<td>A hallucination or error enters context and is reused as if true</td>
-<td>Validate before writing to memory; prune; quarantine</td>
-</tr>
-<tr>
-<td><strong>Distraction</strong></td>
-<td>A long history crowds out the task; the agent repeats past actions</td>
-<td>Summarize or compact; start fresh with a handoff note</td>
-</tr>
-<tr>
-<td><strong>Confusion</strong></td>
-<td>Irrelevant tools or documents degrade choices</td>
-<td>Load fewer tools; retrieve selectively</td>
-</tr>
-<tr>
-<td><strong>Clash</strong></td>
-<td>New information contradicts earlier context</td>
-<td>Remove stale content; keep one source of truth</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div id="four-families-of-technique-write-select-compress-isolate" class="section level3 hasAnchor" number="14.4.3">
-<h3><span class="header-section-number">14.4.3</span> Four families of technique: write, select, compress, isolate<a href="context-harness-engineering.html#four-families-of-technique-write-select-compress-isolate" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>LangChain groups the techniques into four families
-(<a href="https://www.langchain.com/blog/context-engineering-for-agents">LangChain</a>).</p>
+<div id="supervisor-agents" class="section level1 hasAnchor" number="17">
+<h1><span class="header-section-number">Chapter 17</span> Supervisor Agents and Multi-Agent Systems on Databricks<a href="supervisor-agents.html#supervisor-agents" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="introduction-4" class="section level2 hasAnchor" number="17.1">
+<h2><span class="header-section-number">17.1</span> Introduction<a href="supervisor-agents.html#introduction-4" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>A single agent with a few tools can answer many questions. Real analytics
+questions often cross domains, though: <em>“Why did conversions drop for the
+spring campaign, and which audience should we test next?”</em> needs campaign
+metrics, audience overlap, research reports, and perhaps a modeling job. A
+<strong>supervisor agent</strong> handles this by coordinating specialized agents and tools.
+It decides who should answer each part, delegates, and combines the results.</p>
+<p>This chapter covers:</p>
 <ol style="list-style-type: decimal">
-<li><strong>Write: persist state outside the window.</strong> Scratchpads, progress notes, and
-to-do files let an agent recover after its history is trimmed. Manus has the
-agent rewrite a <code>todo.md</code> so its goals stay at the <em>end</em> of the context, a
-direct counter to lost-in-the-middle.</li>
-<li><strong>Select: retrieve just in time.</strong> Keep lightweight identifiers (file paths,
-table names, saved queries) and load content only when needed. Claude Code
-combines an up-front <code>CLAUDE.md</code> with on-demand file search. Selection
-applies to tools too: a smaller, relevant toolset reduces confusion.</li>
-<li><strong>Compress: summarize or prune.</strong> Compaction replaces old history with a
-summary that keeps decisions, open issues, and key details, and drops
-redundant tool output.</li>
-<li><strong>Isolate: give sub-tasks clean windows.</strong> A sub-agent explores in its own
-context and returns a short summary (Anthropic suggests roughly 1,000 to
-2,000 tokens). Isolation costs extra tokens, and some practitioners argue
-that splitting work across agents fragments shared understanding. Choose it
-for parallel, separable work, not by default.</li>
+<li>the supervisor pattern and when multiple agents help or hurt;</li>
+<li>Databricks <strong>Supervisor Agent</strong>: how it works and how to build one;</li>
+<li>what Databricks recommends for new work as of October 2026; and</li>
+<li>a marketing-analytics example with descriptions, test questions, and
+evaluation.</li>
 </ol>
-<p>Supporting guidance from the
-<a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Anthropic guide</a>:</p>
-<ul>
-<li>Write system prompts at the “right altitude”: specific enough to guide
-behavior, but heuristic rather than a brittle list of rules.</li>
-<li>Use a few diverse, canonical examples rather than every edge case.</li>
-<li>Make tools self-contained, robust to errors, and clearly distinct from one
-another. Return compact tool outputs, not raw dumps.</li>
-</ul>
-</div>
-<div id="cost-the-overlooked-dimension" class="section level3 hasAnchor" number="14.4.4">
-<h3><span class="header-section-number">14.4.4</span> Cost: the overlooked dimension<a href="context-harness-engineering.html#cost-the-overlooked-dimension" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>Agents read far more tokens than they write. Manus reports a ratio of roughly
-100 input tokens per output token and calls the KV-cache hit rate the most
-important production metric <strong>[Vendor]</strong>. Cached input tokens are much cheaper
-than uncached ones, which leads to rules such as:</p>
-<ul>
-<li>keep the prompt prefix stable (a timestamp at the top breaks the cache);</li>
-<li>append to the context rather than editing earlier turns;</li>
-<li>serialize JSON deterministically; and</li>
-<li>disable tools by masking them rather than removing their definitions.</li>
-</ul>
-<p>These rules <strong>conflict</strong> with compaction and dynamic tool removal, which
-invalidate the cache. Good designs compress rarely and in large steps rather
-than continuously.</p>
-<p>Manus also advises leaving failed attempts in context so the model avoids
-repeating them, which seems to contradict “poisoning.” One reasonable
-reconciliation (the author’s judgment): <em>observed</em> error messages are useful
-feedback, while <em>unverified claims stored as facts</em> are harmful.</p>
-</div>
-<div id="context-features-are-becoming-platform-features" class="section level3 hasAnchor" number="14.4.5">
-<h3><span class="header-section-number">14.4.5</span> Context features are becoming platform features<a href="context-harness-engineering.html#context-features-are-becoming-platform-features" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>Vendors now ship these techniques as features, for example Anthropic’s
-<a href="https://platform.claude.com/docs/en/build-with-claude/context-editing">context editing</a>,
-<a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/memory-tool">memory tool</a>,
-<a href="https://platform.claude.com/docs/en/build-with-claude/compaction">server-side compaction</a>,
-and the progressive disclosure built into Agent Skills
-(Chapter <a href="claude-code-skills.html#claude-code-skills">10</a>). Learn the four families. The API names
-will change, but the families will still apply.</p>
-</div>
-</div>
-<div id="harness-engineering" class="section level2 hasAnchor" number="14.5">
-<h2><span class="header-section-number">14.5</span> Harness engineering<a href="context-harness-engineering.html#harness-engineering" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<div id="what-is-in-a-harness" class="section level3 hasAnchor" number="14.5.1">
-<h3><span class="header-section-number">14.5.1</span> What is in a harness<a href="context-harness-engineering.html#what-is-in-a-harness" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>A short working definition: <strong>the harness is everything except the model
-weights.</strong> LangChain’s list includes system prompts; tools, skills, and MCP
-servers (Chapter <a href="model-context-protocol.html#model-context-protocol">13</a>); infrastructure such as a
-filesystem, sandbox, or browser; orchestration such as sub-agents and model
-routing; and hooks or middleware for deterministic steps
-(<a href="https://www.langchain.com/blog/the-anatomy-of-an-agent-harness">LangChain</a>).</p>
-<p>It helps to separate:</p>
-<ul>
-<li>the <strong>builder harness</strong>: the product runtime (Claude Code, the Claude Agent
-SDK, Codex, LangChain Deep Agents, a custom agent); and</li>
-<li>the <strong>user harness</strong>: what <em>your team</em> adds on top, such as <code>AGENTS.md</code>,
-specs, tests, linters, hooks, permissions, and CI.</li>
-</ul>
-<p>Most data scientists work mainly on the user harness, or build a small builder
-harness inside an application.</p>
-</div>
-<div id="guides-and-sensors" class="section level3 hasAnchor" number="14.5.2">
-<h3><span class="header-section-number">14.5.2</span> Guides and sensors<a href="context-harness-engineering.html#guides-and-sensors" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>Böckeler classifies harness controls on two axes
-(<a href="https://martinfowler.com/articles/exploring-gen-ai/harness-engineering.html">martinfowler.com</a>):</p>
-<table>
-<colgroup>
-<col width="33%" />
-<col width="33%" />
-<col width="33%" />
-</colgroup>
-<thead>
-<tr>
-<th></th>
-<th><strong>Computational</strong> (deterministic, cheap, reliable)</th>
-<th><strong>Inferential</strong> (model-based, slower, non-deterministic)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Guides</strong> (before the agent acts)</td>
-<td>Templates, schemas, scaffolding scripts, type definitions</td>
-<td><code>AGENTS.md</code>, specs, feature lists, skills</td>
-</tr>
-<tr>
-<td><strong>Sensors</strong> (after the agent acts)</td>
-<td>Tests, linters, type checks, schema validation, data-quality checks</td>
-<td>AI code review, LLM judges, evaluator agents</td>
-</tr>
-</tbody>
-</table>
-<p>Prefer computational sensors wherever they can answer the question, and use
-inferential ones for judgments that code cannot make. Böckeler also notes the
-limits: tests do not catch a misdiagnosed problem, over-engineering, or a
-misunderstood instruction.</p>
-</div>
-<div id="each-pattern-fixes-a-named-failure" class="section level3 hasAnchor" number="14.5.3">
-<h3><span class="header-section-number">14.5.3</span> Each pattern fixes a named failure<a href="context-harness-engineering.html#each-pattern-fixes-a-named-failure" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<table>
-<colgroup>
-<col width="33%" />
-<col width="33%" />
-<col width="33%" />
-</colgroup>
-<thead>
-<tr>
-<th>Recurring failure</th>
-<th>Harness response</th>
-<th>Source</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Declares success too early</td>
-<td>Feature list where every item starts “failing”; checklist before exit; stop hooks that require evidence</td>
-<td>Anthropic (Nov 2025), LangChain [Vendor]</td>
-</tr>
-<tr>
-<td>Tries to do everything at once</td>
-<td>Work on one feature per session; commit after each</td>
-<td>Anthropic (Nov 2025) [Vendor]</td>
-</tr>
-<tr>
-<td>Edits tests to pass</td>
-<td>Explicit rule against changing tests; protected test files; CI</td>
-<td>Anthropic (Nov 2025) [Vendor]</td>
-</tr>
-<tr>
-<td>Loses track over long runs</td>
-<td>Progress log, setup script, descriptive commits, handoff notes</td>
-<td>Anthropic (Nov 2025) [Vendor]</td>
-</tr>
-<tr>
-<td>Praises its own mediocre work</td>
-<td>A separate evaluator agent that exercises the result</td>
-<td>Anthropic (Mar 2026) [Vendor]</td>
-</tr>
-<tr>
-<td>Repeats the same failing edit</td>
-<td>Loop detection that interrupts the agent</td>
-<td>LangChain (Feb 2026) [Vendor]</td>
-</tr>
-<tr>
-<td>Repeats a known mistake</td>
-<td>Add a rule to <code>AGENTS.md</code> or a deterministic check</td>
-<td>Hashimoto (Feb 2026)</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Documentation is part of the harness, and long documents rot.</strong> Several
-practitioners, OpenAI reportedly among them <strong>[Secondary]</strong>, replaced one large
-instruction file with a short index that points to focused documents. This is
-the same idea as progressive disclosure in skills and just-in-time retrieval.</p>
-<p><strong>Security gaps.</strong> The primary harness posts reviewed say little about
-permissions, sandboxing, secret handling, or prompt injection through tool
-outputs. Treat these as first-class harness components anyway: apply least
-privilege, require human approval for actions that write, spend, or send, and
-keep secrets out of context (see Chapters <a href="claude-code-hooks.html#claude-code-hooks">9</a> and
-<a href="model-context-protocol.html#model-context-protocol">13</a>).</p>
-</div>
-<div id="the-thin-harness-debate" class="section level3 hasAnchor" number="14.5.4">
-<h3><span class="header-section-number">14.5.4</span> The thin-harness debate<a href="context-harness-engineering.html#the-thin-harness-debate" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>Rich Sutton’s “Bitter Lesson” argues that general methods that scale with
-compute eventually beat hand-built cleverness. Applied to agents, it raises the
-question of whether harness logic is a temporary crutch.</p>
-<ul>
-<li><strong>Thin-harness view.</strong> Anthropic writes that every harness component
-“encodes an assumption about what the model can’t do on its own.” When a
-stronger model arrived, it removed parts of its own harness
-(<a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">Anthropic, March 2026</a>)
-<strong>[Vendor]</strong>. Schmid recommends harnesses that make yesterday’s clever logic
-easy to delete.</li>
-<li><strong>Harness-matters view.</strong> With the model held fixed, LangChain changed only
-its harness and raised its Terminal-Bench 2.0 score from 52.8% to 66.5%
-(<a href="https://www.langchain.com/blog/improving-deep-agents-with-harness-engineering">LangChain</a>)
-<strong>[Vendor]</strong>. A May 2026 position paper argues that harness-induced variance
-can exceed model-induced variance and can reverse model rankings
-(<a href="https://arxiv.org/abs/2605.23950">arXiv 2605.23950</a>); it is an argument,
-not a controlled meta-analysis.</li>
-</ul>
-<p>The two views are compatible. <em>Specific</em> components (elaborate prompts, rigid
-step structures, large tool collections) are absorbed as models improve. The
-<em>need</em> for an environment, verification, persistent state, and permissions
-remains.</p>
-<p><strong>Practical implication:</strong> a leaderboard score measures a model–harness pair.
-When you compare models for your own application, hold the harness constant,
-and when you change the harness, hold the model constant.</p>
-</div>
-<div id="evaluation-is-a-harness-too" class="section level3 hasAnchor" number="14.5.5">
-<h3><span class="header-section-number">14.5.5</span> Evaluation is a harness too<a href="context-harness-engineering.html#evaluation-is-a-harness-too" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>Anthropic’s guide to agent evaluation distinguishes the <em>evaluation harness</em>
-from the <em>agent harness</em> and defines tasks, trials, graders, transcripts, and
-outcomes
-(<a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Anthropic, January 2026</a>):</p>
-<ul>
-<li><strong>Graders</strong> can be code-based (tests, exact match, schema checks), model-based
-(rubrics, pairwise comparison), or human (expert review).</li>
-<li><strong>Grade outcomes, not paths.</strong> Judge what the agent produced, but keep
-transcripts for debugging and for spotting reward hacking, such as an agent
-editing the tests it is graded on.</li>
-<li><strong><a href="mailto:pass@k" class="email">pass@k</a> versus pass^k.</strong> <a href="mailto:pass@k" class="email">pass@k</a> is the chance that <em>at least one</em> of <em>k</em>
-attempts succeeds; pass^k is the chance that <em>all k</em> succeed. For a
-production tool that users run repeatedly, pass^k is the more honest
-reliability measure.</li>
-</ul>
-<p>For a statistician, this is familiar ground: define the estimand (task
-success), use repeated trials to estimate variance, and avoid grading on the
-training set (tasks the harness was tuned on).</p>
-</div>
-</div>
-<div id="applying-both-to-databricks-analytics-apps" class="section level2 hasAnchor" number="14.6">
-<h2><span class="header-section-number">14.6</span> Applying both to Databricks analytics apps<a href="context-harness-engineering.html#applying-both-to-databricks-analytics-apps" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>The design principle that follows from the evidence is:</p>
+<p>It builds on MCP (Chapter <a href="model-context-protocol.html#model-context-protocol">13</a>), context and harness
+engineering (Chapter <a href="context-harness-engineering.html#context-harness-engineering">14</a>), and the analytics
+tools in Chapter <a href="classification-lookalike.html#classification-lookalike">16</a>.</p>
 <blockquote>
-<p><strong>The model chooses and explains; governed engines compute; sensors verify.</strong></p>
+<p><strong>Status check (October 2026).</strong> On 6 October 2026 the Databricks
+documentation labeled <strong>Supervisor Agent a legacy offering</strong>. For new low-code
+agents it recommends <strong>Genie Agents</strong>. To coordinate multiple agents in code
+it recommends the <strong>Agent Bricks CLI</strong>, which was in Beta at the time of
+writing. The related <strong>Supervisor API</strong> (Beta) was deprecated, with end of life
+on 30 September 2026. The <em>supervisor pattern</em> in this chapter remains
+current; the specific product is likely to change. Check the
+<a href="https://docs.databricks.com/aws/en/agents/agent-bricks/multi-agent-supervisor">Supervisor Agent page</a>
+and <a href="https://docs.databricks.com/aws/en/agents/concepts">What is Agent Bricks?</a>
+before building.</p>
 </blockquote>
-<p>This is the author’s synthesis rather than an official Databricks rule, but
-each part has support in the sources above.</p>
-<div id="metadata-is-the-highest-return-context" class="section level3 hasAnchor" number="14.6.1">
-<h3><span class="header-section-number">14.6.1</span> Metadata is the highest-return context<a href="context-harness-engineering.html#metadata-is-the-highest-return-context" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>Text-to-SQL research suggests that semantic context often matters more than
-which frontier model you pick:</p>
-<ul>
-<li>Adding a 4 KB semantic-layer document raised accuracy on 100 retail questions
-from about 46–51% to about 68–69% across three frontier models, and the
-differences between models were not statistically significant in either
-condition
-(<a href="https://arxiv.org/abs/2604.25149">arXiv 2604.25149</a>). This is a single study
-on one domain.</li>
-<li>On the BIRD benchmark, better column descriptions improved accuracy, although
-ambiguous columns still needed expert input
-(<a href="https://arxiv.org/abs/2408.04691">arXiv 2408.04691</a>).</li>
-<li>Automatically profiled metadata helped one team reach the top of the BIRD
-leaderboard
-(<a href="https://arxiv.org/abs/2505.19988">arXiv 2505.19988</a>).</li>
-</ul>
-<p>Databricks’ own Genie guidance is a context-engineering playbook
-(<a href="https://docs.databricks.com/aws/en/genie/best-practices">Genie best practices</a>):</p>
-<ol style="list-style-type: decimal">
-<li>Rely on clear Unity Catalog table and column names and descriptions.</li>
-<li>Start with a small number of tables (the docs suggest five or fewer).</li>
-<li>Prefer <strong>SQL expressions</strong> for metrics, filters, and dimensions, then
-<strong>example SQL</strong> for complex questions, and use plain-text instructions only
-as a last resort.</li>
-</ol>
-<p><a href="https://docs.databricks.com/aws/en/uc-semantics/metric-views/">Unity Catalog metric views</a>
-define each measure once (reach, overlap rate, lift, support, confidence) so
-that every app and agent computes it the same way.</p>
-<p>For an analytics team, this is good news: the highest-return work is data
-governance work you may already own. Column comments, metric definitions, and
-verified example queries now have a new consumer.</p>
 </div>
-<div id="mapping-to-the-three-workloads" class="section level3 hasAnchor" number="14.6.2">
-<h3><span class="header-section-number">14.6.2</span> Mapping to the three workloads<a href="context-harness-engineering.html#mapping-to-the-three-workloads" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="the-supervisor-pattern" class="section level2 hasAnchor" number="17.2">
+<h2><span class="header-section-number">17.2</span> The supervisor pattern<a href="supervisor-agents.html#the-supervisor-pattern" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="what-a-supervisor-does" class="section level3 hasAnchor" number="17.2.1">
+<h3><span class="header-section-number">17.2.1</span> What a supervisor does<a href="supervisor-agents.html#what-a-supervisor-does" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>A supervisor is an agent whose tools are <em>other agents</em> (and ordinary tools).
+For each request it:</p>
+<ol style="list-style-type: decimal">
+<li><strong>interprets</strong> the question and breaks it into parts;</li>
+<li><strong>routes</strong> each part to the subagent or tool whose description fits best;</li>
+<li><strong>delegates</strong> and collects the answers; and</li>
+<li><strong>synthesizes</strong> one response, or asks the user to clarify.</li>
+</ol>
+<p>Anthropic describes the same idea as the <em>orchestrator–workers</em> workflow: a
+central model breaks down a task, delegates subtasks to workers, and
+synthesizes their results
+(<a href="https://www.anthropic.com/engineering/building-effective-agents">Building effective agents</a>).</p>
+</div>
+<div id="common-multi-agent-shapes" class="section level3 hasAnchor" number="17.2.2">
+<h3><span class="header-section-number">17.2.2</span> Common multi-agent shapes<a href="supervisor-agents.html#common-multi-agent-shapes" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <table>
 <colgroup>
-<col width="25%" />
-<col width="25%" />
-<col width="25%" />
-<col width="25%" />
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
 </colgroup>
 <thead>
 <tr>
-<th>Workload</th>
-<th>Context engineering</th>
-<th>Harness engineering</th>
-<th>Evaluation</th>
+<th>Pattern</th>
+<th>How it works</th>
+<th>Good for</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Streamlit analytical apps</strong> on Databricks Apps</td>
-<td>Send aggregates (top-N, group-bys, summary statistics), not audience-level rows. Keep few tables in scope. Keep a stable system-prompt prefix</td>
-<td>On-behalf-of-user auth so Unity Catalog row filters and column masks apply per user. The model proposes SQL or tool parameters; tables and charts render from the result DataFrame, not from model text</td>
-<td>A code check that every number in the narrative appears in the result table; an LLM judge for groundedness</td>
+<td><strong>Router</strong></td>
+<td>Sends the whole request to one specialist</td>
+<td>Clearly separable domains (billing vs. analytics)</td>
 </tr>
 <tr>
-<td><strong>Reusable jobs</strong> (lookalike, audience overlap, basket analysis)</td>
-<td>Unity Catalog comments on seed, segment, and transaction tables; metric views for overlap, lift, support, and confidence; a few verified example queries for tricky logic such as fiscal calendars</td>
-<td>Expose validated logic as Unity Catalog functions or job-triggering tools via MCP. For coding agents that maintain the job code, a short <code>AGENTS.md</code> map plus tests act as guides and sensors</td>
-<td>Compare results with known gold outputs; measure pass^k across repeated runs; protect unit tests from agent edits</td>
+<td><strong>Supervisor</strong></td>
+<td>Splits the request, calls several specialists, combines results</td>
+<td>Cross-domain questions</td>
 </tr>
 <tr>
-<td><strong>AI-assisted apps</strong> on Databricks foundation models (Genie, Agent Bricks, custom agents)</td>
-<td>Follow the Genie order of instruction types; retrieve methodology documents just in time with AI Search rather than preloading them</td>
-<td>Gateway quotas and budgets; guardrails; durable memory only for state that must persist. Inference logging stores whatever enters context, so keep personal data out</td>
-<td>Genie benchmarks; <a href="https://docs.databricks.com/aws/en/mlflow3/genai/eval-monitor">MLflow GenAI evaluation</a> with code scorers and judges; labeled cases where the app should ask for clarification or refuse</td>
+<td><strong>Hierarchical</strong></td>
+<td>A supervisor calls other supervisors</td>
+<td>Large organizations with domain teams</td>
+</tr>
+<tr>
+<td><strong>Pipeline</strong></td>
+<td>Fixed sequence of steps</td>
+<td>Repeatable workflows; often better as ordinary code</td>
 </tr>
 </tbody>
 </table>
-<p>Relevant Databricks references:
-<a href="https://docs.databricks.com/aws/en/dev-tools/databricks-apps/auth">Databricks Apps authorization</a>,
-<a href="https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp">managed MCP servers</a>
-(Public Preview), and the
-<a href="https://docs.databricks.com/aws/en/machine-learning/foundation-model-apis/supported-models">Foundation Model APIs supported models</a>
-page. Product names change often: Genie spaces are now called Genie Agents,
-Vector Search is now AI Search, and AI Gateway is now Unity Gateway. Check each
-docs page’s preview banner before relying on a feature.</p>
 </div>
-<div id="three-cautions-for-marketing-data" class="section level3 hasAnchor" number="14.6.3">
-<h3><span class="header-section-number">14.6.3</span> Three cautions for marketing data<a href="context-harness-engineering.html#three-cautions-for-marketing-data" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="when-multiple-agents-help-and-when-they-hurt" class="section level3 hasAnchor" number="17.2.3">
+<h3><span class="header-section-number">17.2.3</span> When multiple agents help, and when they hurt<a href="supervisor-agents.html#when-multiple-agents-help-and-when-they-hurt" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><strong>They help when:</strong></p>
+<ul>
+<li>domains have different data, permissions, and owners (each team curates its
+own Genie Agent);</li>
+<li>a specialist needs a focused context, which is the <em>isolate</em> technique from
+Chapter <a href="context-harness-engineering.html#context-harness-engineering">14</a>; and</li>
+<li>subtasks can run independently and be combined.</li>
+</ul>
+<p><strong>They hurt when:</strong></p>
+<ul>
+<li>the task needs one shared, detailed understanding that gets lost in
+handoffs;</li>
+<li>latency and cost matter, because every delegation adds model calls; and</li>
+<li>a fixed workflow would do. A scheduled job is simpler, cheaper, and easier to
+test than an agent deciding the steps each time.</li>
+</ul>
+<p>A good rule: <strong>start with one well-scoped agent, and add a supervisor only when
+routing between distinct, well-defined specialists is the actual problem.</strong></p>
+</div>
+</div>
+<div id="databricks-supervisor-agent" class="section level2 hasAnchor" number="17.3">
+<h2><span class="header-section-number">17.3</span> Databricks Supervisor Agent<a href="supervisor-agents.html#databricks-supervisor-agent" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The facts in this section come from the
+<a href="https://docs.databricks.com/aws/en/agents/agent-bricks/multi-agent-supervisor">Supervisor Agent documentation</a>
+as of 6 October 2026.</p>
+<div id="what-it-provides" class="section level3 hasAnchor" number="17.3.1">
+<h3><span class="header-section-number">17.3.1</span> What it provides<a href="supervisor-agents.html#what-it-provides" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Supervisor Agent builds a supervisor system that coordinates Genie Agents,
+agent endpoints, Unity Catalog functions, MCP servers, and custom agents. It
+produces a serving endpoint that you can query from AI Playground, the API, or
+a Databricks App. Domain experts can improve its routing with
+natural-language feedback. Databricks lists use cases such as market analysis
+across research reports and usage data, internal-process questions, and
+customer-service answers.</p>
+</div>
+<div id="requirements" class="section level3 hasAnchor" number="17.3.2">
+<h3><span class="header-section-number">17.3.2</span> Requirements<a href="supervisor-agents.html#requirements" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li>Serverless compute and Unity Catalog enabled, in a supported region.</li>
+<li>Access to Model Serving and to a serverless usage policy with a nonzero
+budget.</li>
+<li>At least one subagent ready to use.</li>
+<li>End users need explicit access to each subagent (next table).</li>
+</ul>
+</div>
+<div id="supported-subagents-and-required-end-user-permissions" class="section level3 hasAnchor" number="17.3.3">
+<h3><span class="header-section-number">17.3.3</span> Supported subagents and required end-user permissions<a href="supervisor-agents.html#supported-subagents-and-required-end-user-permissions" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Subagent or tool</th>
+<th>Required end-user permission</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Genie Agent</td>
+<td>Access to the Genie Agent and its underlying Unity Catalog objects</td>
+</tr>
+<tr>
+<td>Published dashboard</td>
+<td><code>CAN VIEW</code> on the dashboard</td>
+</tr>
+<tr>
+<td>Knowledge Assistant endpoint</td>
+<td><code>CAN QUERY</code> on the endpoint</td>
+</tr>
+<tr>
+<td>Model serving endpoint</td>
+<td><code>CAN QUERY</code> on the endpoint</td>
+</tr>
+<tr>
+<td>Unity Catalog function</td>
+<td><code>EXECUTE</code> on the function</td>
+</tr>
+<tr>
+<td>Unity Catalog table</td>
+<td><code>SELECT</code>, plus <code>USE CATALOG</code> and <code>USE SCHEMA</code></td>
+</tr>
+<tr>
+<td>Unity Catalog volume</td>
+<td><code>READ VOLUME</code>, plus <code>USE CATALOG</code> and <code>USE SCHEMA</code></td>
+</tr>
+<tr>
+<td>AI Search index (Delta Sync only)</td>
+<td><code>SELECT</code>, plus <code>USE CATALOG</code> and <code>USE SCHEMA</code></td>
+</tr>
+<tr>
+<td>Another Supervisor Agent</td>
+<td><code>CAN QUERY</code> on it</td>
+</tr>
+<tr>
+<td>Unity Catalog MCP Service</td>
+<td><code>EXECUTE</code>, plus <code>USE CATALOG</code> and <code>USE SCHEMA</code></td>
+</tr>
+<tr>
+<td>Custom MCP server or custom agent on Databricks Apps</td>
+<td><code>CAN_USE</code> on the app</td>
+</tr>
+<tr>
+<td>Web search (built in)</td>
+<td>No extra permission; the user approves each search</td>
+</tr>
+</tbody>
+</table>
+<p>A supervisor can use <strong>up to 50 agents and tools</strong>.</p>
+<p><strong>Access control is per user.</strong> End users reach only the subagents and data
+they are allowed to use. If a user can access none of the subagents, the
+supervisor ends the conversation. If they can access only some, it steers away
+from the others. This is the behavior an agency needs when different teams may
+see different clients’ data.</p>
+</div>
+<div id="built-in-code-execution" class="section level3 hasAnchor" number="17.3.4">
+<h3><span class="header-section-number">17.3.4</span> Built-in code execution<a href="supervisor-agents.html#built-in-code-execution" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Every supervisor includes a code execution tool. It runs model-generated
+Python (default), SQL, or shell commands in a sandboxed serverless session with
+<strong>no internet access</strong>. Its only data access is read-only access to the Unity
+Catalog tables and volumes added as tools, subject to the end user’s
+permissions. Databricks warns that running arbitrary code can expose data the
+agent can reach, so permissions and guardrails remain the customer’s
+responsibility.</p>
+</div>
+<div id="web-search" class="section level3 hasAnchor" number="17.3.5">
+<h3><span class="header-section-number">17.3.5</span> Web search<a href="supervisor-agents.html#web-search" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Web search uses the <code>databricks-gpt-5</code> Foundation Model API regardless of the
+model that powers the supervisor. The workspace must allow that model, and web
+search is unavailable in some regions and in workspaces with the Enhanced
+Security and Compliance add-on. The supervisor asks the user to approve each
+search before sending the query to the public web. Never let client data
+appear in a web query.</p>
+</div>
+<div id="building-one-five-steps" class="section level3 hasAnchor" number="17.3.6">
+<h3><span class="header-section-number">17.3.6</span> Building one: five steps<a href="supervisor-agents.html#building-one-five-steps" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <ol style="list-style-type: decimal">
-<li><strong>Schema confusion is tool confusion.</strong> Too many tables in scope degrade
-text-to-SQL the same way too many tools degrade tool choice. Curate.</li>
-<li><strong>Client data in prompts is both a privacy risk and a cost.</strong> Aggregate
-first, enforce minimum cell sizes, and use per-user authorization.</li>
-<li><strong>Do not let the assistant grade its own narrative.</strong> A deterministic check
-against the result table is cheaper and more reliable than asking a model
-whether its lift or overlap summary is correct.</li>
+<li><strong>Configure.</strong> Go to <strong>Agents → Create Agent → Supervisor Agent</strong>. Add tools
+and subagents, and write a <strong>description for each one</strong>; the supervisor
+routes based on these descriptions. Optionally add supervisor-level
+<strong>Instructions</strong> and a user-facing <strong>Description</strong>.</li>
+<li><strong>Test.</strong> Chat in the right pane, or open the endpoint in AI Playground,
+where AI Judge and synthetic task generation may be available. Check that
+each question reaches the right subagent.</li>
+<li><strong>Improve.</strong> In the <strong>Examples</strong> tab, add representative questions. Share
+the configuration page with subject-matter experts (they need Can Manage on
+the agent and access to the subagents). Experts attach natural-language
+<strong>Guidelines</strong> to questions, and guidelines take effect when saved.</li>
+<li><strong>Manage permissions.</strong> Grant <strong>Can Manage</strong> (edit and improve) or <strong>Can
+Query</strong> (use the endpoint only) to users, groups, or service principals.</li>
+<li><strong>Query the endpoint.</strong> From AI Playground, <strong>Get code</strong> provides curl and
+Python examples for applications such as a Streamlit app on Databricks Apps.</li>
 </ol>
 </div>
+<div id="managing-supervisors-with-the-sdk-beta" class="section level3 hasAnchor" number="17.3.7">
+<h3><span class="header-section-number">17.3.7</span> Managing supervisors with the SDK (Beta)<a href="supervisor-agents.html#managing-supervisors-with-the-sdk-beta" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The Databricks SDK for Python can create supervisors and manage their tools.
+From the documentation:</p>
+<div class="sourceCode" id="cb91"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb91-1"><a href="supervisor-agents.html#cb91-1" tabindex="-1"></a><span class="im">from</span> databricks.sdk <span class="im">import</span> WorkspaceClient</span>
+<span id="cb91-2"><a href="supervisor-agents.html#cb91-2" tabindex="-1"></a><span class="im">from</span> databricks.sdk.service.supervisoragents <span class="im">import</span> SupervisorAgent</span>
+<span id="cb91-3"><a href="supervisor-agents.html#cb91-3" tabindex="-1"></a></span>
+<span id="cb91-4"><a href="supervisor-agents.html#cb91-4" tabindex="-1"></a>w <span class="op">=</span> WorkspaceClient()</span>
+<span id="cb91-5"><a href="supervisor-agents.html#cb91-5" tabindex="-1"></a>supervisor_agent <span class="op">=</span> SupervisorAgent(</span>
+<span id="cb91-6"><a href="supervisor-agents.html#cb91-6" tabindex="-1"></a>    display_name<span class="op">=</span><span class="st">&quot;&lt;display-name&gt;&quot;</span>,</span>
+<span id="cb91-7"><a href="supervisor-agents.html#cb91-7" tabindex="-1"></a>    description<span class="op">=</span><span class="st">&quot;&lt;description&gt;&quot;</span>,</span>
+<span id="cb91-8"><a href="supervisor-agents.html#cb91-8" tabindex="-1"></a>    instructions<span class="op">=</span><span class="st">&quot;&lt;instructions&gt;&quot;</span>,</span>
+<span id="cb91-9"><a href="supervisor-agents.html#cb91-9" tabindex="-1"></a>)</span>
+<span id="cb91-10"><a href="supervisor-agents.html#cb91-10" tabindex="-1"></a>created <span class="op">=</span> w.supervisor_agents.create_supervisor_agent(supervisor_agent<span class="op">=</span>supervisor_agent)</span>
+<span id="cb91-11"><a href="supervisor-agents.html#cb91-11" tabindex="-1"></a><span class="bu">print</span>(created)</span></code></pre></div>
+<p>Tools (subagents) are added with <code>w.supervisor_agents.create_tool(...)</code>, and
+their descriptions can be updated with <code>update_tool</code>. This lets a team keep
+supervisor configurations in version control and recreate them across
+workspaces. See the documentation for the tool types and fields.</p>
 </div>
-<div id="a-minimal-sketch-the-number-check-sensor" class="section level2 hasAnchor" number="14.7">
-<h2><span class="header-section-number">14.7</span> A minimal sketch: the number-check sensor<a href="context-harness-engineering.html#a-minimal-sketch-the-number-check-sensor" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>This illustrative check implements the third caution. It is an instructional
-example, not tested production code, and the regular expression handles only
-simple number formats.</p>
-<div class="sourceCode" id="cb86"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb86-1"><a href="context-harness-engineering.html#cb86-1" tabindex="-1"></a><span class="im">import</span> re</span>
-<span id="cb86-2"><a href="context-harness-engineering.html#cb86-2" tabindex="-1"></a></span>
-<span id="cb86-3"><a href="context-harness-engineering.html#cb86-3" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb86-4"><a href="context-harness-engineering.html#cb86-4" tabindex="-1"></a></span>
-<span id="cb86-5"><a href="context-harness-engineering.html#cb86-5" tabindex="-1"></a></span>
-<span id="cb86-6"><a href="context-harness-engineering.html#cb86-6" tabindex="-1"></a><span class="kw">def</span> numbers_in_text(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">set</span>[<span class="bu">float</span>]:</span>
-<span id="cb86-7"><a href="context-harness-engineering.html#cb86-7" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Extract plain numbers such as 12, 3.5, 1,200 or 45% from narrative text.&quot;&quot;&quot;</span></span>
-<span id="cb86-8"><a href="context-harness-engineering.html#cb86-8" tabindex="-1"></a>    tokens <span class="op">=</span> re.findall(<span class="vs">r&quot;-</span><span class="op">?</span><span class="dv">\d</span><span class="pp">[</span><span class="dv">\d</span><span class="pp">,]</span><span class="op">*</span><span class="ch">\.</span><span class="op">?</span><span class="dv">\d</span><span class="op">*</span><span class="vs">&quot;</span>, text)</span>
-<span id="cb86-9"><a href="context-harness-engineering.html#cb86-9" tabindex="-1"></a>    <span class="cf">return</span> {<span class="bu">round</span>(<span class="bu">float</span>(t.replace(<span class="st">&quot;,&quot;</span>, <span class="st">&quot;&quot;</span>)), <span class="dv">2</span>) <span class="cf">for</span> t <span class="kw">in</span> tokens}</span>
-<span id="cb86-10"><a href="context-harness-engineering.html#cb86-10" tabindex="-1"></a></span>
-<span id="cb86-11"><a href="context-harness-engineering.html#cb86-11" tabindex="-1"></a></span>
-<span id="cb86-12"><a href="context-harness-engineering.html#cb86-12" tabindex="-1"></a><span class="kw">def</span> unsupported_numbers(narrative: <span class="bu">str</span>, result: pd.DataFrame) <span class="op">-&gt;</span> <span class="bu">set</span>[<span class="bu">float</span>]:</span>
-<span id="cb86-13"><a href="context-harness-engineering.html#cb86-13" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Return numbers in the narrative that do not appear in the result table.&quot;&quot;&quot;</span></span>
-<span id="cb86-14"><a href="context-harness-engineering.html#cb86-14" tabindex="-1"></a>    numeric <span class="op">=</span> result.select_dtypes(<span class="st">&quot;number&quot;</span>).to_numpy().ravel()</span>
-<span id="cb86-15"><a href="context-harness-engineering.html#cb86-15" tabindex="-1"></a>    allowed <span class="op">=</span> {<span class="bu">round</span>(<span class="bu">float</span>(x), <span class="dv">2</span>) <span class="cf">for</span> x <span class="kw">in</span> numeric}</span>
-<span id="cb86-16"><a href="context-harness-engineering.html#cb86-16" tabindex="-1"></a>    allowed <span class="op">|=</span> {<span class="bu">round</span>(<span class="bu">float</span>(x) <span class="op">*</span> <span class="dv">100</span>, <span class="dv">2</span>) <span class="cf">for</span> x <span class="kw">in</span> numeric}  <span class="co"># shares shown as %</span></span>
-<span id="cb86-17"><a href="context-harness-engineering.html#cb86-17" tabindex="-1"></a>    <span class="cf">return</span> numbers_in_text(narrative) <span class="op">-</span> allowed</span>
-<span id="cb86-18"><a href="context-harness-engineering.html#cb86-18" tabindex="-1"></a></span>
-<span id="cb86-19"><a href="context-harness-engineering.html#cb86-19" tabindex="-1"></a></span>
-<span id="cb86-20"><a href="context-harness-engineering.html#cb86-20" tabindex="-1"></a>result <span class="op">=</span> pd.DataFrame({<span class="st">&quot;segment&quot;</span>: [<span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>], <span class="st">&quot;overlap_rate&quot;</span>: [<span class="fl">0.18</span>, <span class="fl">0.07</span>]})</span>
-<span id="cb86-21"><a href="context-harness-engineering.html#cb86-21" tabindex="-1"></a>narrative <span class="op">=</span> <span class="st">&quot;Segment A overlaps 18% with the seed audience, versus 9</span><span class="sc">% f</span><span class="st">or B.&quot;</span></span>
-<span id="cb86-22"><a href="context-harness-engineering.html#cb86-22" tabindex="-1"></a><span class="bu">print</span>(unsupported_numbers(narrative, result))  <span class="co"># {9.0} -&gt; flag for review</span></span></code></pre></div>
-<p>In a harness, this check runs after the model writes its summary. If it finds
-unsupported numbers, the app either asks the model to revise using only the
-table or shows the table without the narrative.</p>
+<div id="limitations" class="section level3 hasAnchor" number="17.3.8">
+<h3><span class="header-section-number">17.3.8</span> Limitations<a href="supervisor-agents.html#limitations" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li>At most 50 agents and tools per supervisor.</li>
+<li>AI Search subagents support only Delta Sync indexes.</li>
+<li>Web search has the regional and compliance restrictions above.</li>
+<li>It is a legacy offering, so plan for migration.</li>
+</ul>
 </div>
-<div id="exercise-audit-one-ai-assisted-app" class="section level2 hasAnchor" number="14.8">
-<h2><span class="header-section-number">14.8</span> Exercise: audit one AI-assisted app<a href="context-harness-engineering.html#exercise-audit-one-ai-assisted-app" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Choose an existing assistant or prototype and answer:</p>
+</div>
+<div id="what-to-use-for-new-work-october-2026" class="section level2 hasAnchor" number="17.4">
+<h2><span class="header-section-number">17.4</span> What to use for new work (October 2026)<a href="supervisor-agents.html#what-to-use-for-new-work-october-2026" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Need</th>
+<th>Databricks recommendation</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Low-code agent over tables and documents</td>
+<td><strong>Genie Agents</strong></td>
+<td>Curated with Unity Catalog metadata, example SQL, instructions, and trusted assets</td>
+</tr>
+<tr>
+<td>Business users exploring data, dashboards, apps</td>
+<td><strong>Genie One</strong></td>
+<td>Can also be called as a tool by custom agents</td>
+</tr>
+<tr>
+<td>Custom agent in code, including multi-agent coordination</td>
+<td><strong>Agent Bricks CLI</strong> (Beta) deploying to Agent Runtime</td>
+<td>Scaffolds a project, runs locally, deploys with managed memory, sessions, tools, and MLflow tracing</td>
+</tr>
+<tr>
+<td>Composing several agents, such as coding agents</td>
+<td><strong>Omnigent</strong></td>
+<td>Described by Databricks as a meta-harness</td>
+</tr>
+<tr>
+<td>Existing Supervisor Agent</td>
+<td>Keep running, plan migration</td>
+<td>Legacy; no new investment</td>
+</tr>
+</tbody>
+</table>
+<p>Sources: <a href="https://docs.databricks.com/aws/en/agents/concepts">What is Agent Bricks?</a>,
+<a href="https://docs.databricks.com/aws/en/release-notes/product/2026/september">September 2026 release notes</a>.</p>
+<p>In code, the pattern stays the same. Databricks’ multi-agent app template
+builds an <strong>orchestrator that treats each subagent as a tool</strong>: Genie Agents
+reached through their MCP server, other agents on Databricks Apps, and serving
+endpoints. Each subagent has a name, an endpoint, and a detailed description
+to improve routing
+(<a href="https://docs.databricks.com/aws/en/agents/custom-agents/multi-agent-apps">multi-agent apps</a>).
+That page uses the legacy agent server; follow the Agent Bricks CLI
+documentation for new deployments.</p>
+<p><strong>What carries over regardless of product:</strong> clear subagent descriptions,
+per-user permissions, a labeled set of test questions, and expert guidelines.
+Building these now is not wasted if the product changes.</p>
+</div>
+<div id="worked-example-a-campaign-insights-supervisor" class="section level2 hasAnchor" number="17.5">
+<h2><span class="header-section-number">17.5</span> Worked example: a campaign insights supervisor<a href="supervisor-agents.html#worked-example-a-campaign-insights-supervisor" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>An agency team wants one assistant for account leads that answers
+cross-domain questions about a client’s campaigns.</p>
+<div id="the-specialists" class="section level3 hasAnchor" number="17.5.1">
+<h3><span class="header-section-number">17.5.1</span> The specialists<a href="supervisor-agents.html#the-specialists" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Subagent or tool</th>
+<th>Type</th>
+<th>What it covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>campaign_performance</code></td>
+<td>Genie Agent over campaign metric views</td>
+<td>Spend, impressions, reach, conversions, CPA by channel, market, and week</td>
+</tr>
+<tr>
+<td><code>audience_overlap</code></td>
+<td>Unity Catalog function</td>
+<td>Size and overlap of two audience segments</td>
+</tr>
+<tr>
+<td><code>basket_affinity</code></td>
+<td>Unity Catalog function</td>
+<td>Precomputed support, confidence, and lift for product pairs</td>
+</tr>
+<tr>
+<td><code>lookalike_jobs</code></td>
+<td>Custom MCP server on Databricks Apps</td>
+<td>Start the validated lookalike job; check status and results</td>
+</tr>
+<tr>
+<td><code>research_library</code></td>
+<td>Document Q&amp;A (Knowledge Assistant or AI Search index)</td>
+<td>Client briefs, research reports, past campaign learnings</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="write-descriptions-that-route-well" class="section level3 hasAnchor" number="17.5.2">
+<h3><span class="header-section-number">17.5.2</span> Write descriptions that route well<a href="supervisor-agents.html#write-descriptions-that-route-well" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The supervisor routes on descriptions, so treat them as prompts. Compare:</p>
+<blockquote>
+<p><em>Weak:</em> “Campaign data.”</p>
+</blockquote>
+<blockquote>
+<p><em>Strong:</em> “Answers quantitative questions about this client’s paid-media
+campaigns: spend, impressions, reach, clicks, conversions, CPA, and ROAS by
+channel, market, campaign, and week, from 2024 onward. Use for ‘how much’,
+‘how did it change’, and ‘which channel’ questions. Does not contain
+audience membership, product purchases, or research documents.”</p>
+</blockquote>
+<p>A strong description says <strong>what the tool covers, when to use it, and what it
+does not cover</strong>. The “does not” part prevents many routing errors.</p>
+</div>
+<div id="test-questions-and-expected-routing" class="section level3 hasAnchor" number="17.5.3">
+<h3><span class="header-section-number">17.5.3</span> Test questions and expected routing<a href="supervisor-agents.html#test-questions-and-expected-routing" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Question</th>
+<th>Expected route</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>“What was CPA by channel last month in Germany?”</td>
+<td><code>campaign_performance</code></td>
+</tr>
+<tr>
+<td>“How much do our sports-fans and new-parents segments overlap?”</td>
+<td><code>audience_overlap</code></td>
+</tr>
+<tr>
+<td>“Which products are most often bought with running shoes?”</td>
+<td><code>basket_affinity</code></td>
+</tr>
+<tr>
+<td>“Why did spring conversions drop, and what did last year’s brief say about seasonality?”</td>
+<td><code>campaign_performance</code> + <code>research_library</code></td>
+</tr>
+<tr>
+<td>“Build a 3% lookalike from the loyalty seed.”</td>
+<td><code>lookalike_jobs</code>, after confirmation</td>
+</tr>
+<tr>
+<td>“What’s the weather in Paris?”</td>
+<td>Politely decline (out of scope)</td>
+</tr>
+<tr>
+<td>“Show me individual customer emails in the seed.”</td>
+<td>Decline (personal data)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="expert-guidelines" class="section level3 hasAnchor" number="17.5.4">
+<h3><span class="header-section-number">17.5.4</span> Expert guidelines<a href="supervisor-agents.html#expert-guidelines" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Account leads and analysts add guidelines to example questions, such as:</p>
+<ul>
+<li>“When reporting CPA, always state the date range and currency.”</li>
+<li>“Do not compare markets with different currencies without converting.”</li>
+<li>“For lookalike requests, confirm the seed, size, and client before starting a
+job.”</li>
+<li>“Overlap results come from the function; never estimate overlap from
+memory.”</li>
+<li>“If a question mixes two clients, ask which client is meant.”</li>
+</ul>
+</div>
+<div id="agency-specific-design-choices" class="section level3 hasAnchor" number="17.5.5">
+<h3><span class="header-section-number">17.5.5</span> Agency-specific design choices<a href="supervisor-agents.html#agency-specific-design-choices" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ul>
+<li><strong>Client separation.</strong> Use one supervisor per client, or Unity Catalog row
+filters and per-user permissions, so that no conversation can mix clients’
+data. Test this explicitly with users who lack access.</li>
+<li><strong>Numbers from tools.</strong> Display numeric results from tool outputs, not from
+the model’s prose. Apply the number-check sensor from Chapter
+<a href="context-harness-engineering.html#context-harness-engineering">14</a>.</li>
+<li><strong>Actions need confirmation.</strong> Starting a job costs money; require explicit
+user confirmation and log who approved it.</li>
+<li><strong>Web search off or tightly scoped.</strong> Client names or results must not appear
+in public web queries.</li>
+</ul>
+</div>
+</div>
+<div id="evaluating-a-supervisor" class="section level2 hasAnchor" number="17.6">
+<h2><span class="header-section-number">17.6</span> Evaluating a supervisor<a href="supervisor-agents.html#evaluating-a-supervisor" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Evaluate two things separately:</p>
 <ol style="list-style-type: decimal">
-<li><strong>Context inventory.</strong> List everything in the context window on a typical
-request: system prompt, tool definitions, retrieved text, history. Estimate
-tokens for each. What could be removed or loaded just in time?</li>
-<li><strong>Failure mapping.</strong> Find one real failure and classify it as poisoning,
-distraction, confusion, or clash, or as a harness failure such as premature
-success or missing verification.</li>
-<li><strong>One guide, one sensor.</strong> Add one guide (a metric definition, example query,
-or <code>AGENTS.md</code> rule) and one computational sensor (a schema check, number
-check, or test).</li>
-<li><strong>Measure.</strong> Build 20 to 30 representative questions with known answers. Run
-each several times and report pass^k before and after your change, holding
-the model constant.</li>
+<li><strong>Routing accuracy.</strong> For each labeled question, did the supervisor call the
+expected subagents, and avoid the wrong ones? Trace data in MLflow shows
+which tools were called.</li>
+<li><strong>Answer quality.</strong> Are the numbers correct (they should match the tool
+output exactly), is the answer grounded, and did the supervisor clarify or
+decline when it should?</li>
+</ol>
+<p>Practical steps:</p>
+<ul>
+<li>Build 30 to 50 labeled questions covering every subagent, multi-domain
+questions, out-of-scope requests, and permission edge cases.</li>
+<li>Run each question several times and report pass^k (all runs correct), not
+just one lucky run.</li>
+<li>Re-run the set after every change to descriptions, guidelines, or subagents.
+A better description for one tool can steal traffic from another.</li>
+<li>Use <a href="https://docs.databricks.com/aws/en/mlflow3/genai/eval-monitor">MLflow GenAI evaluation</a>
+with code-based checks for routing and number matching, and LLM judges or
+expert review for answer quality.</li>
+</ul>
+</div>
+<div id="common-pitfalls" class="section level2 hasAnchor" number="17.7">
+<h2><span class="header-section-number">17.7</span> Common pitfalls<a href="supervisor-agents.html#common-pitfalls" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Symptom</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Overlapping descriptions</td>
+<td>Questions bounce between two subagents</td>
+<td>Make scopes exclusive; add “does not cover” lines</td>
+</tr>
+<tr>
+<td>Too many subagents</td>
+<td>Slow, inconsistent routing</td>
+<td>Merge narrow tools; add a supervisor only where domains truly differ</td>
+</tr>
+<tr>
+<td>Missing user permissions</td>
+<td>“I can’t help with that” for some users</td>
+<td>Grant access to each subagent, or explain the restriction</td>
+</tr>
+<tr>
+<td>Synthesized numbers</td>
+<td>The answer contains figures not in any tool output</td>
+<td>Render numbers from tool outputs; add a number check</td>
+</tr>
+<tr>
+<td>Silent actions</td>
+<td>Jobs started without approval</td>
+<td>Require confirmation for writing or spending actions</td>
+</tr>
+<tr>
+<td>Untested changes</td>
+<td>Quality drops after an edit</td>
+<td>Re-run the labeled question set after every change</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="exercise-design-a-supervisor-on-paper" class="section level2 hasAnchor" number="17.8">
+<h2><span class="header-section-number">17.8</span> Exercise: design a supervisor on paper<a href="supervisor-agents.html#exercise-design-a-supervisor-on-paper" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ol style="list-style-type: decimal">
+<li>List three to five specialists you already have or could build (a Genie
+Agent, two Unity Catalog functions, a document index).</li>
+<li>Write a strong description for each, including what it does <em>not</em> cover.</li>
+<li>Write 15 test questions with expected routes, including two multi-domain
+questions, two out-of-scope requests, and one permission edge case.</li>
+<li>Write five expert guidelines.</li>
+<li>Decide whether you need a supervisor at all, or whether one Genie Agent or a
+scheduled job would do.</li>
 </ol>
 </div>
-<div id="key-takeaways-10" class="section level2 hasAnchor" number="14.9">
-<h2><span class="header-section-number">14.9</span> Key takeaways<a href="context-harness-engineering.html#key-takeaways-10" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="key-takeaways-13" class="section level2 hasAnchor" number="17.9">
+<h2><span class="header-section-number">17.9</span> Key takeaways<a href="supervisor-agents.html#key-takeaways-13" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <ul>
-<li><strong>Context engineering</strong> decides what the model sees at each step; <strong>harness
-engineering</strong> builds the system that makes many steps reliable.</li>
-<li>Treat <em>prompt ⊂ context ⊂ harness</em> as a useful heuristic, not an official
-taxonomy; the harness also includes deterministic parts that never enter the
-context.</li>
-<li>Context is a finite attention budget: more tokens can reduce quality. Use the
-four families—write, select, compress, isolate—and watch the cost trade-off
-with caching.</li>
-<li>Organize harness controls as guides and sensors, and prefer deterministic
-sensors where possible. Each harness component should fix a named failure.</li>
-<li>Benchmarks measure a model–harness pair. Hold one fixed when you evaluate the
-other, and report pass^k for reliability.</li>
-<li>On Databricks, governed metadata is the best context, deterministic functions
-and jobs are the best tools, and numbers should come from query results.</li>
-<li>Expect specific techniques and API names to expire; the separation of
-concerns is the durable lesson.</li>
+<li>A supervisor routes, delegates, and synthesizes across specialists; it is the
+orchestrator–workers pattern.</li>
+<li>Use multiple agents only when distinct domains, permissions, or contexts
+justify them; otherwise one agent or a fixed workflow is simpler.</li>
+<li>Databricks Supervisor Agent coordinates up to 50 agents and tools, enforces
+per-user access, includes sandboxed code execution, and improves through
+expert guidelines.</li>
+<li>As of October 2026, Supervisor Agent is legacy. Use Genie Agents for low-code
+work and the Agent Bricks CLI for custom multi-agent code.</li>
+<li>Descriptions, permissions, labeled test questions, and guidelines are durable
+assets that survive product changes.</li>
+<li>Evaluate routing and answer quality separately, repeatedly, and after every
+change.</li>
 </ul>
 </div>
-<div id="references-1" class="section level2 hasAnchor" number="14.10">
-<h2><span class="header-section-number">14.10</span> References<a href="context-harness-engineering.html#references-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p><strong>Context engineering</strong></p>
+<div id="references-3" class="section level2 hasAnchor" number="17.10">
+<h2><span class="header-section-number">17.10</span> References<a href="supervisor-agents.html#references-3" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <ul>
-<li><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Anthropic: Effective context engineering for AI agents (Sep 2025)</a></li>
-<li><a href="https://www.langchain.com/blog/the-rise-of-context-engineering">LangChain: The rise of context engineering (Jun 2025)</a></li>
-<li><a href="https://www.langchain.com/blog/context-engineering-for-agents">LangChain: Context engineering for agents (Jul 2025)</a></li>
-<li><a href="https://simonwillison.net/2025/Jun/27/context-engineering/">Simon Willison: Context engineering (Jun 2025)</a></li>
-<li><a href="https://www.philschmid.de/context-engineering">Phil Schmid: The new skill in AI is not prompting, it’s context engineering (Jun 2025)</a></li>
-<li><a href="https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html">Drew Breunig: How long contexts fail (Jun 2025)</a></li>
-<li><a href="https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html">Drew Breunig: How to fix your context (Jun 2025)</a></li>
-<li><a href="https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus">Manus: Context engineering for AI agents (Jul 2025)</a></li>
-<li><a href="https://www.trychroma.com/research/context-rot">Chroma: Context rot (Jul 2025)</a></li>
-<li><a href="https://arxiv.org/abs/2307.03172">Liu et al.: Lost in the middle (2023)</a></li>
-</ul>
-<p><strong>Harness engineering</strong></p>
-<ul>
-<li><a href="https://www.philschmid.de/agent-harness-2026">Phil Schmid: The importance of agent harness in 2026 (Jan 2026)</a></li>
-<li><a href="https://mitchellh.com/writing/my-ai-adoption-journey">Mitchell Hashimoto: My AI adoption journey (Feb 2026)</a></li>
-<li><a href="https://openai.com/index/harness-engineering/">OpenAI: Harness engineering (Feb 2026)</a></li>
-<li><a href="https://www.langchain.com/blog/improving-deep-agents-with-harness-engineering">LangChain: Improving deep agents with harness engineering (Feb 2026)</a></li>
-<li><a href="https://www.langchain.com/blog/the-anatomy-of-an-agent-harness">LangChain: The anatomy of an agent harness (Mar 2026)</a></li>
-<li><a href="https://martinfowler.com/articles/exploring-gen-ai/harness-engineering.html">Birgitta Böckeler: Harness engineering (martinfowler.com, Apr 2026)</a></li>
-<li><a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents">Anthropic: Effective harnesses for long-running agents (Nov 2025)</a></li>
-<li><a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">Anthropic: Harness design for long-running application development (Mar 2026)</a></li>
-<li><a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Anthropic: Demystifying evals for AI agents (Jan 2026)</a></li>
-<li><a href="https://arxiv.org/abs/2605.23950">arXiv 2605.23950: position paper on harness-induced variance (May 2026)</a></li>
-</ul>
-<p><strong>Databricks and text-to-SQL</strong></p>
-<ul>
-<li><a href="https://docs.databricks.com/aws/en/genie/best-practices">Databricks: Genie best practices</a></li>
-<li><a href="https://docs.databricks.com/aws/en/uc-semantics/metric-views/">Databricks: Unity Catalog metric views</a></li>
+<li><a href="https://docs.databricks.com/aws/en/agents/agent-bricks/multi-agent-supervisor">Databricks: Use Supervisor Agent to create a coordinated multi-agent system</a></li>
+<li><a href="https://docs.databricks.com/aws/en/agents/concepts">Databricks: What is Agent Bricks?</a></li>
+<li><a href="https://docs.databricks.com/aws/en/genie-agents/set-up">Databricks: Create and manage a Genie Agent</a></li>
+<li><a href="https://docs.databricks.com/aws/en/genie-agents/best-practices">Databricks: Curate an effective Genie Agent</a></li>
+<li><a href="https://docs.databricks.com/aws/en/agents/custom-agents/multi-agent-apps">Databricks: Build a multi-agent system on Databricks Apps</a></li>
+<li><a href="https://docs.databricks.com/aws/en/agents/agent-bricks/supervisor-api">Databricks: Supervisor API (deprecated)</a></li>
+<li><a href="https://docs.databricks.com/aws/en/release-notes/product/2026/september">Databricks: September 2026 release notes</a></li>
 <li><a href="https://docs.databricks.com/aws/en/mlflow3/genai/eval-monitor">Databricks: MLflow GenAI evaluation</a></li>
-<li><a href="https://docs.databricks.com/aws/en/dev-tools/databricks-apps/auth">Databricks: Apps authorization</a></li>
-<li><a href="https://arxiv.org/abs/2604.25149">arXiv 2604.25149: semantic layer and text-to-SQL accuracy (Apr 2026)</a></li>
-<li><a href="https://arxiv.org/abs/2408.04691">arXiv 2408.04691: column descriptions on BIRD</a></li>
-<li><a href="https://arxiv.org/abs/2505.19988">arXiv 2505.19988: automatic metadata for text-to-SQL</a></li>
+<li><a href="https://www.anthropic.com/engineering/building-effective-agents">Anthropic: Building effective agents</a></li>
 </ul>
 
 </div>
@@ -1315,8 +1257,8 @@ concerns is the durable lesson.</li>
           </div>
         </div>
       </div>
-<a href="model-context-protocol.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="ai-marketing-analytics.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="classification-lookalike.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
