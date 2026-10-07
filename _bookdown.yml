@@ -18,4 +18,7 @@ rmd_files:
   - __repo/claude/08_Loops.Rmd
   - __repo/claude/09_Notebooks.Rmd
   - __repo/claude/10_MCP.Rmd
+  - __repo/claude/11_Context_Harness_Engineering.Rmd
+  - __repo/claude/12_AI_Marketing_Analytics.Rmd
+  - __repo/claude/13_Classification_Lookalike.Rmd
 output_dir: "docs"

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classification Lab</title>
+<meta name="description" content="Interactive companion to the Classification and Lookalike Modeling chapter: confidence formulas, calibration and thresholds, and PU audience sizing.">
+<style>
+  :root {
+    --bg: #f8f7f4; --panel: #ffffff; --text: #24211d; --muted: #6b645b;
+    --border: #e2dcd2; --accent: #0f766e; --accent-soft: #ccebe7;
+    --warn: #b45309; --warn-soft: #fdf0dc; --pos: #0f766e; --neg: #b45309;
+    --grid: #e9e4db;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #181715; --panel: #22201d; --text: #ece8e1; --muted: #a69e93;
+      --border: #3a3631; --accent: #4fb8ac; --accent-soft: #1f3b38;
+      --warn: #e0a458; --warn-soft: #3a2e1e; --pos: #4fb8ac; --neg: #e0a458;
+      --grid: #2f2c28;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #181715; --panel: #22201d; --text: #ece8e1; --muted: #a69e93;
+    --border: #3a3631; --accent: #4fb8ac; --accent-soft: #1f3b38;
+    --warn: #e0a458; --warn-soft: #3a2e1e; --pos: #4fb8ac; --neg: #e0a458;
+    --grid: #2f2c28;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 8px; }
+  h3 { font-size: 1rem; margin: 16px 0 6px; }
+  p { margin: 6px 0; }
+  a { color: var(--accent); }
+  .lede { color: var(--muted); margin-bottom: 16px; }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin: 16px 0;
+    overflow-x: auto; }
+  .tabs button { background: none; border: none; color: var(--muted); padding: 10px 12px;
+    font: inherit; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
+  .tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent);
+    font-weight: 600; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; margin-bottom: 16px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+  label { display: block; font-size: 0.85rem; color: var(--muted); margin-top: 10px; }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+  input[type="number"], input[type="text"], select {
+    font: inherit; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--bg); color: var(--text); }
+  .row { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
+  .row input[type="text"] { flex: 1; min-width: 0; }
+  .row input[type="number"] { width: 80px; }
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .presets button { font: inherit; font-size: 0.85rem; padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; }
+  .presets button:hover { border-color: var(--accent); }
+  .bar { display: grid; grid-template-columns: 120px 1fr 52px; gap: 8px; align-items: center;
+    margin: 4px 0; font-size: 0.9rem; }
+  .bar .track { background: var(--grid); border-radius: 4px; height: 16px; overflow: hidden; }
+  .bar .fill { background: var(--accent); height: 100%; }
+  .bar .fill.top { background: var(--warn); }
+  .bar span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .big { font-size: 2rem; font-weight: 700; color: var(--accent); }
+  .formula { font-family: ui-monospace, Menlo, monospace; font-size: 0.85rem; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 6px; padding: 8px; overflow-x: auto; }
+  .note { background: var(--warn-soft); border-left: 3px solid var(--warn); padding: 8px 12px;
+    border-radius: 4px; font-size: 0.9rem; margin-top: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+  td, th { padding: 6px 8px; border-bottom: 1px solid var(--border); text-align: left; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  canvas { width: 100%; height: 300px; display: block; }
+  .legend { display: flex; gap: 16px; font-size: 0.85rem; color: var(--muted); flex-wrap: wrap; }
+  .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px;
+    vertical-align: -1px; margin-right: 4px; }
+  [hidden] { display: none !important; }
+  footer { color: var(--muted); font-size: 0.85rem; margin-top: 24px; }
+</style>
+</head>
+<body>
+<main>
+  <p><a href="../classification-lookalike.html">&larr; Back to the chapter</a></p>
+  <h1>Classification Lab</h1>
+  <p class="lede">Interactive companion to <em>Classification and Lookalike Modeling</em>.
+    Every number on this page is computed in your browser from the inputs you set. The
+    inputs are illustrative; no real model or vendor API is called.</p>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="conf">1. Confidence formulas</button>
+    <button role="tab" aria-selected="false" data-tab="cal">2. Calibration &amp; thresholds</button>
+    <button role="tab" aria-selected="false" data-tab="pu">3. PU audience sizing</button>
+  </div>
+
+  <!-- ============ TAB 1: CONFIDENCE ============ -->
+  <section id="tab-conf">
+    <div class="panel">
+      <h2>How confidence summarizes a probability distribution</h2>
+      <p>Pretend a typed decision model returned these probabilities. Change them and watch the
+        confidence formulas from the TypeSafe documentation respond. Weights are normalized to
+        sum to 1.</p>
+      <label for="conf-mode">Question type</label>
+      <select id="conf-mode">
+        <option value="choice">Choice: pick one option from a list</option>
+        <option value="score">Score: place on an ordered rubric</option>
+        <option value="noul">Noul: is this statement true?</option>
+      </select>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>Inputs</h3>
+        <div id="conf-inputs"></div>
+        <div class="presets" id="conf-presets"></div>
+      </div>
+      <div class="panel">
+        <h3>Result</h3>
+        <div id="conf-bars"></div>
+        <p>Confidence</p>
+        <div class="big" id="conf-value">–</div>
+        <div class="formula" id="conf-formula"></div>
+        <div class="note">Confidence measures how <strong>concentrated</strong> the
+          distribution is, not whether the answer is <strong>correct</strong>. A model can be
+          confidently wrong. Use tab 2 to see why calibration must be measured.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB 2: CALIBRATION ============ -->
+  <section id="tab-cal" hidden>
+    <div class="panel">
+      <h2>Is "0.95" really 95%? Calibration and cost-based thresholds</h2>
+      <p>This simulates a shadow-mode log. Each case has a true probability of being positive.
+        The model <em>reports</em> a probability that can be pushed toward 0 and 1
+        (overconfident) or toward 0.5 (underconfident). The reliability diagram compares what
+        the model reports with what actually happens.</p>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <label for="cal-k">Overconfidence factor: <strong id="cal-k-val"></strong>
+          (1 = calibrated, above 1 = overconfident, below 1 = underconfident)</label>
+        <input type="range" id="cal-k" min="0.5" max="2.5" step="0.1" value="1.6">
+        <label for="cal-n">Number of labeled cases: <strong id="cal-n-val"></strong></label>
+        <input type="range" id="cal-n" min="200" max="20000" step="200" value="2000">
+        <label for="cal-t">Automation threshold on the reported probability:
+          <strong id="cal-t-val"></strong></label>
+        <input type="range" id="cal-t" min="0.50" max="0.99" step="0.01" value="0.95">
+        <h3>What the threshold delivers</h3>
+        <table>
+          <tr><td>Cases above threshold</td><td class="num" id="cal-above">–</td></tr>
+          <tr><td>Average reported probability</td><td class="num" id="cal-rep">–</td></tr>
+          <tr><td>Actual positive rate</td><td class="num" id="cal-act">–</td></tr>
+          <tr><td>Brier score (lower is better)</td><td class="num" id="cal-brier">–</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <canvas id="cal-canvas" aria-label="Reliability diagram"></canvas>
+        <div class="legend">
+          <span><span class="swatch" style="background:var(--muted)"></span>Perfect calibration</span>
+          <span><span class="swatch" style="background:var(--accent)"></span>This model</span>
+        </div>
+        <p id="cal-summary"></p>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Choose the threshold from business costs</h3>
+      <p>With calibrated probability <em>p</em>, act when
+        <em>p</em> &times; C<sub>FN</sub> &gt; (1 &minus; <em>p</em>) &times; C<sub>FP</sub>,
+        that is, when <em>p</em> &gt; C<sub>FP</sub> / (C<sub>FP</sub> + C<sub>FN</sub>).</p>
+      <div class="row">
+        <label for="cal-cfp" style="margin:0">Cost of a false positive ($)</label>
+        <input type="number" id="cal-cfp" value="1" min="0.01" step="0.5">
+      </div>
+      <div class="row">
+        <label for="cal-cfn" style="margin:0">Cost of a false negative ($)</label>
+        <input type="number" id="cal-cfn" value="9" min="0.01" step="0.5">
+      </div>
+      <p id="cal-cost"></p>
+    </div>
+  </section>
+
+  <!-- ============ TAB 3: PU ============ -->
+  <section id="tab-pu" hidden>
+    <div class="panel">
+      <h2>Lookalike audiences: ranking versus sizing</h2>
+      <p>A population of 1,000,000 people. Each person has a one-dimensional "customer-likeness"
+        score (think of it as a summary of all features). True customers and non-customers have
+        overlapping bell curves. The seed audience is a random share of true customers (the SCAR
+        assumption). Results are computed exactly from the curves, not from a random sample.</p>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <label for="pu-pi">True share of high-value people: <strong id="pu-pi-val"></strong></label>
+        <input type="range" id="pu-pi" min="0.05" max="0.5" step="0.01" value="0.2">
+        <label for="pu-c">Share of true customers in the seed (c): <strong id="pu-c-val"></strong></label>
+        <input type="range" id="pu-c" min="0.05" max="0.9" step="0.01" value="0.3">
+        <label for="pu-d">Separation between the groups: <strong id="pu-d-val"></strong></label>
+        <input type="range" id="pu-d" min="0.25" max="4" step="0.05" value="1.5">
+        <div class="presets">
+          <button data-pu="1.0">Heavy overlap (typical marketing data)</button>
+          <button data-pu="3.5">Clear separation</button>
+        </div>
+        <h3>Results</h3>
+        <table>
+          <tr><td>Seed size</td><td class="num" id="pu-seed">–</td></tr>
+          <tr><td>True high-value people</td><td class="num" id="pu-true">–</td></tr>
+          <tr><td>Naive model implies</td><td class="num" id="pu-naive">–</td></tr>
+          <tr><td>PU-corrected estimate</td><td class="num" id="pu-est">–</td></tr>
+          <tr><td>True c vs estimated c&#770;</td><td class="num" id="pu-chat">–</td></tr>
+          <tr><td>AUC (naive and corrected)</td><td class="num" id="pu-auc">–</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <canvas id="pu-canvas" aria-label="Score distributions of customers and non-customers"></canvas>
+        <div class="legend">
+          <span><span class="swatch" style="background:var(--pos)"></span>True high-value people</span>
+          <span><span class="swatch" style="background:var(--neg)"></span>Everyone else</span>
+        </div>
+        <p id="pu-summary"></p>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Why the estimate of c is biased when groups overlap</h3>
+      <p>The Elkan&ndash;Noto estimate is the average naive score among seed members. Under SCAR
+        that equals c &times; (average probability of being high value, among true high-value
+        people). If true customers are unmistakable, that average is near 1 and the estimate is
+        right. When groups overlap, many true customers look ambiguous, the average falls below 1,
+        c is underestimated, and the audience size is overstated. The ranking (AUC) never changes,
+        because dividing every score by the same number keeps their order.</p>
+    </div>
+  </section>
+
+  <footer>Formulas: confidence definitions from the
+    <a href="https://docs.typesafe.ai/confidence">TypeSafe documentation</a> (vendor); PU correction
+    from Elkan and Noto (2008). Simulations are illustrative and use fixed random seeds.</footer>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const fmt = (x, d = 2) => Number(x).toFixed(d);
+  const fmtInt = (x) => Math.round(x).toLocaleString("en-US");
+
+  // ---------- Tabs ----------
+  const redraw = { cal: () => drawCal(), pu: () => drawPu() };
+  document.querySelectorAll(".tabs button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tabs button").forEach((b) => b.setAttribute("aria-selected", "false"));
+      btn.setAttribute("aria-selected", "true");
+      ["conf", "cal", "pu"].forEach((t) => { $("tab-" + t).hidden = t !== btn.dataset.tab; });
+      if (redraw[btn.dataset.tab]) redraw[btn.dataset.tab]();
+    });
+  });
+
+  // ---------- Canvas helper ----------
+  function setupCanvas(canvas) {
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    canvas.width = w * dpr; canvas.height = h * dpr;
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    return { ctx, w, h };
+  }
+
+  // ================= TAB 1: CONFIDENCE =================
+  const confPresets = {
+    choice: [
+      { name: "Clear winner (0.70)", labels: ["Billing", "Support", "Sales", "Cancel"], w: [0.70, 0.15, 0.10, 0.05] },
+      { name: "Unsure (0.40)", labels: ["Billing", "Support", "Sales", "Cancel"], w: [0.40, 0.30, 0.20, 0.10] },
+      { name: "Even split", labels: ["Billing", "Support", "Sales", "Cancel"], w: [0.25, 0.25, 0.25, 0.25] }
+    ],
+    score: [
+      { name: "A: angry vs furious", labels: ["0 calm", "1", "2", "3 angry", "4 furious"], w: [0, 0, 0, 0.6, 0.4] },
+      { name: "B: angry vs calm", labels: ["0 calm", "1", "2", "3 angry", "4 furious"], w: [0.4, 0, 0, 0.6, 0] },
+      { name: "Spread out", labels: ["0 calm", "1", "2", "3 angry", "4 furious"], w: [0.2, 0.2, 0.2, 0.2, 0.2] }
+    ],
+    noul: [
+      { name: "Confident yes (0.94)", p: 0.94 },
+      { name: "Coin toss (0.55)", p: 0.55 },
+      { name: "Confident no (0.06)", p: 0.06 }
+    ]
+  };
+  let confState = { mode: "choice", labels: [], w: [], p: 0.94 };
+
+  function loadPreset(mode, i) {
+    const pr = confPresets[mode][i];
+    if (mode === "noul") confState.p = pr.p;
+    else { confState.labels = pr.labels.slice(); confState.w = pr.w.slice(); }
+    renderConfInputs();
+    computeConf();
+  }
+
+  function renderConfInputs() {
+    const box = $("conf-inputs");
+    const mode = confState.mode;
+    box.innerHTML = "";
+    if (mode === "noul") {
+      box.innerHTML = '<label for="noul-p">Probability that the statement is true: <strong id="noul-p-val"></strong></label>' +
+        '<input type="range" id="noul-p" min="0" max="1" step="0.01" value="' + confState.p + '">';
+      $("noul-p").addEventListener("input", (e) => { confState.p = +e.target.value; computeConf(); });
+    } else {
+      confState.labels.forEach((lab, i) => {
+        const row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML = '<input type="text" aria-label="Option label" value="' + lab + '">' +
+          '<input type="number" aria-label="Weight" min="0" step="0.05" value="' + confState.w[i] + '">';
+        row.children[0].addEventListener("input", (e) => { confState.labels[i] = e.target.value; computeConf(); });
+        row.children[1].addEventListener("input", (e) => { confState.w[i] = Math.max(0, +e.target.value || 0); computeConf(); });
+        box.appendChild(row);
+      });
+      const note = document.createElement("p");
+      note.style.fontSize = "0.85rem";
+      note.style.color = "var(--muted)";
+      note.textContent = mode === "score" ? "Levels are ordered from top to bottom." : "Options have no order.";
+      box.appendChild(note);
+    }
+    const pbox = $("conf-presets");
+    pbox.innerHTML = "";
+    confPresets[mode].forEach((pr, i) => {
+      const b = document.createElement("button");
+      b.textContent = pr.name;
+      b.addEventListener("click", () => loadPreset(mode, i));
+      pbox.appendChild(b);
+    });
+  }
+
+  function bars(labels, probs, topIdx) {
+    return labels.map((lab, i) =>
+      '<div class="bar"><span title="' + lab + '">' + lab + '</span><div class="track"><div class="fill' +
+      (i === topIdx ? " top" : "") + '" style="width:' + (probs[i] * 100).toFixed(1) + '%"></div></div><span>' +
+      fmt(probs[i]) + "</span></div>").join("");
+  }
+
+  function computeConf() {
+    const mode = confState.mode;
+    let conf, formula;
+    if (mode === "noul") {
+      const p = confState.p;
+      $("noul-p-val").textContent = fmt(p);
+      conf = Math.abs(2 * p - 1);
+      $("conf-bars").innerHTML = bars(["Yes", "No"], [p, 1 - p], p >= 0.5 ? 0 : 1);
+      formula = "confidence = |2p − 1| = |2 × " + fmt(p) + " − 1| = " + fmt(conf);
+    } else {
+      const total = confState.w.reduce((a, b) => a + b, 0);
+      const n = confState.w.length;
+      const probs = total > 0 ? confState.w.map((x) => x / total) : confState.w.map(() => 1 / n);
+      let m = 0;
+      probs.forEach((p, i) => { if (p > probs[m]) m = i; });
+      $("conf-bars").innerHTML = bars(confState.labels, probs, m);
+      if (mode === "choice") {
+        const pmax = probs[m];
+        conf = (pmax - 1 / n) / (1 - 1 / n);
+        formula = "n = " + n + ", p_max = " + fmt(pmax) + "\nconfidence = (p_max − 1/n) / (1 − 1/n)\n= (" +
+          fmt(pmax) + " − " + fmt(1 / n) + ") / (1 − " + fmt(1 / n) + ") = " + fmt(conf);
+      } else {
+        const mid = (n - 1) / 2;
+        let mad = 0, madU = 0;
+        probs.forEach((p, i) => { mad += p * Math.abs(i - m); madU += Math.abs(i - mid) / n; });
+        conf = Math.max(0, 1 - mad / madU);
+        formula = "most likely level m = " + m + "\nΣ p_i |i − m| = " + fmt(mad) +
+          "\nMAD_unif (even spread, from middle level) = " + fmt(madU) +
+          "\nconfidence = max(0, 1 − " + fmt(mad) + " / " + fmt(madU) + ") = " + fmt(conf);
+      }
+    }
+    $("conf-value").textContent = fmt(conf);
+    $("conf-formula").textContent = formula;
+    $("conf-formula").style.whiteSpace = "pre-wrap";
+  }
+
+  $("conf-mode").addEventListener("change", (e) => {
+    confState.mode = e.target.value;
+    loadPreset(confState.mode, 0);
+  });
+  loadPreset("choice", 0);
+
+  // ================= TAB 2: CALIBRATION =================
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  const clip = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
+
+  function simulate(k, n) {
+    const rng = mulberry32(7);
+    const rep = new Float64Array(n), y = new Uint8Array(n);
+    for (let i = 0; i < n; i++) {
+      const p = rng();
+      y[i] = rng() < p ? 1 : 0;
+      rep[i] = clip(0.5 + k * (p - 0.5), 0.01, 0.99);
+    }
+    return { rep, y };
+  }
+
+  function drawCal() {
+    const k = +$("cal-k").value, n = +$("cal-n").value, t = +$("cal-t").value;
+    $("cal-k-val").textContent = fmt(k, 1);
+    $("cal-n-val").textContent = fmtInt(n);
+    $("cal-t-val").textContent = fmt(t);
+    const { rep, y } = simulate(k, n);
+
+    const B = 10, sumP = new Float64Array(B), sumY = new Float64Array(B), cnt = new Float64Array(B);
+    let brier = 0, aN = 0, aRep = 0, aY = 0;
+    for (let i = 0; i < n; i++) {
+      const b = Math.min(B - 1, Math.floor(rep[i] * B));
+      sumP[b] += rep[i]; sumY[b] += y[i]; cnt[b]++;
+      brier += (rep[i] - y[i]) ** 2;
+      if (rep[i] >= t) { aN++; aRep += rep[i]; aY += y[i]; }
+    }
+    $("cal-brier").textContent = fmt(brier / n, 3);
+    $("cal-above").textContent = fmtInt(aN);
+    $("cal-rep").textContent = aN ? fmt(aRep / aN) : "–";
+    $("cal-act").textContent = aN ? fmt(aY / aN) : "–";
+    $("cal-summary").textContent = aN
+      ? "Above " + fmt(t) + ", the model promises about " + fmt(100 * aRep / aN, 0) + "% correct and delivers " +
+        fmt(100 * aY / aN, 0) + "%."
+      : "No cases are above this threshold.";
+
+    drawCost();
+    const canvas = $("cal-canvas");
+    if (canvas.clientWidth === 0) return;
+    const { ctx, w, h } = setupCanvas(canvas);
+    const pad = { l: 44, r: 12, t: 12, b: 36 };
+    const X = (v) => pad.l + v * (w - pad.l - pad.r);
+    const Y = (v) => h - pad.b - v * (h - pad.t - pad.b);
+    ctx.strokeStyle = css("--grid"); ctx.fillStyle = css("--muted");
+    ctx.font = "12px sans-serif"; ctx.lineWidth = 1;
+    for (let v = 0; v <= 1.001; v += 0.2) {
+      ctx.beginPath(); ctx.moveTo(X(0), Y(v)); ctx.lineTo(X(1), Y(v)); ctx.stroke();
+      ctx.fillText(v.toFixed(1), 8, Y(v) + 4);
+      ctx.fillText(v.toFixed(1), X(v) - 8, h - pad.b + 16);
+    }
+    ctx.fillText("Reported probability", X(0.5) - 55, h - 4);
+    ctx.strokeStyle = css("--muted"); ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.moveTo(X(0), Y(0)); ctx.lineTo(X(1), Y(1)); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.strokeStyle = css("--accent"); ctx.fillStyle = css("--accent"); ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    let started = false;
+    for (let b = 0; b < B; b++) {
+      if (!cnt[b]) continue;
+      const px = X(sumP[b] / cnt[b]), py = Y(sumY[b] / cnt[b]);
+      if (!started) { ctx.moveTo(px, py); started = true; } else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+    for (let b = 0; b < B; b++) {
+      if (!cnt[b]) continue;
+      ctx.beginPath(); ctx.arc(X(sumP[b] / cnt[b]), Y(sumY[b] / cnt[b]), 4, 0, 2 * Math.PI); ctx.fill();
+    }
+    ctx.strokeStyle = css("--warn"); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(X(t), Y(0)); ctx.lineTo(X(t), Y(1)); ctx.stroke();
+    ctx.fillStyle = css("--warn"); ctx.fillText("threshold", Math.min(X(t) + 4, w - 64), Y(0.05));
+    ctx.fillStyle = css("--muted"); ctx.fillText("Actual rate", pad.l + 4, pad.t + 12);
+  }
+
+  function drawCost() {
+    const k = +$("cal-k").value;
+    const cfp = Math.max(0.01, +$("cal-cfp").value || 0.01);
+    const cfn = Math.max(0.01, +$("cal-cfn").value || 0.01);
+    const pStar = cfp / (cfp + cfn);
+    const repStar = clip(0.5 + k * (pStar - 0.5), 0.01, 0.99);
+    $("cal-cost").innerHTML = "Optimal threshold on a <strong>calibrated</strong> probability: <strong>" +
+      fmt(pStar) + "</strong>. For the model simulated above (factor " + fmt(k, 1) +
+      "), that corresponds to a <strong>reported</strong> probability of <strong>" + fmt(repStar) +
+      "</strong>. " + (Math.abs(k - 1) < 0.05
+        ? "This model is calibrated, so the two thresholds match."
+        : "Using " + fmt(pStar) + " directly on this model's reported scores would act on the wrong cases; recalibrate first.");
+  }
+
+  ["cal-k", "cal-n", "cal-t"].forEach((id) => $(id).addEventListener("input", drawCal));
+  ["cal-cfp", "cal-cfn"].forEach((id) => $(id).addEventListener("input", drawCost));
+
+  // ================= TAB 3: PU =================
+  const N = 1000000;
+  const dens = (x, mu) => Math.exp(-0.5 * (x - mu) ** 2) / Math.sqrt(2 * Math.PI);
+  function erf(x) { // Abramowitz-Stegun 7.1.26
+    const s = Math.sign(x); x = Math.abs(x);
+    const t = 1 / (1 + 0.3275911 * x);
+    const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+    return s * y;
+  }
+  const Phi = (z) => 0.5 * (1 + erf(z / Math.SQRT2));
+
+  function computePu(pi, c, d) {
+    const lo = -6, hi = d + 6, step = 0.005;
+    let cNum = 0, cDen = 0;
+    for (let x = lo; x <= hi; x += step) {
+      const f1 = dens(x, d), f0 = dens(x, 0);
+      const post = pi * f1 / (pi * f1 + (1 - pi) * f0);
+      cNum += c * post * f1 * step; cDen += f1 * step;
+    }
+    const cHat = cNum / cDen;
+    let est = 0;
+    for (let x = lo; x <= hi; x += step) {
+      const f1 = dens(x, d), f0 = dens(x, 0);
+      const px = pi * f1 + (1 - pi) * f0;
+      const g = c * pi * f1 / px;
+      est += Math.min(1, g / cHat) * px * step;
+    }
+    return { cHat, est: est * N, auc: Phi(d / Math.SQRT2) };
+  }
+
+  function drawPu() {
+    const pi = +$("pu-pi").value, c = +$("pu-c").value, d = +$("pu-d").value;
+    $("pu-pi-val").textContent = fmt(pi);
+    $("pu-c-val").textContent = fmt(c);
+    $("pu-d-val").textContent = fmt(d);
+    const r = computePu(pi, c, d);
+    const seed = N * pi * c, truth = N * pi;
+    $("pu-seed").textContent = fmtInt(seed);
+    $("pu-true").textContent = fmtInt(truth);
+    $("pu-naive").textContent = fmtInt(seed);
+    $("pu-est").textContent = fmtInt(r.est);
+    $("pu-chat").textContent = fmt(c) + " vs " + fmt(r.cHat);
+    $("pu-auc").textContent = fmt(r.auc, 3);
+    const ratio = r.est / truth;
+    $("pu-summary").textContent = "The naive model implies only the seed size. The PU correction estimates " +
+      fmtInt(r.est) + " people, " + (ratio > 1.15 ? fmt(ratio, 1) + "× the truth: overstated because the groups overlap."
+        : ratio < 0.87 ? "below the truth." : "close to the truth.");
+
+    const canvas = $("pu-canvas");
+    if (canvas.clientWidth === 0) return;
+    const { ctx, w, h } = setupCanvas(canvas);
+    const pad = { l: 12, r: 12, t: 12, b: 28 };
+    const lo = -4, hi = Math.max(4, d + 4);
+    const ymax = Math.max(pi, 1 - pi) * dens(0, 0) * 1.1;
+    const X = (x) => pad.l + (x - lo) / (hi - lo) * (w - pad.l - pad.r);
+    const Y = (v) => h - pad.b - v / ymax * (h - pad.t - pad.b);
+    ctx.strokeStyle = css("--grid"); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X(lo), Y(0)); ctx.lineTo(X(hi), Y(0)); ctx.stroke();
+    function curve(mu, weight, color) {
+      ctx.beginPath(); ctx.moveTo(X(lo), Y(0));
+      for (let x = lo; x <= hi; x += 0.02) ctx.lineTo(X(x), Y(weight * dens(x, mu)));
+      ctx.lineTo(X(hi), Y(0)); ctx.closePath();
+      ctx.globalAlpha = 0.25; ctx.fillStyle = color; ctx.fill();
+      ctx.globalAlpha = 1; ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+    }
+    curve(0, 1 - pi, css("--neg"));
+    curve(d, pi, css("--pos"));
+    ctx.fillStyle = css("--muted"); ctx.font = "12px sans-serif";
+    ctx.fillText("customer-likeness score →", X(lo) + 4, h - 8);
+  }
+
+  ["pu-pi", "pu-c", "pu-d"].forEach((id) => $(id).addEventListener("input", drawPu));
+  document.querySelectorAll("[data-pu]").forEach((b) => b.addEventListener("click", () => {
+    $("pu-d").value = b.dataset.pu; drawPu();
+  }));
+
+  window.addEventListener("resize", () => { drawCal(); drawPu(); });
+  drawCal(); drawPu();
+})();
+</script>
+</body>
+</html>

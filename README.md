@@ -10,11 +10,13 @@ Published book: <https://davutemrah.github.io/GenAI_Repo/>
 
 - `index.Rmd` — book title, scope, and reader guidance.
 - `__repo/*.Rmd` — LLM foundations, pre-training, fine-tuning, and evaluation.
-- `__repo/claude/*.Rmd` — Claude, coding-agent, verification, notebook, and
-  Model Context Protocol (MCP) chapters.
+- `__repo/claude/*.Rmd` — Claude, coding-agent, verification, notebook, MCP,
+  context- and harness-engineering, AI-in-marketing-analytics, and
+  classification/lookalike-modeling chapters.
 - `_bookdown.yml` — explicit chapter order and `docs/` publication target.
 - `_output.yml` — GitBook presentation and navigation.
 - `style.css` — book-specific styling.
+- `labs/` — standalone interactive HTML labs, copied to `docs/labs/` by `_build.sh`.
 - `docs/` — generated GitHub Pages output; do not edit by hand.
 - `CONTENT_REVIEW.md` — editorial findings, standards, and remaining review work.
 
@@ -29,7 +31,7 @@ From this repository root:
 Rscript -e 'bookdown::render_book("index.Rmd", "bookdown::gitbook")'
 ```
 
-Or run:
+Or run (this also copies the interactive labs into `docs/labs/`):
 
 ```bash
 sh _build.sh

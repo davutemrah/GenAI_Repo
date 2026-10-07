@@ -1,0 +1,504 @@
+# Context Engineering and Harness Engineering {#context-harness-engineering}
+
+## Why these two terms matter
+
+Earlier chapters covered prompting, verification loops, hooks, skills, and MCP
+as separate techniques. Two newer terms give those techniques a common frame:
+
+- **Context engineering** asks: *which tokens should the model see at this
+  step?* It covers instructions, retrieved data, tool definitions, tool
+  outputs, conversation history, and memory.
+- **Harness engineering** asks: *what system around the model makes it reliable
+  over many steps?* It covers the agent loop, tools, sandbox, state files,
+  hooks, permissions, tests, and evaluation.
+
+Both terms are young, and their boundaries are still debated. This chapter
+separates three kinds of claim: concepts that are likely to last, vendor
+practices and features that change quickly, and evidence. The evidence is
+labeled by strength throughout.
+
+**Source labels used in this chapter**
+
+- **[Vendor]**: an organization reporting on its own product or results.
+- **[Secondary]**: the original could not be read; the claim comes from a
+  mirror, summary, or aggregator.
+- **[Unverified]**: no primary source was found.
+
+Product names, API identifiers, and preview status are as of October 2026.
+
+## Where the terms came from
+
+### Context engineering (mid-2025)
+
+The term spread through a cluster of posts in June and July 2025. No single
+person has a verified claim to coining it, so "popularized by" is the accurate
+phrasing.
+
+- Shopify CEO Tobi Lütke described it as "the art of providing all the context
+  for the task to be plausibly solvable by the LLM" (June 2025, quoted by
+  [Simon Willison](https://simonwillison.net/2025/Jun/27/context-engineering/)).
+- Harrison Chase of LangChain defined it as building dynamic systems that give
+  the model "the right information and tools in the right format," and credited
+  earlier practitioners
+  ([LangChain](https://www.langchain.com/blog/the-rise-of-context-engineering)).
+- Andrej Karpathy called it "the delicate art and science of filling the context
+  window with just the right information for the next step." He compared the
+  model to a CPU and the context window to its RAM (June 2025, quoted by
+  [Simon Willison](https://simonwillison.net/2025/Jun/27/context-engineering/)).
+- Drew Breunig named common ways long contexts fail
+  ([How contexts fail](https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html);
+  [How to fix your context](https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html)).
+- Manus published lessons from running a production agent
+  ([Manus, July 2025](https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus)).
+- Anthropic's engineering guide (29 September 2025) gave the most-cited
+  definition: strategies for curating and maintaining the optimal set of tokens
+  during LLM inference
+  ([Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)).
+
+### Harness engineering (early 2026)
+
+"Harness" and "scaffold" already meant the code around a model. The phrase
+*harness engineering* became common in early 2026.
+
+- Phil Schmid (January 2026) described the agent harness as the infrastructure
+  that wraps a model to manage long-running tasks, and said it is not the agent
+  itself. He extended Karpathy's analogy: model = CPU, context = RAM,
+  harness = operating system, agent = application
+  ([philschmid.de](https://www.philschmid.de/agent-harness-2026)).
+- Mitchell Hashimoto (February 2026) gave the most practical definition:
+  whenever an agent makes a mistake, engineer a fix so it never makes that
+  mistake again. His fixes were updates to `AGENTS.md` plus small,
+  purpose-built scripts
+  ([mitchellh.com](https://mitchellh.com/writing/my-ai-adoption-journey)).
+- OpenAI published "Harness engineering: leveraging Codex in an agent-first
+  world" (February 2026). It describes a team that designs the environment
+  while agents write the code
+  ([OpenAI](https://openai.com/index/harness-engineering/)). **[Secondary]**:
+  the page could not be read for this chapter. Its widely repeated figures
+  (code volume, team size, number of pull requests) are therefore not
+  reproduced here.
+- LangChain summarized the idea as "Agent = Model + Harness"
+  ([LangChain, March 2026](https://www.langchain.com/blog/the-anatomy-of-an-agent-harness)).
+- Birgitta Böckeler's article on martinfowler.com (April 2026) reframed harness
+  engineering for teams that *use* coding agents
+  ([martinfowler.com](https://martinfowler.com/articles/exploring-gen-ai/harness-engineering.html)).
+- Anthropic documented harness patterns for long-running agents
+  ([November 2025](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents);
+  [March 2026](https://www.anthropic.com/engineering/harness-design-long-running-apps))
+  **[Vendor]**.
+
+These definitions emphasize different things. Hashimoto's is incremental,
+OpenAI's is organizational, Schmid's and LangChain's are architectural, and
+Böckeler's treats the harness as a control system.
+
+## How prompt, context, and harness relate
+
+| Layer | Question it answers | Typical artifacts |
+|---|---|---|
+| Prompt engineering | How should the instruction be worded? | System prompt, few-shot examples |
+| Context engineering | Which tokens should the model see at this step? | Retrieval, tool selection, compaction, memory files, sub-agent summaries |
+| Harness engineering | What system makes the model reliable over many steps? | Agent loop, sandbox, hooks, tests and linters, evaluator agents, state logs, permissions |
+
+LangChain calls prompt engineering "a subset of context engineering," and
+Anthropic calls context engineering its "natural progression." Treat the chain
+*prompt ⊂ context ⊂ harness* as a **teaching heuristic**, not a settled
+taxonomy: it appears mostly in explainers, not in primary lab writing.
+
+The more precise statement is that the harness *contains* context management,
+but it also includes deterministic machinery, such as linters, sandboxes, and
+permission checks. That machinery affects the model only when its output is
+fed back into the context.
+
+**Is it just a rebrand?** In part. Retrieval, summarization, and RAG all
+predate the label, and some experienced developers dismiss the term as
+rebranded prompt engineering
+([Addy Osmani](https://addyo.substack.com/p/context-engineering-bringing-engineering)).
+What is new is treating these techniques as **one budgeted design problem for
+multi-step agents**, which a prompt-only view hides.
+
+## Context engineering
+
+### Context is a finite attention budget
+
+The founding premise is that *more context can make results worse*. Anthropic
+describes a finite "attention budget" and names **context rot**: recall falls
+as the token count grows. The goal it sets is "the smallest set of high-signal
+tokens" that makes the desired outcome likely.
+
+Evidence:
+
+- **Lost in the middle.** Accuracy was highest when the relevant information sat
+  at the beginning or end of a long input, and worse in the middle
+  ([Liu et al., arXiv 2307.03172](https://arxiv.org/abs/2307.03172)).
+- **Context rot.** Across 18 models, performance degraded as input length grew,
+  often unevenly
+  ([Chroma, July 2025](https://www.trychroma.com/research/context-rot)).
+  **[Vendor]**: Chroma sells retrieval infrastructure, and the study is not peer
+  reviewed.
+
+A practical consequence: a larger advertised context window is a capacity
+limit, not a promise that the model will use every token equally well.
+
+### Four ways context fails
+
+Breunig's taxonomy pairs each failure with a fix. The examples he cites are
+secondhand and were not checked against the original papers for this chapter.
+
+| Failure | What happens | Typical fix |
+|---|---|---|
+| **Poisoning** | A hallucination or error enters context and is reused as if true | Validate before writing to memory; prune; quarantine |
+| **Distraction** | A long history crowds out the task; the agent repeats past actions | Summarize or compact; start fresh with a handoff note |
+| **Confusion** | Irrelevant tools or documents degrade choices | Load fewer tools; retrieve selectively |
+| **Clash** | New information contradicts earlier context | Remove stale content; keep one source of truth |
+
+### Four families of technique: write, select, compress, isolate
+
+LangChain groups the techniques into four families
+([LangChain](https://www.langchain.com/blog/context-engineering-for-agents)).
+
+1. **Write: persist state outside the window.** Scratchpads, progress notes, and
+   to-do files let an agent recover after its history is trimmed. Manus has the
+   agent rewrite a `todo.md` so its goals stay at the *end* of the context, a
+   direct counter to lost-in-the-middle.
+2. **Select: retrieve just in time.** Keep lightweight identifiers (file paths,
+   table names, saved queries) and load content only when needed. Claude Code
+   combines an up-front `CLAUDE.md` with on-demand file search. Selection
+   applies to tools too: a smaller, relevant toolset reduces confusion.
+3. **Compress: summarize or prune.** Compaction replaces old history with a
+   summary that keeps decisions, open issues, and key details, and drops
+   redundant tool output.
+4. **Isolate: give sub-tasks clean windows.** A sub-agent explores in its own
+   context and returns a short summary (Anthropic suggests roughly 1,000 to
+   2,000 tokens). Isolation costs extra tokens, and some practitioners argue
+   that splitting work across agents fragments shared understanding. Choose it
+   for parallel, separable work, not by default.
+
+Supporting guidance from the
+[Anthropic guide](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents):
+
+- Write system prompts at the "right altitude": specific enough to guide
+  behavior, but heuristic rather than a brittle list of rules.
+- Use a few diverse, canonical examples rather than every edge case.
+- Make tools self-contained, robust to errors, and clearly distinct from one
+  another. Return compact tool outputs, not raw dumps.
+
+### Cost: the overlooked dimension
+
+Agents read far more tokens than they write. Manus reports a ratio of roughly
+100 input tokens per output token and calls the KV-cache hit rate the most
+important production metric **[Vendor]**. Cached input tokens are much cheaper
+than uncached ones, which leads to rules such as:
+
+- keep the prompt prefix stable (a timestamp at the top breaks the cache);
+- append to the context rather than editing earlier turns;
+- serialize JSON deterministically; and
+- disable tools by masking them rather than removing their definitions.
+
+These rules **conflict** with compaction and dynamic tool removal, which
+invalidate the cache. Good designs compress rarely and in large steps rather
+than continuously.
+
+Manus also advises leaving failed attempts in context so the model avoids
+repeating them, which seems to contradict "poisoning." One reasonable
+reconciliation (the author's judgment): *observed* error messages are useful
+feedback, while *unverified claims stored as facts* are harmful.
+
+### Context features are becoming platform features
+
+Vendors now ship these techniques as features, for example Anthropic's
+[context editing](https://platform.claude.com/docs/en/build-with-claude/context-editing),
+[memory tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/memory-tool),
+[server-side compaction](https://platform.claude.com/docs/en/build-with-claude/compaction),
+and the progressive disclosure built into Agent Skills
+(Chapter \@ref(claude-code-skills)). Learn the four families. The API names
+will change, but the families will still apply.
+
+## Harness engineering
+
+### What is in a harness
+
+A short working definition: **the harness is everything except the model
+weights.** LangChain's list includes system prompts; tools, skills, and MCP
+servers (Chapter \@ref(model-context-protocol)); infrastructure such as a
+filesystem, sandbox, or browser; orchestration such as sub-agents and model
+routing; and hooks or middleware for deterministic steps
+([LangChain](https://www.langchain.com/blog/the-anatomy-of-an-agent-harness)).
+
+It helps to separate:
+
+- the **builder harness**: the product runtime (Claude Code, the Claude Agent
+  SDK, Codex, LangChain Deep Agents, a custom agent); and
+- the **user harness**: what *your team* adds on top, such as `AGENTS.md`,
+  specs, tests, linters, hooks, permissions, and CI.
+
+Most data scientists work mainly on the user harness, or build a small builder
+harness inside an application.
+
+### Guides and sensors
+
+Böckeler classifies harness controls on two axes
+([martinfowler.com](https://martinfowler.com/articles/exploring-gen-ai/harness-engineering.html)):
+
+| | **Computational** (deterministic, cheap, reliable) | **Inferential** (model-based, slower, non-deterministic) |
+|---|---|---|
+| **Guides** (before the agent acts) | Templates, schemas, scaffolding scripts, type definitions | `AGENTS.md`, specs, feature lists, skills |
+| **Sensors** (after the agent acts) | Tests, linters, type checks, schema validation, data-quality checks | AI code review, LLM judges, evaluator agents |
+
+Prefer computational sensors wherever they can answer the question, and use
+inferential ones for judgments that code cannot make. Böckeler also notes the
+limits: tests do not catch a misdiagnosed problem, over-engineering, or a
+misunderstood instruction.
+
+### Each pattern fixes a named failure
+
+| Recurring failure | Harness response | Source |
+|---|---|---|
+| Declares success too early | Feature list where every item starts "failing"; checklist before exit; stop hooks that require evidence | Anthropic (Nov 2025), LangChain [Vendor] |
+| Tries to do everything at once | Work on one feature per session; commit after each | Anthropic (Nov 2025) [Vendor] |
+| Edits tests to pass | Explicit rule against changing tests; protected test files; CI | Anthropic (Nov 2025) [Vendor] |
+| Loses track over long runs | Progress log, setup script, descriptive commits, handoff notes | Anthropic (Nov 2025) [Vendor] |
+| Praises its own mediocre work | A separate evaluator agent that exercises the result | Anthropic (Mar 2026) [Vendor] |
+| Repeats the same failing edit | Loop detection that interrupts the agent | LangChain (Feb 2026) [Vendor] |
+| Repeats a known mistake | Add a rule to `AGENTS.md` or a deterministic check | Hashimoto (Feb 2026) |
+
+**Documentation is part of the harness, and long documents rot.** Several
+practitioners, OpenAI reportedly among them **[Secondary]**, replaced one large
+instruction file with a short index that points to focused documents. This is
+the same idea as progressive disclosure in skills and just-in-time retrieval.
+
+**Security gaps.** The primary harness posts reviewed say little about
+permissions, sandboxing, secret handling, or prompt injection through tool
+outputs. Treat these as first-class harness components anyway: apply least
+privilege, require human approval for actions that write, spend, or send, and
+keep secrets out of context (see Chapters \@ref(claude-code-hooks) and
+\@ref(model-context-protocol)).
+
+### The thin-harness debate
+
+Rich Sutton's "Bitter Lesson" argues that general methods that scale with
+compute eventually beat hand-built cleverness. Applied to agents, it raises the
+question of whether harness logic is a temporary crutch.
+
+- **Thin-harness view.** Anthropic writes that every harness component
+  "encodes an assumption about what the model can't do on its own." When a
+  stronger model arrived, it removed parts of its own harness
+  ([Anthropic, March 2026](https://www.anthropic.com/engineering/harness-design-long-running-apps))
+  **[Vendor]**. Schmid recommends harnesses that make yesterday's clever logic
+  easy to delete.
+- **Harness-matters view.** With the model held fixed, LangChain changed only
+  its harness and raised its Terminal-Bench 2.0 score from 52.8% to 66.5%
+  ([LangChain](https://www.langchain.com/blog/improving-deep-agents-with-harness-engineering))
+  **[Vendor]**. A May 2026 position paper argues that harness-induced variance
+  can exceed model-induced variance and can reverse model rankings
+  ([arXiv 2605.23950](https://arxiv.org/abs/2605.23950)); it is an argument,
+  not a controlled meta-analysis.
+
+The two views are compatible. *Specific* components (elaborate prompts, rigid
+step structures, large tool collections) are absorbed as models improve. The
+*need* for an environment, verification, persistent state, and permissions
+remains.
+
+**Practical implication:** a leaderboard score measures a model–harness pair.
+When you compare models for your own application, hold the harness constant,
+and when you change the harness, hold the model constant.
+
+### Evaluation is a harness too
+
+Anthropic's guide to agent evaluation distinguishes the *evaluation harness*
+from the *agent harness* and defines tasks, trials, graders, transcripts, and
+outcomes
+([Anthropic, January 2026](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents)):
+
+- **Graders** can be code-based (tests, exact match, schema checks), model-based
+  (rubrics, pairwise comparison), or human (expert review).
+- **Grade outcomes, not paths.** Judge what the agent produced, but keep
+  transcripts for debugging and for spotting reward hacking, such as an agent
+  editing the tests it is graded on.
+- **pass@k versus pass^k.** pass@k is the chance that *at least one* of *k*
+  attempts succeeds; pass^k is the chance that *all k* succeed. For a
+  production tool that users run repeatedly, pass^k is the more honest
+  reliability measure.
+
+For a statistician, this is familiar ground: define the estimand (task
+success), use repeated trials to estimate variance, and avoid grading on the
+training set (tasks the harness was tuned on).
+
+## Applying both to Databricks analytics apps
+
+The design principle that follows from the evidence is:
+
+> **The model chooses and explains; governed engines compute; sensors verify.**
+
+This is the author's synthesis rather than an official Databricks rule, but
+each part has support in the sources above.
+
+### Metadata is the highest-return context
+
+Text-to-SQL research suggests that semantic context often matters more than
+which frontier model you pick:
+
+- Adding a 4 KB semantic-layer document raised accuracy on 100 retail questions
+  from about 46–51% to about 68–69% across three frontier models, and the
+  differences between models were not statistically significant in either
+  condition
+  ([arXiv 2604.25149](https://arxiv.org/abs/2604.25149)). This is a single study
+  on one domain.
+- On the BIRD benchmark, better column descriptions improved accuracy, although
+  ambiguous columns still needed expert input
+  ([arXiv 2408.04691](https://arxiv.org/abs/2408.04691)).
+- Automatically profiled metadata helped one team reach the top of the BIRD
+  leaderboard
+  ([arXiv 2505.19988](https://arxiv.org/abs/2505.19988)).
+
+Databricks' own Genie guidance is a context-engineering playbook
+([Genie best practices](https://docs.databricks.com/aws/en/genie/best-practices)):
+
+1. Rely on clear Unity Catalog table and column names and descriptions.
+2. Start with a small number of tables (the docs suggest five or fewer).
+3. Prefer **SQL expressions** for metrics, filters, and dimensions, then
+   **example SQL** for complex questions, and use plain-text instructions only
+   as a last resort.
+
+[Unity Catalog metric views](https://docs.databricks.com/aws/en/uc-semantics/metric-views/)
+define each measure once (reach, overlap rate, lift, support, confidence) so
+that every app and agent computes it the same way.
+
+For an analytics team, this is good news: the highest-return work is data
+governance work you may already own. Column comments, metric definitions, and
+verified example queries now have a new consumer.
+
+### Mapping to the three workloads
+
+| Workload | Context engineering | Harness engineering | Evaluation |
+|---|---|---|---|
+| **Streamlit analytical apps** on Databricks Apps | Send aggregates (top-N, group-bys, summary statistics), not audience-level rows. Keep few tables in scope. Keep a stable system-prompt prefix | On-behalf-of-user auth so Unity Catalog row filters and column masks apply per user. The model proposes SQL or tool parameters; tables and charts render from the result DataFrame, not from model text | A code check that every number in the narrative appears in the result table; an LLM judge for groundedness |
+| **Reusable jobs** (lookalike, audience overlap, basket analysis) | Unity Catalog comments on seed, segment, and transaction tables; metric views for overlap, lift, support, and confidence; a few verified example queries for tricky logic such as fiscal calendars | Expose validated logic as Unity Catalog functions or job-triggering tools via MCP. For coding agents that maintain the job code, a short `AGENTS.md` map plus tests act as guides and sensors | Compare results with known gold outputs; measure pass^k across repeated runs; protect unit tests from agent edits |
+| **AI-assisted apps** on Databricks foundation models (Genie, Agent Bricks, custom agents) | Follow the Genie order of instruction types; retrieve methodology documents just in time with AI Search rather than preloading them | Gateway quotas and budgets; guardrails; durable memory only for state that must persist. Inference logging stores whatever enters context, so keep personal data out | Genie benchmarks; [MLflow GenAI evaluation](https://docs.databricks.com/aws/en/mlflow3/genai/eval-monitor) with code scorers and judges; labeled cases where the app should ask for clarification or refuse |
+
+Relevant Databricks references:
+[Databricks Apps authorization](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/auth),
+[managed MCP servers](https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp)
+(Public Preview), and the
+[Foundation Model APIs supported models](https://docs.databricks.com/aws/en/machine-learning/foundation-model-apis/supported-models)
+page. Product names change often: Genie spaces are now called Genie Agents,
+Vector Search is now AI Search, and AI Gateway is now Unity Gateway. Check each
+docs page's preview banner before relying on a feature.
+
+### Three cautions for marketing data
+
+1. **Schema confusion is tool confusion.** Too many tables in scope degrade
+   text-to-SQL the same way too many tools degrade tool choice. Curate.
+2. **Client data in prompts is both a privacy risk and a cost.** Aggregate
+   first, enforce minimum cell sizes, and use per-user authorization.
+3. **Do not let the assistant grade its own narrative.** A deterministic check
+   against the result table is cheaper and more reliable than asking a model
+   whether its lift or overlap summary is correct.
+
+## A minimal sketch: the number-check sensor
+
+This illustrative check implements the third caution. It is an instructional
+example, not tested production code, and the regular expression handles only
+simple number formats.
+
+```python
+import re
+
+import pandas as pd
+
+
+def numbers_in_text(text: str) -> set[float]:
+    """Extract plain numbers such as 12, 3.5, 1,200 or 45% from narrative text."""
+    tokens = re.findall(r"-?\d[\d,]*\.?\d*", text)
+    return {round(float(t.replace(",", "")), 2) for t in tokens}
+
+
+def unsupported_numbers(narrative: str, result: pd.DataFrame) -> set[float]:
+    """Return numbers in the narrative that do not appear in the result table."""
+    numeric = result.select_dtypes("number").to_numpy().ravel()
+    allowed = {round(float(x), 2) for x in numeric}
+    allowed |= {round(float(x) * 100, 2) for x in numeric}  # shares shown as %
+    return numbers_in_text(narrative) - allowed
+
+
+result = pd.DataFrame({"segment": ["A", "B"], "overlap_rate": [0.18, 0.07]})
+narrative = "Segment A overlaps 18% with the seed audience, versus 9% for B."
+print(unsupported_numbers(narrative, result))  # {9.0} -> flag for review
+```
+
+In a harness, this check runs after the model writes its summary. If it finds
+unsupported numbers, the app either asks the model to revise using only the
+table or shows the table without the narrative.
+
+## Exercise: audit one AI-assisted app
+
+Choose an existing assistant or prototype and answer:
+
+1. **Context inventory.** List everything in the context window on a typical
+   request: system prompt, tool definitions, retrieved text, history. Estimate
+   tokens for each. What could be removed or loaded just in time?
+2. **Failure mapping.** Find one real failure and classify it as poisoning,
+   distraction, confusion, or clash, or as a harness failure such as premature
+   success or missing verification.
+3. **One guide, one sensor.** Add one guide (a metric definition, example query,
+   or `AGENTS.md` rule) and one computational sensor (a schema check, number
+   check, or test).
+4. **Measure.** Build 20 to 30 representative questions with known answers. Run
+   each several times and report pass^k before and after your change, holding
+   the model constant.
+
+## Key takeaways
+
+- **Context engineering** decides what the model sees at each step; **harness
+  engineering** builds the system that makes many steps reliable.
+- Treat *prompt ⊂ context ⊂ harness* as a useful heuristic, not an official
+  taxonomy; the harness also includes deterministic parts that never enter the
+  context.
+- Context is a finite attention budget: more tokens can reduce quality. Use the
+  four families—write, select, compress, isolate—and watch the cost trade-off
+  with caching.
+- Organize harness controls as guides and sensors, and prefer deterministic
+  sensors where possible. Each harness component should fix a named failure.
+- Benchmarks measure a model–harness pair. Hold one fixed when you evaluate the
+  other, and report pass^k for reliability.
+- On Databricks, governed metadata is the best context, deterministic functions
+  and jobs are the best tools, and numbers should come from query results.
+- Expect specific techniques and API names to expire; the separation of
+  concerns is the durable lesson.
+
+## References
+
+**Context engineering**
+
+- [Anthropic: Effective context engineering for AI agents (Sep 2025)](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
+- [LangChain: The rise of context engineering (Jun 2025)](https://www.langchain.com/blog/the-rise-of-context-engineering)
+- [LangChain: Context engineering for agents (Jul 2025)](https://www.langchain.com/blog/context-engineering-for-agents)
+- [Simon Willison: Context engineering (Jun 2025)](https://simonwillison.net/2025/Jun/27/context-engineering/)
+- [Phil Schmid: The new skill in AI is not prompting, it's context engineering (Jun 2025)](https://www.philschmid.de/context-engineering)
+- [Drew Breunig: How long contexts fail (Jun 2025)](https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html)
+- [Drew Breunig: How to fix your context (Jun 2025)](https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html)
+- [Manus: Context engineering for AI agents (Jul 2025)](https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus)
+- [Chroma: Context rot (Jul 2025)](https://www.trychroma.com/research/context-rot)
+- [Liu et al.: Lost in the middle (2023)](https://arxiv.org/abs/2307.03172)
+
+**Harness engineering**
+
+- [Phil Schmid: The importance of agent harness in 2026 (Jan 2026)](https://www.philschmid.de/agent-harness-2026)
+- [Mitchell Hashimoto: My AI adoption journey (Feb 2026)](https://mitchellh.com/writing/my-ai-adoption-journey)
+- [OpenAI: Harness engineering (Feb 2026)](https://openai.com/index/harness-engineering/)
+- [LangChain: Improving deep agents with harness engineering (Feb 2026)](https://www.langchain.com/blog/improving-deep-agents-with-harness-engineering)
+- [LangChain: The anatomy of an agent harness (Mar 2026)](https://www.langchain.com/blog/the-anatomy-of-an-agent-harness)
+- [Birgitta Böckeler: Harness engineering (martinfowler.com, Apr 2026)](https://martinfowler.com/articles/exploring-gen-ai/harness-engineering.html)
+- [Anthropic: Effective harnesses for long-running agents (Nov 2025)](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
+- [Anthropic: Harness design for long-running application development (Mar 2026)](https://www.anthropic.com/engineering/harness-design-long-running-apps)
+- [Anthropic: Demystifying evals for AI agents (Jan 2026)](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents)
+- [arXiv 2605.23950: position paper on harness-induced variance (May 2026)](https://arxiv.org/abs/2605.23950)
+
+**Databricks and text-to-SQL**
+
+- [Databricks: Genie best practices](https://docs.databricks.com/aws/en/genie/best-practices)
+- [Databricks: Unity Catalog metric views](https://docs.databricks.com/aws/en/uc-semantics/metric-views/)
+- [Databricks: MLflow GenAI evaluation](https://docs.databricks.com/aws/en/mlflow3/genai/eval-monitor)
+- [Databricks: Apps authorization](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/auth)
+- [arXiv 2604.25149: semantic layer and text-to-SQL accuracy (Apr 2026)](https://arxiv.org/abs/2604.25149)
+- [arXiv 2408.04691: column descriptions on BIRD](https://arxiv.org/abs/2408.04691)
+- [arXiv 2505.19988: automatic metadata for text-to-SQL](https://arxiv.org/abs/2505.19988)

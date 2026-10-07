@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 12 Interactive Notebooks: Professional Data Science Workflows | Generative AI, Large Language Models, and Coding Agents</title>
+  <title>Chapter 14 Context Engineering and Harness Engineering | Generative AI, Large Language Models, and Coding Agents</title>
   <meta name="description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 12 Interactive Notebooks: Professional Data Science Workflows | Generative AI, Large Language Models, and Coding Agents" />
+  <meta property="og:title" content="Chapter 14 Context Engineering and Harness Engineering | Generative AI, Large Language Models, and Coding Agents" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   <meta name="github-repo" content="davutemrah/GenAI_Repo" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 12 Interactive Notebooks: Professional Data Science Workflows | Generative AI, Large Language Models, and Coding Agents" />
+  <meta name="twitter:title" content="Chapter 14 Context Engineering and Harness Engineering | Generative AI, Large Language Models, and Coding Agents" />
   
   <meta name="twitter:description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
   
@@ -30,8 +30,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="verification-loops.html"/>
-<link rel="next" href="model-context-protocol.html"/>
+<link rel="prev" href="model-context-protocol.html"/>
+<link rel="next" href="ai-marketing-analytics.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -625,370 +625,653 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="notebooks" class="section level1 hasAnchor" number="12">
-<h1><span class="header-section-number">Chapter 12</span> Interactive Notebooks: Professional Data Science Workflows<a href="notebooks.html#notebooks" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<div id="why-professional-notebooks-matter" class="section level2 hasAnchor" number="12.1">
-<h2><span class="header-section-number">12.1</span> Why Professional Notebooks Matter<a href="notebooks.html#why-professional-notebooks-matter" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Notebooks can be:
-- ❌ <strong>Bad:</strong> Messy, unexplainable, breaks every run
-- ✅ <strong>Professional:</strong> Reproducible, documented, production-quality</p>
-<p>This chapter shows you how to build the professional kind.</p>
+<div id="context-harness-engineering" class="section level1 hasAnchor" number="14">
+<h1><span class="header-section-number">Chapter 14</span> Context Engineering and Harness Engineering<a href="context-harness-engineering.html#context-harness-engineering" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="why-these-two-terms-matter" class="section level2 hasAnchor" number="14.1">
+<h2><span class="header-section-number">14.1</span> Why these two terms matter<a href="context-harness-engineering.html#why-these-two-terms-matter" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Earlier chapters covered prompting, verification loops, hooks, skills, and MCP
+as separate techniques. Two newer terms give those techniques a common frame:</p>
+<ul>
+<li><strong>Context engineering</strong> asks: <em>which tokens should the model see at this
+step?</em> It covers instructions, retrieved data, tool definitions, tool
+outputs, conversation history, and memory.</li>
+<li><strong>Harness engineering</strong> asks: <em>what system around the model makes it reliable
+over many steps?</em> It covers the agent loop, tools, sandbox, state files,
+hooks, permissions, tests, and evaluation.</li>
+</ul>
+<p>Both terms are young, and their boundaries are still debated. This chapter
+separates three kinds of claim: concepts that are likely to last, vendor
+practices and features that change quickly, and evidence. The evidence is
+labeled by strength throughout.</p>
+<p><strong>Source labels used in this chapter</strong></p>
+<ul>
+<li><strong>[Vendor]</strong>: an organization reporting on its own product or results.</li>
+<li><strong>[Secondary]</strong>: the original could not be read; the claim comes from a
+mirror, summary, or aggregator.</li>
+<li><strong>[Unverified]</strong>: no primary source was found.</li>
+</ul>
+<p>Product names, API identifiers, and preview status are as of October 2026.</p>
 </div>
-<div id="the-3-section-notebook-structure" class="section level2 hasAnchor" number="12.2">
-<h2><span class="header-section-number">12.2</span> The 3-Section Notebook Structure<a href="notebooks.html#the-3-section-notebook-structure" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Every professional notebook has this structure:</p>
-<pre><code>SECTION 1: SETUP
-- Imports
-- Configuration
-- Data loading
-
-SECTION 2: ANALYSIS
-- Exploration
-- Transformation
-- Modeling
-
-SECTION 3: OUTPUTS
-- Results
-- Visualizations
-- Save/export</code></pre>
-<div id="section-1-setup" class="section level3 hasAnchor" number="12.2.1">
-<h3><span class="header-section-number">12.2.1</span> Section 1: Setup<a href="notebooks.html#section-1-setup" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p><strong>Purpose:</strong> Everything needed to run the notebook</p>
-<div class="sourceCode" id="cb72"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb72-1"><a href="notebooks.html#cb72-1" tabindex="-1"></a><span class="co"># SECTION 1: SETUP</span></span>
-<span id="cb72-2"><a href="notebooks.html#cb72-2" tabindex="-1"></a><span class="co"># ====================================</span></span>
-<span id="cb72-3"><a href="notebooks.html#cb72-3" tabindex="-1"></a></span>
-<span id="cb72-4"><a href="notebooks.html#cb72-4" tabindex="-1"></a><span class="co"># 1.1 Imports</span></span>
-<span id="cb72-5"><a href="notebooks.html#cb72-5" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb72-6"><a href="notebooks.html#cb72-6" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb72-7"><a href="notebooks.html#cb72-7" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb72-8"><a href="notebooks.html#cb72-8" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
-<span id="cb72-9"><a href="notebooks.html#cb72-9" tabindex="-1"></a><span class="im">from</span> sklearn.dummy <span class="im">import</span> DummyClassifier</span>
-<span id="cb72-10"><a href="notebooks.html#cb72-10" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestClassifier</span>
-<span id="cb72-11"><a href="notebooks.html#cb72-11" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> balanced_accuracy_score, classification_report</span>
-<span id="cb72-12"><a href="notebooks.html#cb72-12" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
-<span id="cb72-13"><a href="notebooks.html#cb72-13" tabindex="-1"></a></span>
-<span id="cb72-14"><a href="notebooks.html#cb72-14" tabindex="-1"></a><span class="co"># 1.2 Configuration</span></span>
-<span id="cb72-15"><a href="notebooks.html#cb72-15" tabindex="-1"></a>CONFIG <span class="op">=</span> {</span>
-<span id="cb72-16"><a href="notebooks.html#cb72-16" tabindex="-1"></a>    <span class="st">&#39;random_state&#39;</span>: <span class="dv">42</span>,</span>
-<span id="cb72-17"><a href="notebooks.html#cb72-17" tabindex="-1"></a>    <span class="st">&#39;test_size&#39;</span>: <span class="fl">0.2</span>,</span>
-<span id="cb72-18"><a href="notebooks.html#cb72-18" tabindex="-1"></a>    <span class="st">&#39;figsize&#39;</span>: (<span class="dv">12</span>, <span class="dv">8</span>),</span>
-<span id="cb72-19"><a href="notebooks.html#cb72-19" tabindex="-1"></a>    <span class="st">&#39;data_path&#39;</span>: Path(<span class="st">&#39;../data/customers.csv&#39;</span>),</span>
-<span id="cb72-20"><a href="notebooks.html#cb72-20" tabindex="-1"></a>    <span class="st">&#39;output_dir&#39;</span>: Path(<span class="st">&#39;../output&#39;</span>)</span>
-<span id="cb72-21"><a href="notebooks.html#cb72-21" tabindex="-1"></a>}</span>
-<span id="cb72-22"><a href="notebooks.html#cb72-22" tabindex="-1"></a></span>
-<span id="cb72-23"><a href="notebooks.html#cb72-23" tabindex="-1"></a><span class="co"># 1.3 Load Data</span></span>
-<span id="cb72-24"><a href="notebooks.html#cb72-24" tabindex="-1"></a>df_raw <span class="op">=</span> pd.read_csv(CONFIG[<span class="st">&#39;data_path&#39;</span>])</span>
-<span id="cb72-25"><a href="notebooks.html#cb72-25" tabindex="-1"></a></span>
-<span id="cb72-26"><a href="notebooks.html#cb72-26" tabindex="-1"></a><span class="co"># 1.4 Quick sanity check</span></span>
-<span id="cb72-27"><a href="notebooks.html#cb72-27" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Data shape: </span><span class="sc">{</span>df_raw<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb72-28"><a href="notebooks.html#cb72-28" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Missing values:</span><span class="ch">\n</span><span class="sc">{</span>df_raw<span class="sc">.</span>isnull()<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">&quot;</span>)</span></code></pre></div>
-<p><strong>Key Principle:</strong> Someone should be able to run Section 1 and have everything working.</p>
+<div id="where-the-terms-came-from" class="section level2 hasAnchor" number="14.2">
+<h2><span class="header-section-number">14.2</span> Where the terms came from<a href="context-harness-engineering.html#where-the-terms-came-from" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="context-engineering-mid-2025" class="section level3 hasAnchor" number="14.2.1">
+<h3><span class="header-section-number">14.2.1</span> Context engineering (mid-2025)<a href="context-harness-engineering.html#context-engineering-mid-2025" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The term spread through a cluster of posts in June and July 2025. No single
+person has a verified claim to coining it, so “popularized by” is the accurate
+phrasing.</p>
+<ul>
+<li>Shopify CEO Tobi Lütke described it as “the art of providing all the context
+for the task to be plausibly solvable by the LLM” (June 2025, quoted by
+<a href="https://simonwillison.net/2025/Jun/27/context-engineering/">Simon Willison</a>).</li>
+<li>Harrison Chase of LangChain defined it as building dynamic systems that give
+the model “the right information and tools in the right format,” and credited
+earlier practitioners
+(<a href="https://www.langchain.com/blog/the-rise-of-context-engineering">LangChain</a>).</li>
+<li>Andrej Karpathy called it “the delicate art and science of filling the context
+window with just the right information for the next step.” He compared the
+model to a CPU and the context window to its RAM (June 2025, quoted by
+<a href="https://simonwillison.net/2025/Jun/27/context-engineering/">Simon Willison</a>).</li>
+<li>Drew Breunig named common ways long contexts fail
+(<a href="https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html">How contexts fail</a>;
+<a href="https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html">How to fix your context</a>).</li>
+<li>Manus published lessons from running a production agent
+(<a href="https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus">Manus, July 2025</a>).</li>
+<li>Anthropic’s engineering guide (29 September 2025) gave the most-cited
+definition: strategies for curating and maintaining the optimal set of tokens
+during LLM inference
+(<a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Anthropic</a>).</li>
+</ul>
 </div>
-<div id="section-2-analysis" class="section level3 hasAnchor" number="12.2.2">
-<h3><span class="header-section-number">12.2.2</span> Section 2: Analysis<a href="notebooks.html#section-2-analysis" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p><strong>Purpose:</strong> Your actual work (exploration, modeling, analysis)</p>
-<div class="sourceCode" id="cb73"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb73-1"><a href="notebooks.html#cb73-1" tabindex="-1"></a><span class="co"># SECTION 2: ANALYSIS</span></span>
-<span id="cb73-2"><a href="notebooks.html#cb73-2" tabindex="-1"></a><span class="co"># ====================================</span></span>
-<span id="cb73-3"><a href="notebooks.html#cb73-3" tabindex="-1"></a></span>
-<span id="cb73-4"><a href="notebooks.html#cb73-4" tabindex="-1"></a><span class="co"># 2.1 Data Exploration</span></span>
-<span id="cb73-5"><a href="notebooks.html#cb73-5" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
-<span id="cb73-6"><a href="notebooks.html#cb73-6" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;EXPLORATORY DATA ANALYSIS&quot;</span>)</span>
-<span id="cb73-7"><a href="notebooks.html#cb73-7" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
-<span id="cb73-8"><a href="notebooks.html#cb73-8" tabindex="-1"></a></span>
-<span id="cb73-9"><a href="notebooks.html#cb73-9" tabindex="-1"></a><span class="co"># Describe the data</span></span>
-<span id="cb73-10"><a href="notebooks.html#cb73-10" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Numerical Summary:&quot;</span>)</span>
-<span id="cb73-11"><a href="notebooks.html#cb73-11" tabindex="-1"></a><span class="bu">print</span>(df_raw.describe())</span>
-<span id="cb73-12"><a href="notebooks.html#cb73-12" tabindex="-1"></a></span>
-<span id="cb73-13"><a href="notebooks.html#cb73-13" tabindex="-1"></a><span class="co"># Check distributions</span></span>
-<span id="cb73-14"><a href="notebooks.html#cb73-14" tabindex="-1"></a>df_raw.hist(figsize<span class="op">=</span>CONFIG[<span class="st">&#39;figsize&#39;</span>])</span>
-<span id="cb73-15"><a href="notebooks.html#cb73-15" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb73-16"><a href="notebooks.html#cb73-16" tabindex="-1"></a>plt.show()</span>
-<span id="cb73-17"><a href="notebooks.html#cb73-17" tabindex="-1"></a></span>
-<span id="cb73-18"><a href="notebooks.html#cb73-18" tabindex="-1"></a><span class="co"># 2.2 Data Preparation</span></span>
-<span id="cb73-19"><a href="notebooks.html#cb73-19" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span> <span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
-<span id="cb73-20"><a href="notebooks.html#cb73-20" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;DATA PREPARATION&quot;</span>)</span>
-<span id="cb73-21"><a href="notebooks.html#cb73-21" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
-<span id="cb73-22"><a href="notebooks.html#cb73-22" tabindex="-1"></a></span>
-<span id="cb73-23"><a href="notebooks.html#cb73-23" tabindex="-1"></a><span class="co"># Feature engineering</span></span>
-<span id="cb73-24"><a href="notebooks.html#cb73-24" tabindex="-1"></a>df_model <span class="op">=</span> df_raw.copy()</span>
-<span id="cb73-25"><a href="notebooks.html#cb73-25" tabindex="-1"></a>source_required <span class="op">=</span> {</span>
-<span id="cb73-26"><a href="notebooks.html#cb73-26" tabindex="-1"></a>    <span class="st">&#39;customer_id&#39;</span>, <span class="st">&#39;days_since_purchase&#39;</span>,</span>
-<span id="cb73-27"><a href="notebooks.html#cb73-27" tabindex="-1"></a>    <span class="st">&#39;transactions_last_90_days&#39;</span>, <span class="st">&#39;purchased_flag&#39;</span></span>
-<span id="cb73-28"><a href="notebooks.html#cb73-28" tabindex="-1"></a>}</span>
-<span id="cb73-29"><a href="notebooks.html#cb73-29" tabindex="-1"></a>missing_columns <span class="op">=</span> source_required.difference(df_model.columns)</span>
-<span id="cb73-30"><a href="notebooks.html#cb73-30" tabindex="-1"></a><span class="cf">if</span> missing_columns:</span>
-<span id="cb73-31"><a href="notebooks.html#cb73-31" tabindex="-1"></a>    <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f&quot;Missing required columns: </span><span class="sc">{</span><span class="bu">sorted</span>(missing_columns)<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb73-32"><a href="notebooks.html#cb73-32" tabindex="-1"></a></span>
-<span id="cb73-33"><a href="notebooks.html#cb73-33" tabindex="-1"></a><span class="co"># These example features must be measured before the prediction outcome window.</span></span>
-<span id="cb73-34"><a href="notebooks.html#cb73-34" tabindex="-1"></a>df_model[<span class="st">&#39;recency&#39;</span>] <span class="op">=</span> df_model[<span class="st">&#39;days_since_purchase&#39;</span>].astype(<span class="bu">float</span>)</span>
-<span id="cb73-35"><a href="notebooks.html#cb73-35" tabindex="-1"></a>df_model[<span class="st">&#39;frequency&#39;</span>] <span class="op">=</span> df_model[<span class="st">&#39;transactions_last_90_days&#39;</span>].astype(<span class="bu">float</span>)</span>
-<span id="cb73-36"><a href="notebooks.html#cb73-36" tabindex="-1"></a></span>
-<span id="cb73-37"><a href="notebooks.html#cb73-37" tabindex="-1"></a><span class="co"># Handle missing values</span></span>
-<span id="cb73-38"><a href="notebooks.html#cb73-38" tabindex="-1"></a>required_columns <span class="op">=</span> [<span class="st">&#39;customer_id&#39;</span>, <span class="st">&#39;recency&#39;</span>, <span class="st">&#39;frequency&#39;</span>, <span class="st">&#39;purchased_flag&#39;</span>]</span>
-<span id="cb73-39"><a href="notebooks.html#cb73-39" tabindex="-1"></a>df_model <span class="op">=</span> df_model[required_columns].dropna().copy()</span>
-<span id="cb73-40"><a href="notebooks.html#cb73-40" tabindex="-1"></a></span>
-<span id="cb73-41"><a href="notebooks.html#cb73-41" tabindex="-1"></a><span class="co"># 2.3 Modeling</span></span>
-<span id="cb73-42"><a href="notebooks.html#cb73-42" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span> <span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
-<span id="cb73-43"><a href="notebooks.html#cb73-43" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;MODEL TRAINING&quot;</span>)</span>
-<span id="cb73-44"><a href="notebooks.html#cb73-44" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
-<span id="cb73-45"><a href="notebooks.html#cb73-45" tabindex="-1"></a></span>
-<span id="cb73-46"><a href="notebooks.html#cb73-46" tabindex="-1"></a><span class="co"># Prepare features and target</span></span>
-<span id="cb73-47"><a href="notebooks.html#cb73-47" tabindex="-1"></a>X <span class="op">=</span> df_model[[<span class="st">&#39;recency&#39;</span>, <span class="st">&#39;frequency&#39;</span>]]</span>
-<span id="cb73-48"><a href="notebooks.html#cb73-48" tabindex="-1"></a>y <span class="op">=</span> df_model[<span class="st">&#39;purchased_flag&#39;</span>]</span>
-<span id="cb73-49"><a href="notebooks.html#cb73-49" tabindex="-1"></a></span>
-<span id="cb73-50"><a href="notebooks.html#cb73-50" tabindex="-1"></a><span class="co"># Split before fitting any learned preprocessing or model.</span></span>
-<span id="cb73-51"><a href="notebooks.html#cb73-51" tabindex="-1"></a><span class="co"># Use a temporal or grouped split instead when random rows would leak information.</span></span>
-<span id="cb73-52"><a href="notebooks.html#cb73-52" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
-<span id="cb73-53"><a href="notebooks.html#cb73-53" tabindex="-1"></a>    X,</span>
-<span id="cb73-54"><a href="notebooks.html#cb73-54" tabindex="-1"></a>    y,</span>
-<span id="cb73-55"><a href="notebooks.html#cb73-55" tabindex="-1"></a>    test_size<span class="op">=</span>CONFIG[<span class="st">&#39;test_size&#39;</span>],</span>
-<span id="cb73-56"><a href="notebooks.html#cb73-56" tabindex="-1"></a>    random_state<span class="op">=</span>CONFIG[<span class="st">&#39;random_state&#39;</span>],</span>
-<span id="cb73-57"><a href="notebooks.html#cb73-57" tabindex="-1"></a>    stratify<span class="op">=</span>y</span>
-<span id="cb73-58"><a href="notebooks.html#cb73-58" tabindex="-1"></a>)</span>
-<span id="cb73-59"><a href="notebooks.html#cb73-59" tabindex="-1"></a></span>
-<span id="cb73-60"><a href="notebooks.html#cb73-60" tabindex="-1"></a><span class="co"># Establish a simple benchmark.</span></span>
-<span id="cb73-61"><a href="notebooks.html#cb73-61" tabindex="-1"></a>baseline <span class="op">=</span> DummyClassifier(strategy<span class="op">=</span><span class="st">&#39;most_frequent&#39;</span>)</span>
-<span id="cb73-62"><a href="notebooks.html#cb73-62" tabindex="-1"></a>baseline.fit(X_train, y_train)</span>
-<span id="cb73-63"><a href="notebooks.html#cb73-63" tabindex="-1"></a>baseline_predictions <span class="op">=</span> baseline.predict(X_test)</span>
-<span id="cb73-64"><a href="notebooks.html#cb73-64" tabindex="-1"></a>baseline_score <span class="op">=</span> balanced_accuracy_score(y_test, baseline_predictions)</span>
-<span id="cb73-65"><a href="notebooks.html#cb73-65" tabindex="-1"></a></span>
-<span id="cb73-66"><a href="notebooks.html#cb73-66" tabindex="-1"></a><span class="co"># Train model</span></span>
-<span id="cb73-67"><a href="notebooks.html#cb73-67" tabindex="-1"></a>model <span class="op">=</span> RandomForestClassifier(</span>
-<span id="cb73-68"><a href="notebooks.html#cb73-68" tabindex="-1"></a>    n_estimators<span class="op">=</span><span class="dv">100</span>,</span>
-<span id="cb73-69"><a href="notebooks.html#cb73-69" tabindex="-1"></a>    random_state<span class="op">=</span>CONFIG[<span class="st">&#39;random_state&#39;</span>]</span>
-<span id="cb73-70"><a href="notebooks.html#cb73-70" tabindex="-1"></a>)</span>
-<span id="cb73-71"><a href="notebooks.html#cb73-71" tabindex="-1"></a>model.fit(X_train, y_train)</span>
-<span id="cb73-72"><a href="notebooks.html#cb73-72" tabindex="-1"></a>test_predictions <span class="op">=</span> model.predict(X_test)</span>
-<span id="cb73-73"><a href="notebooks.html#cb73-73" tabindex="-1"></a>test_score <span class="op">=</span> balanced_accuracy_score(y_test, test_predictions)</span>
-<span id="cb73-74"><a href="notebooks.html#cb73-74" tabindex="-1"></a></span>
-<span id="cb73-75"><a href="notebooks.html#cb73-75" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Model trained and evaluated on held-out data.&quot;</span>)</span>
-<span id="cb73-76"><a href="notebooks.html#cb73-76" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Baseline balanced accuracy: </span><span class="sc">{</span>baseline_score<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb73-77"><a href="notebooks.html#cb73-77" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Model balanced accuracy: </span><span class="sc">{</span>test_score<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb73-78"><a href="notebooks.html#cb73-78" tabindex="-1"></a><span class="bu">print</span>(classification_report(y_test, test_predictions, zero_division<span class="op">=</span><span class="dv">0</span>))</span></code></pre></div>
-</div>
-<div id="section-3-outputs" class="section level3 hasAnchor" number="12.2.3">
-<h3><span class="header-section-number">12.2.3</span> Section 3: Outputs<a href="notebooks.html#section-3-outputs" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p><strong>Purpose:</strong> Results, visualizations, saved files</p>
-<div class="sourceCode" id="cb74"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb74-1"><a href="notebooks.html#cb74-1" tabindex="-1"></a><span class="co"># SECTION 3: OUTPUTS</span></span>
-<span id="cb74-2"><a href="notebooks.html#cb74-2" tabindex="-1"></a><span class="co"># ====================================</span></span>
-<span id="cb74-3"><a href="notebooks.html#cb74-3" tabindex="-1"></a></span>
-<span id="cb74-4"><a href="notebooks.html#cb74-4" tabindex="-1"></a><span class="co"># 3.1 Results Summary</span></span>
-<span id="cb74-5"><a href="notebooks.html#cb74-5" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
-<span id="cb74-6"><a href="notebooks.html#cb74-6" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;RESULTS SUMMARY&quot;</span>)</span>
-<span id="cb74-7"><a href="notebooks.html#cb74-7" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
-<span id="cb74-8"><a href="notebooks.html#cb74-8" tabindex="-1"></a></span>
-<span id="cb74-9"><a href="notebooks.html#cb74-9" tabindex="-1"></a>results <span class="op">=</span> {</span>
-<span id="cb74-10"><a href="notebooks.html#cb74-10" tabindex="-1"></a>    <span class="st">&#39;rows_processed&#39;</span>: <span class="bu">len</span>(df_model),</span>
-<span id="cb74-11"><a href="notebooks.html#cb74-11" tabindex="-1"></a>    <span class="st">&#39;features_used&#39;</span>: <span class="bu">len</span>(X.columns),</span>
-<span id="cb74-12"><a href="notebooks.html#cb74-12" tabindex="-1"></a>    <span class="st">&#39;baseline_balanced_accuracy&#39;</span>: baseline_score,</span>
-<span id="cb74-13"><a href="notebooks.html#cb74-13" tabindex="-1"></a>    <span class="st">&#39;test_balanced_accuracy&#39;</span>: test_score,</span>
-<span id="cb74-14"><a href="notebooks.html#cb74-14" tabindex="-1"></a>    <span class="st">&#39;feature_importance&#39;</span>: pd.DataFrame({</span>
-<span id="cb74-15"><a href="notebooks.html#cb74-15" tabindex="-1"></a>        <span class="st">&#39;feature&#39;</span>: X.columns,</span>
-<span id="cb74-16"><a href="notebooks.html#cb74-16" tabindex="-1"></a>        <span class="st">&#39;importance&#39;</span>: model.feature_importances_</span>
-<span id="cb74-17"><a href="notebooks.html#cb74-17" tabindex="-1"></a>    }).sort_values(<span class="st">&#39;importance&#39;</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb74-18"><a href="notebooks.html#cb74-18" tabindex="-1"></a>}</span>
-<span id="cb74-19"><a href="notebooks.html#cb74-19" tabindex="-1"></a></span>
-<span id="cb74-20"><a href="notebooks.html#cb74-20" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="ch">\n</span><span class="ss">Rows processed: </span><span class="sc">{</span>results[<span class="st">&#39;rows_processed&#39;</span>]<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb74-21"><a href="notebooks.html#cb74-21" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Baseline balanced accuracy: </span><span class="sc">{</span>results[<span class="st">&#39;baseline_balanced_accuracy&#39;</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb74-22"><a href="notebooks.html#cb74-22" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Test balanced accuracy: </span><span class="sc">{</span>results[<span class="st">&#39;test_balanced_accuracy&#39;</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb74-23"><a href="notebooks.html#cb74-23" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="ch">\n</span><span class="ss">Top features:</span><span class="ch">\n</span><span class="sc">{</span>results[<span class="st">&#39;feature_importance&#39;</span>]<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb74-24"><a href="notebooks.html#cb74-24" tabindex="-1"></a></span>
-<span id="cb74-25"><a href="notebooks.html#cb74-25" tabindex="-1"></a><span class="co"># 3.2 Visualizations</span></span>
-<span id="cb74-26"><a href="notebooks.html#cb74-26" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>CONFIG[<span class="st">&#39;figsize&#39;</span>])</span>
-<span id="cb74-27"><a href="notebooks.html#cb74-27" tabindex="-1"></a></span>
-<span id="cb74-28"><a href="notebooks.html#cb74-28" tabindex="-1"></a><span class="co"># Feature importance</span></span>
-<span id="cb74-29"><a href="notebooks.html#cb74-29" tabindex="-1"></a>results[<span class="st">&#39;feature_importance&#39;</span>].plot(</span>
-<span id="cb74-30"><a href="notebooks.html#cb74-30" tabindex="-1"></a>    x<span class="op">=</span><span class="st">&#39;feature&#39;</span>, y<span class="op">=</span><span class="st">&#39;importance&#39;</span>, kind<span class="op">=</span><span class="st">&#39;barh&#39;</span>, ax<span class="op">=</span>axes[<span class="dv">0</span>]</span>
-<span id="cb74-31"><a href="notebooks.html#cb74-31" tabindex="-1"></a>)</span>
-<span id="cb74-32"><a href="notebooks.html#cb74-32" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">&#39;Feature Importance&#39;</span>)</span>
-<span id="cb74-33"><a href="notebooks.html#cb74-33" tabindex="-1"></a></span>
-<span id="cb74-34"><a href="notebooks.html#cb74-34" tabindex="-1"></a><span class="co"># Model performance</span></span>
-<span id="cb74-35"><a href="notebooks.html#cb74-35" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix</span>
-<span id="cb74-36"><a href="notebooks.html#cb74-36" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, test_predictions)</span>
-<span id="cb74-37"><a href="notebooks.html#cb74-37" tabindex="-1"></a>axes[<span class="dv">1</span>].imshow(cm, cmap<span class="op">=</span><span class="st">&#39;Blues&#39;</span>)</span>
-<span id="cb74-38"><a href="notebooks.html#cb74-38" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">&#39;Confusion Matrix&#39;</span>)</span>
-<span id="cb74-39"><a href="notebooks.html#cb74-39" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb74-40"><a href="notebooks.html#cb74-40" tabindex="-1"></a>plt.show()</span>
-<span id="cb74-41"><a href="notebooks.html#cb74-41" tabindex="-1"></a></span>
-<span id="cb74-42"><a href="notebooks.html#cb74-42" tabindex="-1"></a><span class="co"># 3.3 Save Results</span></span>
-<span id="cb74-43"><a href="notebooks.html#cb74-43" tabindex="-1"></a>output_results <span class="op">=</span> pd.DataFrame({</span>
-<span id="cb74-44"><a href="notebooks.html#cb74-44" tabindex="-1"></a>    <span class="st">&#39;customer_id&#39;</span>: df_model.loc[X_test.index, <span class="st">&#39;customer_id&#39;</span>],</span>
-<span id="cb74-45"><a href="notebooks.html#cb74-45" tabindex="-1"></a>    <span class="st">&#39;actual_purchase&#39;</span>: y_test,</span>
-<span id="cb74-46"><a href="notebooks.html#cb74-46" tabindex="-1"></a>    <span class="st">&#39;predicted_purchase&#39;</span>: test_predictions,</span>
-<span id="cb74-47"><a href="notebooks.html#cb74-47" tabindex="-1"></a>    <span class="st">&#39;confidence&#39;</span>: model.predict_proba(X_test).<span class="bu">max</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb74-48"><a href="notebooks.html#cb74-48" tabindex="-1"></a>})</span>
-<span id="cb74-49"><a href="notebooks.html#cb74-49" tabindex="-1"></a></span>
-<span id="cb74-50"><a href="notebooks.html#cb74-50" tabindex="-1"></a>CONFIG[<span class="st">&#39;output_dir&#39;</span>].mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb74-51"><a href="notebooks.html#cb74-51" tabindex="-1"></a>output_path <span class="op">=</span> CONFIG[<span class="st">&#39;output_dir&#39;</span>] <span class="op">/</span> <span class="st">&#39;test_predictions.csv&#39;</span></span>
-<span id="cb74-52"><a href="notebooks.html#cb74-52" tabindex="-1"></a>output_results.to_csv(output_path, index<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb74-53"><a href="notebooks.html#cb74-53" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="ch">\n</span><span class="ss">Held-out predictions saved to &#39;</span><span class="sc">{</span>output_path<span class="sc">}</span><span class="ss">&#39;&quot;</span>)</span></code></pre></div>
+<div id="harness-engineering-early-2026" class="section level3 hasAnchor" number="14.2.2">
+<h3><span class="header-section-number">14.2.2</span> Harness engineering (early 2026)<a href="context-harness-engineering.html#harness-engineering-early-2026" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>“Harness” and “scaffold” already meant the code around a model. The phrase
+<em>harness engineering</em> became common in early 2026.</p>
+<ul>
+<li>Phil Schmid (January 2026) described the agent harness as the infrastructure
+that wraps a model to manage long-running tasks, and said it is not the agent
+itself. He extended Karpathy’s analogy: model = CPU, context = RAM,
+harness = operating system, agent = application
+(<a href="https://www.philschmid.de/agent-harness-2026">philschmid.de</a>).</li>
+<li>Mitchell Hashimoto (February 2026) gave the most practical definition:
+whenever an agent makes a mistake, engineer a fix so it never makes that
+mistake again. His fixes were updates to <code>AGENTS.md</code> plus small,
+purpose-built scripts
+(<a href="https://mitchellh.com/writing/my-ai-adoption-journey">mitchellh.com</a>).</li>
+<li>OpenAI published “Harness engineering: leveraging Codex in an agent-first
+world” (February 2026). It describes a team that designs the environment
+while agents write the code
+(<a href="https://openai.com/index/harness-engineering/">OpenAI</a>). <strong>[Secondary]</strong>:
+the page could not be read for this chapter. Its widely repeated figures
+(code volume, team size, number of pull requests) are therefore not
+reproduced here.</li>
+<li>LangChain summarized the idea as “Agent = Model + Harness”
+(<a href="https://www.langchain.com/blog/the-anatomy-of-an-agent-harness">LangChain, March 2026</a>).</li>
+<li>Birgitta Böckeler’s article on martinfowler.com (April 2026) reframed harness
+engineering for teams that <em>use</em> coding agents
+(<a href="https://martinfowler.com/articles/exploring-gen-ai/harness-engineering.html">martinfowler.com</a>).</li>
+<li>Anthropic documented harness patterns for long-running agents
+(<a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents">November 2025</a>;
+<a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">March 2026</a>)
+<strong>[Vendor]</strong>.</li>
+</ul>
+<p>These definitions emphasize different things. Hashimoto’s is incremental,
+OpenAI’s is organizational, Schmid’s and LangChain’s are architectural, and
+Böckeler’s treats the harness as a control system.</p>
 </div>
 </div>
-<div id="best-practices-for-each-section" class="section level2 hasAnchor" number="12.3">
-<h2><span class="header-section-number">12.3</span> Best Practices for Each Section<a href="notebooks.html#best-practices-for-each-section" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<div id="section-1-setup-best-practices" class="section level3 hasAnchor" number="12.3.1">
-<h3><span class="header-section-number">12.3.1</span> Section 1: Setup Best Practices<a href="notebooks.html#section-1-setup-best-practices" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>✅ <strong>DO:</strong>
-- ✓ Import only what you need
-- ✓ Use <code>CONFIG</code> dict for paths, parameters
-- ✓ Set random seeds for reproducibility
-- ✓ Add quick sanity checks
-- ✓ Document data sources
-- ✓ Record package versions and a data snapshot or version identifier</p>
-<p>❌ <strong>DON’T:</strong>
-- ✗ Install packages in notebooks (do it separately)
-- ✗ Hardcode paths (use CONFIG)
-- ✗ Scatter imports throughout
-- ✗ Load data multiple times</p>
+<div id="how-prompt-context-and-harness-relate" class="section level2 hasAnchor" number="14.3">
+<h2><span class="header-section-number">14.3</span> How prompt, context, and harness relate<a href="context-harness-engineering.html#how-prompt-context-and-harness-relate" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Question it answers</th>
+<th>Typical artifacts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prompt engineering</td>
+<td>How should the instruction be worded?</td>
+<td>System prompt, few-shot examples</td>
+</tr>
+<tr>
+<td>Context engineering</td>
+<td>Which tokens should the model see at this step?</td>
+<td>Retrieval, tool selection, compaction, memory files, sub-agent summaries</td>
+</tr>
+<tr>
+<td>Harness engineering</td>
+<td>What system makes the model reliable over many steps?</td>
+<td>Agent loop, sandbox, hooks, tests and linters, evaluator agents, state logs, permissions</td>
+</tr>
+</tbody>
+</table>
+<p>LangChain calls prompt engineering “a subset of context engineering,” and
+Anthropic calls context engineering its “natural progression.” Treat the chain
+<em>prompt ⊂ context ⊂ harness</em> as a <strong>teaching heuristic</strong>, not a settled
+taxonomy: it appears mostly in explainers, not in primary lab writing.</p>
+<p>The more precise statement is that the harness <em>contains</em> context management,
+but it also includes deterministic machinery, such as linters, sandboxes, and
+permission checks. That machinery affects the model only when its output is
+fed back into the context.</p>
+<p><strong>Is it just a rebrand?</strong> In part. Retrieval, summarization, and RAG all
+predate the label, and some experienced developers dismiss the term as
+rebranded prompt engineering
+(<a href="https://addyo.substack.com/p/context-engineering-bringing-engineering">Addy Osmani</a>).
+What is new is treating these techniques as <strong>one budgeted design problem for
+multi-step agents</strong>, which a prompt-only view hides.</p>
 </div>
-<div id="section-2-analysis-best-practices" class="section level3 hasAnchor" number="12.3.2">
-<h3><span class="header-section-number">12.3.2</span> Section 2: Analysis Best Practices<a href="notebooks.html#section-2-analysis-best-practices" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>✅ <strong>DO:</strong>
-- ✓ Add section headers
-- ✓ Print progress (“Starting model training…”)
-- ✓ Show intermediate results
-- ✓ Use meaningful variable names
-- ✓ Add markdown cells explaining what you’re doing
-- ✓ Split data before fitting preprocessing or models
-- ✓ Compare against a meaningful baseline
-- ✓ Match the split strategy and metrics to the decision problem</p>
-<p>❌ <strong>DON’T:</strong>
-- ✗ Hide long-running cells without progress, caching, or documentation
-- ✗ Modify input dataframes (use copies)
-- ✗ Use magic numbers (put in CONFIG)
-- ✗ Skip validation checks
-- ✗ Report training-set performance as evidence of generalization
-- ✗ Fit transformations on the complete dataset before splitting</p>
+<div id="context-engineering" class="section level2 hasAnchor" number="14.4">
+<h2><span class="header-section-number">14.4</span> Context engineering<a href="context-harness-engineering.html#context-engineering" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="context-is-a-finite-attention-budget" class="section level3 hasAnchor" number="14.4.1">
+<h3><span class="header-section-number">14.4.1</span> Context is a finite attention budget<a href="context-harness-engineering.html#context-is-a-finite-attention-budget" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The founding premise is that <em>more context can make results worse</em>. Anthropic
+describes a finite “attention budget” and names <strong>context rot</strong>: recall falls
+as the token count grows. The goal it sets is “the smallest set of high-signal
+tokens” that makes the desired outcome likely.</p>
+<p>Evidence:</p>
+<ul>
+<li><strong>Lost in the middle.</strong> Accuracy was highest when the relevant information sat
+at the beginning or end of a long input, and worse in the middle
+(<a href="https://arxiv.org/abs/2307.03172">Liu et al., arXiv 2307.03172</a>).</li>
+<li><strong>Context rot.</strong> Across 18 models, performance degraded as input length grew,
+often unevenly
+(<a href="https://www.trychroma.com/research/context-rot">Chroma, July 2025</a>).
+<strong>[Vendor]</strong>: Chroma sells retrieval infrastructure, and the study is not peer
+reviewed.</li>
+</ul>
+<p>A practical consequence: a larger advertised context window is a capacity
+limit, not a promise that the model will use every token equally well.</p>
 </div>
-<div id="section-3-outputs-best-practices" class="section level3 hasAnchor" number="12.3.3">
-<h3><span class="header-section-number">12.3.3</span> Section 3: Outputs Best Practices<a href="notebooks.html#section-3-outputs-best-practices" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>✅ <strong>DO:</strong>
-- ✓ Print summary statistics
-- ✓ Create visualizations
-- ✓ Save results to files
-- ✓ Document what was saved and where
-- ✓ Include metrics, uncertainty, and relevant subgroup diagnostics</p>
-<p>❌ <strong>DON’T:</strong>
-- ✗ Leave outputs scattered in cells
-- ✗ Save without documenting
-- ✗ Create messy visualizations
-- ✗ Forget to save key results</p>
+<div id="four-ways-context-fails" class="section level3 hasAnchor" number="14.4.2">
+<h3><span class="header-section-number">14.4.2</span> Four ways context fails<a href="context-harness-engineering.html#four-ways-context-fails" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Breunig’s taxonomy pairs each failure with a fix. The examples he cites are
+secondhand and were not checked against the original papers for this chapter.</p>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Failure</th>
+<th>What happens</th>
+<th>Typical fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Poisoning</strong></td>
+<td>A hallucination or error enters context and is reused as if true</td>
+<td>Validate before writing to memory; prune; quarantine</td>
+</tr>
+<tr>
+<td><strong>Distraction</strong></td>
+<td>A long history crowds out the task; the agent repeats past actions</td>
+<td>Summarize or compact; start fresh with a handoff note</td>
+</tr>
+<tr>
+<td><strong>Confusion</strong></td>
+<td>Irrelevant tools or documents degrade choices</td>
+<td>Load fewer tools; retrieve selectively</td>
+</tr>
+<tr>
+<td><strong>Clash</strong></td>
+<td>New information contradicts earlier context</td>
+<td>Remove stale content; keep one source of truth</td>
+</tr>
+</tbody>
+</table>
 </div>
-</div>
-<div id="debugging-notebook-issues" class="section level2 hasAnchor" number="12.4">
-<h2><span class="header-section-number">12.4</span> Debugging Notebook Issues<a href="notebooks.html#debugging-notebook-issues" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<div id="issue-notebook-works-first-run-then-fails" class="section level3 hasAnchor" number="12.4.1">
-<h3><span class="header-section-number">12.4.1</span> Issue: Notebook “works” first run, then fails<a href="notebooks.html#issue-notebook-works-first-run-then-fails" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p><strong>Cause:</strong> Cells run out of order, or state isn’t clean</p>
-<p><strong>Fix:</strong>
-1. <code>Kernel → Restart Kernel</code>
-2. <code>Run All</code> (Ctrl+Shift+Enter)
-3. If still fails, there’s an order dependency</p>
-<p><strong>Prevention:</strong>
-- Design for top-to-bottom execution
-- Clear Section 1 handles all setup
-- Don’t rely on cell order</p>
-</div>
-<div id="issue-notebook-runs-slow" class="section level3 hasAnchor" number="12.4.2">
-<h3><span class="header-section-number">12.4.2</span> Issue: Notebook runs slow<a href="notebooks.html#issue-notebook-runs-slow" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p><strong>Cause:</strong> Section 2 has expensive operations</p>
-<p><strong>Fix:</strong></p>
-<div class="sourceCode" id="cb75"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb75-1"><a href="notebooks.html#cb75-1" tabindex="-1"></a><span class="co"># Before: Load full dataset (1M rows)</span></span>
-<span id="cb75-2"><a href="notebooks.html#cb75-2" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">&#39;data.csv&#39;</span>)</span>
-<span id="cb75-3"><a href="notebooks.html#cb75-3" tabindex="-1"></a></span>
-<span id="cb75-4"><a href="notebooks.html#cb75-4" tabindex="-1"></a><span class="co"># After: Sample for development</span></span>
-<span id="cb75-5"><a href="notebooks.html#cb75-5" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">&#39;data.csv&#39;</span>, nrows<span class="op">=</span><span class="dv">10000</span>)</span>
-<span id="cb75-6"><a href="notebooks.html#cb75-6" tabindex="-1"></a><span class="co"># Change back to full data when finalizing</span></span></code></pre></div>
-</div>
-<div id="issue-results-dont-match-when-rerun" class="section level3 hasAnchor" number="12.4.3">
-<h3><span class="header-section-number">12.4.3</span> Issue: Results don’t match when rerun<a href="notebooks.html#issue-results-dont-match-when-rerun" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p><strong>Cause:</strong> Missing random seed setting</p>
-<p><strong>Fix:</strong></p>
-<div class="sourceCode" id="cb76"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb76-1"><a href="notebooks.html#cb76-1" tabindex="-1"></a><span class="co"># In Section 1 Setup</span></span>
-<span id="cb76-2"><a href="notebooks.html#cb76-2" tabindex="-1"></a><span class="im">import</span> random</span>
-<span id="cb76-3"><a href="notebooks.html#cb76-3" tabindex="-1"></a>np.random.seed(CONFIG[<span class="st">&#39;random_state&#39;</span>])</span>
-<span id="cb76-4"><a href="notebooks.html#cb76-4" tabindex="-1"></a>random.seed(CONFIG[<span class="st">&#39;random_state&#39;</span>])</span>
-<span id="cb76-5"><a href="notebooks.html#cb76-5" tabindex="-1"></a></span>
-<span id="cb76-6"><a href="notebooks.html#cb76-6" tabindex="-1"></a><span class="co"># In model training</span></span>
-<span id="cb76-7"><a href="notebooks.html#cb76-7" tabindex="-1"></a>model <span class="op">=</span> RandomForestClassifier(</span>
-<span id="cb76-8"><a href="notebooks.html#cb76-8" tabindex="-1"></a>    random_state<span class="op">=</span>CONFIG[<span class="st">&#39;random_state&#39;</span>]</span>
-<span id="cb76-9"><a href="notebooks.html#cb76-9" tabindex="-1"></a>)</span></code></pre></div>
-</div>
-</div>
-<div id="asking-claude-about-notebooks" class="section level2 hasAnchor" number="12.5">
-<h2><span class="header-section-number">12.5</span> Asking Claude About Notebooks<a href="notebooks.html#asking-claude-about-notebooks" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<pre><code>I&#39;m building a data science notebook for [task].
-
-Current structure:
-SECTION 1: [what&#39;s in setup]
-SECTION 2: [what&#39;s in analysis]
-SECTION 3: [what&#39;s in outputs]
-
-Requirements:
-- [feature 1]
-- [feature 2]
-- [must be reproducible]
-
-Can you:
-1. Review the structure
-2. Suggest improvements
-3. Show example cells
-
-Keep it professional and well-commented.</code></pre>
-</div>
-<div id="exercise-restructure-an-existing-notebook" class="section level2 hasAnchor" number="12.6">
-<h2><span class="header-section-number">12.6</span> Exercise: Restructure an Existing Notebook<a href="notebooks.html#exercise-restructure-an-existing-notebook" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>Take one of your notebooks:</p>
+<div id="four-families-of-technique-write-select-compress-isolate" class="section level3 hasAnchor" number="14.4.3">
+<h3><span class="header-section-number">14.4.3</span> Four families of technique: write, select, compress, isolate<a href="context-harness-engineering.html#four-families-of-technique-write-select-compress-isolate" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>LangChain groups the techniques into four families
+(<a href="https://www.langchain.com/blog/context-engineering-for-agents">LangChain</a>).</p>
 <ol style="list-style-type: decimal">
-<li><strong>Identify the sections</strong> (setup, analysis, outputs)</li>
-<li><strong>Reorganize by section</strong> (even if messy)</li>
-<li><strong>Add CONFIG dict</strong> with all paths and parameters</li>
-<li><strong>Add section headers</strong> (markdown cells)</li>
-<li><strong>Test:</strong> Restart kernel, run all, verify it works</li>
+<li><strong>Write: persist state outside the window.</strong> Scratchpads, progress notes, and
+to-do files let an agent recover after its history is trimmed. Manus has the
+agent rewrite a <code>todo.md</code> so its goals stay at the <em>end</em> of the context, a
+direct counter to lost-in-the-middle.</li>
+<li><strong>Select: retrieve just in time.</strong> Keep lightweight identifiers (file paths,
+table names, saved queries) and load content only when needed. Claude Code
+combines an up-front <code>CLAUDE.md</code> with on-demand file search. Selection
+applies to tools too: a smaller, relevant toolset reduces confusion.</li>
+<li><strong>Compress: summarize or prune.</strong> Compaction replaces old history with a
+summary that keeps decisions, open issues, and key details, and drops
+redundant tool output.</li>
+<li><strong>Isolate: give sub-tasks clean windows.</strong> A sub-agent explores in its own
+context and returns a short summary (Anthropic suggests roughly 1,000 to
+2,000 tokens). Isolation costs extra tokens, and some practitioners argue
+that splitting work across agents fragments shared understanding. Choose it
+for parallel, separable work, not by default.</li>
 </ol>
-<p>Compare before/after. Notice how much more organized it is!</p>
+<p>Supporting guidance from the
+<a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Anthropic guide</a>:</p>
+<ul>
+<li>Write system prompts at the “right altitude”: specific enough to guide
+behavior, but heuristic rather than a brittle list of rules.</li>
+<li>Use a few diverse, canonical examples rather than every edge case.</li>
+<li>Make tools self-contained, robust to errors, and clearly distinct from one
+another. Return compact tool outputs, not raw dumps.</li>
+</ul>
 </div>
-<div id="performance-tips" class="section level2 hasAnchor" number="12.7">
-<h2><span class="header-section-number">12.7</span> Performance Tips<a href="notebooks.html#performance-tips" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<div id="tip-1-use-sampling-for-development" class="section level3 hasAnchor" number="12.7.1">
-<h3><span class="header-section-number">12.7.1</span> Tip 1: Use Sampling for Development<a href="notebooks.html#tip-1-use-sampling-for-development" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb78"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb78-1"><a href="notebooks.html#cb78-1" tabindex="-1"></a><span class="co"># Quick iteration</span></span>
-<span id="cb78-2"><a href="notebooks.html#cb78-2" tabindex="-1"></a>df_work <span class="op">=</span> df.sample(n<span class="op">=</span><span class="dv">10000</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
-<span id="cb78-3"><a href="notebooks.html#cb78-3" tabindex="-1"></a></span>
-<span id="cb78-4"><a href="notebooks.html#cb78-4" tabindex="-1"></a><span class="co"># Final run</span></span>
-<span id="cb78-5"><a href="notebooks.html#cb78-5" tabindex="-1"></a>df_work <span class="op">=</span> df.copy()</span></code></pre></div>
+<div id="cost-the-overlooked-dimension" class="section level3 hasAnchor" number="14.4.4">
+<h3><span class="header-section-number">14.4.4</span> Cost: the overlooked dimension<a href="context-harness-engineering.html#cost-the-overlooked-dimension" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Agents read far more tokens than they write. Manus reports a ratio of roughly
+100 input tokens per output token and calls the KV-cache hit rate the most
+important production metric <strong>[Vendor]</strong>. Cached input tokens are much cheaper
+than uncached ones, which leads to rules such as:</p>
+<ul>
+<li>keep the prompt prefix stable (a timestamp at the top breaks the cache);</li>
+<li>append to the context rather than editing earlier turns;</li>
+<li>serialize JSON deterministically; and</li>
+<li>disable tools by masking them rather than removing their definitions.</li>
+</ul>
+<p>These rules <strong>conflict</strong> with compaction and dynamic tool removal, which
+invalidate the cache. Good designs compress rarely and in large steps rather
+than continuously.</p>
+<p>Manus also advises leaving failed attempts in context so the model avoids
+repeating them, which seems to contradict “poisoning.” One reasonable
+reconciliation (the author’s judgment): <em>observed</em> error messages are useful
+feedback, while <em>unverified claims stored as facts</em> are harmful.</p>
 </div>
-<div id="tip-2-cache-expensive-operations" class="section level3 hasAnchor" number="12.7.2">
-<h3><span class="header-section-number">12.7.2</span> Tip 2: Cache Expensive Operations<a href="notebooks.html#tip-2-cache-expensive-operations" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb79"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb79-1"><a href="notebooks.html#cb79-1" tabindex="-1"></a><span class="co"># First time: compute</span></span>
-<span id="cb79-2"><a href="notebooks.html#cb79-2" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> os.path.exists(<span class="st">&#39;processed_data.csv&#39;</span>):</span>
-<span id="cb79-3"><a href="notebooks.html#cb79-3" tabindex="-1"></a>    df_processed <span class="op">=</span> expensive_operation(df)</span>
-<span id="cb79-4"><a href="notebooks.html#cb79-4" tabindex="-1"></a>    df_processed.to_csv(<span class="st">&#39;processed_data.csv&#39;</span>)</span>
-<span id="cb79-5"><a href="notebooks.html#cb79-5" tabindex="-1"></a><span class="cf">else</span>:</span>
-<span id="cb79-6"><a href="notebooks.html#cb79-6" tabindex="-1"></a>    <span class="co"># Subsequent times: load cached version</span></span>
-<span id="cb79-7"><a href="notebooks.html#cb79-7" tabindex="-1"></a>    df_processed <span class="op">=</span> pd.read_csv(<span class="st">&#39;processed_data.csv&#39;</span>)</span></code></pre></div>
-</div>
-<div id="tip-3-profile-slow-code" class="section level3 hasAnchor" number="12.7.3">
-<h3><span class="header-section-number">12.7.3</span> Tip 3: Profile Slow Code<a href="notebooks.html#tip-3-profile-slow-code" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb80"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb80-1"><a href="notebooks.html#cb80-1" tabindex="-1"></a><span class="im">import</span> time</span>
-<span id="cb80-2"><a href="notebooks.html#cb80-2" tabindex="-1"></a></span>
-<span id="cb80-3"><a href="notebooks.html#cb80-3" tabindex="-1"></a>start <span class="op">=</span> time.time()</span>
-<span id="cb80-4"><a href="notebooks.html#cb80-4" tabindex="-1"></a><span class="co"># your code</span></span>
-<span id="cb80-5"><a href="notebooks.html#cb80-5" tabindex="-1"></a>end <span class="op">=</span> time.time()</span>
-<span id="cb80-6"><a href="notebooks.html#cb80-6" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Took </span><span class="sc">{</span>end <span class="op">-</span> start<span class="sc">:.2f}</span><span class="ss"> seconds&quot;</span>)</span></code></pre></div>
+<div id="context-features-are-becoming-platform-features" class="section level3 hasAnchor" number="14.4.5">
+<h3><span class="header-section-number">14.4.5</span> Context features are becoming platform features<a href="context-harness-engineering.html#context-features-are-becoming-platform-features" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Vendors now ship these techniques as features, for example Anthropic’s
+<a href="https://platform.claude.com/docs/en/build-with-claude/context-editing">context editing</a>,
+<a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/memory-tool">memory tool</a>,
+<a href="https://platform.claude.com/docs/en/build-with-claude/compaction">server-side compaction</a>,
+and the progressive disclosure built into Agent Skills
+(Chapter <a href="claude-code-skills.html#claude-code-skills">10</a>). Learn the four families. The API names
+will change, but the families will still apply.</p>
 </div>
 </div>
-<div id="key-takeaways-8" class="section level2 hasAnchor" number="12.8">
-<h2><span class="header-section-number">12.8</span> Key Takeaways<a href="notebooks.html#key-takeaways-8" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>✅ Use 3-section structure (Setup, Analysis, Output)<br />
-✅ Make Section 1 complete and standalone<br />
-✅ Run all from top every time<br />
-✅ Set random seeds and record environment versions for reproducibility<br />
-✅ Prevent leakage by splitting before learned preprocessing<br />
-✅ Compare held-out performance with a baseline<br />
-✅ Add progress messages and headers<br />
-✅ Save and document outputs<br />
-✅ Test with “Restart &amp; Run All”</p>
+<div id="harness-engineering" class="section level2 hasAnchor" number="14.5">
+<h2><span class="header-section-number">14.5</span> Harness engineering<a href="context-harness-engineering.html#harness-engineering" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="what-is-in-a-harness" class="section level3 hasAnchor" number="14.5.1">
+<h3><span class="header-section-number">14.5.1</span> What is in a harness<a href="context-harness-engineering.html#what-is-in-a-harness" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>A short working definition: <strong>the harness is everything except the model
+weights.</strong> LangChain’s list includes system prompts; tools, skills, and MCP
+servers (Chapter <a href="model-context-protocol.html#model-context-protocol">13</a>); infrastructure such as a
+filesystem, sandbox, or browser; orchestration such as sub-agents and model
+routing; and hooks or middleware for deterministic steps
+(<a href="https://www.langchain.com/blog/the-anatomy-of-an-agent-harness">LangChain</a>).</p>
+<p>It helps to separate:</p>
+<ul>
+<li>the <strong>builder harness</strong>: the product runtime (Claude Code, the Claude Agent
+SDK, Codex, LangChain Deep Agents, a custom agent); and</li>
+<li>the <strong>user harness</strong>: what <em>your team</em> adds on top, such as <code>AGENTS.md</code>,
+specs, tests, linters, hooks, permissions, and CI.</li>
+</ul>
+<p>Most data scientists work mainly on the user harness, or build a small builder
+harness inside an application.</p>
+</div>
+<div id="guides-and-sensors" class="section level3 hasAnchor" number="14.5.2">
+<h3><span class="header-section-number">14.5.2</span> Guides and sensors<a href="context-harness-engineering.html#guides-and-sensors" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Böckeler classifies harness controls on two axes
+(<a href="https://martinfowler.com/articles/exploring-gen-ai/harness-engineering.html">martinfowler.com</a>):</p>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th><strong>Computational</strong> (deterministic, cheap, reliable)</th>
+<th><strong>Inferential</strong> (model-based, slower, non-deterministic)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Guides</strong> (before the agent acts)</td>
+<td>Templates, schemas, scaffolding scripts, type definitions</td>
+<td><code>AGENTS.md</code>, specs, feature lists, skills</td>
+</tr>
+<tr>
+<td><strong>Sensors</strong> (after the agent acts)</td>
+<td>Tests, linters, type checks, schema validation, data-quality checks</td>
+<td>AI code review, LLM judges, evaluator agents</td>
+</tr>
+</tbody>
+</table>
+<p>Prefer computational sensors wherever they can answer the question, and use
+inferential ones for judgments that code cannot make. Böckeler also notes the
+limits: tests do not catch a misdiagnosed problem, over-engineering, or a
+misunderstood instruction.</p>
+</div>
+<div id="each-pattern-fixes-a-named-failure" class="section level3 hasAnchor" number="14.5.3">
+<h3><span class="header-section-number">14.5.3</span> Each pattern fixes a named failure<a href="context-harness-engineering.html#each-pattern-fixes-a-named-failure" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Recurring failure</th>
+<th>Harness response</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Declares success too early</td>
+<td>Feature list where every item starts “failing”; checklist before exit; stop hooks that require evidence</td>
+<td>Anthropic (Nov 2025), LangChain [Vendor]</td>
+</tr>
+<tr>
+<td>Tries to do everything at once</td>
+<td>Work on one feature per session; commit after each</td>
+<td>Anthropic (Nov 2025) [Vendor]</td>
+</tr>
+<tr>
+<td>Edits tests to pass</td>
+<td>Explicit rule against changing tests; protected test files; CI</td>
+<td>Anthropic (Nov 2025) [Vendor]</td>
+</tr>
+<tr>
+<td>Loses track over long runs</td>
+<td>Progress log, setup script, descriptive commits, handoff notes</td>
+<td>Anthropic (Nov 2025) [Vendor]</td>
+</tr>
+<tr>
+<td>Praises its own mediocre work</td>
+<td>A separate evaluator agent that exercises the result</td>
+<td>Anthropic (Mar 2026) [Vendor]</td>
+</tr>
+<tr>
+<td>Repeats the same failing edit</td>
+<td>Loop detection that interrupts the agent</td>
+<td>LangChain (Feb 2026) [Vendor]</td>
+</tr>
+<tr>
+<td>Repeats a known mistake</td>
+<td>Add a rule to <code>AGENTS.md</code> or a deterministic check</td>
+<td>Hashimoto (Feb 2026)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Documentation is part of the harness, and long documents rot.</strong> Several
+practitioners, OpenAI reportedly among them <strong>[Secondary]</strong>, replaced one large
+instruction file with a short index that points to focused documents. This is
+the same idea as progressive disclosure in skills and just-in-time retrieval.</p>
+<p><strong>Security gaps.</strong> The primary harness posts reviewed say little about
+permissions, sandboxing, secret handling, or prompt injection through tool
+outputs. Treat these as first-class harness components anyway: apply least
+privilege, require human approval for actions that write, spend, or send, and
+keep secrets out of context (see Chapters <a href="claude-code-hooks.html#claude-code-hooks">9</a> and
+<a href="model-context-protocol.html#model-context-protocol">13</a>).</p>
+</div>
+<div id="the-thin-harness-debate" class="section level3 hasAnchor" number="14.5.4">
+<h3><span class="header-section-number">14.5.4</span> The thin-harness debate<a href="context-harness-engineering.html#the-thin-harness-debate" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Rich Sutton’s “Bitter Lesson” argues that general methods that scale with
+compute eventually beat hand-built cleverness. Applied to agents, it raises the
+question of whether harness logic is a temporary crutch.</p>
+<ul>
+<li><strong>Thin-harness view.</strong> Anthropic writes that every harness component
+“encodes an assumption about what the model can’t do on its own.” When a
+stronger model arrived, it removed parts of its own harness
+(<a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">Anthropic, March 2026</a>)
+<strong>[Vendor]</strong>. Schmid recommends harnesses that make yesterday’s clever logic
+easy to delete.</li>
+<li><strong>Harness-matters view.</strong> With the model held fixed, LangChain changed only
+its harness and raised its Terminal-Bench 2.0 score from 52.8% to 66.5%
+(<a href="https://www.langchain.com/blog/improving-deep-agents-with-harness-engineering">LangChain</a>)
+<strong>[Vendor]</strong>. A May 2026 position paper argues that harness-induced variance
+can exceed model-induced variance and can reverse model rankings
+(<a href="https://arxiv.org/abs/2605.23950">arXiv 2605.23950</a>); it is an argument,
+not a controlled meta-analysis.</li>
+</ul>
+<p>The two views are compatible. <em>Specific</em> components (elaborate prompts, rigid
+step structures, large tool collections) are absorbed as models improve. The
+<em>need</em> for an environment, verification, persistent state, and permissions
+remains.</p>
+<p><strong>Practical implication:</strong> a leaderboard score measures a model–harness pair.
+When you compare models for your own application, hold the harness constant,
+and when you change the harness, hold the model constant.</p>
+</div>
+<div id="evaluation-is-a-harness-too" class="section level3 hasAnchor" number="14.5.5">
+<h3><span class="header-section-number">14.5.5</span> Evaluation is a harness too<a href="context-harness-engineering.html#evaluation-is-a-harness-too" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Anthropic’s guide to agent evaluation distinguishes the <em>evaluation harness</em>
+from the <em>agent harness</em> and defines tasks, trials, graders, transcripts, and
+outcomes
+(<a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Anthropic, January 2026</a>):</p>
+<ul>
+<li><strong>Graders</strong> can be code-based (tests, exact match, schema checks), model-based
+(rubrics, pairwise comparison), or human (expert review).</li>
+<li><strong>Grade outcomes, not paths.</strong> Judge what the agent produced, but keep
+transcripts for debugging and for spotting reward hacking, such as an agent
+editing the tests it is graded on.</li>
+<li><strong><a href="mailto:pass@k" class="email">pass@k</a> versus pass^k.</strong> <a href="mailto:pass@k" class="email">pass@k</a> is the chance that <em>at least one</em> of <em>k</em>
+attempts succeeds; pass^k is the chance that <em>all k</em> succeed. For a
+production tool that users run repeatedly, pass^k is the more honest
+reliability measure.</li>
+</ul>
+<p>For a statistician, this is familiar ground: define the estimand (task
+success), use repeated trials to estimate variance, and avoid grading on the
+training set (tasks the harness was tuned on).</p>
+</div>
+</div>
+<div id="applying-both-to-databricks-analytics-apps" class="section level2 hasAnchor" number="14.6">
+<h2><span class="header-section-number">14.6</span> Applying both to Databricks analytics apps<a href="context-harness-engineering.html#applying-both-to-databricks-analytics-apps" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The design principle that follows from the evidence is:</p>
+<blockquote>
+<p><strong>The model chooses and explains; governed engines compute; sensors verify.</strong></p>
+</blockquote>
+<p>This is the author’s synthesis rather than an official Databricks rule, but
+each part has support in the sources above.</p>
+<div id="metadata-is-the-highest-return-context" class="section level3 hasAnchor" number="14.6.1">
+<h3><span class="header-section-number">14.6.1</span> Metadata is the highest-return context<a href="context-harness-engineering.html#metadata-is-the-highest-return-context" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Text-to-SQL research suggests that semantic context often matters more than
+which frontier model you pick:</p>
+<ul>
+<li>Adding a 4 KB semantic-layer document raised accuracy on 100 retail questions
+from about 46–51% to about 68–69% across three frontier models, and the
+differences between models were not statistically significant in either
+condition
+(<a href="https://arxiv.org/abs/2604.25149">arXiv 2604.25149</a>). This is a single study
+on one domain.</li>
+<li>On the BIRD benchmark, better column descriptions improved accuracy, although
+ambiguous columns still needed expert input
+(<a href="https://arxiv.org/abs/2408.04691">arXiv 2408.04691</a>).</li>
+<li>Automatically profiled metadata helped one team reach the top of the BIRD
+leaderboard
+(<a href="https://arxiv.org/abs/2505.19988">arXiv 2505.19988</a>).</li>
+</ul>
+<p>Databricks’ own Genie guidance is a context-engineering playbook
+(<a href="https://docs.databricks.com/aws/en/genie/best-practices">Genie best practices</a>):</p>
+<ol style="list-style-type: decimal">
+<li>Rely on clear Unity Catalog table and column names and descriptions.</li>
+<li>Start with a small number of tables (the docs suggest five or fewer).</li>
+<li>Prefer <strong>SQL expressions</strong> for metrics, filters, and dimensions, then
+<strong>example SQL</strong> for complex questions, and use plain-text instructions only
+as a last resort.</li>
+</ol>
+<p><a href="https://docs.databricks.com/aws/en/uc-semantics/metric-views/">Unity Catalog metric views</a>
+define each measure once (reach, overlap rate, lift, support, confidence) so
+that every app and agent computes it the same way.</p>
+<p>For an analytics team, this is good news: the highest-return work is data
+governance work you may already own. Column comments, metric definitions, and
+verified example queries now have a new consumer.</p>
+</div>
+<div id="mapping-to-the-three-workloads" class="section level3 hasAnchor" number="14.6.2">
+<h3><span class="header-section-number">14.6.2</span> Mapping to the three workloads<a href="context-harness-engineering.html#mapping-to-the-three-workloads" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<table>
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Workload</th>
+<th>Context engineering</th>
+<th>Harness engineering</th>
+<th>Evaluation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Streamlit analytical apps</strong> on Databricks Apps</td>
+<td>Send aggregates (top-N, group-bys, summary statistics), not audience-level rows. Keep few tables in scope. Keep a stable system-prompt prefix</td>
+<td>On-behalf-of-user auth so Unity Catalog row filters and column masks apply per user. The model proposes SQL or tool parameters; tables and charts render from the result DataFrame, not from model text</td>
+<td>A code check that every number in the narrative appears in the result table; an LLM judge for groundedness</td>
+</tr>
+<tr>
+<td><strong>Reusable jobs</strong> (lookalike, audience overlap, basket analysis)</td>
+<td>Unity Catalog comments on seed, segment, and transaction tables; metric views for overlap, lift, support, and confidence; a few verified example queries for tricky logic such as fiscal calendars</td>
+<td>Expose validated logic as Unity Catalog functions or job-triggering tools via MCP. For coding agents that maintain the job code, a short <code>AGENTS.md</code> map plus tests act as guides and sensors</td>
+<td>Compare results with known gold outputs; measure pass^k across repeated runs; protect unit tests from agent edits</td>
+</tr>
+<tr>
+<td><strong>AI-assisted apps</strong> on Databricks foundation models (Genie, Agent Bricks, custom agents)</td>
+<td>Follow the Genie order of instruction types; retrieve methodology documents just in time with AI Search rather than preloading them</td>
+<td>Gateway quotas and budgets; guardrails; durable memory only for state that must persist. Inference logging stores whatever enters context, so keep personal data out</td>
+<td>Genie benchmarks; <a href="https://docs.databricks.com/aws/en/mlflow3/genai/eval-monitor">MLflow GenAI evaluation</a> with code scorers and judges; labeled cases where the app should ask for clarification or refuse</td>
+</tr>
+</tbody>
+</table>
+<p>Relevant Databricks references:
+<a href="https://docs.databricks.com/aws/en/dev-tools/databricks-apps/auth">Databricks Apps authorization</a>,
+<a href="https://docs.databricks.com/aws/en/agents/mcp-tools/managed-mcp">managed MCP servers</a>
+(Public Preview), and the
+<a href="https://docs.databricks.com/aws/en/machine-learning/foundation-model-apis/supported-models">Foundation Model APIs supported models</a>
+page. Product names change often: Genie spaces are now called Genie Agents,
+Vector Search is now AI Search, and AI Gateway is now Unity Gateway. Check each
+docs page’s preview banner before relying on a feature.</p>
+</div>
+<div id="three-cautions-for-marketing-data" class="section level3 hasAnchor" number="14.6.3">
+<h3><span class="header-section-number">14.6.3</span> Three cautions for marketing data<a href="context-harness-engineering.html#three-cautions-for-marketing-data" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ol style="list-style-type: decimal">
+<li><strong>Schema confusion is tool confusion.</strong> Too many tables in scope degrade
+text-to-SQL the same way too many tools degrade tool choice. Curate.</li>
+<li><strong>Client data in prompts is both a privacy risk and a cost.</strong> Aggregate
+first, enforce minimum cell sizes, and use per-user authorization.</li>
+<li><strong>Do not let the assistant grade its own narrative.</strong> A deterministic check
+against the result table is cheaper and more reliable than asking a model
+whether its lift or overlap summary is correct.</li>
+</ol>
+</div>
+</div>
+<div id="a-minimal-sketch-the-number-check-sensor" class="section level2 hasAnchor" number="14.7">
+<h2><span class="header-section-number">14.7</span> A minimal sketch: the number-check sensor<a href="context-harness-engineering.html#a-minimal-sketch-the-number-check-sensor" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>This illustrative check implements the third caution. It is an instructional
+example, not tested production code, and the regular expression handles only
+simple number formats.</p>
+<div class="sourceCode" id="cb86"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb86-1"><a href="context-harness-engineering.html#cb86-1" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb86-2"><a href="context-harness-engineering.html#cb86-2" tabindex="-1"></a></span>
+<span id="cb86-3"><a href="context-harness-engineering.html#cb86-3" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb86-4"><a href="context-harness-engineering.html#cb86-4" tabindex="-1"></a></span>
+<span id="cb86-5"><a href="context-harness-engineering.html#cb86-5" tabindex="-1"></a></span>
+<span id="cb86-6"><a href="context-harness-engineering.html#cb86-6" tabindex="-1"></a><span class="kw">def</span> numbers_in_text(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">set</span>[<span class="bu">float</span>]:</span>
+<span id="cb86-7"><a href="context-harness-engineering.html#cb86-7" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Extract plain numbers such as 12, 3.5, 1,200 or 45% from narrative text.&quot;&quot;&quot;</span></span>
+<span id="cb86-8"><a href="context-harness-engineering.html#cb86-8" tabindex="-1"></a>    tokens <span class="op">=</span> re.findall(<span class="vs">r&quot;-</span><span class="op">?</span><span class="dv">\d</span><span class="pp">[</span><span class="dv">\d</span><span class="pp">,]</span><span class="op">*</span><span class="ch">\.</span><span class="op">?</span><span class="dv">\d</span><span class="op">*</span><span class="vs">&quot;</span>, text)</span>
+<span id="cb86-9"><a href="context-harness-engineering.html#cb86-9" tabindex="-1"></a>    <span class="cf">return</span> {<span class="bu">round</span>(<span class="bu">float</span>(t.replace(<span class="st">&quot;,&quot;</span>, <span class="st">&quot;&quot;</span>)), <span class="dv">2</span>) <span class="cf">for</span> t <span class="kw">in</span> tokens}</span>
+<span id="cb86-10"><a href="context-harness-engineering.html#cb86-10" tabindex="-1"></a></span>
+<span id="cb86-11"><a href="context-harness-engineering.html#cb86-11" tabindex="-1"></a></span>
+<span id="cb86-12"><a href="context-harness-engineering.html#cb86-12" tabindex="-1"></a><span class="kw">def</span> unsupported_numbers(narrative: <span class="bu">str</span>, result: pd.DataFrame) <span class="op">-&gt;</span> <span class="bu">set</span>[<span class="bu">float</span>]:</span>
+<span id="cb86-13"><a href="context-harness-engineering.html#cb86-13" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Return numbers in the narrative that do not appear in the result table.&quot;&quot;&quot;</span></span>
+<span id="cb86-14"><a href="context-harness-engineering.html#cb86-14" tabindex="-1"></a>    numeric <span class="op">=</span> result.select_dtypes(<span class="st">&quot;number&quot;</span>).to_numpy().ravel()</span>
+<span id="cb86-15"><a href="context-harness-engineering.html#cb86-15" tabindex="-1"></a>    allowed <span class="op">=</span> {<span class="bu">round</span>(<span class="bu">float</span>(x), <span class="dv">2</span>) <span class="cf">for</span> x <span class="kw">in</span> numeric}</span>
+<span id="cb86-16"><a href="context-harness-engineering.html#cb86-16" tabindex="-1"></a>    allowed <span class="op">|=</span> {<span class="bu">round</span>(<span class="bu">float</span>(x) <span class="op">*</span> <span class="dv">100</span>, <span class="dv">2</span>) <span class="cf">for</span> x <span class="kw">in</span> numeric}  <span class="co"># shares shown as %</span></span>
+<span id="cb86-17"><a href="context-harness-engineering.html#cb86-17" tabindex="-1"></a>    <span class="cf">return</span> numbers_in_text(narrative) <span class="op">-</span> allowed</span>
+<span id="cb86-18"><a href="context-harness-engineering.html#cb86-18" tabindex="-1"></a></span>
+<span id="cb86-19"><a href="context-harness-engineering.html#cb86-19" tabindex="-1"></a></span>
+<span id="cb86-20"><a href="context-harness-engineering.html#cb86-20" tabindex="-1"></a>result <span class="op">=</span> pd.DataFrame({<span class="st">&quot;segment&quot;</span>: [<span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>], <span class="st">&quot;overlap_rate&quot;</span>: [<span class="fl">0.18</span>, <span class="fl">0.07</span>]})</span>
+<span id="cb86-21"><a href="context-harness-engineering.html#cb86-21" tabindex="-1"></a>narrative <span class="op">=</span> <span class="st">&quot;Segment A overlaps 18% with the seed audience, versus 9</span><span class="sc">% f</span><span class="st">or B.&quot;</span></span>
+<span id="cb86-22"><a href="context-harness-engineering.html#cb86-22" tabindex="-1"></a><span class="bu">print</span>(unsupported_numbers(narrative, result))  <span class="co"># {9.0} -&gt; flag for review</span></span></code></pre></div>
+<p>In a harness, this check runs after the model writes its summary. If it finds
+unsupported numbers, the app either asks the model to revise using only the
+table or shows the table without the narrative.</p>
+</div>
+<div id="exercise-audit-one-ai-assisted-app" class="section level2 hasAnchor" number="14.8">
+<h2><span class="header-section-number">14.8</span> Exercise: audit one AI-assisted app<a href="context-harness-engineering.html#exercise-audit-one-ai-assisted-app" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Choose an existing assistant or prototype and answer:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Context inventory.</strong> List everything in the context window on a typical
+request: system prompt, tool definitions, retrieved text, history. Estimate
+tokens for each. What could be removed or loaded just in time?</li>
+<li><strong>Failure mapping.</strong> Find one real failure and classify it as poisoning,
+distraction, confusion, or clash, or as a harness failure such as premature
+success or missing verification.</li>
+<li><strong>One guide, one sensor.</strong> Add one guide (a metric definition, example query,
+or <code>AGENTS.md</code> rule) and one computational sensor (a schema check, number
+check, or test).</li>
+<li><strong>Measure.</strong> Build 20 to 30 representative questions with known answers. Run
+each several times and report pass^k before and after your change, holding
+the model constant.</li>
+</ol>
+</div>
+<div id="key-takeaways-10" class="section level2 hasAnchor" number="14.9">
+<h2><span class="header-section-number">14.9</span> Key takeaways<a href="context-harness-engineering.html#key-takeaways-10" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ul>
+<li><strong>Context engineering</strong> decides what the model sees at each step; <strong>harness
+engineering</strong> builds the system that makes many steps reliable.</li>
+<li>Treat <em>prompt ⊂ context ⊂ harness</em> as a useful heuristic, not an official
+taxonomy; the harness also includes deterministic parts that never enter the
+context.</li>
+<li>Context is a finite attention budget: more tokens can reduce quality. Use the
+four families—write, select, compress, isolate—and watch the cost trade-off
+with caching.</li>
+<li>Organize harness controls as guides and sensors, and prefer deterministic
+sensors where possible. Each harness component should fix a named failure.</li>
+<li>Benchmarks measure a model–harness pair. Hold one fixed when you evaluate the
+other, and report pass^k for reliability.</li>
+<li>On Databricks, governed metadata is the best context, deterministic functions
+and jobs are the best tools, and numbers should come from query results.</li>
+<li>Expect specific techniques and API names to expire; the separation of
+concerns is the durable lesson.</li>
+</ul>
+</div>
+<div id="references-1" class="section level2 hasAnchor" number="14.10">
+<h2><span class="header-section-number">14.10</span> References<a href="context-harness-engineering.html#references-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Context engineering</strong></p>
+<ul>
+<li><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Anthropic: Effective context engineering for AI agents (Sep 2025)</a></li>
+<li><a href="https://www.langchain.com/blog/the-rise-of-context-engineering">LangChain: The rise of context engineering (Jun 2025)</a></li>
+<li><a href="https://www.langchain.com/blog/context-engineering-for-agents">LangChain: Context engineering for agents (Jul 2025)</a></li>
+<li><a href="https://simonwillison.net/2025/Jun/27/context-engineering/">Simon Willison: Context engineering (Jun 2025)</a></li>
+<li><a href="https://www.philschmid.de/context-engineering">Phil Schmid: The new skill in AI is not prompting, it’s context engineering (Jun 2025)</a></li>
+<li><a href="https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html">Drew Breunig: How long contexts fail (Jun 2025)</a></li>
+<li><a href="https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html">Drew Breunig: How to fix your context (Jun 2025)</a></li>
+<li><a href="https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus">Manus: Context engineering for AI agents (Jul 2025)</a></li>
+<li><a href="https://www.trychroma.com/research/context-rot">Chroma: Context rot (Jul 2025)</a></li>
+<li><a href="https://arxiv.org/abs/2307.03172">Liu et al.: Lost in the middle (2023)</a></li>
+</ul>
+<p><strong>Harness engineering</strong></p>
+<ul>
+<li><a href="https://www.philschmid.de/agent-harness-2026">Phil Schmid: The importance of agent harness in 2026 (Jan 2026)</a></li>
+<li><a href="https://mitchellh.com/writing/my-ai-adoption-journey">Mitchell Hashimoto: My AI adoption journey (Feb 2026)</a></li>
+<li><a href="https://openai.com/index/harness-engineering/">OpenAI: Harness engineering (Feb 2026)</a></li>
+<li><a href="https://www.langchain.com/blog/improving-deep-agents-with-harness-engineering">LangChain: Improving deep agents with harness engineering (Feb 2026)</a></li>
+<li><a href="https://www.langchain.com/blog/the-anatomy-of-an-agent-harness">LangChain: The anatomy of an agent harness (Mar 2026)</a></li>
+<li><a href="https://martinfowler.com/articles/exploring-gen-ai/harness-engineering.html">Birgitta Böckeler: Harness engineering (martinfowler.com, Apr 2026)</a></li>
+<li><a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents">Anthropic: Effective harnesses for long-running agents (Nov 2025)</a></li>
+<li><a href="https://www.anthropic.com/engineering/harness-design-long-running-apps">Anthropic: Harness design for long-running application development (Mar 2026)</a></li>
+<li><a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents">Anthropic: Demystifying evals for AI agents (Jan 2026)</a></li>
+<li><a href="https://arxiv.org/abs/2605.23950">arXiv 2605.23950: position paper on harness-induced variance (May 2026)</a></li>
+</ul>
+<p><strong>Databricks and text-to-SQL</strong></p>
+<ul>
+<li><a href="https://docs.databricks.com/aws/en/genie/best-practices">Databricks: Genie best practices</a></li>
+<li><a href="https://docs.databricks.com/aws/en/uc-semantics/metric-views/">Databricks: Unity Catalog metric views</a></li>
+<li><a href="https://docs.databricks.com/aws/en/mlflow3/genai/eval-monitor">Databricks: MLflow GenAI evaluation</a></li>
+<li><a href="https://docs.databricks.com/aws/en/dev-tools/databricks-apps/auth">Databricks: Apps authorization</a></li>
+<li><a href="https://arxiv.org/abs/2604.25149">arXiv 2604.25149: semantic layer and text-to-SQL accuracy (Apr 2026)</a></li>
+<li><a href="https://arxiv.org/abs/2408.04691">arXiv 2408.04691: column descriptions on BIRD</a></li>
+<li><a href="https://arxiv.org/abs/2505.19988">arXiv 2505.19988: automatic metadata for text-to-SQL</a></li>
+</ul>
 
 </div>
 </div>
@@ -997,8 +1280,8 @@ Keep it professional and well-commented.</code></pre>
           </div>
         </div>
       </div>
-<a href="verification-loops.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="model-context-protocol.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="model-context-protocol.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="ai-marketing-analytics.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

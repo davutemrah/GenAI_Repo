@@ -1,0 +1,139 @@
+# AI Models in Marketing Analytics {#ai-marketing-analytics}
+
+## Introduction
+
+Marketing analytics has used statistical and machine-learning models for
+decades. Response models, customer segmentation, propensity scores, and
+marketing mix models were standard well before large language models existed.
+What has changed is the range of tasks that models can now take on. Predictive
+models score audiences. Causal models estimate what spend actually caused.
+Generative models write copy, summarize research, and turn questions into SQL.
+Agents chain these steps together and call governed tools.
+
+This chapter maps where each kind of model fits in day-to-day marketing
+analytics work, especially in an agency setting that serves many clients,
+markets, and data sources. It ties the earlier chapters to the domain:
+prompting and verification (Chapters \@ref(prompting) and
+\@ref(verification-loops)), MCP (Chapter \@ref(model-context-protocol)), and
+context and harness engineering (Chapter \@ref(context-harness-engineering)).
+
+Two principles run through the chapter:
+
+1. **Use the right model family for the question.** A language model is not a
+   substitute for a causal design, and a propensity model does not estimate
+   incrementality. Many costly mistakes in marketing analytics come from
+   answering a causal question with a predictive tool.
+2. **The model chooses and explains; governed engines compute.** Generative AI
+   is most useful as an interface to validated analyses, not as the source of
+   the numbers.
+
+Measurement theory (marketing mix modeling, attribution, experimentation, and
+segmentation) is covered in depth in the companion
+[Marketing Analytics book](https://davutemrah.github.io/4.Marketing_analytics/).
+This chapter focuses on how AI models are used across that work.
+
+## A map of AI model families in marketing
+
+Four families of models solve different kinds of problems: predictive
+(classification, regression, ranking), causal (experiments, quasi-experiments,
+econometric models), generative (language, image, and multimodal models), and
+agentic systems that combine models with tools. For each, this section will
+cover the typical marketing questions it answers, the data it needs, and the
+question it *cannot* answer on its own.
+
+## Audience and customer modeling
+
+This section covers segmentation, lookalike and propensity modeling, customer
+lifetime value, and churn. It will also discuss where foundation models and
+embeddings add value, for example by turning unstructured behavioral or text
+data into features. The recurring risks are leakage from post-outcome
+features, seed-audience bias, and treating a high propensity score as proof of
+incrementality.
+Chapter \@ref(classification-lookalike) treats lookalike modeling as
+positive-unlabeled learning and covers two-tower embeddings and typed decision
+models in depth.
+
+## Measurement, attribution, and incrementality
+
+This section explains how AI fits around measurement without replacing causal
+identification. Topics include marketing mix models (for example the
+open-source [Meridian](https://github.com/google/meridian) and
+[Robyn](https://github.com/facebookexperimental/Robyn) projects), multi-touch
+attribution and its limits, geo and holdout experiments, and how language
+models can help explain results to clients while the estimates themselves come
+from validated models.
+
+## Media planning, reach, and audience overlap
+
+This section covers budget allocation and scenario planning, reach and
+frequency estimation, and audience overlap across platforms and segments. It
+discusses optimization on top of response curves and how an assistant can
+expose these analyses as governed tools rather than ad hoc calculations.
+
+## Basket analysis and recommendations
+
+This section covers market basket analysis (support, confidence, and lift),
+product affinity, and recommendation systems. It also covers embedding-based
+approaches and how to explain affinity results in plain language without
+overstating causality.
+
+## Generative AI for content and creative
+
+This section covers copy and creative variation, localization across markets,
+brief generation, and creative pre-testing. It addresses brand safety, factual
+claims in ads, intellectual-property and disclosure considerations, and why
+creative variants still need a proper experiment to show which one works.
+
+## Voice of the customer: text, reviews, and social
+
+This section covers using language models to classify, summarize, and extract
+themes from reviews, survey open-ends, call transcripts, and social posts. It
+compares zero-shot LLM labeling with traditional supervised classifiers and
+explains how to validate LLM labels against a human-coded sample before
+reporting the results.
+
+## AI-assisted analytics workflows
+
+This section covers analytics copilots and text-to-SQL assistants (such as
+Databricks Genie), automated reporting and insight narration, and Streamlit
+apps built on foundation models. It applies the metadata-first, numbers-from-
+the-engine design from Chapter \@ref(context-harness-engineering).
+
+## Agents in marketing operations
+
+This section covers multi-step agents that monitor campaign performance, detect
+anomalies, prepare client reports, or trigger reusable jobs such as lookalike
+builds. It addresses permissions, human approval for actions that spend or
+publish, and auditability.
+
+## Data foundations and privacy
+
+This section covers first-party data, identity resolution, data clean rooms,
+consent, and regional privacy regulation. It explains why aggregation,
+minimum cell sizes, and per-user authorization matter more once client data
+can flow into model context and logs.
+
+## Evaluation and governance
+
+This section covers how to evaluate each model family: offline metrics for
+predictive models, validity checks for causal estimates, human-validated
+benchmarks for generative tasks, and repeated-run reliability (pass^k) for
+assistants and agents. It also covers fairness in targeting, monitoring for
+drift, and documenting model limits for clients.
+
+## Interview takeaways
+
+This section will summarize how to explain these choices in an interview: which
+model family fits a stated business question, how to defend a measurement
+approach, and how to describe the safe use of generative AI on client data.
+
+## Key takeaways
+
+- Marketing analytics uses four model families: predictive, causal,
+  generative, and agentic. Match the family to the question.
+- Predictive accuracy is not incrementality; causal questions need causal
+  designs.
+- Generative AI is strongest as an interface to validated analyses and as a
+  tool for unstructured text and creative work.
+- Governed metadata, deterministic tools, privacy controls, and evaluation turn
+  AI prototypes into dependable client-facing products.

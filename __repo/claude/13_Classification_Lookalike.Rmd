@@ -1,0 +1,792 @@
+# Classification and Lookalike Modeling: PU Learning, Two-Tower Networks, and Typed Decision Models {#classification-lookalike}
+
+## Introduction
+
+Marketing data science classifies constantly. It scores leads, routes
+inquiries, labels reviews, and finds new customers who resemble existing ones.
+Three developments have changed how this work can be done:
+
+1. **Positive-unlabeled (PU) learning** gives lookalike modeling a principled
+   footing when advertisers know their positives (the seed audience) but have
+   no confirmed negatives.
+2. **Two-tower neural networks** embed users and items in a shared vector space
+   so that similarity search scales to hundreds of millions of users.
+3. **Typed decision models**, such as TypeSafe AI's Jev (released in
+   September 2026), return probabilities for predefined choices instead of
+   generating text. They target fast, cheap, structured classification that
+   generative LLMs handle awkwardly.
+
+This chapter explains when each approach fits, what it assumes, and how to
+validate it before it touches live campaigns.
+The interactive [Classification Lab](labs/classification-lab.html) lets you
+experiment with the confidence formulas, calibration, and PU audience sizing
+used in this chapter. It builds on the transformer
+background in Chapter \@ref(foundations-of-generative-ai-and-llms) and the
+workflow chapters on notebooks (Chapter \@ref(notebooks)), verification loops
+(Chapter \@ref(verification-loops)), and MCP (Chapter \@ref(model-context-protocol)).
+
+**Provenance note.** This chapter began as an AI-generated research summary.
+Its claims were checked against primary sources. Several were corrected or
+removed because they could not be verified, or because they confused a
+vendor's marketing claims with established results. Vendor claims that remain
+are labeled **[Vendor]**.
+
+## Choosing a model family
+
+| Approach | Core mechanism | Typical marketing use | Main assumption or risk |
+|---|---|---|---|
+| Classical supervised ML (logistic regression, gradient boosting) | Learns a decision boundary from labeled features | Propensity, churn, lead scoring with reliable labels | Labels represent the target; no leakage |
+| PU learning | Learns from positives plus unlabeled records | Lookalike audiences, account expansion | How positives were selected into the seed (often assumed random) |
+| Two-tower networks | Separate user and item encoders, compared by dot product | Large-scale retrieval, recommendations, embedding-based lookalikes | Enough interaction data; well-designed negative sampling |
+| Generative LLMs | Generate text token by token | Labeling ambiguous text, explanations, content | Cost, latency, output-format errors, ungrounded claims |
+| Typed decision models (e.g., Jev) | Return probabilities over a predefined schema | High-volume routing, triage, text-to-feature labeling, guardrails | Vendor-reported accuracy and calibration must be checked on your data |
+
+None of these is a causal method. A high lookalike score or propensity score
+says who *resembles* converters, not who would convert *because of* the
+campaign. Incrementality needs an experiment or a credible quasi-experimental
+design.
+
+## Lookalike modeling as positive-unlabeled learning
+
+### The problem: no true negatives
+
+A lookalike model starts from a seed audience, such as repeat purchasers or
+high-value accounts, and searches a wider population for similar people. The
+wider population is not negative. It is **unlabeled**: it contains future
+customers, customers of competitors, and people who simply were never
+observed.
+
+Treating all unlabeled records as negatives is the common shortcut. It biases
+probability estimates downward because the "negatives" contain hidden
+positives.
+
+### The key assumption and a useful result
+
+Most PU methods assume that labeled positives are a **random sample of all
+positives**, often called *selected completely at random* (SCAR). Under SCAR,
+Elkan and Noto (2008) showed that:
+
+$$
+P(y = 1 \mid x) = \frac{P(s = 1 \mid x)}{c}, \qquad c = P(s = 1 \mid y = 1),
+$$
+
+where $s = 1$ means "in the seed" and $y = 1$ means "truly positive." Two
+practical consequences follow:
+
+1. **Ranking is unchanged.** Dividing by a constant does not change the order
+   of scores. If you only need the top-*k* users, the naive seed-versus-rest
+   classifier already produces the same ranking as the PU-corrected one under
+   SCAR.
+2. **Probabilities and audience sizes change.** If you need calibrated
+   probabilities, expected conversions, or an estimate of how many positives
+   exist in the population, you must estimate $c$.
+
+The SCAR assumption is often doubtful in marketing. Seed audiences come from
+past campaigns, specific channels, or loyalty programs, so they are rarely a
+random sample of all potential customers. When selection depends on features,
+the naive ranking inherits that selection bias. More recent methods relax SCAR;
+see the survey by Bekker and Davis (2020).
+
+### Common strategies
+
+- **Two-step methods** first identify *reliable negatives* in the unlabeled
+  data and then train an ordinary classifier.
+  - *Spy technique:* hide a random subset of seed members ("spies") in the
+    unlabeled set, train seed versus unlabeled, and treat unlabeled records that
+    score below most spies as reliable negatives (Liu et al., 2002).
+  - *Initial-classifier approach:* train seed versus unlabeled, then take the
+    lowest-scoring unlabeled records as reliable negatives.
+- **Bagging PU** trains many classifiers, each on the positives against a
+  random subsample of unlabeled records, and averages their scores (Mordelet
+  and Vert, 2014).
+- **Class-prior methods** estimate $c$ (or the positive share) and correct the
+  classifier's output, as in Elkan and Noto.
+
+### Worked example: a retailer's lookalike audience
+
+The numbers are invented and kept round so the logic is easy to follow.
+
+**Setup.** A retailer's addressable population has 1,000,000 people. Suppose
+(unknown to the analyst) 200,000 of them would become high-value customers.
+The seed audience is 60,000 known high-value customers. So the seed captures
+$c = 60{,}000 / 200{,}000 = 0.30$ of all true positives.
+
+**Step 1: the naive model.** The analyst trains "seed versus everyone else."
+The model outputs $P(s = 1 \mid x)$: the probability that a person *is in the
+seed*, not the probability that they *are high value*.
+
+| Person | Naive score $P(s=1 \mid x)$ | Corrected $P(y=1 \mid x) = \text{score} / 0.30$ |
+|---|---|---|
+| Ana | 0.15 | 0.50 |
+| Ben | 0.06 | 0.20 |
+| Cem | 0.01 | 0.03 |
+
+**What changes and what does not.**
+
+- *Ranking is the same.* Ana > Ben > Cem under both columns. If the media plan
+  says "target the top 100,000 people," the naive model already picks the
+  right people (under SCAR).
+- *Probabilities and sizes change.* The naive scores sum to roughly the seed
+  size (about 60,000) across the population, so the naive model implies "about
+  60,000 people like our customers exist." The corrected scores sum to about
+  200,000. If a client asks "how big is the opportunity?" or "how many
+  conversions should we expect?", the naive answer is too low by a factor of
+  about three.
+
+**Step 2: the spy technique in numbers.** To find reliable negatives, hide
+6,000 seed members (10%) as "spies" inside the unlabeled population and train
+seed versus unlabeled. Suppose 95% of spies score above 0.08. Unlabeled people
+scoring below 0.08 look *less* like customers than almost every real customer
+does, so they are treated as reliable negatives. A second model is then
+trained on seed versus those reliable negatives.
+
+**Step 3: when the assumption fails.** Suppose the seed came only from the
+email loyalty program. Mobile-app-only customers are high value but rarely in
+the program, so they are under-represented in the seed. The model learns
+"looks like an email subscriber" rather than "looks like a high-value
+customer." It ranks valuable mobile-only prospects low, and no PU correction
+fixes that, because the correction assumes the seed is a random sample of all
+positives. The remedies are a better seed (combine sources), features that
+describe selection, or methods that relax SCAR.
+
+To see how class overlap distorts audience sizing while leaving the ranking
+unchanged, open tab 3 of the [Classification Lab](labs/classification-lab.html).
+
+### A runnable illustration
+
+The simulation below knows the true labels, so it can show both what the
+Elkan–Noto correction does and when it fails. Results were produced with
+scikit-learn 1.5; other versions may differ slightly.
+
+```python
+import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split
+
+
+def pu_demo(class_sep: float, label_freq: float = 0.3, seed: int = 42) -> None:
+    rng = np.random.default_rng(seed)
+    X, y = make_classification(n_samples=20_000, n_features=10, n_informative=5,
+                               weights=[0.8, 0.2], class_sep=class_sep,
+                               random_state=seed)
+    # Seed audience: a random 30% of true positives (the SCAR assumption)
+    s = ((y == 1) & (rng.random(len(y)) < label_freq)).astype(int)
+
+    X_fit, X_rest, s_fit, s_rest, _, y_rest = train_test_split(
+        X, s, y, test_size=0.4, random_state=seed, stratify=s)
+    X_hold, X_te, s_hold, _, _, y_te = train_test_split(
+        X_rest, s_rest, y_rest, test_size=0.5, random_state=seed, stratify=s_rest)
+
+    # Naive model: seed (s=1) vs everyone else treated as negative
+    clf = LogisticRegression(max_iter=1000).fit(X_fit, s_fit)
+
+    # Elkan-Noto: c = P(s=1 | y=1), estimated on held-out seed members
+    c_hat = clf.predict_proba(X_hold[s_hold == 1])[:, 1].mean()
+    p_pos = np.clip(clf.predict_proba(X_te)[:, 1] / c_hat, 0, 1)
+
+    print(f"class_sep={class_sep}: c_hat={c_hat:.2f} (true {label_freq}), "
+          f"AUC={roc_auc_score(y_te, p_pos):.3f}, "
+          f"est. positive share={p_pos.mean():.3f} (true {y_te.mean():.3f})")
+
+
+for sep in [1.0, 3.0]:
+    pu_demo(sep)
+```
+
+```text
+class_sep=1.0: c_hat=0.11 (true 0.3), AUC=0.832, est. positive share=0.465 (true 0.207)
+class_sep=3.0: c_hat=0.24 (true 0.3), AUC=0.981, est. positive share=0.209 (true 0.207)
+```
+
+**Interpretation.**
+
+- When positives and negatives are well separated (`class_sep=3.0`), the
+  estimate of $c$ is close to the truth and the estimated positive share is
+  accurate.
+- When the classes overlap (`class_sep=1.0`), which is typical of behavioral
+  marketing data, the estimator of $c$ is badly biased downward. The positive
+  share is then overstated by more than a factor of two. This estimator
+  assumes the classifier gives true positives a score near $c$, which fails
+  when classes overlap.
+- The ranking (AUC) is identical to the naive classifier in both cases,
+  illustrating consequence 1 above.
+
+**Takeaway:** use PU corrections for audience *sizing* only after checking
+their assumptions. For audience *ranking*, the larger risks are selection bias
+in the seed and leakage, not the missing negatives.
+
+### An enterprise example
+
+IBM has described using PU learning in its account-based marketing to find
+lookalike accounts. It reported identifying nurturable lower-engagement
+accounts "93% of the time" and lookalike accounts converting at twice the
+average rate
+([Content Marketing Institute](https://contentmarketinginstitute.com/articles/ibm-b2b-data-marketing-strategy/)).
+**[Vendor]**: this is a company-reported case study without a published
+methodology. The meaning of "93% of the time," the baseline, and the
+evaluation design are not stated.
+
+## Two-tower networks for retrieval and lookalikes
+
+### Architecture
+
+A two-tower model has two independent neural networks:
+
+- the **user tower** encodes user features (demographics, context, recent
+  behavior, engagement history) into an embedding vector $u$; and
+- the **item tower** encodes item features (category, text description,
+  images, popularity) into an embedding $v$ of the same dimension.
+
+The model scores a user–item pair by their similarity:
+
+$$
+\text{score}(u, v) = u \cdot v = \sum_{i=1}^{d} u_i v_i
+\quad \text{or} \quad
+\cos(u, v) = \frac{u \cdot v}{\lVert u \rVert \, \lVert v \rVert}.
+$$
+
+The dot product rewards both direction and magnitude. Cosine similarity uses
+only direction, which removes the effect of vector length, often a proxy for
+popularity.
+
+The idea goes back to the deep structured semantic model for search (Huang et
+al., 2013). YouTube's candidate-generation network (Covington et al., 2016) and
+its sampling-bias-corrected two-tower model (Yi et al., 2019) made it standard
+for large-scale recommendation.
+
+### Why it scales: late interaction and approximate search
+
+The towers interact only at the final similarity step ("late fusion"). That
+separation enables a two-stage system:
+
+1. **Offline:** compute embeddings for every item (or every user) and store them
+   in a vector index.
+2. **Online:** compute the query embedding and run an **approximate nearest
+   neighbor (ANN)** search to retrieve the top candidates quickly, even across
+   very large catalogs.
+
+Because the towers never see each other's features before the final step, they
+cannot model detailed user–item feature crosses. Production systems therefore
+add a **ranking stage**. A heavier model, such as Wide & Deep (Cheng et al.,
+2016) or DeepFM (Guo et al., 2017), re-scores the few hundred retrieved
+candidates and applies business rules such as diversity, frequency caps, and
+brand safety.
+
+### Using embeddings for lookalike audiences
+
+Once user embeddings exist, lookalike modeling becomes a search problem:
+
+- **Centroid search:** average the seed users' embeddings and retrieve the
+  nearest non-seed users. This is simple but assumes a single, compact seed
+  cluster.
+- **Multi-anchor search:** cluster the seed first, then search around each
+  cluster center. This works better when the seed contains distinct personas.
+- **Classifier in embedding space:** train a PU or ordinary classifier on the
+  embeddings, combining the two approaches in this chapter.
+
+### Worked example: dot product versus cosine
+
+Real embeddings have dozens to hundreds of dimensions that have no names. For
+intuition, imagine three dimensions: *sport*, *tech*, and *family*.
+
+A user who mostly buys sports gear, sometimes family items, and rarely tech
+has the embedding $u = (0.9, 0.1, 0.4)$. Three candidate items:
+
+| Item | Embedding $v$ | Length $\lVert v \rVert$ | Dot product $u \cdot v$ | Cosine |
+|---|---|---|---|---|
+| Running shoes | (0.8, 0.0, 0.3) | 0.85 | 0.84 | **0.99** |
+| Phone case (very popular) | (1.5, 1.2, 1.0) | 2.17 | **1.87** | 0.87 |
+| Kids' bike | (0.2, 0.1, 0.9) | 0.93 | 0.55 | 0.60 |
+
+How to read it:
+
+- The running shoes point in almost exactly the user's direction (cosine 0.99):
+  they are the best *match in taste*.
+- The phone case has a long vector. In many trained models, popular items end
+  up with larger embeddings because they appear in many interactions. The dot
+  product rewards that length, so the phone case wins on dot product even
+  though it matches the user's taste less well.
+- Neither metric is "right." Dot product mixes relevance with popularity, which
+  can raise click-through but narrows exposure. Cosine focuses on taste, which
+  helps niche items and new products. Choose deliberately and evaluate both.
+
+### Worked example: why a single centroid can fail
+
+Suppose the seed has two personas in a two-dimensional embedding: *bargain
+hunters* near (1, 0) and *premium buyers* near (0, 1). Their centroid is
+(0.5, 0.5).
+
+| Prospect | Distance to centroid | Distance to nearest persona |
+|---|---|---|
+| Bargain-hunter-like (0.9, 0.1) | 0.57 | 0.14 |
+| Premium-like (0.1, 0.9) | 0.57 | 0.14 |
+| In-between (0.5, 0.5) | **0.00** | 0.71 |
+
+A centroid search ranks the in-between prospect first even though that person
+resembles *neither* real persona. Clustering the seed first and searching
+around each cluster center (multi-anchor search) ranks the two persona-like
+prospects first, which is what the client wants.
+
+### Training choices that matter
+
+- **Negative sampling.** Interaction logs contain mostly positives (clicks,
+  purchases). Negatives usually come from in-batch sampling or random
+  sampling. In-batch sampling over-represents popular items, which Yi et al.
+  correct for. The ratio of negatives to positives is a tuning choice, not a
+  fixed rule.
+- **Popularity bias.** Without correction, retrieval favors already-popular
+  items and users who resemble the majority. Common responses are sampling
+  corrections, re-weighting rare items, and diversity rules at the ranking
+  stage.
+- **Cold start.** Because the towers use content and context features, new
+  users and items get embeddings from their metadata. Their quality still needs
+  separate evaluation.
+- **Privacy.** User embeddings derived from behavior are personal data in many
+  jurisdictions. Govern them like the raw data.
+
+On Databricks, embeddings are typically stored in Delta tables and served
+through AI Search (formerly Vector Search) for ANN retrieval. Check the current
+documentation for supported index types and limits.
+
+## Typed decision models: Jev and "System One" classification
+
+### Why a different model type
+
+Generative LLMs can classify text, but for high-volume pipelines they bring
+three costs:
+
+- latency and token cost, because they generate output token by token;
+- format errors when asked to return JSON; and
+- free-text output that downstream code must parse and validate.
+
+Teams already address these with structured-output features, small fine-tuned
+encoders (BERT-style classifiers), or embedding-plus-classifier pipelines. A
+newer option is a model built only for typed decisions.
+
+### What Jev is
+
+TypeSafe AI describes Jev as the first "System One model," a name borrowed
+from Kahneman's distinction between fast, intuitive thinking and slow,
+deliberate thinking
+([TypeSafe announcement, Sep 2026](https://typesafe.ai/blog/introducing-system-one-models-and-jev)).
+Jev takes a piece of *state* (text or JSON) and one or more typed questions,
+and returns only structured answers. It never generates prose, explanations,
+or code.
+
+According to the
+[TypeSafe documentation](https://docs.typesafe.ai/introduction), it supports
+three question primitives:
+
+| Primitive | Question form | Returns | Marketing example |
+|---|---|---|---|
+| **Choice** | Pick one option from a list | The chosen option, a probability for each option, confidence | Route an inquiry to billing, support, or sales |
+| **Score** | Place the state on an ordered rubric | A score, probabilities over levels, confidence | Rate lead urgency or customer frustration |
+| **Noul** | Is this statement true? | A single probability that the answer is yes | "Does this email request a refund?" |
+
+TypeSafe says it trains Jev with a method it calls *Reinforcement Learning for
+Calibrated Decisions* (RLCD), which it contrasts with the RLHF used for chat
+models. It has not published the method's details.
+
+### Confidence is not calibration
+
+TypeSafe's documentation defines **confidence as a summary of how
+concentrated the probability distribution is**
+([TypeSafe: Confidence](https://docs.typesafe.ai/confidence)):
+
+- **Choice**, with $n$ options and top probability $p_{\max}$:
+  $$\text{confidence} = \frac{p_{\max} - 1/n}{1 - 1/n},$$
+  which is 0 for an even split and 1 for certainty.
+- **Noul**, with probability $p$: the suggested summary is
+  $\text{confidence} = |2p - 1|$.
+- **Score**, with level probabilities $p_i$ and most likely level $m$:
+  $$\text{confidence} = \max\left(0,\; 1 - \frac{\sum_i p_i \lvert i - m \rvert}{\text{MAD}_{\text{unif}}}\right),$$
+  where $\text{MAD}_{\text{unif}}$ is the same average distance for an even
+  spread across all levels, measured from the middle level. Uncertainty between
+  adjacent levels lowers confidence less than uncertainty between distant
+  levels.
+
+### Worked examples: computing confidence by hand
+
+**Choice: routing a customer email** to one of four teams ($n = 4$, so an even
+split gives each team $1/n = 0.25$).
+
+| Returned probabilities (Billing, Support, Sales, Cancel) | $p_{\max}$ | Confidence |
+|---|---|---|
+| 0.70, 0.15, 0.10, 0.05 | 0.70 | $(0.70 - 0.25)/(1 - 0.25) = 0.60$ |
+| 0.40, 0.30, 0.20, 0.10 | 0.40 | $(0.40 - 0.25)/(0.75) = 0.20$ |
+| 0.25, 0.25, 0.25, 0.25 | 0.25 | 0.00 |
+
+Read confidence as "how far the top answer stands above a coin-toss among the
+options," rescaled to run from 0 to 1.
+
+**Score: rating complaint urgency** on five levels numbered 0 (calm) to 4
+(furious). For five levels, an even spread has an average distance of 1.2
+levels from the middle level, so $\text{MAD}_{\text{unif}} = 1.2$.
+
+| Case | Probabilities on levels 0–4 | Most likely level | Average distance $\sum p_i \lvert i - m \rvert$ | Confidence |
+|---|---|---|---|---|
+| A: torn between *angry* and *furious* | 0, 0, 0, 0.6, 0.4 | 3 | $0.4 \times 1 = 0.4$ | $1 - 0.4/1.2 = 0.67$ |
+| B: torn between *angry* and *calm* | 0.4, 0, 0, 0.6, 0 | 3 | $0.4 \times 3 = 1.2$ | $1 - 1.2/1.2 = 0.00$ |
+
+Both cases put 60% on level 3, yet A has useful confidence and B has none. In
+A the model only hesitates about *how* angry the customer is. In B it cannot
+tell whether the customer is angry or calm, which is useless for prioritizing.
+
+**Noul: "Does this email request a refund?"**
+
+| Returned $p$ | Confidence $\lvert 2p - 1 \rvert$ | Reading |
+|---|---|---|
+| 0.94 | 0.88 | Confident *yes* |
+| 0.55 | 0.10 | Close to a coin toss |
+| 0.06 | 0.88 | Confident *no* |
+
+**Confidently wrong.** In the first Choice row, suppose the email actually
+came from a customer about to cancel. The model said Billing with confidence
+0.60, and it was wrong. Nothing in the formula can reveal that; only comparing
+predictions with true labels across many emails can. That comparison is
+calibration, described next.
+
+Try your own distributions in tab 1 of the [Classification Lab](labs/classification-lab.html).
+
+These formulas describe the **shape** of the distribution, not whether it is
+**right**. A model can be confidently wrong. Calibration means that among
+cases predicted at 90%, about 90% are actually positive. Calibration is an
+empirical property that you must measure on your own labeled data. TypeSafe
+says Jev is trained for calibrated probabilities, but no calibration evaluation
+(such as reliability diagrams or expected calibration error) was found in its
+published materials as of October 2026.
+
+### Vendor-reported performance
+
+TypeSafe reports **[Vendor]**:
+
+- end-to-end latency of roughly 70 to 500 milliseconds, against seconds for
+  frontier LLMs;
+- input pricing of $0.042 per million tokens, with output not billed; and
+- that answers always match the declared schema, so type errors are
+  impossible by construction.
+
+TypeSafe notes that its published evaluations were run from its own machines
+and that its workflow benchmarks were built by its own team. Schema conformance
+by construction is credible. Accuracy, calibration, and real-world latency
+still need independent testing. As of October 2026 the model was proprietary
+and served through TypeSafe's hosted API; access terms may change.
+
+### Where a typed decision model fits
+
+- **Routing and triage:** a Choice question picks the destination while a Score
+  question rates urgency, evaluated on the same input.
+- **Text-to-feature labeling:** turn reviews, survey open-ends, or call notes
+  into categorical features for downstream models.
+- **Guardrails for agents:** ask a Noul question such as "Is this proposed
+  action read-only?" before an agent runs a tool. This complements
+  deterministic permissions and hooks; it does not replace them.
+
+Design questions **atomically**: ask one factor per question, and let ordinary
+code combine the answers into the final action. This keeps each probability
+interpretable and testable.
+
+## Validating classifiers before automation
+
+Whatever the model, decide thresholds from evidence, not from reported
+confidence.
+
+1. **Build a labeled sample** that represents production traffic, including
+   rare and ambiguous cases. Have humans label it, and measure agreement
+   between labelers.
+2. **Run in shadow mode.** Score live traffic in parallel with the current
+   process without affecting decisions.
+3. **Measure discrimination and calibration separately.** Discrimination
+   (AUC, precision at the chosen threshold) says whether the model ranks
+   well. Calibration says whether its probabilities can be taken at face
+   value.
+4. **Set thresholds from costs.** Choose automation thresholds from the cost of
+   each error type, and route the uncertain middle band to people or to a
+   slower model.
+5. **Monitor drift.** Re-check calibration when products, campaigns, or
+   language change.
+
+A minimal calibration check:
+
+```python
+import numpy as np
+import pandas as pd
+from sklearn.calibration import calibration_curve
+from sklearn.metrics import brier_score_loss
+
+
+def calibration_report(y_true, p_pred, n_bins: int = 10) -> pd.DataFrame:
+    """Compare predicted probabilities with observed frequencies on labeled data."""
+    frac_pos, mean_pred = calibration_curve(y_true, p_pred, n_bins=n_bins,
+                                            strategy="quantile")
+    print(f"Brier score: {brier_score_loss(y_true, p_pred):.3f}")
+    return pd.DataFrame({"mean_predicted": mean_pred.round(2),
+                         "observed_rate": frac_pos.round(2)})
+
+
+# Simulated shadow-mode log: an overconfident classifier
+rng = np.random.default_rng(7)
+true_p = rng.uniform(0, 1, 2_000)
+y = rng.binomial(1, true_p)
+p_reported = np.clip(0.5 + 1.6 * (true_p - 0.5), 0.01, 0.99)  # pushed toward 0/1
+
+print(calibration_report(y, p_reported, n_bins=5))
+```
+
+```text
+Brier score: 0.180
+   mean_predicted  observed_rate
+0            0.01           0.10
+1            0.18           0.30
+2            0.49           0.51
+3            0.82           0.68
+4            0.99           0.91
+```
+
+The simulated model reports 0.99 when the observed rate is 0.91, and 0.01 when
+it is 0.10. A threshold of "automate above 0.95" would therefore be much less
+safe than it appears. If calibration is poor but ranking is good, recalibrate
+with Platt scaling or isotonic regression on held-out data. Do not tune the
+threshold on the same sample you use to report performance.
+
+### Worked example: from calibration to an automation threshold
+
+**Checking calibration in plain terms.** In shadow mode, a classifier flags
+1,000 emails as "refund request" with probability around 0.90. Human reviewers
+check them and find that 760 really are refund requests. The observed rate is
+0.76, not 0.90, so the model is **overconfident** in that range. Repeat the
+check for other probability bands (0.1, 0.3, 0.5, ...) to draw the full
+calibration curve.
+
+**Choosing a threshold from costs.** Suppose the app escalates likely churn
+emails to a retention specialist:
+
+- escalating an email that was not churn risk (false positive) wastes about
+  \$1 of specialist time;
+- missing a real churn-risk email (false negative) loses about \$9 in expected
+  customer value.
+
+With *calibrated* probability $p$, escalating costs $(1 - p) \times 1$ in
+expectation and not escalating costs $p \times 9$. Escalation is worth it when
+$p \times 9 > (1 - p) \times 1$, that is, when
+
+$$
+p > \frac{C_{FP}}{C_{FP} + C_{FN}} = \frac{1}{1 + 9} = 0.10.
+$$
+
+Two lessons follow:
+
+1. **The threshold comes from the business costs, not from the model.** Here
+   escalating at only 10% probability is rational because misses are nine
+   times as costly as false alarms. A default threshold of 0.5 would miss many
+   saveable customers.
+2. **The rule only works with calibrated probabilities.** If the model's "0.10"
+   really means 0.03, the threshold is wrong. Calibrate first, then apply the
+   cost rule.
+
+Tab 2 of the [Classification Lab](labs/classification-lab.html) simulates an
+overconfident model, draws its calibration curve, and converts business costs
+into a threshold.
+
+For lookalike audiences, the final test is an **outcome experiment**: compare
+conversion or incremental lift for the new audience against a control or the
+current method. Offline metrics show the model learned the seed; only an
+experiment shows business value.
+
+## Putting the pieces together
+
+A practical marketing stack might combine these approaches:
+
+- **Two-tower embeddings** for large-scale audience retrieval and
+  recommendations.
+- **PU-aware classifiers** to rank and size lookalike audiences, with explicit
+  checks on seed selection.
+- **A typed decision model or small fine-tuned classifier** for high-volume
+  routing and text-to-feature labeling.
+- **Generative LLMs** for explanation, ambiguous cases, and content, connected
+  to governed tools through MCP (Chapter \@ref(model-context-protocol)).
+- **Verification loops** around all of them: execution checks, quality checks
+  against labeled data, and outcome experiments (Chapter
+  \@ref(verification-loops)).
+
+Develop these models in reproducible notebooks with a clear setup, analysis,
+and outputs structure, deterministic seeds, and held-out evaluation, as
+described in Chapter \@ref(notebooks).
+
+## Implementing this in a Databricks marketing practice
+
+This section turns the chapter into four concrete projects for an agency data
+science team that runs reusable Databricks jobs and Streamlit apps. Each
+project lists the steps, the deliverable, and how to prove it works. Product
+names follow the Databricks documentation as of October 2026; check current
+docs before building.
+
+### Project 1: upgrade the lookalike job to be PU-aware
+
+**Goal:** keep the existing lookalike ranking, but add honest audience sizing
+and a check on seed bias.
+
+1. **Document the seed.** Record where each seed member came from (CRM, loyalty
+   program, campaign responders) as a column in the seed table in Unity
+   Catalog.
+2. **Compare seed with population.** Before modeling, compare the seed's
+   distribution on key features (region, channel, device, age band) with the
+   population's. Large gaps warn that SCAR is doubtful. Report them to the
+   client.
+3. **Train the ranking model as usual** (seed versus unlabeled, for example
+   with gradient boosting), logged with MLflow.
+4. **Add a sizing step.** Estimate $c$ on held-out seed members, as in the
+   runnable example. Report the estimated audience size *with a range*. Flag
+   the estimate as unreliable when the classes overlap heavily, which shows up
+   as a low held-out AUC.
+5. **Make the job reusable.** Parameterize seed table, population table, and
+   audience size; write scores and a run summary (size estimate, AUC, seed-gap
+   report) to Delta tables.
+6. **Validate with an experiment.** For important clients, run a holdout or
+   geo test comparing the new audience with the current method.
+
+**Deliverable:** a ranked audience table plus a one-page run summary that a
+client lead can read.
+
+### Project 2: embedding-based lookalikes and recommendations
+
+**Goal:** find similar users or products at scale, and explain why they are
+similar.
+
+1. **Start simple.** Before training a two-tower model, build user embeddings
+   from existing features or from purchase sequences (for example, embeddings
+   of product IDs averaged per user). This gives a baseline.
+2. **Train a two-tower model** when interaction data is large enough (clicks,
+   purchases, views). Use in-batch negatives and a popularity correction.
+3. **Index embeddings** with Databricks AI Search (formerly Vector Search) for
+   nearest-neighbor retrieval.
+4. **Use multi-anchor search** for lookalikes: cluster the seed embeddings and
+   retrieve around each cluster center.
+5. **Evaluate offline, then online.** Offline: recall@K of held-out purchases,
+   plus coverage and diversity of retrieved items. Online: an A/B test on
+   conversion.
+6. **Expose as a tool.** Wrap "find lookalikes for seed X" as a Unity Catalog
+   function or a job-triggering tool, so a Streamlit assistant can call it
+   through MCP (Chapter \@ref(model-context-protocol)).
+
+**Deliverable:** an embedding table, a search index, and a retrieval tool with
+documented evaluation.
+
+### Project 3: high-volume text classification for voice of the customer
+
+**Goal:** turn reviews, survey open-ends, or support emails into categorical
+features (topic, sentiment, urgency, refund request) cheaply and reliably.
+
+1. **Define atomic questions.** For example: topic (Choice), urgency (Score
+   0–4), refund request (yes or no). Write clear definitions and two or three
+   examples for each label.
+2. **Create a labeled sample.** Have two people label 300 to 500 records and
+   measure agreement. Low agreement means the label definitions need work
+   before any model can do better.
+3. **Compare candidate classifiers on the same sample:** a generative LLM from
+   Databricks Foundation Model APIs with structured output, a small fine-tuned
+   encoder, and, if you have access, a typed decision model such as Jev.
+   Compare accuracy, calibration, latency, and cost per 1,000 records.
+4. **Calibrate and set thresholds** with the cost rule above. Route the
+   uncertain middle band to people.
+5. **Run as a scheduled job** that writes labels and probabilities to a Delta
+   table, then feed those columns into dashboards or downstream models (churn,
+   satisfaction drivers).
+6. **Monitor monthly.** Re-label a small random sample and re-check accuracy
+   and calibration.
+
+**Deliverable:** a labeled feature table, a model comparison report, and a
+monitoring check.
+
+### Project 4: a calibration check as a reusable tool
+
+**Goal:** make "is this model's probability trustworthy?" a standard step for
+every classifier the team ships.
+
+1. Package the `calibration_report` function from this chapter, plus AUC and
+   the cost-based threshold, as a shared Python module.
+2. Add it to the team's notebook template (Chapter \@ref(notebooks)) and to the
+   evaluation step of every job, logging results to MLflow.
+3. Add a rule to the team's `AGENTS.md` or skill: an agent may not recommend an
+   automation threshold without a calibration report (Chapter
+   \@ref(claude-code-skills)).
+
+**Deliverable:** one shared function and one team rule. This is the smallest
+project and a good first step.
+
+### Where to start
+
+Start with **Project 4**, because it is small and improves every other
+project. Then do **Project 1**, which adds value to a job you already run.
+Projects 2 and 3 depend on data volume and access to labeled text, so scope
+them with a specific client use case.
+
+## Interview takeaways
+
+- *"How would you build a lookalike model?"* Frame it as PU learning. State the
+  SCAR assumption, explain why ranking is unaffected by the missing negatives
+  but sizing is not, and propose an experiment to validate lift.
+- *"Why use a two-tower model?"* It separates user and item encoders so that
+  embeddings can be precomputed and searched with approximate nearest
+  neighbors. The trade-off is weaker feature interactions, which a ranking
+  stage recovers.
+- *"Can I trust a model's confidence score?"* Only after measuring calibration
+  on representative labeled data. Concentration of probability is not
+  accuracy.
+- *"LLM or classifier for ticket routing?"* For stable categories at high
+  volume, use a classifier or typed decision model with measured calibration.
+  Reserve generative models for ambiguous cases and explanations.
+
+## Key takeaways
+
+- Lookalike modeling is a positive-unlabeled problem. The SCAR assumption
+  determines what corrections are valid, and seed selection bias is often the
+  bigger risk.
+- Two-tower networks make embedding-based retrieval and lookalikes scale;
+  negative sampling and popularity bias need deliberate design.
+- Typed decision models such as Jev return structured probabilities instead of
+  text. Their schema guarantees are credible by design, but accuracy and
+  calibration claims require your own validation.
+- Confidence measures how concentrated a distribution is; calibration measures
+  whether probabilities match reality. Automate only on measured calibration.
+- Validate in shadow mode first, then prove business value with experiments.
+
+## References
+
+**Positive-unlabeled learning**
+
+- Elkan, C., and Noto, K. (2008). Learning classifiers from only positive and
+  unlabeled data. *KDD*. <https://doi.org/10.1145/1401890.1401920>
+- Liu, B., Lee, W. S., Yu, P. S., and Li, X. (2002). Partially supervised
+  classification of text documents. *ICML*.
+- Mordelet, F., and Vert, J.-P. (2014). A bagging SVM to learn from positive
+  and unlabeled examples. *Pattern Recognition Letters*.
+  <https://arxiv.org/abs/1010.0772>
+- Bekker, J., and Davis, J. (2020). Learning from positive and unlabeled data:
+  a survey. *Machine Learning*. <https://arxiv.org/abs/1811.04820>
+
+**Two-tower and recommendation models**
+
+- Huang, P.-S., et al. (2013). Learning deep structured semantic models for web
+  search using clickthrough data. *CIKM*.
+- Covington, P., Adams, J., and Sargin, E. (2016). Deep neural networks for
+  YouTube recommendations. *RecSys*. <https://doi.org/10.1145/2959100.2959190>
+- Yi, X., et al. (2019). Sampling-bias-corrected neural modeling for large
+  corpus item recommendations. *RecSys*.
+  <https://doi.org/10.1145/3298689.3346996>
+- Cheng, H.-T., et al. (2016). Wide & deep learning for recommender systems.
+  <https://arxiv.org/abs/1606.07792>
+- Guo, H., et al. (2017). DeepFM: A factorization-machine based neural network
+  for CTR prediction. <https://arxiv.org/abs/1703.04247>
+
+**Typed decision models**
+
+- [TypeSafe AI: Introducing System One models and Jev (Sep 2026)](https://typesafe.ai/blog/introducing-system-one-models-and-jev) [Vendor]
+- [TypeSafe AI documentation](https://docs.typesafe.ai/introduction) [Vendor]
+- [TypeSafe AI: Confidence](https://docs.typesafe.ai/confidence) [Vendor]
+
+**Case study**
+
+- [Content Marketing Institute: How IBM uses data to power its account-based marketing strategy](https://contentmarketinginstitute.com/articles/ibm-b2b-data-marketing-strategy/) [Vendor]
