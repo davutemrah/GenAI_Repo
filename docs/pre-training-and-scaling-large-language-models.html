@@ -23,7 +23,7 @@
 <meta name="author" content="Davut Ayan" />
 
 
-<meta name="date" content="2026-10-06" />
+<meta name="date" content="2026-10-07" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -666,7 +666,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><p><strong>Generative AI Project Life Cycle Overview</strong></p>
 <ul>
 <li><p>The process begins with scoping the use case and determining how an LLM will integrate into the application.</p></li>
-<li><p>Next, choose a model: either use an existing model or train one from scratch (the latter is explored in detail later).</p></li>
+<li><p>Next, choose a model: either use an existing model or train one from scratch (the cost of the latter is discussed below).</p></li>
 </ul></li>
 <li><p><strong>Choosing a Model</strong></p>
 <ul>
@@ -714,8 +714,9 @@ training recipe, and task fit also matter.</p></li>
 </ol>
 <div id="computational-challenges-of-pre-training" class="section level2 hasAnchor" number="2.1">
 <h2><span class="header-section-number">2.1</span> Computational Challenges of pre-training<a href="pre-training-and-scaling-large-language-models.html#computational-challenges-of-pre-training" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>This detailed explanation of memory issues in large language models (LLMs) and the solutions available highlights several key points about quantization, precision, and distributed computing in the context of training large models.</p>
-<p>Below is a structured summary of the information:</p>
+<p>Training large language models (LLMs) is constrained by GPU memory. The main
+responses are reduced numerical precision (quantization) and distributed
+computing:</p>
 <ul>
 <li><p>Reduced-precision arithmetic and quantization are important options for
 addressing memory and throughput constraints; the appropriate method depends
@@ -793,8 +794,8 @@ on hardware, training or inference stage, and acceptable numerical error.</p></l
 </div>
 <div id="scaling-laws" class="section level2 hasAnchor" number="2.2">
 <h2><span class="header-section-number">2.2</span> Scaling Laws<a href="pre-training-and-scaling-large-language-models.html#scaling-laws" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>This content discusses research and insights into optimizing large language models by exploring the relationships between model size, training dataset size, and compute budget.</p>
-<p>Here are the key points:</p>
+<p>Scaling-law research studies how model size, training dataset size, and compute
+budget jointly determine language-model performance.</p>
 <ol style="list-style-type: decimal">
 <li><p><strong>Pre-training Goals:</strong> The goal of pre-training language models is to maximize performance by minimizing loss when predicting tokens. Improvements can be achieved by:</p>
 <ul>
@@ -827,7 +828,7 @@ constant for every architecture or objective.</p></li>
 <li><p>Models like Bloomberg GPT show that compute-efficient training can achieve excellent task-specific performance with smaller parameter sizes.</p></li>
 </ul></li>
 </ol>
-<p>The discussion points towards a shift away from the “bigger is better” trend to a focus on compute-efficient and optimally trained models.</p>
+<p>These results point towards a shift away from the “bigger is better” trend to a focus on compute-efficient and optimally trained models.</p>
 
 </div>
 </div>

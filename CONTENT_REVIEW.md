@@ -45,7 +45,8 @@ the highest-risk claims corrected, but a later scholarly pass should:
 
 - add primary citations for transformer architecture, scaling laws, FLAN,
   catastrophic forgetting, PEFT/LoRA, and each benchmark;
-- replace lecture-oriented phrases with a consistent textbook voice;
+- continue the textbook-voice rewrite (course references, week pointers, and
+  third-party slide screenshots were removed on October 7, 2026);
 - add diagrams with provenance and accessible alternative text;
 - add small reproducible exercises for tokenization, decoding, evaluation, and
   parameter-efficient adaptation; and

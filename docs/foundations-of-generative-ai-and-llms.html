@@ -23,7 +23,7 @@
 <meta name="author" content="Davut Ayan" />
 
 
-<meta name="date" content="2026-10-06" />
+<meta name="date" content="2026-10-07" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -697,15 +697,15 @@ of exact memories.</p></li>
 <li><p><strong>Scale is one factor</strong>: More parameters can increase representational
 capacity, but performance also depends on data, architecture, optimization,
 inference strategy, adaptation, and evaluation domain.</p></li>
-<li><p><strong>Model Representation</strong>: Throughout the course, LLMs will be represented by purple circles.</p></li>
-<li><p><strong>Example Model</strong>: In the labs, you will use an open-source model called flan-T5 for language tasks.</p></li>
+<li><p><strong>Example Model</strong>: FLAN-T5 is a small, openly available instruction-tuned
+model that is convenient for hands-on language-task experiments.</p></li>
 </ul>
 </div>
 <div id="model-adaptation-and-use" class="section level3 hasAnchor" number="1.1.3">
 <h3><span class="header-section-number">1.1.3</span> Model Adaptation and Use<a href="foundations-of-generative-ai-and-llms.html#model-adaptation-and-use" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <ul>
 <li><p><strong>Fine Tuning</strong>: You can either use these models as they are or apply fine-tuning techniques to adapt them to specific use cases without the need to train a new model from scratch.</p></li>
-<li><p><strong>Multimodal Generative AI</strong>: While generative AI models exist for images, video, audio, and speech, this course focuses on LLMs and natural language generation.</p></li>
+<li><p><strong>Multimodal Generative AI</strong>: While generative AI models exist for images, video, audio, and speech, these notes focus on LLMs and natural language generation.</p></li>
 </ul>
 </div>
 <div id="interaction-with-llms" class="section level3 hasAnchor" number="1.1.4">
@@ -721,7 +721,8 @@ varies by model and product and should be checked in current documentation.</p><
 </div>
 <div id="use-cases-of-llm" class="section level2 hasAnchor" number="1.2">
 <h2><span class="header-section-number">1.2</span> Use Cases of LLM<a href="foundations-of-generative-ai-and-llms.html#use-cases-of-llm" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>The broader applications of large language models (LLMs) and generative AI beyond chatbots. It highlights that while chatbots are prominent, LLMs can also perform diverse tasks, such as:</p>
+<p>Chatbots are the most visible application of large language models (LLMs), but
+the same models can perform many other tasks, such as:</p>
 <p><strong>Text Generation:</strong> LLMs can generate essays based on prompts and summarize dialogues.</p>
 <p><strong>Translation:</strong> They can translate between different languages and convert natural language into machine code, such as generating Python code.</p>
 <p><strong>Information extraction:</strong> LLMs can extract or classify spans such as people,
@@ -860,7 +861,7 @@ configured decoding strategy.</p></li>
 </div>
 <div id="prediction-process" class="section level3 hasAnchor" number="1.5.10">
 <h3><span class="header-section-number">1.5.10</span> Prediction Process<a href="foundations-of-generative-ai-and-llms.html#prediction-process" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>Let’s walk through a sequence-to-sequence task, such as translating a French phrase into English:</p>
+<p>Consider a sequence-to-sequence task, such as translating a French phrase into English:</p>
 <ol style="list-style-type: decimal">
 <li><p><strong>Tokenize Input</strong>: The French phrase is tokenized using the same tokenizer that trained the network.</p></li>
 <li><p><strong>Encoder</strong>: Tokenized input is passed through the embedding layer and multi-headed attention layers, producing a deep representation of the input sequence.</p></li>
@@ -1024,7 +1025,8 @@ prompting or adaptation method, and evaluation domain.</li>
 <p><strong>Fine-Tuning</strong></p>
 <ul>
 <li><strong>Definition</strong>: Additional training on the model with new data to improve task-specific performance.</li>
-<li><strong>Upcoming</strong>: Detailed exploration of fine-tuning will be covered in week 2 of the course.</li>
+<li><strong>See also</strong>: Chapter <a href="instruction-fine-tuning-and-evaluation.html#instruction-fine-tuning-and-evaluation">3</a> covers
+fine-tuning in detail.</li>
 </ul>
 <p><strong>Model Performance and Scale</strong></p>
 <ul>
@@ -1035,14 +1037,16 @@ prompting or adaptation method, and evaluation domain.</li>
 <p><strong>Experimentation</strong></p>
 <ul>
 <li><p><strong>Recommendation</strong>: Experiment with different models and settings to find the best fit for your use case.</p></li>
-<li><p><strong>Next Steps</strong>: Explore configuration settings to influence the structure and style of model completions.</p></li>
+<li><p><strong>Generation settings</strong>: Inference-time configuration also shapes the
+structure and style of completions (Section
+<a href="foundations-of-generative-ai-and-llms.html#configuring-generative-ai-models">1.9</a>).</p></li>
 </ul>
 </div>
 </div>
 <div id="configuring-generative-ai-models" class="section level2 hasAnchor" number="1.9">
 <h2><span class="header-section-number">1.9</span> Configuring Generative AI Models<a href="foundations-of-generative-ai-and-llms.html#configuring-generative-ai-models" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p><strong>Overview</strong></p>
-<p>This lecture examines methods and configuration parameters used to influence a model’s next-word generation during inference. Unlike training parameters, these settings are adjusted at inference time to control aspects like the maximum number of tokens generated and the creativity of the output.</p>
+<p>This section examines methods and configuration parameters used to influence a model’s next-word generation during inference. Unlike training parameters, these settings are adjusted at inference time to control aspects like the maximum number of tokens generated and the creativity of the output.</p>
 <p><strong>Key Configuration Parameters</strong></p>
 <p><strong>1. Max New Tokens</strong></p>
 <ul>
@@ -1084,15 +1088,86 @@ prompting or adaptation method, and evaluation domain.</li>
 <li><p>Temperature=1: Uses the default probability distribution.</p></li>
 </ul></li>
 </ul>
-<p><img src="figures/parameter_temp.png" /></p>
+<p>Temperature divides the logits before the softmax, <span class="math inline">\(p_i \propto \exp(z_i / T)\)</span>.
+The illustrative table below applies three temperatures to the same four
+logits (apple = -1.0, banana = 0.5, cake = 2.0, donut = 1.2):</p>
+<table>
+<thead>
+<tr>
+<th align="left">Next token</th>
+<th align="right">T = 0.5</th>
+<th align="right">T = 1.0</th>
+<th align="right">T = 2.0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">apple</td>
+<td align="right">0.002</td>
+<td align="right">0.029</td>
+<td align="right">0.094</td>
+</tr>
+<tr>
+<td align="left">banana</td>
+<td align="right">0.040</td>
+<td align="right">0.130</td>
+<td align="right">0.200</td>
+</tr>
+<tr>
+<td align="left">cake</td>
+<td align="right">0.797</td>
+<td align="right">0.581</td>
+<td align="right">0.423</td>
+</tr>
+<tr>
+<td align="left">donut</td>
+<td align="right">0.161</td>
+<td align="right">0.261</td>
+<td align="right">0.283</td>
+</tr>
+</tbody>
+</table>
+<p>A lower temperature produces a sharply peaked distribution; a higher
+temperature flattens it, so less likely tokens are sampled more often.</p>
 </div>
 <div id="generative-ai-project-lifecycle" class="section level2 hasAnchor" number="1.10">
 <h2><span class="header-section-number">1.10</span> Generative AI project lifecycle<a href="foundations-of-generative-ai-and-llms.html#generative-ai-project-lifecycle" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p><strong>Introduction</strong></p>
-<p>Throughout this course, you’ll learn the techniques required to develop and deploy an LLM-powered application. This video introduces the generative AI project life cycle, guiding you from conception to launch.</p>
+<p>Building an LLM-powered application involves a sequence of decisions from
+conception to launch. The generative AI project life cycle organizes them into
+four stages.</p>
 <div id="project-life-cycle-stages" class="section level3 hasAnchor" number="1.10.1">
 <h3><span class="header-section-number">1.10.1</span> Project Life Cycle Stages<a href="foundations-of-generative-ai-and-llms.html#project-life-cycle-stages" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p><img src="figures/project_life.png" /></p>
+<table>
+<colgroup>
+<col width="29%" />
+<col width="70%" />
+</colgroup>
+<thead>
+<tr>
+<th align="left">Stage</th>
+<th align="left">Main activities</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">Scope</td>
+<td align="left">Define the use case</td>
+</tr>
+<tr>
+<td align="left">Select</td>
+<td align="left">Choose an existing model or pre-train your own</td>
+</tr>
+<tr>
+<td align="left">Adapt and align</td>
+<td align="left">Prompt engineering, fine-tuning, alignment with human feedback, and evaluation</td>
+</tr>
+<tr>
+<td align="left">Integrate</td>
+<td align="left">Optimize and deploy the model for inference; augment it and build the application</td>
+</tr>
+</tbody>
+</table>
 <div id="define-the-scope" class="section level4 hasAnchor" number="1.10.1.1">
 <h4><span class="header-section-number">1.10.1.1</span> Define the Scope<a href="foundations-of-generative-ai-and-llms.html#define-the-scope" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <ul>
@@ -1108,7 +1183,10 @@ prompting or adaptation method, and evaluation domain.</li>
 <ul>
 <li><p><strong>Decision</strong>: Train your own model from scratch or use an existing base model.</p></li>
 <li><p><strong>Common Approach</strong>: Start with an existing model.</p></li>
-<li><p><strong>Considerations</strong>: Later in the course, you’ll learn rules of thumb to help estimate the feasibility of training your own model.</p></li>
+<li><p><strong>Considerations</strong>: Chapter
+<a href="pre-training-and-scaling-large-language-models.html#pre-training-and-scaling-large-language-models">2</a> discusses the
+compute and scaling considerations that determine whether training your own
+model is feasible.</p></li>
 </ul>
 </div>
 <div id="assess-and-train-the-model" class="section level4 hasAnchor" number="1.10.1.3">
@@ -1117,15 +1195,18 @@ prompting or adaptation method, and evaluation domain.</li>
 <li><p><strong>Initial Steps</strong>: Use prompt engineering and in-context learning to improve model performance.</p></li>
 <li><p><strong>Fine-Tuning</strong>:</p></li>
 <li><p>Necessary if prompt engineering is insufficient.</p></li>
-<li><p>Supervised learning process covered in Week 2.</p></li>
-<li><p><strong>Reinforcement Learning with Human Feedback (RLHF)</strong>:</p></li>
-<li><p>Ensures the model behaves well and aligns with human preferences. - Covered in Week 3.</p></li>
+<li><p>A supervised learning process; see Chapter
+<a href="instruction-fine-tuning-and-evaluation.html#instruction-fine-tuning-and-evaluation">3</a>.</p></li>
+<li><p><strong>Reinforcement Learning from Human Feedback (RLHF)</strong>:</p></li>
+<li><p>Adjusts model behavior toward human preferences, such as helpfulness and
+harmlessness.</p></li>
 </ul>
 </div>
 <div id="evaluate-the-model" class="section level4 hasAnchor" number="1.10.1.4">
 <h4><span class="header-section-number">1.10.1.4</span> Evaluate the Model<a href="foundations-of-generative-ai-and-llms.html#evaluate-the-model" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <ul>
-<li><strong>Metrics and Benchmarks</strong>: Explore next week.</li>
+<li><strong>Metrics and Benchmarks</strong>: See Section
+<a href="instruction-fine-tuning-and-evaluation.html#evaluating-model-performance-in-language-tasks">3.3</a>.</li>
 <li><strong>Iterative Process</strong>:
 <ul>
 <li>Start with prompt engineering.</li>
@@ -1155,7 +1236,9 @@ prompting or adaptation method, and evaluation domain.</li>
 </ul></li>
 <li><strong>Overcoming Limitations</strong>:
 <ul>
-<li>Learn techniques to address these issues in the final part of the course.</li>
+<li>Connect the model to external data sources and tools (for example,
+retrieval or code execution) and verify outputs rather than relying on
+the model alone.</li>
 </ul></li>
 </ul>
 </div>

@@ -4,7 +4,7 @@
   
    - The process begins with scoping the use case and determining how an LLM will integrate into the application.
   
-   - Next, choose a model: either use an existing model or train one from scratch (the latter is explored in detail later).
+   - Next, choose a model: either use an existing model or train one from scratch (the cost of the latter is discussed below).
 
 2. **Choosing a Model**  
   
@@ -63,10 +63,9 @@
 
 ## Computational Challenges of pre-training
 
-This detailed explanation of memory issues in large language models (LLMs) and the solutions available highlights several key points about quantization, precision, and distributed computing in the context of training large models. 
-
-
-Below is a structured summary of the information:
+Training large language models (LLMs) is constrained by GPU memory. The main
+responses are reduced numerical precision (quantization) and distributed
+computing:
 
 - Reduced-precision arithmetic and quantization are important options for
   addressing memory and throughput constraints; the appropriate method depends
@@ -149,9 +148,8 @@ Below is a structured summary of the information:
 
 ## Scaling Laws
 
-This content discusses research and insights into optimizing large language models by exploring the relationships between model size, training dataset size, and compute budget. 
-
-Here are the key points:
+Scaling-law research studies how model size, training dataset size, and compute
+budget jointly determine language-model performance.
 
 1. **Pre-training Goals:** The goal of pre-training language models is to maximize performance by minimizing loss when predicting tokens. Improvements can be achieved by:
 
@@ -190,4 +188,4 @@ Here are the key points:
 
    - Models like Bloomberg GPT show that compute-efficient training can achieve excellent task-specific performance with smaller parameter sizes.
 
-The discussion points towards a shift away from the "bigger is better" trend to a focus on compute-efficient and optimally trained models.
+These results point towards a shift away from the "bigger is better" trend to a focus on compute-efficient and optimally trained models.

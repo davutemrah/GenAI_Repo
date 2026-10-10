@@ -40,15 +40,14 @@ code. Common applications include:
     capacity, but performance also depends on data, architecture, optimization,
     inference strategy, adaptation, and evaluation domain.
 
--   **Model Representation**: Throughout the course, LLMs will be represented by purple circles.
-
--   **Example Model**: In the labs, you will use an open-source model called flan-T5 for language tasks.
+-   **Example Model**: FLAN-T5 is a small, openly available instruction-tuned
+    model that is convenient for hands-on language-task experiments.
 
 ### Model Adaptation and Use
 
 -   **Fine Tuning**: You can either use these models as they are or apply fine-tuning techniques to adapt them to specific use cases without the need to train a new model from scratch.
 
--   **Multimodal Generative AI**: While generative AI models exist for images, video, audio, and speech, this course focuses on LLMs and natural language generation.
+-   **Multimodal Generative AI**: While generative AI models exist for images, video, audio, and speech, these notes focus on LLMs and natural language generation.
 
 ### Interaction with LLMs
 
@@ -62,7 +61,8 @@ Prompt --\> LLM --\> Completion (generated text)
 
 ## Use Cases of LLM
 
-The broader applications of large language models (LLMs) and generative AI beyond chatbots. It highlights that while chatbots are prominent, LLMs can also perform diverse tasks, such as:
+Chatbots are the most visible application of large language models (LLMs), but
+the same models can perform many other tasks, such as:
 
 **Text Generation:** LLMs can generate essays based on prompts and summarize dialogues.
 
@@ -199,7 +199,7 @@ The transformer model consists of two main components:
 
 ### Prediction Process
 
-Let's walk through a sequence-to-sequence task, such as translating a French phrase into English:
+Consider a sequence-to-sequence task, such as translating a French phrase into English:
 
 1.  **Tokenize Input**: The French phrase is tokenized using the same tokenizer that trained the network.
 
@@ -380,7 +380,8 @@ Prompt engineering involves crafting and refining the input text (prompt) fed to
 **Fine-Tuning**
 
 -   **Definition**: Additional training on the model with new data to improve task-specific performance.
--   **Upcoming**: Detailed exploration of fine-tuning will be covered in week 2 of the course.
+-   **See also**: Chapter \@ref(instruction-fine-tuning-and-evaluation) covers
+    fine-tuning in detail.
 
 **Model Performance and Scale**
 
@@ -394,13 +395,15 @@ Prompt engineering involves crafting and refining the input text (prompt) fed to
 
 -   **Recommendation**: Experiment with different models and settings to find the best fit for your use case.
 
--   **Next Steps**: Explore configuration settings to influence the structure and style of model completions.
+-   **Generation settings**: Inference-time configuration also shapes the
+    structure and style of completions (Section
+    \@ref(configuring-generative-ai-models)).
 
 ## Configuring Generative AI Models
 
 **Overview**
 
-This lecture examines methods and configuration parameters used to influence a model's next-word generation during inference. Unlike training parameters, these settings are adjusted at inference time to control aspects like the maximum number of tokens generated and the creativity of the output.
+This section examines methods and configuration parameters used to influence a model's next-word generation during inference. Unlike training parameters, these settings are adjusted at inference time to control aspects like the maximum number of tokens generated and the creativity of the output.
 
 **Key Configuration Parameters**
 
@@ -456,17 +459,36 @@ This lecture examines methods and configuration parameters used to influence a m
 
     -   Temperature=1: Uses the default probability distribution.
 
-![](figures/parameter_temp.png)
+Temperature divides the logits before the softmax, $p_i \propto \exp(z_i / T)$.
+The illustrative table below applies three temperatures to the same four
+logits (apple = -1.0, banana = 0.5, cake = 2.0, donut = 1.2):
+
+| Next token | T = 0.5 | T = 1.0 | T = 2.0 |
+|:-----------|--------:|--------:|--------:|
+| apple      | 0.002   | 0.029   | 0.094   |
+| banana     | 0.040   | 0.130   | 0.200   |
+| cake       | 0.797   | 0.581   | 0.423   |
+| donut      | 0.161   | 0.261   | 0.283   |
+
+A lower temperature produces a sharply peaked distribution; a higher
+temperature flattens it, so less likely tokens are sampled more often.
 
 ## Generative AI project lifecycle
 
 **Introduction**
 
-Throughout this course, you'll learn the techniques required to develop and deploy an LLM-powered application. This video introduces the generative AI project life cycle, guiding you from conception to launch.
+Building an LLM-powered application involves a sequence of decisions from
+conception to launch. The generative AI project life cycle organizes them into
+four stages.
 
 ### Project Life Cycle Stages
 
-![](figures/project_life.png)
+| Stage | Main activities |
+|:------|:----------------|
+| Scope | Define the use case |
+| Select | Choose an existing model or pre-train your own |
+| Adapt and align | Prompt engineering, fine-tuning, alignment with human feedback, and evaluation |
+| Integrate | Optimize and deploy the model for inference; augment it and build the application |
 
 #### Define the Scope
 
@@ -486,7 +508,10 @@ Throughout this course, you'll learn the techniques required to develop and depl
 
 -   **Common Approach**: Start with an existing model.
 
--   **Considerations**: Later in the course, you'll learn rules of thumb to help estimate the feasibility of training your own model.
+-   **Considerations**: Chapter
+    \@ref(pre-training-and-scaling-large-language-models) discusses the
+    compute and scaling considerations that determine whether training your own
+    model is feasible.
 
 #### Assess and Train the Model
 
@@ -496,15 +521,18 @@ Throughout this course, you'll learn the techniques required to develop and depl
 
 -   Necessary if prompt engineering is insufficient.
 
--   Supervised learning process covered in Week 2.
+-   A supervised learning process; see Chapter
+    \@ref(instruction-fine-tuning-and-evaluation).
 
--   **Reinforcement Learning with Human Feedback (RLHF)**:
+-   **Reinforcement Learning from Human Feedback (RLHF)**:
 
--   Ensures the model behaves well and aligns with human preferences. - Covered in Week 3.
+-   Adjusts model behavior toward human preferences, such as helpfulness and
+    harmlessness.
 
 #### Evaluate the Model
 
--   **Metrics and Benchmarks**: Explore next week.
+-   **Metrics and Benchmarks**: See Section
+    \@ref(evaluating-model-performance-in-language-tasks).
 -   **Iterative Process**:
     -   Start with prompt engineering.
     -   Evaluate outputs and fine-tune if necessary.
@@ -523,7 +551,9 @@ Throughout this course, you'll learn the techniques required to develop and depl
     -   Tendency to invent information when unsure.
     -   Limited ability to perform complex reasoning and mathematics.
 -   **Overcoming Limitations**:
-    -   Learn techniques to address these issues in the final part of the course.
+    -   Connect the model to external data sources and tools (for example,
+        retrieval or code execution) and verify outputs rather than relying on
+        the model alone.
 
 #### Conclusion
 
