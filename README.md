@@ -10,6 +10,8 @@ Published book: <https://davutemrah.github.io/GenAI_Repo/>
 
 - `index.Rmd` — book title, scope, and reader guidance.
 - `__repo/*.Rmd` — LLM foundations, pre-training, fine-tuning, and evaluation.
+- `__repo/prompting/*.Rmd` — the Prompt Engineering part; see
+  `PROMPT_ENGINEERING_PLAN.md` for the chapter plan and status.
 - `__repo/claude/*.Rmd` — Claude, coding-agent, verification, notebook, MCP,
   context- and harness-engineering, AI-in-marketing-analytics, and
   classification/lookalike-modeling, and supervisor-agent chapters.

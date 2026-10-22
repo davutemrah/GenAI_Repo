@@ -1,3 +1,5 @@
+# (PART) Claude and Coding Agents {-}
+
 # Claude Fundamentals and Product Context {#claude-fundamentals}
 
 ## Claude is a model family, not one fixed interface

@@ -1,0 +1,466 @@
+# (PART) Prompt Engineering {-}
+
+# Anatomy of a Prompt {#prompt-anatomy}
+
+A prompt is the main lever a practitioner controls when using a pre-trained
+model without retraining it. This part of the book treats prompting as an
+engineering discipline rather than a collection of tricks:
+
+1. **Anatomy** (this chapter): what a prompt is made of and how to lay it out.
+2. **Core techniques**: clarity, examples, structure, structured output,
+   reasoning, and prompt chaining, together with the evidence for each.
+3. **Strategy cards by use case**: extraction, classification, summarization,
+   coding and SQL, grounded question answering, agents, marketing copy, and
+   LLM-as-judge prompts.
+4. **Guideline-first prompt building**: collect authoritative standards first,
+   then draft, test, and revise a prompt against them.
+5. **Evaluation and maintenance**: success criteria, test sets, graders, and
+   regression testing.
+6. **Robustness and safety**: prompt injection, data leakage, and defences.
+
+The guidance is vendor-neutral. Where a vendor's documentation is cited, it is
+cited as evidence of current practice, not as a universal rule. Model behaviour
+and product features change quickly, so check the linked documentation before
+relying on a product-specific detail.
+
+## What a prompt is
+
+For a given request, the **prompt** is everything the model conditions on
+before it generates: system or developer instructions, the conversation so far,
+supplied documents, tool results, and the user's latest message. The model then
+produces a completion $y$ by sampling from a conditional distribution
+$p(y \mid x)$, where $x$ is the prompt.
+
+Three consequences follow directly from that definition:
+
+- **A prompt changes the distribution, not the model.** The weights are fixed.
+  A better prompt shifts probability towards useful completions; it does not
+  add knowledge the model lacks or guarantee a correct answer.
+- **Outputs vary.** Under sampling (Section
+  \@ref(configuring-generative-ai-models)), the same prompt can produce
+  different answers. One good response is an anecdote, not evidence that the
+  prompt works.
+- **Everything in the context competes for attention.** Irrelevant material is
+  not neutral; it can distract the model and costs tokens. The context
+  engineering chapter (Chapter \@ref(context-harness-engineering)) develops
+  this point for agents.
+
+Prompting is therefore closer to designing an experiment than to writing a
+command: specify the task carefully, then measure whether the outputs meet a
+predefined standard.
+
+## Messages and roles
+
+Chat-style models receive a list of messages, each with a role. The names vary
+by vendor, but the structure is similar:
+
+| Role | Written by | Typical content |
+|:-----|:-----------|:----------------|
+| System / developer | The application builder | Purpose, standing rules, output format, examples |
+| User | The end user (or the application on their behalf) | The request and the variable input for this call |
+| Assistant | The model | Previous model responses in the conversation |
+| Tool result | A tool the application ran | Search results, query output, file contents |
+
+Vendor naming in current documentation:
+
+- **Anthropic** passes standing instructions in a separate `system` parameter
+  and the conversation in `messages`
+  ([prompting best practices](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices)).
+- **OpenAI** calls the application builder's role `developer` and describes a
+  *chain of command* in which developer messages take priority over user
+  messages
+  ([prompt engineering guide](https://developers.openai.com/api/docs/guides/prompt-engineering)).
+- **Google Gemini** calls them *system instructions*
+  ([prompt design strategies](https://ai.google.dev/gemini-api/docs/prompting-strategies)).
+
+OpenAI's guide offers a useful analogy: developer and user messages relate like
+a function and its arguments. Stable rules belong in the system or developer
+message; the material that changes from call to call belongs in the user
+message.
+
+One rule matters more than any naming convention: **content is not
+instructions.** A customer review, a retrieved web page, or a tool result is
+data to be processed. Text inside it that looks like a command ("ignore your
+previous instructions") should not be obeyed. Delimiting data clearly is the
+first defence; the robustness chapter later in this part covers the rest.
+
+## The building blocks
+
+Vendor guides list slightly different components, but they converge on six
+building blocks. Not every prompt needs all six; a quick question may need only
+the first.
+
+| Block | Question it answers | Typical failure when missing |
+|:------|:--------------------|:-----------------------------|
+| **Task** | What should the model do? | The model answers an easier or different question |
+| **Context** | Why is this needed, and for whom? | Generic output that ignores the real goal |
+| **Input data** | What should it work on? | The model invents or assumes the material |
+| **Examples** | What does a good answer look like? | Inconsistent format, tone, or labelling |
+| **Output format** | What shape should the answer take? | Output that is hard to parse or compare |
+| **Constraints** | What is out of bounds? | Unwanted libraries, labels, length, or claims |
+
+### Task
+
+State the action and its object in the first lines: "Assign one theme to each
+survey response" rather than "Here are some survey responses." Use a numbered
+list when the order or completeness of steps matters. Anthropic's guide offers
+a practical test: show the prompt to a colleague with no background on the task
+and ask whether they could follow it. If they would be confused, the model
+probably will be too.
+
+### Context and motivation
+
+Context includes the audience, the purpose, and the reason behind each rule.
+Explaining *why* lets the model generalize to cases the rule did not
+anticipate. Anthropic's example contrasts "NEVER use ellipses" with an
+explanation that the output will be read aloud by a text-to-speech engine that
+cannot pronounce them; the second version tells the model what to do in
+related situations as well.
+
+### Input data
+
+Supply the material the model must work on rather than expecting it to recall
+facts. A model asked about "our Q3 campaign" without the campaign data can only
+guess. Wrap inputs in clear delimiters so the model can tell data from
+instructions.
+
+### Examples
+
+Examples are among the most reliable ways to fix format, tone, and labelling
+conventions. They should be relevant to the real inputs, diverse enough to
+cover edge cases, and clearly separated from the instructions. Examples also
+carry unintended signals: if every example is short, outputs become short; if
+every example is positive, the model may under-predict negatives. The
+core-techniques chapter of this part treats few-shot design in detail.
+
+### Output format
+
+Specify the shape you can check: a JSON object with named keys, a table with
+fixed columns, or a fixed set of labels. A format you can parse is a format you
+can evaluate automatically.
+
+### Constraints
+
+Constraints bound the answer: allowed labels, language and library versions,
+length, reading level, and claims the model must not make. State what to do
+instead, not only what to avoid ("Use 'other' when no theme applies" rather
+than only "Don't invent themes").
+
+### What about roles and personas?
+
+A one-sentence role in the system prompt ("You are a market-research analyst")
+can focus tone and vocabulary, and current vendor guides still recommend it.
+Treat it as a modest steering device. A persona does not add expertise the
+model lacks, and claims that a particular persona reliably improves accuracy
+should be tested on your own task rather than assumed.
+
+### Mapping to the earlier question framework
+
+The *What, Why, How, Constraints* structure in the prompting chapter of the
+Claude part (Chapter \@ref(prompting)) maps onto these blocks: *What* is the
+task, *Why* is the context, *How* is the output format and examples, and
+*Constraints* are constraints. The six-block version adds input data and
+examples as separate, deliberate design choices.
+
+## An annotated example
+
+Suppose the marketing team wants open-ended survey responses grouped into
+themes for a monthly brand-health report. A first draft often looks like this:
+
+```text
+Classify the survey response by theme.
+
+The agent on the phone solved it in five minutes.
+```
+
+The model must guess which themes exist, how many to assign, what format to
+return, and what to do when nothing fits. Different calls will guess
+differently, so monthly counts will not be comparable.
+
+A structured version separates stable instructions (system message) from the
+variable input (user message):
+
+```text
+SYSTEM
+<task>
+Assign one theme to each open-ended customer survey response.
+</task>
+
+<context>
+The themes feed a monthly brand-health report for the marketing team.
+Consistent labels matter more than nuance, because counts are compared
+month to month.
+</context>
+
+<constraints>
+- Use exactly one of: price, delivery, product_quality, service, other.
+- Use 'other' when no theme clearly applies; do not invent new themes.
+</constraints>
+
+<output_format>
+JSON: {"theme": "<label>", "evidence": "<short quote>"}
+</output_format>
+
+<examples>
+<example>
+<input>Arrived two weeks late.</input>
+<output>{"theme": "delivery", "evidence": "two weeks late"}</output>
+</example>
+<example>
+<input>Great taste, but too pricey.</input>
+<output>{"theme": "price", "evidence": "too pricey"}</output>
+</example>
+</examples>
+
+USER
+<input>
+The agent on the phone solved it in five minutes.
+</input>
+```
+
+What each part contributes:
+
+- The **task** names one theme per response, removing the multi-label
+  ambiguity.
+- The **context** explains why consistency matters, which guides borderline
+  decisions.
+- The **constraints** fix the label set and give the model a legitimate exit
+  (`other`), which reduces invented categories.
+- The **output format** asks for an `evidence` quote, so a reviewer can audit
+  each label quickly.
+- The **examples** demonstrate the format. Two is the minimum for illustration;
+  a production prompt would include more, covering `other` and ambiguous cases.
+
+The structured prompt is not guaranteed to be better. It is *testable*: its
+outputs can be parsed, counted, and compared with human labels. Whether it
+outperforms the draft is an empirical question for the evaluation chapter.
+
+## Order and layout
+
+**Separate stable from variable content.** Put rules, format, and examples in
+the system or developer message, and the per-call input in the user message.
+This makes prompts easier to version and review. Several providers also cache
+repeated prompt prefixes, so a stable opening section can reduce cost and
+latency.
+
+**Long material first, question last.** For long documents, Anthropic and
+Google both recommend placing the documents near the top and the specific
+question or instruction at the end. Anthropic reports that putting queries at
+the end improved response quality by up to 30 percent in its tests with
+complex, multi-document inputs
+([long context prompting](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices#long-context-prompting)).
+Treat that figure as the vendor's internal result, not a guarantee for your
+task.
+
+**Use delimiters consistently.** XML-style tags (`<context>`, `<input>`) and
+Markdown headings both work; consistency matters more than the choice. Tags
+are especially useful for marking where untrusted data starts and ends, and
+for nesting multiple documents with their sources.
+
+**Write in a normal register.** Older prompts often shouted: "CRITICAL: You
+MUST...". Anthropic's current guidance notes that newer models are more
+responsive to system prompts and that such emphatic language can cause
+over-triggering; a plain instruction usually suffices.
+
+## Offline example: assembling a prompt from parts
+
+Treating a prompt as data rather than a hand-edited string makes it easier to
+check, version, and reuse. The class below stores the building blocks, warns
+about missing ones, and renders the system and user messages. It makes no API
+call.
+
+```python
+from dataclasses import dataclass, field
+
+
+@dataclass
+class PromptSpec:
+    task: str
+    context: str = ""
+    output_format: str = ""
+    constraints: list[str] = field(default_factory=list)
+    examples: list[tuple[str, str]] = field(default_factory=list)
+
+    def check(self):
+        """Return warnings for missing or weak building blocks."""
+        warnings = []
+        if not self.context:
+            warnings.append("No context: the model must guess purpose and audience.")
+        if not self.output_format:
+            warnings.append("No output format: responses will vary in shape.")
+        if not self.examples:
+            warnings.append("No examples: consider 3-5 for format-sensitive tasks.")
+        return warnings
+
+    def system_prompt(self):
+        """Stable instructions, reused across requests."""
+        parts = [f"<task>\n{self.task}\n</task>"]
+        if self.context:
+            parts.append(f"<context>\n{self.context}\n</context>")
+        if self.constraints:
+            rules = "\n".join(f"- {c}" for c in self.constraints)
+            parts.append(f"<constraints>\n{rules}\n</constraints>")
+        if self.output_format:
+            parts.append(f"<output_format>\n{self.output_format}\n</output_format>")
+        if self.examples:
+            shots = "\n".join(
+                f"<example>\n<input>{i}</input>\n<output>{o}</output>\n</example>"
+                for i, o in self.examples
+            )
+            parts.append(f"<examples>\n{shots}\n</examples>")
+        return "\n\n".join(parts)
+
+    def messages(self, input_text):
+        """Variable input goes in the user turn, wrapped as data."""
+        return [{"role": "user", "content": f"<input>\n{input_text}\n</input>"}]
+
+
+draft = PromptSpec(task="Classify the survey response by theme.")
+print(draft.check())
+```
+
+```text
+['No context: the model must guess purpose and audience.',
+ 'No output format: responses will vary in shape.',
+ 'No examples: consider 3-5 for format-sensitive tasks.']
+```
+
+Filling in the remaining blocks for the survey example produces no warnings,
+and `spec.system_prompt()` returns exactly the system message shown in the
+annotated example above:
+
+```python
+spec = PromptSpec(
+    task="Assign one theme to each open-ended customer survey response.",
+    context=(
+        "The themes feed a monthly brand-health report for the marketing team. "
+        "Consistent labels matter more than nuance, because counts are compared "
+        "month to month."
+    ),
+    constraints=[
+        "Use exactly one of: price, delivery, product_quality, service, other.",
+        "Use 'other' when no theme clearly applies; do not invent new themes.",
+    ],
+    output_format='JSON: {"theme": "<label>", "evidence": "<short quote>"}',
+    examples=[
+        ("Arrived two weeks late.", '{"theme": "delivery", "evidence": "two weeks late"}'),
+        ("Great taste, but too pricey.", '{"theme": "price", "evidence": "too pricey"}'),
+    ],
+)
+print(spec.check())
+print(spec.messages("The agent on the phone solved it in five minutes."))
+```
+
+```text
+[]
+[{'role': 'user', 'content': '<input>\nThe agent on the phone solved it in five minutes.\n</input>'}]
+```
+
+The checks are deliberately simple heuristics. An empty warning list means the
+blocks are present, not that the prompt is good; only evaluation on
+representative inputs can establish that.
+
+## Optional: sending the prompt to an API
+
+The snippets below show where each part goes in two vendor SDKs. They are **not
+executed** when the book is built, require an API key and incur cost, and SDK
+details change; check the current documentation and model list before running
+them. `MODEL_ID` is a placeholder.
+
+Anthropic (standing instructions in `system`):
+
+```python
+import anthropic
+
+client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from the environment
+response = client.messages.create(
+    model="MODEL_ID",
+    max_tokens=200,
+    system=spec.system_prompt(),
+    messages=spec.messages("The agent on the phone solved it in five minutes."),
+)
+print(response.content[0].text)
+```
+
+OpenAI Responses API (standing instructions in `instructions`, which take
+developer-level priority):
+
+```python
+from openai import OpenAI
+
+client = OpenAI()  # reads OPENAI_API_KEY from the environment
+response = client.responses.create(
+    model="MODEL_ID",
+    instructions=spec.system_prompt(),
+    input=spec.messages("The agent on the phone solved it in five minutes."),
+)
+print(response.output_text)
+```
+
+Never hard-code an API key in a notebook or commit it to a repository; read it
+from the environment or a secrets manager.
+
+## Common anatomy mistakes
+
+- **Burying the task.** The instruction appears after several paragraphs of
+  background, or only implicitly.
+- **Contradictions.** A rule in the system message conflicts with an example
+  or with a later user instruction, and the model must pick one.
+- **Examples that disagree with the instructions.** The model often follows
+  the examples.
+- **No output format.** Results cannot be parsed or compared across runs.
+- **Unmarked data.** Inputs pasted without delimiters blur the line between
+  material to process and instructions to follow.
+- **The kitchen sink.** Every rule anyone has ever needed, accumulated over
+  months. Long prompts are not wrong, but each rule should earn its place
+  through a failure it prevents.
+- **One-run validation.** Declaring success after a single good output.
+
+## Checklist
+
+Before using a prompt for anything that matters:
+
+- [ ] The task is stated in the first lines, as an action on an object.
+- [ ] The context explains the purpose and audience, and the reasons for
+      non-obvious rules.
+- [ ] Input data is supplied and clearly delimited from instructions.
+- [ ] Examples, if used, are relevant, varied, and consistent with the rules.
+- [ ] The output format is specific enough to parse or check.
+- [ ] Constraints say what to do instead, not only what to avoid.
+- [ ] Stable instructions and variable inputs are separated.
+- [ ] Success criteria and a few test inputs exist before iteration begins.
+
+## Exercise: dissect a prompt
+
+Take a prompt you used recently at work or in study.
+
+1. Label each sentence with one of the six building blocks. Which blocks are
+   missing?
+2. Rewrite it with stable instructions in a system section and the variable
+   input in a delimited user section.
+3. Write five test inputs, including one ambiguous case and one case where the
+   correct answer is "none of the above".
+4. Run both versions on the test inputs several times and compare consistency.
+   Keep the results; the evaluation chapter of this part reuses them.
+
+## Key takeaways
+
+- A prompt conditions the model's output distribution; it does not change the
+  model or guarantee correctness.
+- Roles separate the builder's standing instructions from the user's request
+  and from untrusted data.
+- Six building blocks (task, context, input data, examples, output format,
+  constraints) cover most prompts; use the ones the task needs.
+- Put stable material first and the per-call input or question last; delimit
+  data consistently.
+- A structured prompt is valuable mainly because it is testable.
+
+## References
+
+- Anthropic. [Prompt engineering overview](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview)
+  and [Prompting best practices](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices).
+  Accessed October 2026.
+- OpenAI. [Prompt engineering guide](https://developers.openai.com/api/docs/guides/prompt-engineering).
+  Accessed October 2026.
+- Google. [Prompt design strategies](https://ai.google.dev/gemini-api/docs/prompting-strategies).
+  Accessed October 2026.

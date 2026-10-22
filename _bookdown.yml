@@ -8,6 +8,7 @@ rmd_files:
   - __repo/00_DL_genAI.Rmd
   - __repo/01_DL_genAI.Rmd
   - __repo/02_00_DL_genAI.Rmd
+  - __repo/prompting/01_Prompt_Anatomy.Rmd
   - __repo/claude/01_Fundamentals.Rmd
   - __repo/claude/02_Prompting.Rmd
   - __repo/claude/03_Code-Best-Practices.Rmd

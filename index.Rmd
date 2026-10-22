@@ -26,11 +26,13 @@ safe, reproducible practice for data science and software work.
 
 </div>
 
-The book has two complementary tracks:
+The book has three parts:
 
 1. **LLM foundations** — transformers, pre-training, adaptation, instruction
    fine-tuning, and evaluation.
-2. **Applied agent workflows** — prompting, code review, verification loops,
+2. **Prompt engineering** — prompt anatomy, techniques, use-case strategies,
+   evaluation, and safety (in progress).
+3. **Applied agent workflows** — prompting, code review, verification loops,
    Claude Code hooks and skills, and reproducible notebooks.
 
 These are educational notes, not vendor certification material. Product
