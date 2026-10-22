@@ -7,6 +7,7 @@ site: bookdown::bookdown_site
 output: bookdown::gitbook
 documentclass: book
 link-citations: yes
+bibliography: book.bib
 github-repo: davutemrah/GenAI_Repo
 description: "Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents."
 ---
@@ -28,12 +29,16 @@ safe, reproducible practice for data science and software work.
 
 The book has three parts:
 
-1. **LLM foundations** — transformers, pre-training, adaptation, instruction
-   fine-tuning, and evaluation.
+1. **LLM foundations** — transformers and attention, pre-training and scaling
+   laws, fine-tuning and PEFT, evaluation, alignment (RLHF, DPO), and building
+   LLM applications (inference optimization, RAG, tools, responsible AI).
 2. **Prompt engineering** — prompt anatomy, techniques, use-case strategies,
    evaluation, and safety (in progress).
 3. **Applied agent workflows** — prompting, code review, verification loops,
    Claude Code hooks and skills, and reproducible notebooks.
+
+An appendix summarizes the hands-on labs that accompanied the LLM foundations
+material.
 
 These are educational notes, not vendor certification material. Product
 features change quickly, so product-specific chapters link to primary vendor

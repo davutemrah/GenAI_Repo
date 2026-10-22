@@ -1,0 +1,170 @@
+# (APPENDIX) Appendix {-}
+
+# Course Labs: Walkthroughs {#course-labs}
+
+The course *Generative AI with Large Language Models* (DeepLearning.AI / AWS,
+Coursera) had three hands-on labs. All three used one task: summarizing
+dialogues with Flan-T5. Each lab applied one stage of the lifecycle
+(Section \@ref(generative-ai-project-lifecycle)) to that task: prompting,
+then fine-tuning, then alignment.
+
+This appendix records what each lab did and what it teaches. It is written in
+my own words, and the course notebooks are not reproduced.
+
+> **About the numbers.** Results below are **as reported in the course labs,
+> not reproduced** here. They came from small samples and short training runs
+> on 2023-era library versions. Read them as directional evidence. The
+> libraries used (Hugging Face `transformers`, `peft`, `trl`, and `evaluate`)
+> have changed their APIs since then, so check current documentation before
+> rebuilding any of these workflows.
+
+## Common setup
+
+| Item | Choice |
+|:-----|:-------|
+| Model | `google/flan-t5-base`: an instruction-tuned encoder–decoder model of about 250M parameters (Chapter \@ref(instruction-fine-tuning-and-evaluation)) |
+| Data | **DialogSum** [@chen2021dialogsum]: about 13,000 everyday and service dialogues, each with a human-written summary. Not part of Flan-T5's training mixture. |
+| Task | Generate a one- or two-sentence summary of a dialogue |
+| Reference | The human summary, used for side-by-side reading and as the ROUGE reference |
+| Limits | Flan-T5's 512-token input limit; long dialogues get truncated |
+
+## Lab 1: Summarization with prompting and generation settings
+
+**Goal.** Find out how far prompting alone can take a small model, before any
+training. This is the first step with any new model and dataset.
+
+**Steps:**
+
+1. **No instruction.** Pass the raw dialogue to the model. The output was a
+   continuation or fragment, not a summary. The model could not tell what task
+   was wanted.
+2. **Zero-shot instruction.** Wrap the dialogue as "Summarize the following
+   conversation. … Summary:". The output became summary-like but missed
+   nuance.
+3. **Model-native template.** Use one of the phrasings from Flan-T5's own
+   training templates ("Dialogue: … What was going on?"). This gave a modest
+   improvement. Prompts that match the model's instruction-tuning format
+   tend to work better.
+4. **One-shot and few-shot.** Prepend one, then three, complete examples
+   (dialogue plus human summary) before the target dialogue. One-shot helped;
+   few-shot did not clearly beat one-shot on the example shown. Some few-shot
+   prompts also exceeded the 512-token limit.
+5. **Generation settings.** Vary `max_new_tokens`, sampling on or off, and
+   temperature (Section \@ref(configuring-generative-ai-models)). Low
+   temperature gave conservative, repeatable summaries. High temperature gave
+   varied and sometimes incoherent ones.
+
+**Lessons:**
+
+- With a small model, the instruction wording and format matter, and
+  in-context examples give a limited lift. The course team's rule of thumb was
+  that more than five or six examples rarely help.
+- Examples consume the context window. For a 512-token model this is a hard
+  constraint.
+- When prompting plateaus below the quality you need, fine-tune (Lab 2).
+
+## Lab 2: Full fine-tuning vs. LoRA
+
+**Goal.** Improve zero-shot summarization by fine-tuning on DialogSum, and
+compare full fine-tuning with parameter-efficient LoRA (Section \@ref(peft)).
+
+**Steps:**
+
+1. **Format the data as instructions.** Map each record to the prompt
+   "Summarize the following conversation. {dialogue} Summary:", with the human
+   summary as the target. Tokenize, and split into training, validation, and
+   test sets.
+2. **Full instruction fine-tuning.** Train all ~250M parameters with the
+   Hugging Face `Trainer`. The in-lab run used a small subsample and very few
+   steps to save time. A checkpoint trained longer offline was then loaded
+   for evaluation. That checkpoint was about **945 MB**, a full copy of the
+   model.
+3. **LoRA fine-tuning.** Wrap the same base model with a LoRA configuration of
+   rank $r = 32$, a relatively high rank. That left about **1.4% of
+   parameters trainable**. Train the same way, then load an offline-trained
+   adapter of about **14 MB**.
+4. **Inference.** Load the adapter on top of the frozen base model with
+   training disabled. That reported 0% trainable parameters and avoids
+   allocating training state.
+5. **Evaluate.** Compare human, base-model, fully fine-tuned, and
+   LoRA-tuned summaries, first by reading them and then with ROUGE
+   (Section \@ref(evaluating-model-performance-in-language-tasks)) on a
+   larger held-out set.
+
+**Reported results:**
+
+- Full fine-tuning clearly beat the base model on every ROUGE variant. The
+  walkthrough quoted about **18** (ROUGE-1), **10** (ROUGE-2), **13**
+  (ROUGE-L), and **13.7** (ROUGE-Lsum) "percent" higher. It did not say whether
+  these are relative changes or absolute ROUGE points. The lecture summarized
+  the same comparison as absolute ROUGE-1 gains of **+0.19** (full) and
+  **+0.17** (LoRA), which suggests absolute points.
+- LoRA scored about **1–2 points below** full fine-tuning across the ROUGE
+  metrics. It trained about 1.4% of the parameters and stored about 14 MB
+  instead of about 945 MB.
+
+**Lessons:**
+
+- A small amount of task-specific instruction data can lift a general instruct
+  model substantially on a narrow task.
+- LoRA gives up a little quality for large savings in training memory and
+  storage. The base model can be shared, with one small adapter per task.
+- Read outputs as well as metrics. A ROUGE gain says nothing directly about
+  invented details or missing actions.
+
+## Lab 3: Detoxifying with RLHF (PPO)
+
+**Goal.** Make the Lab 2 summarizer less likely to produce hateful or toxic
+language, using reinforcement learning against a reward model
+(Chapter \@ref(alignment-human-feedback)).
+
+**Components:**
+
+| Role | What was used |
+|:-----|:--------------|
+| Policy | The LoRA-tuned Flan-T5 from Lab 2, plus a **value head**. The head is a single linear layer from the 768-dimensional hidden state to a scalar: 768 weights plus 1 bias. Only the LoRA adapter and the value head were trained. |
+| Reference policy | A frozen copy of the Lab 2 model, used for the KL penalty |
+| Reward model | An off-the-shelf RoBERTa hate-speech classifier with two classes, *not hate* and *hate*. The **logit of the "not hate" class** was the reward. |
+| Algorithm | PPO from the `trl` library, with batch size 16 and few PPO epochs to keep the run short |
+| Evaluation | Mean and standard deviation of the classifier's *hate* probability over generated summaries, before and after training |
+
+**Steps:**
+
+1. Build prompts from DialogSum dialogues, sampling input lengths to fit the
+   model's context.
+2. Measure the baseline toxicity of the Lab 2 model's summaries.
+3. For each batch: generate summaries, score each (prompt, summary) pair with
+   the classifier, and pass the prompts, responses, and rewards to a PPO step.
+   The KL divergence to the reference model was monitored so that the policy
+   could not drift into reward hacking.
+4. Re-measure toxicity, and compare summaries and rewards before and after.
+
+**Reported results.** After a short run, rewards rose on many examples and
+mean toxicity fell "by a decent amount". The KL divergence stayed roughly
+stable during training. The course noted that the effect was modest because
+DialogSum is not a toxic dataset to begin with. Training longer, on more toxic
+prompts, would show a larger difference.
+
+**Lessons:**
+
+- **Check the reward's class index.** The classifier put "not hate" at index
+  0. Optimizing the wrong index would actively *increase* toxicity. Reward
+  definitions deserve tests of their own.
+- **A classifier is a narrow reward.** The policy is optimized towards
+  whatever this one model measures, which is why the KL penalty and human
+  review of samples matter (Section \@ref(reward-hacking)).
+- **PEFT makes RLHF affordable.** Training only the adapter and the value head
+  kept memory low. The reference policy could share the frozen base weights.
+
+## What the three labs show together
+
+| Lab | Lifecycle stage | Lever | What changes | Main cost |
+|:----|:----------------|:------|:-------------|:----------|
+| 1 | Adapt (prompting) | Instructions, examples, generation settings | Only the input | Context tokens; limited ceiling |
+| 2 | Adapt (fine-tuning) | Supervised training, full or LoRA | Weights or adapter | Labelled data and compute |
+| 3 | Align | PPO against a reward model, with a KL penalty | Adapter and value head | Reward design, run stability, evaluation |
+
+The progression is the one recommended throughout this part of the book:
+start with prompting, fine-tune when prompting plateaus, align when outputs
+must follow preferences that labels alone do not capture, and evaluate at
+every step.

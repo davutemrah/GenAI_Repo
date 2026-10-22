@@ -8,6 +8,8 @@ rmd_files:
   - __repo/00_DL_genAI.Rmd
   - __repo/01_DL_genAI.Rmd
   - __repo/02_00_DL_genAI.Rmd
+  - __repo/03_00_Alignment.Rmd
+  - __repo/04_00_LLM_Applications.Rmd
   - __repo/prompting/01_Prompt_Anatomy.Rmd
   - __repo/claude/01_Fundamentals.Rmd
   - __repo/claude/02_Prompting.Rmd
@@ -23,4 +25,6 @@ rmd_files:
   - __repo/claude/12_AI_Marketing_Analytics.Rmd
   - __repo/claude/13_Classification_Lookalike.Rmd
   - __repo/claude/14_Supervisor_Agents.Rmd
+  - __repo/A_Course_Labs.Rmd
+  - __repo/references.Rmd
 output_dir: "docs"

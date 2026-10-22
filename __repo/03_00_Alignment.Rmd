@@ -1,0 +1,381 @@
+# Aligning LLMs with Human Feedback {#alignment-human-feedback}
+
+Instruction fine-tuning (Chapter \@ref(instruction-fine-tuning-and-evaluation))
+teaches a model *what tasks look like*. It does not teach the model which of
+many plausible answers people actually prefer. A model trained to imitate
+internet text and demonstration data can still be unhelpful (it misreads the
+request), dishonest (it states falsehoods confidently), or harmful (it gives
+dangerous instructions or toxic language). Those behaviours exist in its
+training data.
+
+**Alignment** is the further training that moves a model towards human
+preferences. A common shorthand for the target is **HHH**: *helpful, honest,
+and harmless* [@askell2021hhh]. This chapter explains the classic method,
+reinforcement learning from human feedback (RLHF), and the methods that
+simplified or replaced parts of it.
+
+## Why preferences instead of demonstrations
+
+Supervised fine-tuning needs a correct completion for every prompt. For many
+qualities (tone, helpfulness, safety, a good summary) writing the ideal answer
+is hard. Recognising the **better of two** answers is much easier. Preference
+data is therefore cheaper to collect and often more informative.
+
+The evidence that this works:
+
+- @christiano2017deep trained RL agents from human comparisons of behaviour
+  clips, with no hand-written reward function.
+- @stiennon2020summarize applied the idea to summarization. Policies trained
+  with human feedback produced summaries that people preferred over those of
+  much larger supervised models, and even over the human reference summaries
+  in the dataset.
+- @ouyang2022instructgpt (InstructGPT) used the same recipe for general
+  instruction following. Labelers preferred outputs of the 1.3B-parameter
+  InstructGPT model to those of the 175B-parameter GPT-3. This was the
+  template for the first wave of chat assistants.
+
+## Reinforcement learning, mapped to language models
+
+In reinforcement learning, an **agent** follows a **policy** to choose
+**actions** in an **environment**. It observes the resulting **states** and
+receives **rewards**. It learns a policy that maximizes the expected cumulative
+reward. For an LLM the mapping is:
+
+| RL concept | In RLHF |
+|:-----------|:--------|
+| Policy $\pi_\theta$ | The LLM being trained |
+| State $s_t$ | The prompt plus the tokens generated so far |
+| Action $a_t$ | The next token; the action space is the vocabulary |
+| Episode / rollout | One full completion of a prompt |
+| Reward | A score for the finished completion from a reward model, usually given once at the end |
+
+Humans cannot score millions of rollouts during training. RLHF therefore first
+trains a **reward model** to imitate human judgments, then optimizes the
+policy against that model.
+
+## The RLHF pipeline
+
+The InstructGPT recipe [@ouyang2022instructgpt] has three stages:
+
+1. **Supervised fine-tuning (SFT).** Start from an instruction-tuned model, so
+   that sampled completions are already reasonable.
+2. **Reward modelling.** Collect human comparisons of completions and train a
+   model that scores a (prompt, completion) pair.
+3. **RL optimization.** Optimize the SFT model against the reward model with
+   PPO, while penalizing drift from the SFT model.
+
+### Collecting human feedback
+
+For each prompt in a prompt dataset, the SFT model generates several
+completions. Labelers **rank** them against a defined criterion, such as
+helpfulness, correctness, or harmlessness.
+
+The labeling **instructions** matter as much as the labelers. Good
+instructions state the criterion, say how to fact-check, define how to treat
+ties (allowed but rare), and provide a flag for nonsensical answers so they can
+be removed. Each item usually goes to several labelers, which shows agreement
+and exposes labelers who misread the task. For scale: InstructGPT used about 40
+contractors and ranked between 4 and 9 completions per prompt
+[@ouyang2022instructgpt].
+
+**Ranking produces pairs.** A ranking of $K$ completions yields
+$\binom{K}{2}$ pairwise comparisons; three completions give three pairs. Each
+pair becomes a training example (prompt, preferred $y_w$, rejected $y_l$).
+Ranking yields more training signal per prompt than a thumbs-up/down label.
+
+### Training the reward model
+
+The reward model $r_\phi(x, y)$ is usually a language model (often initialized
+from the SFT model) with a head that outputs **one scalar**. It is trained with
+the **Bradley–Terry** model of pairwise preference [@bradley1952rank]. Under
+that model, the probability that $y_w$ beats $y_l$ is
+$\sigma\big(r_\phi(x, y_w) - r_\phi(x, y_l)\big)$. The loss is the negative
+log-likelihood of the human choices:
+
+$$
+\mathcal{L}(\phi) = -\,\mathbb{E}_{(x,\,y_w,\,y_l)}
+\Big[\log \sigma\big(r_\phi(x, y_w) - r_\phi(x, y_l)\big)\Big]
+$$
+
+Only reward **differences** are identified, so the absolute scale is
+arbitrary. Rewards are often normalized before RL.
+
+**A classifier can also act as the reward.** For a narrow goal such as
+detoxification, an existing classifier (for example, a hate-speech detector)
+can supply the reward. A common choice is its logit or probability for the
+desired class ("not hate"). This skips preference collection, but the policy
+is then optimized towards whatever that classifier happens to measure.
+
+### The RL objective and the KL penalty
+
+The policy is trained to earn high reward **without drifting far from the SFT
+model**, which is kept frozen as the **reference policy** $\pi_{\text{ref}}$:
+
+$$
+\max_\theta \;
+\mathbb{E}_{x \sim \mathcal{D},\, y \sim \pi_\theta(\cdot \mid x)}
+\big[r_\phi(x, y)\big]
+\;-\; \beta\, D_{\text{KL}}\!\big(\pi_\theta(\cdot \mid x) \,\big\|\, \pi_{\text{ref}}(\cdot \mid x)\big)
+$$
+
+In practice the KL term is estimated from the sampled tokens. Each generated
+token is charged
+$\beta \log \frac{\pi_\theta(y_t \mid x, y_{<t})}{\pi_{\text{ref}}(y_t \mid x, y_{<t})}$,
+and the reward-model score is added at the final token. The penalty does two
+things:
+
+- It **limits reward hacking**. The reward model is accurate only near the
+  kind of text it was trained on, so the policy should not wander into
+  unfamiliar text.
+- It **preserves fluency and general ability** learned in pre-training and
+  SFT.
+
+$\beta$ sets the trade-off. Too small and the policy exploits the reward
+model; too large and it barely moves.
+
+### PPO in the LLM setting
+
+**Proximal Policy Optimization** [@schulman2017ppo] is the RL algorithm used
+in the original RLHF work. Each PPO iteration has two phases:
+
+**Phase 1: rollouts.** Sample completions for a batch of prompts from the
+current policy. Score them (reward model minus KL penalty), and record the
+token log-probabilities under the policy that generated them. Call that policy
+$\pi_{\theta_\text{old}}$.
+
+**Phase 2: updates.** Take a few gradient steps on that batch, using three
+terms:
+
+1. **Value loss.** A **value function** $V_\psi(s_t)$ predicts the future
+   reward from a partial completion. It is usually a separate head or model,
+   often initialized from the reward model. It is trained by regression,
+   $\big(V_\psi(s_t) - \hat{R}_t\big)^2$, towards the observed return
+   $\hat{R}_t$.
+
+2. **Clipped policy loss.** The **advantage** $\hat{A}_t$ measures how much
+   better token $a_t$ turned out than the value function expected. Generalized
+   advantage estimation combines the one-step errors
+   $\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$ into
+   $\hat{A}_t = \sum_{l \ge 0} (\gamma\lambda)^l \delta_{t+l}$
+   [@schulman2016gae]. With the probability ratio
+   $\rho_t(\theta) = \pi_\theta(a_t \mid s_t) / \pi_{\theta_\text{old}}(a_t \mid s_t)$:
+
+   $$
+   L^{\text{CLIP}}(\theta) = \mathbb{E}_t\Big[\min\big(\rho_t \hat{A}_t,\;
+   \text{clip}(\rho_t,\, 1-\epsilon,\, 1+\epsilon)\, \hat{A}_t\big)\Big]
+   $$
+
+   Maximizing $\rho_t \hat{A}_t$ raises the probability of tokens with
+   positive advantage and lowers it for tokens with negative advantage. The
+   advantage estimates are reliable only while the new policy stays close to
+   the one that generated the data. The **clip** (typically $\epsilon \approx
+   0.2$) and the $\min$ remove any incentive to move the ratio outside
+   $[1-\epsilon, 1+\epsilon]$. That gives an approximate *trust region*, which
+   is the "proximal" in PPO.
+
+3. **Entropy bonus.** Adding the policy's entropy $S[\pi_\theta]$ discourages
+   the policy from collapsing to one fixed answer. It acts during training,
+   whereas temperature acts at inference.
+
+The combined objective, maximized by gradient ascent, is
+$L^{\text{CLIP}} - c_1 L^{\text{VF}} + c_2 S$. Here $c_1$ and $c_2$ are
+weighting hyperparameters. After the updates, the new policy becomes
+$\pi_{\theta_\text{old}}$ for the next round of rollouts.
+
+**Two "old" models.** $\pi_{\theta_\text{old}}$ in the ratio is the *previous
+iteration's* policy, and it changes every iteration. $\pi_{\text{ref}}$ in the
+KL penalty is the *frozen SFT model* and never changes. Confusing the two is a
+common mistake.
+
+**Cost.** PPO-based RLHF keeps four models in play: the policy, the reference
+policy, the reward model, and the value model. It is also sensitive to
+hyperparameters. One way to cut memory is to train the policy as a **LoRA
+adapter** (Section \@ref(peft)). The reference policy is then the same base
+weights with the adapter switched off, so there is no second full copy.
+
+## Reward hacking
+
+**Reward hacking** happens when the policy finds outputs that score highly
+under the reward model but fail the real objective. It is Goodhart's law
+applied to a learned proxy. Typical symptoms:
+
+- A detoxification run learns to fill every answer with effusive phrases
+  ("most awesome, most incredible") because the toxicity classifier rewards
+  them.
+- Answers get longer or more hedged because the reward model learned that
+  length correlates with preference.
+- The text degrades into odd or ungrammatical strings that happen to score
+  well.
+
+@gao2023overoptimization measured this systematically. As optimization pushes
+the policy further from its starting point, the proxy reward keeps rising.
+The **true** quality (measured by a larger "gold" reward model) rises, peaks,
+and then declines.
+
+Defences:
+
+- the KL penalty against the reference policy;
+- early stopping on held-out human or gold-model evaluation, not on proxy
+  reward;
+- larger and better reward models, refreshed with new comparisons from the
+  current policy; and
+- reading samples. Hacked outputs are often obvious to a person long before
+  the metrics show anything.
+
+## Evaluating an aligned model
+
+Evaluate the aligned model with **the same measure on the same held-out
+prompts, before and after**. In the detoxification example, run the SFT model
+and the aligned model over the same evaluation prompts. Score each completion
+with a toxicity classifier, then compare the mean probability of the toxic
+class. It should go down.
+
+Also check for collateral damage:
+
+- **Capability regressions ("alignment tax").** InstructGPT showed drops on
+  some standard NLP benchmarks. It reduced them by mixing pre-training
+  gradients into the PPO updates [@ouyang2022instructgpt].
+- **Over-refusal**, where the model declines harmless requests.
+- **Sycophancy.** RLHF-trained assistants tend to agree with the user's stated
+  views even when the user is wrong, partly because human raters reward
+  agreement [@sharma2024sycophancy].
+
+Human preference evaluation on held-out prompts remains the reference
+standard.
+
+## Scaling feedback: Constitutional AI and RLAIF
+
+Human labeling is slow and expensive, and labelers must read harmful content.
+There is also a tension between helpfulness and harmlessness, documented by
+@bai2022hh. A model optimized mainly for helpfulness may comply with a harmful
+request, such as explaining how to break into a neighbour's Wi-Fi.
+
+**Constitutional AI** [@bai2022constitutional] replaces most of the human
+harmlessness labels with feedback from the model itself, guided by a short
+written list of principles called the **constitution**. An example principle:
+choose the response that is least likely to encourage illegal or unethical
+activity. It has two phases:
+
+1. **Supervised phase (critique and revise).** Prompt a helpful model with
+   *red-team* prompts designed to elicit harmful answers. Ask it to critique
+   its own answer against a principle, then to rewrite the answer to remove
+   the problem. Fine-tune on the (red-team prompt, revised answer) pairs.
+2. **RL phase (RLAIF).** Sample pairs of responses from the fine-tuned model.
+   Ask a model which response better satisfies the constitution. Train a
+   preference model on these **AI-generated** comparisons (combined with
+   human helpfulness labels in the paper), then run RL as in RLHF. This is
+   **reinforcement learning from AI feedback (RLAIF)**.
+
+The principles are explicit and editable, so the target behaviour is easier
+to inspect and adapt to a domain than thousands of individual labels. The
+quality of the result still depends on the principles and on the model's
+ability to apply them.
+
+## Beyond PPO: current alignment methods
+
+> **Current practice (October 2026).** PPO-based RLHF is the conceptual
+> foundation, but it is no longer the only or default recipe. Two simpler or
+> more targeted families are widely used. Check recent technical reports
+> before treating any one pipeline as standard.
+
+### Direct Preference Optimization (DPO)
+
+@rafailov2023dpo showed that the KL-regularized objective above has a
+closed-form optimal policy, $\pi^*(y \mid x) \propto \pi_{\text{ref}}(y \mid x)
+\exp\big(r(x, y)/\beta\big)$. Inverting this expresses the reward through the
+policy itself. Substituting into the Bradley–Terry loss gives a **classification
+loss on preference pairs**, with no reward model and no sampling during
+training:
+
+$$
+\mathcal{L}_{\text{DPO}}(\theta) = -\,\mathbb{E}_{(x,\,y_w,\,y_l)}
+\left[\log \sigma\!\left(
+\beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)}
+- \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}
+\right)\right]
+$$
+
+DPO raises the likelihood of preferred answers relative to rejected ones,
+measured against the reference model. It needs only the policy and a frozen
+reference, trains like supervised fine-tuning, and has few hyperparameters.
+The trade-off: it learns from a fixed, offline preference dataset, not from
+fresh samples of the current policy. Online RL methods can keep collecting
+feedback as the policy changes.
+
+### RL with verifiable rewards and GRPO
+
+For tasks with checkable answers (mathematics, code that must pass tests,
+strict formats), the reward can be a **program** instead of a learned
+model. The reward is "1 if the final answer is correct or the tests pass, else
+0". This is **reinforcement learning with verifiable rewards (RLVR)**
+[@lambert2024tulu3]. A rule-based reward is much harder to hack than a learned
+reward model.
+
+**GRPO** (Group Relative Policy Optimization) [@shao2024deepseekmath] is a
+PPO variant built for this setting. For each prompt it samples a group of $G$
+completions and uses each completion's reward relative to the group as its
+advantage:
+
+$$
+\hat{A}_i = \frac{r_i - \operatorname{mean}(r_1, \dots, r_G)}{\operatorname{std}(r_1, \dots, r_G)}
+$$
+
+This removes the value model. GRPO keeps PPO's clipped ratio and adds a KL
+term to the reference policy. DeepSeek-R1 showed that large-scale RL with
+rule-based rewards can teach a model long, self-checking chains of thought
+[@deepseek2025r1]. RLVR-style training is now a common ingredient of
+*reasoning models*.
+
+### Method comparison
+
+| Method | Feedback source | Reward model? | Models in memory during training | Main strength | Main risk |
+|:-------|:----------------|:--------------|:---------------------------------|:--------------|:----------|
+| RLHF with PPO | Human rankings | Yes, learned | Policy, reference, reward, value | Online; general preferences | Cost, instability, reward hacking |
+| Constitutional AI / RLAIF | Model judgments guided by principles | Yes, learned from AI labels | As PPO | Scales feedback; explicit principles | Inherits the judge's blind spots |
+| DPO | Human or AI preference pairs | No (implicit) | Policy, reference | Simple, stable, cheap | Offline; limited to its dataset |
+| RLVR with GRPO | Programmatic checks | No (rule-based) | Policy, reference | Hard to hack; drives reasoning gains | Only for verifiable tasks |
+
+## Key takeaways
+
+- Alignment trains for *preferred* behaviour (helpful, honest, harmless), not
+  just task format. Comparing outputs is easier for people than writing ideal
+  ones.
+- RLHF has three stages: SFT, a reward model trained on pairwise comparisons
+  with the Bradley–Terry loss, and RL against that reward with a KL penalty to
+  the frozen SFT model.
+- PPO limits each update with a clipped probability ratio. A value function
+  supplies advantages, and an entropy bonus keeps outputs diverse.
+- Reward hacking is the central failure mode. Defend with the KL penalty,
+  held-out evaluation, better reward models, and reading samples.
+- Constitutional AI and RLAIF replace much human labeling with model feedback
+  guided by explicit principles.
+- DPO removes the reward model and RL loop for preference data. RLVR with GRPO
+  uses programmatic rewards for verifiable tasks and underlies today's
+  reasoning models.
+
+## Interview checkpoints
+
+- **Why train a reward model instead of using humans directly?** RL needs
+  rewards for a huge number of samples. The reward model is a cheap,
+  always-available stand-in for human judgment.
+- **Reward-model loss?** Bradley–Terry:
+  $-\log \sigma\big(r(x, y_w) - r(x, y_l)\big)$. Only reward differences are
+  learned.
+- **What does the KL penalty do?** It keeps the policy close to the SFT model,
+  where the reward model is trustworthy. That limits reward hacking and
+  preserves fluency.
+- **What does PPO's clipping do?** It caps how far one update can move the
+  probability ratio, giving an approximate trust region and stable training.
+- **$\pi_{\theta_\text{old}}$ vs. $\pi_{\text{ref}}$?** The previous iteration's
+  policy (in the PPO ratio) vs. the frozen SFT model (in the KL penalty).
+- **Which models does PPO-based RLHF need?** The policy, reference, reward
+  model, and value model.
+- **What is reward hacking, and how do you detect it?** The proxy reward rises
+  while true quality falls. Detect it with held-out human or gold-model
+  evaluation and by reading samples.
+- **DPO vs. PPO?** DPO is an offline classification loss on preference pairs
+  with no reward model or sampling. PPO is online RL against a learned reward.
+- **What does GRPO remove?** The value model. Advantages come from rewards
+  relative to a group of samples for the same prompt.
+- **What is the alignment tax?** Capability lost on other tasks after
+  alignment. Mixing in pre-training data during RL reduces it.

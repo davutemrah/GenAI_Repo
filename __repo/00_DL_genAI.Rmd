@@ -1,561 +1,362 @@
 # (PART) LLM Foundations {-}
 
-# Foundations of Generative AI and LLMs
-
-## Generative AI Overview
-
-Generative models learn statistical structure from observed data and generate
-new samples under that learned distribution. Depending on the model and
-interface, outputs can include text, images, audio, video, structured data, or
-code. Common applications include:
-
--   Chatbots
-
--   Image generation from text
-
--   Code development plugins
-
-### What is Generative AI?
-
--   **Statistical learning**: Generative models learn patterns in training data
-    and use them to produce new outputs. They do not retrieve a guaranteed fact
-    simply because an answer sounds confident.
-
--   **Training**: Modern LLMs are commonly pre-trained on large token corpora
-    using substantial compute, then adapted or aligned for intended interactions.
-    Dataset size and training recipe vary by model.
-
--   **Foundation models**: Broadly trained models can be adapted to many
-    downstream tasks. Capabilities and limitations must be measured; parameter
-    count alone does not establish reasoning quality or task suitability.
-
-    Examples include BERT, GPT-family models, Llama, BLOOM, PaLM, and FLAN-T5.
-
-### Understanding Parameters
-
--   **Learned values**: Parameters are numerical values updated during training.
-    They encode distributed statistical structure, but they are not a database
-    of exact memories.
-
--   **Scale is one factor**: More parameters can increase representational
-    capacity, but performance also depends on data, architecture, optimization,
-    inference strategy, adaptation, and evaluation domain.
-
--   **Example Model**: FLAN-T5 is a small, openly available instruction-tuned
-    model that is convenient for hands-on language-task experiments.
-
-### Model Adaptation and Use
-
--   **Fine Tuning**: You can either use these models as they are or apply fine-tuning techniques to adapt them to specific use cases without the need to train a new model from scratch.
-
--   **Multimodal Generative AI**: While generative AI models exist for images, video, audio, and speech, these notes focus on LLMs and natural language generation.
-
-### Interaction with LLMs
-
--   **Natural Language Prompts**: Unlike traditional machine learning and programming paradigms that use formalized syntax, LLMs take natural language instructions (prompts) and perform tasks.
-
--   **Context window**: The context window bounds the tokens available for
-    instructions, conversation, supplied content, and tool results. Its size
-    varies by model and product and should be checked in current documentation.
-
-Prompt --\> LLM --\> Completion (generated text)
-
-## Use Cases of LLM
-
-Chatbots are the most visible application of large language models (LLMs), but
-the same models can perform many other tasks, such as:
-
-**Text Generation:** LLMs can generate essays based on prompts and summarize dialogues.
-
-**Translation:** They can translate between different languages and convert natural language into machine code, such as generating Python code.
-
-**Information extraction:** LLMs can extract or classify spans such as people,
-organizations, and places. Retrieval of external information is a separate
-system capability that requires a data source or retrieval tool.
-
-**Augmentation:** There's ongoing development in connecting LLMs to external data sources and APIs to enhance their capabilities and access real-time information.
-
-Scale can improve some capabilities under suitable data and training regimes,
-while smaller or specialized models may be preferable for cost, latency,
-privacy, or task-specific performance. Model selection requires direct
-evaluation on the intended use case.
-
-## Text Generation before Transformers
-
-**Introduction to Generative Algorithms**
-
-Generative algorithms have been a part of natural language processing for a long time. Before the advent of transformer models, the primary architecture used for generative tasks was recurrent neural networks (RNNs).
-
-### Recurrent Neural Networks (RNNs)
-
--   **Architecture**: RNNs process sequences of data by maintaining a hidden state that captures information from previous time steps.
-
--   **Limitations**:
-
--   **Computational and Memory Constraints**: RNNs require significant computational resources and memory to process long sequences.
-
-    -   **Short-Term Memory**: RNNs struggle with long-term dependencies due to vanishing gradients, leading to poor performance on tasks requiring an understanding of extended context.
-
-### Example of RNN in Action
-
--   **Simple Next-Word Prediction Task**:
-
-    -   With only one preceding word, the RNN's prediction is not very accurate.
-
-    -   Scaling the RNN to consider more preceding words increases computational complexity and resource usage.
-
-    -   Despite scaling, the model often fails to capture enough context for accurate predictions.
-
-### Challenges in Language Understanding
-
--   **Context Requirement**: Successful next-word prediction requires understanding the entire sentence or document.
-
--   **Complexity of Language**:
-
-    -   **Homonyms**: Words with multiple meanings depending on context (e.g., "bank" as a financial institution or the side of a river).
-
-    -   **Syntactic Ambiguity**: Sentence structures can be ambiguous (e.g., "The teacher taught the students with the book" – did the teacher use the book or did the students have the book?).
-
-## Introduction of Transformer Architecture
-
-In 2017, the transformer architecture revolutionized generative AI with the publication of the paper "Attention is All You Need" by researchers from Google and the University of Toronto.
-
-### Advantages of Transformers
-
--   **Efficient Scaling**: Can be efficiently scaled to use multi-core GPUs.
-
--   **Parallel Processing**: Processes input data in parallel, allowing for the use of larger training datasets.
-
--   **Attention Mechanism**:
-
-    -   Learns to pay attention to the meaning of words in context.
-
-    -   Addresses the limitations of RNNs by considering the relevance of each word in the input sequence to every other word.
-
-The transformer architecture marked a significant breakthrough in natural language processing, enabling models to handle complex generative tasks more efficiently and accurately. The title of the influential paper, "Attention is All You Need," underscores the importance of the attention mechanism in transforming the field of generative AI.
-
-## Transformers
-
-### Overview
-
-The transformer architecture significantly improved natural language processing tasks compared to earlier RNNs, enabling superior generative capabilities. Its power lies in learning the relevance and context of words across a sentence using attention mechanisms.
-
-### Attention Mechanisms
-
--   **Self-Attention**: This mechanism learns the relationships between all words in a sentence, allowing the model to understand the context and relevance of each word in relation to others.
-
--   **Attention Map**: A visual representation of the attention weights, showing how words relate to each other. For example, the word "book" might strongly connect with "teacher" and "student".
-
-### Transformer Architecture
-
-The transformer model consists of two main components:
-
--   **Encoder**: Encodes input sequences into deep representations.
-
--   **Decoder**: Uses these representations to generate output sequences.
-
-### Tokenization
-
--   Segments text into tokens and maps each token to an identifier in the
-    tokenizer vocabulary. Tokens may represent whole words, subwords,
-    characters, bytes, or other learned units.
-
--   Tokenization methods can vary, representing whole words or parts of words.
-
--   Consistent tokenization is essential for both training and generating text.
-
-### Embedding Layer
-
--   Transforms token IDs into high-dimensional vectors.
-
--   Encodes the meaning and context of tokens in a vector space.
-
-### Positional Encoding
-
--   Adds information about the position of words in a sentence, preserving word order relevance.
-
-### Self-Attention Layer
-
--   Analyzes relationships between tokens in the input sequence.
-
--   Multi-headed self-attention means multiple sets of self-attention weights are learned in parallel.
-
--   Each attention head learns different aspects of language, enhancing contextual understanding.
-
-### Feed-Forward Network
-
--   Processes outputs from the self-attention layer.
-
--   Applies position-wise nonlinear transformations within each transformer
-    block. A later output projection maps final hidden states to vocabulary
-    logits.
-
-### Softmax Layer
-
--   Normalizes logits into probability scores for each token.
-
--   Converts vocabulary logits into probabilities. The decoder may select the
-    highest-probability token under greedy decoding or sample according to a
-    configured decoding strategy.
-
-### Prediction Process
-
-Consider a sequence-to-sequence task, such as translating a French phrase into English:
-
-1.  **Tokenize Input**: The French phrase is tokenized using the same tokenizer that trained the network.
-
-2.  **Encoder**: Tokenized input is passed through the embedding layer and multi-headed attention layers, producing a deep representation of the input sequence.
-
-3.  **Decoder**:
-
-    -   A start-of-sequence token triggers the decoder to predict the next token.
-
-    -   The decoder uses the encoder's contextual understanding to generate the output token.
-
-4.  **Loop**: The output token is fed back into the decoder to predict the next token until an end-of-sequence token is predicted.
-
-5.  **Detokenization**: The sequence of tokens is converted back into words to form the final output.
-
-### Example
-
--   Input: French phrase "Je t'aime la machine d'apprentissage".
-
--   Tokenized input is processed through the encoder and decoder.
-
--   Output: "I love machine learning".
-
-## Transformer Architecture
-
-### Overview
-
-The transformer architecture consists of **encoder** and **decoder** components, essential for various natural language processing tasks.
-
-### Encoder
-
--   **Function**: Encodes input sequences into a deep representation of their structure and meaning.
-
--   **Usage**:
-
-    -   You can train encoder-only models to perform classification tasks such as sentiment analysis
-
-    -   Encoder-only models such as BERT produce contextual representations for
-        input tokens. A task head can produce sequence-level outputs (for example,
-        classification) or token-level outputs (for example, named-entity labels).
-
-    -   With additional layers, you can train encoder-only models to perform classification tasks like sentiment analysis.
-
-### Decoder
-
--   **Function**: In an encoder-decoder model, the decoder conditions on encoder
-    representations and previously generated tokens. In a decoder-only model,
-    generation conditions on the preceding token sequence without a separate
-    encoder.
-
--   **Usage**:
-
-    -   Decoder-only models, such as GPT-family, BLOOM, and Llama models, are
-        widely used for generative tasks. Their performance varies by model,
-        prompting or adaptation method, and evaluation domain.
-
-### Encoder-Decoder Models
-
--   **Function**: Handle sequence-to-sequence tasks where input and output sequences can differ in length.
-
--   **Examples**: BART, T5.
-
--   **Usage**: Suitable for tasks like translation and general text generation.
-
-### Practical Application
-
--   **Main Goal**: Understand the differences between various models to read model documentation effectively.
-
--   **Prompt Engineering**: Interact with transformer models through natural language prompts, focusing on written words rather than code.
-
-**Transformers: Attention is all you need**
-
-"Attention is All You Need" is a research paper published in 2017 by Google researchers, which introduced the Transformer model, a novel architecture that revolutionized the field of natural language processing (NLP) and became the basis for the LLMs we now know - such as GPT, PaLM and others. The paper proposes a neural network architecture that replaces traditional recurrent neural networks (RNNs) and convolutional neural networks (CNNs) with an entirely attention-based mechanism.
-
-The Transformer model uses self-attention to compute representations of input sequences, which allows it to capture long-term dependencies and parallelize computation effectively. The authors demonstrate that their model achieves state-of-the-art performance on several machine translation tasks and outperforms previous models that rely on RNNs or CNNs.
-
-The Transformer architecture consists of an encoder and a decoder, each of which is composed of several layers. Each layer consists of two sub-layers: a multi-head self-attention mechanism and a feed-forward neural network. The multi-head self-attention mechanism allows the model to attend to different parts of the input sequence, while the feed-forward network applies a point-wise fully connected layer to each position separately and identically.
-
-The Transformer model also uses residual connections and layer normalization to facilitate training and prevent overfitting. In addition, the authors introduce a positional encoding scheme that encodes the position of each token in the input sequence, enabling the model to capture the order of the sequence without the need for recurrent or convolutional operations.
-
-## Some well-known models
-
-### BERT
-
-**BERT** (Bidirectional Encoder Representations from Transformers) is a **transformer-based language model** developed by Google in 2018, designed specifically for natural language understanding (NLU) tasks. BERT differs from earlier models because of its **bidirectional training** approach, which allows it to understand context in a nuanced way by considering both the left and right context in a sentence.
-
-#### Key Details About BERT:
-
-1.  **Parameter Sizes**:
-
-    -   **BERT Base**: 110 million parameters (12 layers, 768 hidden units, 12 attention heads)
-
-    -   **BERT Large**: 340 million parameters (24 layers, 1024 hidden units, 16 attention heads)
-
-2.  **Bidirectional Training**: BERT’s bidirectional approach uses **masked language modeling** (MLM) during training. This means it randomly masks words in a sentence and trains the model to predict them based on the surrounding context, giving it a deeper understanding of word relationships.
-
-3.  **Pretraining Tasks**:
-
-    -   **Masked Language Modeling (MLM)**: BERT masks a portion of the words in a sentence and tries to predict the missing words.
-
-    -   **Next Sentence Prediction (NSP)**: BERT also learns to predict if one sentence logically follows another, which helps with tasks like question answering and sentence-pair classification.
-
-4.  **Fine-Tuning for Specific Tasks**: BERT’s architecture is flexible, allowing it to be fine-tuned for a range of NLP tasks with minimal additional training. Common tasks include:
-
-    -   **Sentiment Analysis**
-
-    -   **Named Entity Recognition (NER)**
-
-    -   **Question Answering (e.g., SQuAD benchmark)**
-
-    -   **Text Classification and Similarity Tasks**
-
-5.  **Impact and Variants**: BERT set a new benchmark in NLP, and its architecture has inspired many derivatives and improvements, including **RoBERTa** (by Facebook AI), **DistilBERT** (a smaller, faster BERT), and **ALBERT** (a more efficient BERT variant).
-
-BERT transformed NLP by demonstrating how powerful bidirectional transformers can be for understanding language context, which has since influenced other models like GPT, T5, and BLOOM.
-
-### BLOOM
-
-**BLOOM** (BigScience Large Open-science Open-access Multilingual Language Model) is a large language model created by the **BigScience** project, an open scientific collaboration led by Hugging Face with researchers worldwide. BLOOM is designed to handle multiple languages and tasks, such as text generation, summarization, and translation, in a way similar to models like GPT-3.
-
-#### Key Details About BLOOM:
-
-1.  **Parameter Size**: BLOOM has **176 billion parameters** in its largest version, making it one of the largest open-access language models available. There are smaller versions with fewer parameters, which are used for different applications requiring less computational power.
-
-2.  **Multilingual Capacity**: BLOOM was trained on **46 languages** and 13 programming languages, including English, French, Arabic, Spanish, Chinese, and more, making it versatile in multilingual NLP tasks.
-
-3.  **Training Data**: The model was trained on a vast, diverse dataset of over 1.5 terabytes of text data, which includes a variety of domains to help BLOOM perform across multiple contexts and languages.
-
-4.  **Open Access**: One of the primary goals of the BLOOM model is transparency and open accessibility for the AI research community, unlike other large models that are proprietary.
-
-If you’re working in NLP or language modeling, BLOOM is an excellent model to explore due to its openness, multilingual capabilities, and state-of-the-art performance across various tasks.
-
-## Prompt Engineering
-
-**Introduction**
-
-Prompt engineering involves crafting and refining the input text (prompt) fed to a model to influence its behavior during inference, resulting in desired output (completion). The total text available for the prompt is called the context window.
-
-### Key Concepts
-
-**Prompt Engineering**
-
--   **Definition**: The process of developing and improving the prompt to achieve desired model behavior.
-
--   **Strategy**: Including examples of the task within the prompt, known as in-context learning.
-
-**In-Context Learning**
-
--   **Definition**: Helping models learn the task by including examples in the prompt.
-
--   **Example**: For sentiment analysis, the prompt can include the instruction, review text, and an expected sentiment output.
-
-**Zero-Shot Inference**
-
--   **Definition**: Providing only the input data in the prompt without examples.
-
--   **Effectiveness**: Large models perform well; smaller models may struggle.
-
-**One-Shot Inference**
-
--   **Definition**: Including a single example in the prompt to guide the model.
-
--   **Example**: A sample review and sentiment analysis followed by the actual input review.
-
-**Few-Shot Inference**
-
--   **Definition**: Including multiple examples in the prompt to improve model understanding.
-
--   **Example**: A mix of positive and negative reviews to guide sentiment analysis.
-
-**Practical Considerations**
-
-**Context Window**
-
--   **Limitation**: There's a limit on the amount of in-context learning that can be included.
--   **Recommendation**: If performance doesn’t improve with multiple examples, consider fine-tuning the model.
-
-**Fine-Tuning**
-
--   **Definition**: Additional training on the model with new data to improve task-specific performance.
--   **See also**: Chapter \@ref(instruction-fine-tuning-and-evaluation) covers
-    fine-tuning in detail.
-
-**Model Performance and Scale**
-
--   **Observation**: Model performance on various tasks depends on the scale (number of parameters).
-
--   **Large Models**: Good at zero-shot inference for multiple tasks.
-
--   **Smaller Models**: Generally limited to tasks similar to their training data.
-
-**Experimentation**
-
--   **Recommendation**: Experiment with different models and settings to find the best fit for your use case.
-
--   **Generation settings**: Inference-time configuration also shapes the
-    structure and style of completions (Section
-    \@ref(configuring-generative-ai-models)).
-
-## Configuring Generative AI Models
-
-**Overview**
-
-This section examines methods and configuration parameters used to influence a model's next-word generation during inference. Unlike training parameters, these settings are adjusted at inference time to control aspects like the maximum number of tokens generated and the creativity of the output.
-
-**Key Configuration Parameters**
-
-**1. Max New Tokens**
-
--   **Definition**: Limits the number of tokens the model generates.
-
--   **Usage**: Set to values like 100, 150, or 200 to cap the generation process.
-
--   **Example**: If set to 200, the generation might end sooner if an end-of-sequence token is predicted.
-
-**2. Greedy Decoding**
-
--   **Definition**: The model always selects the word with the highest probability.
-
--   **Characteristics**: Works well for short texts but can lead to repetitive outputs.
-
-**3. Random Sampling**
-
--   **Definition**: Selects the next word based on the probability distribution.
-
--   **Advantages**: Introduces variability to avoid repetitive text.
-
--   **Disadvantages**: Can produce outputs that are too creative or nonsensical.
-
--   **Implementation**: In Hugging Face, set `do_sample=True`.
-
-**4. Top-k Sampling**
-
--   **Definition**: Limits choices to the top k highest probability tokens.
-
--   **Example**: If k=3, the model selects from the top 3 probable words.
-
--   **Benefit**: Balances randomness and coherence in the output.
-
-**5. Top-p (Nucleus) Sampling**
-
--   **Definition**: Chooses from tokens whose cumulative probability meets a threshold p.
-
--   **Example**: If p=0.3, selects from tokens that together have a probability of 0.3.
-
--   **Benefit**: Ensures sensible and coherent generation by limiting low-probability words.
-
-**6. Temperature**
-
--   **Definition**: Controls the randomness by scaling the probability distribution.
-
--   **Effect**:
-
-    -   Low temperature (\<1): Concentrates probability on fewer words, producing less random and more predictable text.
-
-    -   High temperature (\>1): Spreads probability more evenly, increasing randomness and creativity.
-
-    -   Temperature=1: Uses the default probability distribution.
-
-Temperature divides the logits before the softmax, $p_i \propto \exp(z_i / T)$.
-The illustrative table below applies three temperatures to the same four
-logits (apple = -1.0, banana = 0.5, cake = 2.0, donut = 1.2):
-
-| Next token | T = 0.5 | T = 1.0 | T = 2.0 |
+# Foundations of Generative AI and LLMs {#foundations-of-generative-ai-and-llms}
+
+This part of the book builds an understanding of large language models from
+the ground up, following the lifecycle of an LLM project:
+
+| Chapter | Question it answers |
+|:--------|:--------------------|
+| This chapter | What is an LLM, how does a transformer generate text, and how do prompts and generation settings shape the output? |
+| Chapter \@ref(pre-training-and-scaling-large-language-models) | How are LLMs pre-trained, and what do model size, data, and compute buy? |
+| Chapter \@ref(instruction-fine-tuning-and-evaluation) | How do we adapt a model to our tasks, efficiently, and measure the result? |
+| Chapter \@ref(alignment-human-feedback) | How do we make a model helpful, honest, and harmless? |
+| Chapter \@ref(llm-applications) | How do we serve a model and connect it to data and tools responsibly? |
+
+These chapters began as study notes from the DeepLearning.AI / AWS course
+*Generative AI with Large Language Models* (Coursera). They have since been
+rewritten as a reference, checked against the primary papers cited in each
+chapter, and extended with later developments.
+
+## What generative AI is
+
+**Generative models** learn the statistical structure of their training data
+and produce new samples from it: text, images, audio, video, or code. This
+book focuses on **large language models (LLMs)**: neural networks trained on
+very large text corpora to predict the next token. Chatbots, code assistants,
+and writing tools are applications built on top of that one capability.
+
+Key terms:
+
+- **Foundation model.** A model trained broadly enough to be adapted to many
+  downstream tasks. Examples include BERT, GPT, T5/FLAN-T5, BLOOM, and Llama.
+  Its capabilities must be measured on each task; they cannot be assumed from
+  its size.
+- **Parameters.** The learned weights, currently up to hundreds of billions
+  for large models. Parameters encode distributed statistical patterns, *not*
+  a database of retrievable facts. More parameters add capacity, but data,
+  training recipe, and adaptation matter as much.
+- **Prompt, completion, inference.** The text you send is the *prompt*.
+  Producing text is *inference*. The output is the *completion*.
+- **Context window.** The maximum number of tokens the model can attend to at
+  once: instructions, conversation, documents, tool results, and its own
+  output. The limit varies by model; check current documentation.
+
+You interact with an LLM in natural language, not in a formal programming
+language. You can use it as is, or adapt it (Chapter
+\@ref(instruction-fine-tuning-and-evaluation)) without training a new model.
+
+## What LLMs are used for
+
+Many tasks reduce to next-token prediction under the right prompt:
+
+- **Generation**: drafting essays, emails, or marketing copy.
+- **Summarization**: condensing dialogues, documents, or reviews.
+- **Translation**: between natural languages, or from natural language to code
+  or SQL.
+- **Information extraction**: pulling named entities (people, places,
+  organizations), fields, or labels out of text.
+- **Augmented tasks**: answering from documents or calling APIs. These are not
+  abilities of the model alone; the surrounding application supplies the data
+  and tools (Chapter \@ref(llm-applications)).
+
+Larger models generally handle more tasks without examples. Smaller or
+specialized models can still be the better choice on cost, latency, privacy,
+or a narrow task. Choose by evaluating on your own use case.
+
+## Before transformers: recurrent networks
+
+Earlier language models used **recurrent neural networks (RNNs)**. An RNN
+reads tokens one at a time and carries a hidden state forward, so in principle
+it summarizes everything seen so far. In practice it has three problems:
+
+- **Long-range dependencies.** Gradients shrink (or explode) as they flow back
+  through many time steps, so plain RNNs struggle to learn from distant
+  context [@bengio1994vanishing]. LSTMs reduced but did not remove the problem
+  [@hochreiter1997lstm].
+- **Sequential computation.** Step $t$ needs the result of step $t-1$. Training
+  cannot be parallelized across positions, which limits model and data scale.
+- **A fixed-size bottleneck.** The whole history must be squeezed into one
+  state vector.
+
+Language needs wide context. Words have several meanings: a *bank* can be a
+financial institution or a riverside. Sentences can be syntactically
+ambiguous: in "The teacher taught the students with the book", whose book is
+it? Resolving such cases often requires the whole sentence or document.
+
+**Attention** was the fix. It was first added to RNN translation models: the
+decoder learned to look back at all encoder states and weight the most
+relevant ones [@bahdanau2015attention]. The transformer took the next step and
+dropped recurrence entirely.
+
+## The transformer
+
+"Attention Is All You Need" [@vaswani2017attention] introduced the
+**transformer**. It is built from attention and position-wise feed-forward
+layers, with no recurrence. Two properties explain its success:
+
+- **Parallelism.** All positions in a sequence are processed at once. That
+  makes training efficient on GPUs and allows much larger models and datasets.
+- **Direct context.** Every token can attend to every other token in one
+  step, however far apart they are.
+
+### From text to vectors
+
+1. **Tokenization.** Text is split into **tokens** from a fixed vocabulary.
+   Tokens are usually subword units learned by algorithms such as byte-pair
+   encoding [@sennrich2016bpe], so rare words split into pieces. Each token
+   maps to an integer ID. A model must always be used with the tokenizer it
+   was trained with.
+2. **Embedding.** Each token ID is mapped to a learned vector of dimension
+   $d_{\text{model}}$ (512 in the original transformer). Tokens with related
+   meanings end up close together in this space.
+3. **Positional information.** Attention by itself ignores order, so position
+   must be added. The original paper added fixed sinusoidal **positional
+   encodings** to the embeddings. Many modern LLMs instead use rotary position
+   embeddings (RoPE), which encode relative position inside the attention
+   computation [@su2024rope].
+
+### Self-attention
+
+Each token's vector $x_i$ is projected into three vectors with learned
+matrices. The **query** $q_i = x_i W^Q$ says what the token is looking for.
+The **key** $k_j = x_j W^K$ says what each token offers. The **value**
+$v_j = x_j W^V$ is what gets passed along if the token is attended to.
+Stacking these vectors into matrices $Q, K, V$ gives **scaled dot-product
+attention**:
+
+$$
+\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{Q K^\top}{\sqrt{d_k}}\right) V
+$$
+
+- $QK^\top$ scores how relevant every token is to every other token. The
+  softmax turns each row of scores into weights that sum to one; plotted as a
+  grid, these weights form an **attention map**. Each output is a weighted
+  average of the value vectors.
+- **Why divide by $\sqrt{d_k}$?** Dot products grow with the vector dimension
+  $d_k$. Large scores push the softmax towards a one-hot output, where
+  gradients become very small. Scaling keeps training stable.
+- **Multi-head attention** runs $h$ attention operations in parallel, each
+  with its own projections (the original used $h = 8$ heads of size
+  $d_k = 64$), and concatenates the results. Different heads learn
+  different relations, for example syntactic agreement, coreference, or
+  topic. Which relation a head learns is not chosen in advance.
+- **Cost.** The score matrix is $n \times n$ for a sequence of $n$ tokens, so
+  attention compute and memory grow **quadratically** with context length.
+  That is why long contexts are expensive.
+
+### The rest of a transformer block
+
+Each layer (block) wraps attention with:
+
+- a **position-wise feed-forward network**: two linear layers with a
+  nonlinearity, applied to each token separately (inner width 2,048 in the
+  original);
+- **residual connections** and **layer normalization** around both
+  sub-layers, which make deep stacks trainable.
+
+The original model stacked six such layers in the encoder and six in the
+decoder. A final linear layer maps each output vector to one **logit** per
+vocabulary token, and a **softmax** turns the logits into a probability
+distribution over the next token.
+
+### Encoder, decoder, and the three model families
+
+- The **encoder** reads the whole input with *bidirectional* self-attention.
+  It produces a contextual representation of each input token.
+- The **decoder** generates output one token at a time. Its self-attention is
+  *masked* (causal): each position sees only earlier positions, so the model
+  cannot peek at the token it is predicting. In an encoder–decoder model, the
+  decoder also uses **cross-attention**, where its queries attend over the
+  encoder's outputs.
+
+Using one or both halves gives three families: **encoder-only** (BERT),
+**decoder-only** (GPT, Llama), and **encoder–decoder** (T5, BART). They differ
+in pre-training objective and in which tasks they suit. Chapter
+\@ref(pre-training-and-scaling-large-language-models) compares them in
+detail.
+
+### Generating text, end to end
+
+Take translation with an encoder–decoder model, from "J'aime l'apprentissage
+automatique" to "I love machine learning":
+
+1. Tokenize the French sentence with the model's tokenizer.
+2. The **encoder** processes all input tokens in parallel into contextual
+   representations.
+3. The **decoder** starts from a start-of-sequence token. Attending to its own
+   previous outputs and (through cross-attention) to the encoder's
+   representations, it produces a distribution over the next token, and one
+   token is chosen.
+4. The chosen token is appended and fed back in. Step 3 repeats until an
+   end-of-sequence token is produced or a length limit is reached.
+5. **Detokenize** the output tokens into text.
+
+A decoder-only model works the same way without the encoder. The prompt and
+the tokens generated so far form one sequence, and the model extends it one
+token at a time. This loop is **autoregressive** generation. How the next
+token is *chosen* from the distribution is set by the generation
+configuration (Section \@ref(configuring-generative-ai-models)).
+
+### Landmark models
+
+| Model | Year | Family | Size | Why it matters |
+|:------|:-----|:-------|:-----|:---------------|
+| BERT [@devlin2019bert] | 2018 | Encoder | 110M (Base), 340M (Large) | Bidirectional pre-training with masked language modelling; set the pattern of pre-train then fine-tune for understanding tasks |
+| T5 [@raffel2020t5] | 2019 | Encoder–decoder | Up to 11B | Framed every task as text-to-text; FLAN-T5 is its instruction-tuned version |
+| GPT-3 [@brown2020gpt3] | 2020 | Decoder | 175B | Showed strong few-shot in-context learning at scale |
+| BLOOM [@bigscience2022bloom] | 2022 | Decoder | 176B | Open-science, multilingual (46 natural and 13 programming languages) |
+| LLaMA [@touvron2023llama] | 2023 | Decoder | 7B–65B | Smaller models trained on more tokens; led a wave of open-weight models |
+
+Model families move quickly. Use this table for the historical milestones, and
+check current model cards for anything newer.
+
+## Prompting and in-context learning {#prompt-engineering}
+
+**Prompt engineering** is designing the input so the model produces the
+desired completion. Its most important effect, discovered at scale, is
+**in-context learning (ICL)**: the model picks up a task from examples placed
+in the prompt, with no weight updates [@brown2020gpt3].
+
+- **Zero-shot:** an instruction and the input, no examples. For example,
+  "Classify this review: … Sentiment:".
+- **One-shot:** one solved example before the real input.
+- **Few-shot:** several solved examples, ideally covering the label space (for
+  example, both a positive and a negative review).
+
+What to know:
+
+- **ICL depends on scale.** Large models often do well zero-shot. Small models
+  may fail even with several examples.
+- **Examples cost context.** They use up the context window and add tokens to
+  every call.
+- **There is a ceiling.** If a handful of examples does not get the
+  performance you need, more examples rarely help. That is the signal to
+  fine-tune (Chapter \@ref(instruction-fine-tuning-and-evaluation)).
+
+The Prompt Engineering part of this book (starting with Chapter
+\@ref(prompt-anatomy)) covers prompt structure, techniques, and evaluation in
+depth.
+
+## Configuring generation {#configuring-generative-ai-models}
+
+At each step the model outputs a probability distribution over the
+vocabulary. **Inference-time settings** (as opposed to training parameters)
+decide how the next token is picked from it, and when to stop.
+
+- **Max new tokens.** A cap on the number of generated tokens. Generation can
+  stop earlier at an end-of-sequence token.
+- **Greedy decoding.** Always pick the most probable token. It is
+  deterministic and fine for short factual outputs, but prone to repetitive
+  loops in longer text. (*Beam search*, which keeps the best few partial
+  sequences, is a deterministic alternative common in translation.)
+- **Random sampling.** Draw the next token in proportion to its probability.
+  This adds variety but can wander into low-probability, incoherent tokens.
+  In Hugging Face Transformers, sampling is enabled with `do_sample=True`.
+- **Top-k sampling.** Sample only from the $k$ most probable tokens,
+  renormalized.
+- **Top-p (nucleus) sampling.** Sample from the smallest set of tokens whose
+  cumulative probability reaches $p$. The candidate set adapts to how
+  confident the model is [@holtzman2020nucleus].
+- **Temperature.** Rescale the logits before the softmax:
+  $p_i \propto \exp(z_i / T)$. $T < 1$ sharpens the distribution (more
+  predictable). $T > 1$ flattens it (more varied). $T = 1$ leaves it
+  unchanged.
+
+**Worked example.** Suppose the next-token logits are apple $= -1.0$,
+banana $= 0.5$, cake $= 2.0$, and donut $= 1.2$.
+
+| Next token | $T = 0.5$ | $T = 1.0$ | $T = 2.0$ |
 |:-----------|--------:|--------:|--------:|
 | apple      | 0.002   | 0.029   | 0.094   |
 | banana     | 0.040   | 0.130   | 0.200   |
 | cake       | 0.797   | 0.581   | 0.423   |
 | donut      | 0.161   | 0.261   | 0.283   |
 
-A lower temperature produces a sharply peaked distribution; a higher
-temperature flattens it, so less likely tokens are sampled more often.
+At $T = 1$:
 
-## Generative AI project lifecycle
+- **Top-k with $k = 3$** keeps cake, donut, and banana and renormalizes them
+  to 0.598, 0.269, and 0.133.
+- **Top-p with $p = 0.8$** keeps cake and donut, the smallest set whose
+  cumulative probability (0.842) reaches 0.8, and renormalizes them to 0.690
+  and 0.310.
 
-**Introduction**
+Apple can never be sampled under either filter.
 
-Building an LLM-powered application involves a sequence of decisions from
-conception to launch. The generative AI project life cycle organizes them into
-four stages.
+In practice, use low temperature or greedy decoding for extraction,
+classification, and code. Use moderate temperature with top-p for open-ended
+writing. Hosted APIs may expose only some of these settings, and reasoning
+models may fix them.
 
-### Project Life Cycle Stages
+## The generative AI project lifecycle {#generative-ai-project-lifecycle}
 
-| Stage | Main activities |
-|:------|:----------------|
-| Scope | Define the use case |
-| Select | Choose an existing model or pre-train your own |
-| Adapt and align | Prompt engineering, fine-tuning, alignment with human feedback, and evaluation |
-| Integrate | Optimize and deploy the model for inference; augment it and build the application |
+An LLM project moves through four stages, and later results often send you
+back to an earlier one:
 
-#### Define the Scope
+| Stage | Key decisions | Covered in |
+|:------|:--------------|:-----------|
+| **Scope** | Define the use case narrowly: which tasks, which inputs, what counts as success | This section |
+| **Select** | Use an existing foundation model (the usual choice) or pre-train your own | Chapter \@ref(pre-training-and-scaling-large-language-models) |
+| **Adapt and align** | Prompting first, then fine-tuning or PEFT, then alignment with human feedback; evaluate at every step | Chapters \@ref(instruction-fine-tuning-and-evaluation) and \@ref(alignment-human-feedback) |
+| **Integrate** | Optimize for inference; add retrieval and tools to overcome model limits; deploy, monitor, and manage risks | Chapter \@ref(llm-applications) |
 
--   **Importance**: Accurately and narrowly define the project's scope.
+**Scoping matters most.** A model that must do many things needs to be larger
+and more general than one that only extracts named entities from invoices. A
+narrow scope makes model choice, evaluation, and risk assessment easier and
+cheaper.
 
--   **Considerations**:
+The inner loop is **adapt → evaluate → adapt**. Start with prompt engineering
+and in-context learning. Measure against a held-out evaluation set. Fine-tune
+only if prompting falls short. Then return to prompting with the tuned model.
 
--   What specific function will the LLM serve in your application?
+Even a well-adapted model invents information when unsure and is unreliable
+at exact computation. It also knows nothing after its training cut-off.
+Production systems therefore add retrieval, tools, and verification around the
+model; see Chapter \@ref(llm-applications).
 
--   Does the model need to perform various tasks or focus on one specific task (e.g., named entity recognition)?
+## Key takeaways
 
--   **Outcome**: Save time and compute costs by clearly defining requirements.
+- An LLM is a next-token predictor trained on huge text corpora. Many tasks,
+  from summarization to translation to extraction, are next-token prediction
+  under the right prompt.
+- RNNs struggled with long-range context and could not parallelize.
+  Transformers replaced recurrence with attention, which made large-scale
+  training practical.
+- Scaled dot-product attention, $\text{softmax}(QK^\top/\sqrt{d_k})V$, lets
+  every token weight every other token. Multi-head attention learns several
+  relations at once. The cost is quadratic in sequence length.
+- Encoder (bidirectional), decoder (causal, autoregressive), and
+  encoder–decoder (cross-attention) models suit different tasks.
+- In-context learning (zero-, one-, few-shot) adapts behaviour without
+  training but is limited by scale and context.
+- Greedy, top-k, top-p, and temperature control the trade-off between
+  determinism and diversity at inference.
+- The lifecycle is scope → select → adapt and align → integrate, with
+  evaluation throughout.
 
-#### Choose a Model
+## Interview checkpoints
 
--   **Decision**: Train your own model from scratch or use an existing base model.
-
--   **Common Approach**: Start with an existing model.
-
--   **Considerations**: Chapter
-    \@ref(pre-training-and-scaling-large-language-models) discusses the
-    compute and scaling considerations that determine whether training your own
-    model is feasible.
-
-#### Assess and Train the Model
-
--   **Initial Steps**: Use prompt engineering and in-context learning to improve model performance.
-
--   **Fine-Tuning**:
-
--   Necessary if prompt engineering is insufficient.
-
--   A supervised learning process; see Chapter
-    \@ref(instruction-fine-tuning-and-evaluation).
-
--   **Reinforcement Learning from Human Feedback (RLHF)**:
-
--   Adjusts model behavior toward human preferences, such as helpfulness and
-    harmlessness.
-
-#### Evaluate the Model
-
--   **Metrics and Benchmarks**: See Section
-    \@ref(evaluating-model-performance-in-language-tasks).
--   **Iterative Process**:
-    -   Start with prompt engineering.
-    -   Evaluate outputs and fine-tune if necessary.
-    -   Revisit and refine prompt engineering.
-
-#### Deployment
-
--   **Final Steps**:
-    -   Optimize the model for deployment.
-    -   Integrate the model with your application.
-    -   Ensure efficient use of compute resources for a better user experience.
-
-#### Additional Infrastructure Considerations
-
--   **Limitations of LLMs**:
-    -   Tendency to invent information when unsure.
-    -   Limited ability to perform complex reasoning and mathematics.
--   **Overcoming Limitations**:
-    -   Connect the model to external data sources and tools (for example,
-        retrieval or code execution) and verify outputs rather than relying on
-        the model alone.
-
-#### Conclusion
-
-This framework maps out the tasks required to take your project from conception to launch, providing insights into important decisions, potential difficulties, and necessary infrastructure for developing and deploying your application.
+- **Why did transformers replace RNNs?** Parallel training across positions,
+  and direct attention between any two tokens instead of a long chain of
+  recurrent steps.
+- **Write the attention formula. Why the $\sqrt{d_k}$?**
+  $\text{softmax}(QK^\top/\sqrt{d_k})V$. Without scaling, large dot products
+  saturate the softmax and shrink the gradients.
+- **What are Q, K, and V?** Learned projections of each token: what it is
+  looking for (query), what it offers to be matched on (key), and the content
+  it passes on when attended to (value).
+- **Why multi-head attention?** Several heads can capture different relations
+  in parallel at the same total cost.
+- **Why does attention need positional information?** Attention treats its
+  inputs as an unordered set; positional encodings or RoPE inject word order.
+- **What does causal masking do?** It stops each decoder position from seeing
+  future tokens, so training matches left-to-right generation.
+- **What is the complexity of self-attention in sequence length?**
+  Quadratic, $O(n^2)$.
+- **Top-k vs. top-p?** Top-k keeps a fixed number of tokens. Top-p keeps a
+  variable number whose cumulative probability reaches $p$.
+- **What does temperature do?** It divides the logits before the softmax.
+  Lower values sharpen the distribution; higher values flatten it.
+- **Zero-shot vs. few-shot? When do you move to fine-tuning?** Few-shot
+  includes solved examples in the prompt. Move on when a handful of examples
+  does not reach the target performance, or when context or cost limits bite.

@@ -40,16 +40,19 @@ Every technical chapter should distinguish:
 
 ## Remaining review backlog
 
-The older LLM foundation chapters began as condensed course notes. They now have
-the highest-risk claims corrected, but a later scholarly pass should:
+The LLM foundation chapters (Part 1) were rewritten in October 2026 (see
+`COURSERA_INTEGRATION_PLAN.md`). They now use textbook prose with primary
+citations from `book.bib`, hand-worked numeric examples, dated "Current
+practice" notes, and interview checkpoints. Two new chapters cover alignment
+and LLM applications, and an appendix covers the course labs. Course claims
+that conflicted with the primary papers were corrected; the plan file lists
+them. By decision, these chapters contain no runnable Python.
 
-- add primary citations for transformer architecture, scaling laws, FLAN,
-  catastrophic forgetting, PEFT/LoRA, and each benchmark;
-- continue the textbook-voice rewrite (course references, week pointers, and
-  third-party slide screenshots were removed on October 7, 2026);
-- add diagrams with provenance and accessible alternative text;
-- add small reproducible exercises for tokenization, decoding, evaluation, and
-  parameter-efficient adaptation; and
+Remaining items:
+
+- re-check the dated "Current practice (October 2026)" notes periodically;
+- add diagrams (attention, LoRA, the RLHF pipeline, RAG) with provenance and
+  accessible alternative text; and
 - review whether PDF and EPUB output should be restored after the HTML edition
   is stable.
 

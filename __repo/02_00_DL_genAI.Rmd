@@ -1,227 +1,488 @@
-# Instruction Fine-Tuning and Evaluation
-
-1. **Prompt Engineering and Inference:**
-
-   - **Zero-shot:** Models respond to prompts without examples.
-
-   - **One/Few-shot:** Including example outputs improves performance, but it uses context window space and may not work for smaller models.
-   
-
-**Drawbacks:** 
-    - In context learning may not work for smaller LLM models
-      
-    - Examples take up valuable space in the context window
-
-2. **Fine-tuning Basics:**
-
-   - Unlike pre-training on vast data using self-supervised learning, **fine-tuning** uses labeled examples (prompt-completion pairs) via supervised learning to optimize model weights for specific tasks.
-
-   - Instruction fine-tuning trains models with explicit instruction-based examples for tasks (e.g., "Summarize the following text").
-   
-   - Data sets of task-specific examples consists of PROMPT + COMPLETION couples
-   
-   - Full fine-tuning updates all parameters. 
-
-3. **Instruction Fine-Tuning Process:**
-   
-   - Prepare labeled data with templates (e.g., using Amazon reviews to create classification or summarization prompts).
-   
-   - There are prompt template libraries turn existing unstructured datasets into instruction prompt datasets for fine tuning
-   
-   - Split data into training, validation, and test sets.
-   
-   - Train the model using cross-entropy loss and backpropagation.
-   
-   - Evaluate using validation and test datasets for accuracy.
-
-4. **Outcome:**
-   
-   - The result is an updated model (instruct model) fine-tuned for your desired tasks.
-
-This approach is highly common in LLM optimization and essential for building task-specific solutions.
-
-
-## Fine-tuning on a single task
-
-Single-task fine-tuning can improve performance on a well-defined task when the
-training data are representative and evaluation matches the intended use. The
-required sample size is empirical: it depends on the model, task diversity,
-label quality, adaptation method, and acceptable error. Full fine-tuning can
-also produce **catastrophic forgetting**—performance improves on the adapted
-task while degrading on capabilities learned previously.
-
-### Key Points:
-
-1. **Single-task Fine-tuning:**
-
-   - Focuses on one task (e.g., summarization or sentiment analysis) using task-specific examples.
-
-   - Effective for applications where only one task is required.
-
-2. **Catastrophic Forgetting:**
-
-   - Occurs because full fine-tuning modifies the original model's weights.
-   
-   - Catastrophic forgetting occurs when a machine learning model forgets previously learned information as it learns new information.
-   
-   - Catastrophic forgetting is a common problem in machine learning, especially in deep learning models.
-   
-   - One way to mitigate catastrophic forgetting is by using regularization techniques to limit the amount of change that can be made to the weights of the model during training.
-
-   - Example: A model fine-tuned for sentiment analysis may lose its ability to do named entity recognition.
-
-3. **Options to Mitigate Catastrophic Forgetting:**
-
-   - **Evaluate use case needs:** If only one task is needed, catastrophic forgetting may not be an issue.
-
-   - **Multitask Fine-tuning:** Train on a balanced mixture of relevant tasks and
-     evaluate both target and retained capabilities. Data and compute needs vary
-     substantially by model and objective.
-
-   - **Parameter Efficient Fine-tuning (PEFT):** Modify only a small number of task-specific layers while preserving most of the original LLM weights. PEFT helps maintain robustness to catastrophic forgetting.
-
-These approaches enable tailoring LLMs while balancing task-specific optimization with multitask generalization. 
-
-
-## Multi-task, instruction fine-tuning
-
-
-  - Multitask fine-tuning trains a model on examples for multiple tasks (e.g., summarization, review rating, entity recognition).  
-
-  - Avoids **catastrophic forgetting** by improving performance across all tasks simultaneously.  
-
-- **Requirements:**  
-  
-  - Needs sufficiently diverse, high-quality examples across the intended tasks;
-    there is no universal minimum sample count.
-  
-  - Produces a general-purpose model capable of handling diverse tasks well.
-
-- **Example:**  
-  
-  - **FLAN Models (Fine-Tuned Language Net):**  
-  
-    - Family of models like FLAN-T5 and FLAN-PaLM are fine-tuned using 473 datasets across 146 tasks.  
-  
-    - SAMSum dataset (dialogue summaries) is one of the datasets used for fine-tuning FLAN-T5.  
-
-
-### Custom Fine-Tuning for Specific Use Cases
-
-1. **Scenario:**
-   - Example: Customer service teams using summaries of support chat conversations.  
-   - FLAN-T5 may struggle with domain-specific tasks (e.g., customer support chats) not covered in its training.
-
-2. **Solution:**  
-   - Use a representative, permissioned domain dataset to adapt and evaluate the
-     model. A public dialogue-summarization dataset may help with prototyping,
-     but it is not a substitute for deployment-domain data.
-
-3. **Benefits of Domain-Specific Fine-Tuning:**  
-   - Improves task performance on unique datasets (e.g., internal customer support chats).  
-   - May improve domain performance, but hallucination, safety, privacy, and
-     distribution-shift risks still require separate evaluation.
-
-
-### **Evaluation and Next Steps**
-- Evaluate the quality of fine-tuned model outputs using metrics and benchmarks.  
-- Internal, domain-specific datasets (e.g., customer service transcripts) can provide even better results tailored to the business needs.
-
-
-
-## Evaluating Model Performance in Language Tasks
-
-When assessing language model performance, statements like "the model showed improvement" need formalization through evaluation metrics. While traditional machine learning metrics (e.g., accuracy) are straightforward, evaluating language-based models involves additional challenges, particularly when outputs are non-deterministic.  
-
-No single metric establishes overall quality. A defensible evaluation combines
-representative held-out cases, task-appropriate automatic metrics, structured
-human review where judgment is required, error analysis, and checks for safety,
-latency, cost, and subgroup behavior that matter in the deployment context.
-
-Key Metrics:  
-
-1. **ROUGE (Recall-Oriented Understudy for Gisting Evaluation):**  
-
-   - Used for summarization tasks.
-
-   - Measures overlap between model-generated and reference text using:  
-
-     - **ROUGE-1**: Focus on unigram (single word) matches.  
-
-     - **ROUGE-2**: Incorporates bigram (two-word sequence) matches to account for word order.  
-
-     - **ROUGE-L**: Uses the longest common subsequence for recall, precision, and F1-score calculations.  
-
-   - Challenges include susceptibility to artificially high scores from repeated words or incorrect word orders. Solutions include unigram clipping and experimenting with n-gram sizes based on sentence structure and use cases.  
-
-2. **BLEU (Bilingual Evaluation Understudy):**  
-
-   - Designed for machine translation tasks.  
-
-   - Calculates precision over multiple n-gram sizes and averages them.  
-
-   - Example: A BLEU score of 0.495 reflects a moderate match, improving as generated text resembles the reference more closely.  
-
-**Best Practices:**  
-
-- ROUGE is ideal for diagnosing summarization performance.  
-
-- BLEU is suited for translation evaluation.  
-
-- Both are simple and computationally inexpensive but should not be the sole evaluation tools for large language models. 
-Use standardized benchmarks for comprehensive assessment.  
-
-Next steps often include benchmarking models against established datasets for a holistic evaluation. Many libraries (e.g., Hugging Face) provide pre-built implementations of these metrics for ease of use.
-
-
-## Benchmarks
-
-Large language models (LLMs) are complex, and traditional metrics like ROUGE and BLEU provide limited insights into their capabilities. To evaluate LLMs more holistically, researchers rely on specialized datasets and benchmarks, which assess various skills, risks, and limitations. Selecting appropriate datasets for evaluation is crucial for understanding an LLM’s performance, particularly on unseen data.
-
-### Key Benchmarks for LLM Evaluation:  
-
-1. **GLUE (General Language Understanding Evaluation):**  
-
-   - Introduced in 2018.  
-
-   - Focuses on generalization across tasks like sentiment analysis and question-answering.  
-
-   - Encourages the development of versatile models.
-
-2. **SuperGLUE:**  
-
-   - Introduced in 2019 to address GLUE’s limitations.  
-
-   - Adds tasks like multi-sentence reasoning and reading comprehension.  
-
-   - Features more challenging tests.  
-
-Both GLUE and SuperGLUE offer leaderboards for comparing systems on fixed task
-suites. Strong benchmark performance should not be interpreted as general human
-equivalence: datasets can saturate, become contaminated, or fail to represent a
-deployment setting.
-
-3. **MMLU (Massive Multitask Language Understanding):**  
-
-   - Tests modern LLMs on diverse topics such as mathematics, history, law, and computer science.  
-
-   - Emphasizes advanced world knowledge and problem-solving.  
-
-4. **BIG-bench:**  
-
-   - Includes 204 tasks across disciplines like linguistics, common sense reasoning, software development, and biology.  
-   - Offers scalability with multiple size options to manage costs.  
-
-5. **HELM (Holistic Evaluation of Language Models):**  
-
-   - Focuses on model transparency and suitability for specific tasks.  
-
-   - Measures seven metrics (including fairness, bias, and toxicity) across 16 scenarios.  
-
-   - Goes beyond accuracy with multidimensional evaluation to reveal trade-offs.  
-
-HELM continuously evolves with new models, metrics, and scenarios, making it a dynamic resource for tracking progress in LLM capabilities.
-
-### Summary:  
-
-Modern LLM benchmarks like GLUE, SuperGLUE, MMLU, BIG-bench, and HELM provide essential tools for evaluating language models. They offer valuable insights into models' strengths, weaknesses, and performance across a variety of tasks and contexts, aiding both research and practical applications.
+# Fine-Tuning and Evaluation {#instruction-fine-tuning-and-evaluation}
+
+There are three ways to make a pre-trained model better at your task. Each one
+changes something different:
+
+| Lever | What changes | Covered in |
+|:------|:-------------|:-----------|
+| Prompting and in-context learning | Only the input; the weights stay fixed | Section \@ref(prompt-engineering) and the Prompt Engineering part |
+| Fine-tuning | The weights, using labelled examples | This chapter |
+| Alignment with human feedback | The weights, using preference signals | Next chapter |
+
+This chapter covers supervised fine-tuning: full instruction fine-tuning first,
+then parameter-efficient methods. It ends with how to measure whether the
+adapted model actually improved.
+
+## Why fine-tune instead of prompting
+
+In-context learning puts worked examples in the prompt (Section
+\@ref(prompt-engineering)). It needs no training, so it should be tried first.
+It has four limits:
+
+- **Small models may not pick up the task**, even from several examples.
+- **Examples use up the context window**, leaving less room for the actual
+  input, retrieved documents, or tool results.
+- **Examples are paid for on every call**, in tokens and in latency.
+- **Prompts are not great at fixing a style or format** across thousands of
+  calls. Training on examples usually makes the output more consistent.
+
+Fine-tuning moves the task knowledge from the prompt into the weights. A
+practical rule of thumb: fine-tuning is good at teaching **behaviour** (a task,
+format, style, or domain vocabulary). It is a poor way to add **facts that
+change**. Fresh or private facts are better supplied at inference time through
+retrieval, which a later chapter covers.
+
+## Instruction fine-tuning
+
+**Instruction fine-tuning** (also called supervised fine-tuning, SFT) continues
+training a pre-trained model on pairs. Each pair is a prompt containing an
+instruction plus the desired completion:
+
+```text
+Prompt:     Classify this review: "I loved this book, could not put it down."
+Completion: Sentiment: positive
+```
+
+It differs from pre-training in two ways. Pre-training is self-supervised on
+unlabelled text. Instruction fine-tuning is supervised on labelled pairs, and
+the dataset is many orders of magnitude smaller. When every weight is updated,
+the procedure is called **full fine-tuning**. Its output is a new copy of the
+model, often called an *instruct model*.
+
+### Building the dataset
+
+Most existing NLP datasets (reviews, Q&A pairs, dialogues) are not written as
+instructions. **Prompt template libraries** such as PromptSource
+[@bach2022promptsource] solve this. A template wraps each record in an
+instruction. For example, an Amazon review can become a rating-prediction
+prompt, a review-generation prompt, or a summarization prompt.
+
+Using **several phrasings of the same instruction** ("Summarize the
+dialogue", "What was this conversation about?", ...) helps the model generalize
+beyond one wording. The original FLAN work wrote ten templates per dataset for
+this reason [@wei2022flan].
+
+Split the data into training, validation, and test sets, as in any supervised
+problem. The test set must stay untouched until the final evaluation.
+
+### Training objective
+
+The model is trained with the same next-token cross-entropy loss used in
+pre-training, applied to the completion. For a prompt $x$ and target completion
+$y = (y_1, \dots, y_T)$:
+
+$$
+\mathcal{L}(\theta) = -\sum_{t=1}^{T} \log p_\theta\left(y_t \mid x, y_{<t}\right)
+$$
+
+The loss is commonly computed only on the completion tokens. The prompt tokens
+are masked out, so the model is not trained to reproduce the instruction.
+Gradients from batches of examples update the weights over one or more epochs.
+The validation loss or metric is tracked to choose when to stop.
+
+Full fine-tuning has the same memory profile as training. Weights, gradients,
+and optimizer states must all fit in memory (Section
+\@ref(memory-challenges-in-training-llms)). That cost motivates the
+parameter-efficient methods in Section \@ref(peft).
+
+## Single-task fine-tuning and catastrophic forgetting
+
+If an application needs only one task, such as summarizing support chats, you
+can fine-tune on that task alone. Single-task fine-tuning often works with
+**hundreds to a few thousand** high-quality examples. That is tiny compared
+with pre-training corpora. LIMA, for example, reported strong instruction
+following after tuning on 1,000 curated examples [@zhou2023lima]. Treat any
+number as a starting point to validate, not a requirement. Label quality and
+representativeness matter more than volume.
+
+The risk is **catastrophic forgetting**: updating the weights for one task can
+degrade abilities learned earlier [@mccloskey1989catastrophic]. For example, a
+model tuned only for sentiment classification may stop doing named-entity
+recognition correctly, or may answer every prompt with a sentiment label.
+
+Ways to handle it, roughly in order of cost:
+
+1. **Check whether it matters.** If the deployed model only ever performs the
+   tuned task, losing other skills may be acceptable.
+2. **Mix in general data.** Add a sample of general instruction data (or the
+   earlier tasks) to the fine-tuning set. This is sometimes called *replay*.
+3. **Regularize the update.** Penalize movement of weights that mattered for
+   earlier tasks, for example with elastic weight consolidation
+   [@kirkpatrick2017ewc].
+4. **Use parameter-efficient fine-tuning.** Freeze the original weights and
+   train a small add-on (Section \@ref(peft)).
+5. **Fine-tune on many tasks at once** (next section).
+
+Whatever you choose, evaluate **both** the target task and a fixed set of
+capabilities you need to keep. Without the second set, forgetting goes
+unnoticed.
+
+## Multi-task instruction fine-tuning and FLAN
+
+**Multi-task instruction fine-tuning** trains on a mixture of tasks
+(summarization, classification, translation, question answering, code, ...) at
+the same time. Because no single task dominates, the model improves across many
+tasks instead of trading them off. The cost is data: you need diverse,
+high-quality examples for every task in the mixture.
+
+The FLAN models are the reference example (FLAN stands for *Fine-tuned LAnguage
+Net*):
+
+- @wei2022flan fine-tuned a 137B-parameter model on more than 60 datasets
+  phrased as instructions. Its *zero-shot* performance improved on task types
+  that were **held out** of training. This was the key evidence that instruction
+  tuning teaches the general skill of following instructions, not just the
+  training tasks.
+- @chung2022scaling scaled the approach to **1,836 tasks** (drawn from 473
+  datasets in 146 task categories) and released Flan-T5 and Flan-PaLM. Two
+  findings matter: performance kept improving as both the number of tasks and
+  the model size grew, and including chain-of-thought examples in the mixture
+  preserved the models' step-by-step reasoning ability.
+
+One dataset in the FLAN mixture is **SAMSum**: about 16,000 messenger-style
+dialogues with summaries, written by linguists [@gliwa2019samsum]. It explains
+both the strength and the limit of a general instruct model. Flan-T5 can
+summarize casual chats between friends. However, a customer-support dialogue
+has a different structure (a customer request, staff actions, a resolution).
+A general model may miss key actions or invent details there.
+
+The fix is a further round of fine-tuning on data close to the deployment
+setting. **DialogSum** is a public example: about 13,000 dialogues from
+real-life scenarios such as hotel check-ins and service desks, each with a
+summary [@chen2021dialogsum]. In production, permissioned internal data (your
+own support transcripts and the summaries your team wants) is usually the
+better choice. Even then, evaluate hallucination, privacy, and distribution
+shift separately.
+
+## Parameter-efficient fine-tuning (PEFT) {#peft}
+
+Full fine-tuning has three practical costs:
+
+1. **Training memory.** Gradients and optimizer states are needed for every
+   parameter. With Adam, that is several times the memory of the weights
+   themselves.
+2. **Storage.** Each task produces a complete copy of the model.
+3. **Forgetting.** Every weight can move, which risks catastrophic forgetting.
+
+**Parameter-efficient fine-tuning** methods freeze most or all of the
+pre-trained weights and train a small number of parameters. That reduces the
+gradient and optimizer memory. The task-specific artefact can be a few
+megabytes instead of a full model. The frozen base also makes forgetting less
+likely.
+
+Note what PEFT does *not* remove: the frozen weights must still sit in memory
+for the forward and backward passes. QLoRA (below) attacks that remaining
+cost.
+
+### Three families of methods
+
+@lialin2023scaling group PEFT methods into three families:
+
+| Family | Idea | Examples |
+|:-------|:-----|:---------|
+| **Selective** | Train only a chosen subset of the existing parameters | BitFit trains only the bias terms [@benzaken2022bitfit]; training only the top layers |
+| **Reparameterization** | Learn the weight *update* in a compact, low-rank form | LoRA [@hu2022lora] |
+| **Additive** | Keep the original weights frozen and add new trainable parameters | Adapter layers inserted inside each block [@houlsby2019adapters]; soft prompts [@lester2021prompt; @li2021prefix] |
+
+Selective methods are simple. They are less common for large generative models
+because their quality and memory savings vary a lot. The two methods most used
+in practice are LoRA and soft prompts. Both are explained below.
+
+### LoRA: low-rank adaptation
+
+**Idea.** Full fine-tuning learns an update $\Delta W$ for each weight matrix
+$W_0$. @hu2022lora hypothesized that this update has low *intrinsic rank*. If
+so, it can be written as the product of two thin matrices. LoRA freezes $W_0$
+and trains only those two matrices:
+
+$$
+h = W_0 x + \Delta W x = W_0 x + \frac{\alpha}{r} B A x,
+\qquad B \in \mathbb{R}^{d \times r},\;
+A \in \mathbb{R}^{r \times k},\;
+r \ll \min(d, k)
+$$
+
+- $r$ is the **rank**, the main hyperparameter. $\alpha$ is a scaling
+  constant.
+- $A$ starts random and $B$ starts at zero. At step 0, $\Delta W = 0$, so
+  training begins exactly at the pre-trained model.
+- Only $A$ and $B$ get gradients and optimizer states.
+
+**Parameter count.** A $d \times k$ matrix has $dk$ parameters. Its LoRA update
+has $r(d + k)$.
+
+| Matrix | Full update $dk$ | LoRA, $r = 8$: $r(d+k)$ | Share trained |
+|:-------|-----------------:|------------------------:|--------------:|
+| One attention head projection in the original Transformer, $512 \times 64$ [@vaswani2017attention] | 32,768 | 4,608 | 14% |
+| A $4096 \times 4096$ projection, typical of a 7B-parameter model | 16,777,216 | 65,536 | 0.39% |
+
+The savings grow with the matrix size. On GPT-3 175B, @hu2022lora reported
+about **10,000× fewer trainable parameters** and about **3× lower GPU memory**
+than full fine-tuning. Quality was on par with or better than full fine-tuning
+on the tasks they evaluated.
+
+**Inference.** After training, the update can be merged into the base weights,
+$W = W_0 + \frac{\alpha}{r} BA$. The merged model has exactly the original
+shape, so it adds **no inference latency**. Alternatively, keep the adapters
+separate and load a different $(A, B)$ pair per task on one shared base model.
+That is how one deployment can serve many tasks.
+
+**Which matrices to adapt.** The LoRA paper adapted the attention projections
+(mainly the query and value matrices). It found that adapting more matrix types
+at a small rank beat adapting one type at a larger rank [@hu2022lora]. Despite
+a common claim, attention does *not* hold most of a transformer's parameters.
+With the usual feed-forward width of $4d$, the feed-forward layers hold about
+two-thirds of each block's weights. The QLoRA authors found that applying LoRA
+to **all linear layers** was needed to match full fine-tuning
+[@dettmers2023qlora].
+
+**Choosing the rank.** In @hu2022lora, very small ranks (even single digits)
+were competitive on the tasks studied. Raising the rank did not reliably help.
+Values from 4 to 64 are common in practice. Treat $r$ (and $\alpha$) as
+hyperparameters to tune on the validation set. A larger rank means more
+capacity and more memory, not automatically better results.
+
+### QLoRA: LoRA on a quantized base
+
+LoRA shrinks the trainable part, but the frozen base model still has to fit in
+memory. **QLoRA** stores the frozen base in 4-bit precision and trains LoRA
+adapters in 16-bit on top of it [@dettmers2023qlora]. Three techniques make
+this work:
+
+- **4-bit NormalFloat (NF4)**, a 4-bit data type designed for weights that are
+  roughly normally distributed.
+- **Double quantization**, which also quantizes the quantization constants to
+  save more memory.
+- **Paged optimizers**, which move optimizer state to CPU memory during memory
+  spikes.
+
+The paper fine-tuned a 65B-parameter model on a single 48 GB GPU while
+preserving the task performance of 16-bit fine-tuning. Section
+\@ref(quantization-techniques) explains the data types involved.
+
+### Prompt tuning with soft prompts
+
+**Prompt tuning** is not prompt engineering. Prompt engineering edits the words
+of a prompt by hand. Prompt tuning *learns* a short sequence of continuous
+vectors, a **soft prompt**, that is prepended to the input embeddings
+[@lester2021prompt]:
+
+- Ordinary ("hard") tokens map to fixed rows of the embedding table. A soft
+  prompt is $p$ *virtual tokens*: free vectors $P \in \mathbb{R}^{p \times d}$
+  in the same embedding space, not tied to any word.
+- The model is completely frozen. Backpropagation updates only $P$, using the
+  same supervised loss as fine-tuning.
+- The trainable count is tiny. Twenty virtual tokens with $d = 4096$ is 81,920
+  parameters. One soft prompt per task can be stored and swapped at inference,
+  and a single batch can even mix tasks.
+
+**Evidence.** On SuperGLUE, prompt tuning trailed full fine-tuning for small
+T5 models. The gap closed as model size grew, and at about 11B parameters it
+matched full fine-tuning. It also outperformed GPT-3's few-shot prompting by a
+large margin. In the
+same experiments, about 20 virtual tokens captured most of the gain; longer
+prompts added little [@lester2021prompt].
+
+**Interpretability.** The learned vectors do not correspond to vocabulary
+tokens. Their nearest vocabulary neighbours tend to form semantically related
+clusters, often connected to the task. Even so, a soft prompt cannot be read
+like a sentence.
+
+**Related method.** *Prefix tuning* learns trainable vectors at every layer, not
+only at the input, giving it more capacity per virtual token [@li2021prefix].
+
+### Choosing an adaptation method
+
+| Method | Trainable parameters | Training memory | Inference overhead | Typical use |
+|:-------|:---------------------|:----------------|:-------------------|:------------|
+| Prompting / in-context learning | None | None | Longer prompts | First attempt; fast iteration |
+| Full fine-tuning | All | Highest | None | Large shift in behaviour, enough data and compute |
+| LoRA | Well under 1% for large models (depends on rank and layers) | Low (base still in memory) | None if merged | Default PEFT choice; many tasks on one base |
+| QLoRA | Same as LoRA | Lowest (4-bit base) | None if merged; quantized base otherwise | Large models on limited GPUs |
+| Prompt tuning | Tiny ($p \times d$) | Low | A few extra input positions | Very large frozen models; many tasks |
+
+> **Current practice (October 2026).** LoRA and QLoRA remain the standard
+> PEFT methods in common open-source tooling, such as the Hugging Face `peft`
+> library. Many hosted model APIs offer fine-tuning without exposing the
+> method. Supervised fine-tuning is now usually one stage in a pipeline that
+> also includes preference-based alignment (next chapter).
+
+## Evaluating fine-tuned models {#evaluating-model-performance-in-language-tasks}
+
+Classifier accuracy is easy to compute because there is one right label.
+Generated text is harder to score. Two sentences can mean the same thing with
+almost no shared words ("Mike really loves drinking tea" vs. "Mike adores
+sipping tea"). Two others can differ by one word and mean the opposite ("Mike
+does drink coffee" vs. "Mike does not drink coffee"). Automatic metrics
+approximate quality through overlap with a human **reference**. That makes them
+cheap and repeatable, but blind to meaning.
+
+Terminology: a **unigram** is one word, a **bigram** is two consecutive words,
+and an **n-gram** is $n$ consecutive words.
+
+### ROUGE
+
+**ROUGE** [@lin2004rouge] scores summaries by their overlap with reference
+summaries. For n-gram matches between a candidate and a reference:
+
+$$
+\text{Recall} = \frac{\text{matched n-grams}}{\text{n-grams in reference}},
+\qquad
+\text{Precision} = \frac{\text{matched n-grams}}{\text{n-grams in candidate}},
+\qquad
+F_1 = \frac{2PR}{P + R}
+$$
+
+- **ROUGE-1** uses unigrams, **ROUGE-2** uses bigrams (which are slightly
+  sensitive to word order).
+- **ROUGE-L** uses the length of the **longest common subsequence** (LCS) as
+  the match count. A subsequence keeps word order but does *not* have to be
+  contiguous. Mixing this up with the longest contiguous match is a common
+  error.
+
+**Worked example.** Reference: *"It is cold outside"* (4 words). Candidate:
+*"It is very cold outside"* (5 words).
+
+| Metric | Matches | Recall | Precision | F1 |
+|:-------|:--------|-------:|----------:|---:|
+| ROUGE-1 | it, is, cold, outside = 4 | 4/4 = 1.00 | 4/5 = 0.80 | 0.89 |
+| ROUGE-2 | "it is", "cold outside" = 2 | 2/3 = 0.67 | 2/4 = 0.50 | 0.57 |
+| ROUGE-L | LCS "it is cold outside" = 4 | 4/4 = 1.00 | 4/5 = 0.80 | 0.89 |
+
+**Failure modes:**
+
+- **Meaning reversal.** *"It is not cold outside"* gets exactly the same ROUGE-1
+  scores as the candidate above. Overlap does not check meaning.
+- **Repetition.** *"cold cold cold cold"* has a ROUGE-1 precision of 4/4 =
+  1.00 if every repeat counts. **Clipping** caps each n-gram's matches at its
+  count in the reference. The idea comes from BLEU's modified precision
+  [@papineni2002bleu]. With clipping, precision becomes 1/4 = 0.25.
+- **Reordering.** *"outside cold it is"* still scores 1.00 on clipped ROUGE-1.
+  Order-sensitive variants catch it: ROUGE-2 F1 = 1/3 = 0.33 (only "it is"
+  matches) and ROUGE-L F1 = 0.50 (LCS = 2).
+
+ROUGE scores are comparable only within the same task, dataset, reference set,
+and implementation settings (tokenization, stemming). Use them to track
+progress on summarization while you iterate, never as the final verdict.
+
+### BLEU
+
+**BLEU** [@papineni2002bleu] was designed for machine translation. It is
+precision-oriented and combines several n-gram sizes:
+
+$$
+\text{BLEU} = \text{BP} \cdot \exp\left(\sum_{n=1}^{N} w_n \log p_n\right),
+\qquad
+\text{BP} =
+\begin{cases}
+1 & \text{if } c > r \\
+e^{\,1 - r/c} & \text{if } c \le r
+\end{cases}
+$$
+
+- $p_n$ is the **clipped** n-gram precision. Usually $N = 4$ with equal
+  weights $w_n = 1/4$, so the exponential term is the *geometric mean* of the
+  four precisions (not a simple average).
+- The **brevity penalty** BP penalizes candidates shorter than the reference
+  ($c$ = candidate length, $r$ = reference length). Without it, a very short
+  output with only safe words would score high precision.
+- BLEU was defined at the corpus level. Sentence-level BLEU is noisy and needs
+  smoothing, because a single missing 4-gram makes the geometric mean zero.
+
+### Beyond overlap metrics
+
+ROUGE and BLEU are cheap diagnostics. They cannot judge factual correctness,
+faithfulness to the source, safety, or usefulness. A defensible evaluation
+combines:
+
+- a **representative held-out set** drawn from the deployment setting;
+- **task-appropriate automatic metrics** (overlap, exact match, schema
+  validity, executable tests);
+- **structured human review** with a written rubric where judgment is needed;
+- **error analysis** by category and subgroup;
+- **retained-capability checks** to detect catastrophic forgetting; and
+- latency and cost.
+
+**LLM-as-a-judge** (using a strong model to grade outputs against a rubric)
+scales human-like judgments cheaply. @zheng2023judge found that strong judges
+agree with human preferences about as often as humans agree with each other.
+They also documented systematic biases: position bias, a preference for longer
+answers, and a tendency to favour the judge's own outputs. Calibrate a judge
+against human labels before trusting it.
+
+## Benchmarks {#benchmarks}
+
+Benchmarks are fixed, public task suites used to compare models across many
+skills:
+
+| Benchmark | Year | What it measures |
+|:----------|:-----|:-----------------|
+| GLUE [@wang2019glue] | 2018 | Nine sentence- and sentence-pair understanding tasks (sentiment, entailment, paraphrase, ...) |
+| SuperGLUE [@wang2019superglue] | 2019 | Eight harder tasks (multi-sentence reasoning, reading comprehension, coreference), created as models saturated GLUE |
+| MMLU [@hendrycks2021mmlu] | 2020 | Multiple-choice knowledge and problem-solving across 57 subjects (elementary mathematics, US history, law, computer science, ...) |
+| BIG-bench [@srivastava2023bigbench] | 2022 | 204 community-contributed tasks (linguistics, common sense, mathematics, social bias, software, ...); a smaller "Lite" subset keeps evaluation cost manageable |
+| HELM [@liang2023helm] | 2022 | A framework scoring models on seven metrics (accuracy, calibration, robustness, fairness, bias, toxicity, efficiency) across 16 core scenarios, so trade-offs are visible rather than hidden in one number |
+
+**How to read benchmark results:**
+
+- **Saturation.** Top systems surpassed the SuperGLUE human-baseline estimate
+  within about two years. A model matching humans on a benchmark is not human
+  level at the general skill. This "arms race" is why benchmarks keep being
+  replaced.
+- **Contamination.** If test items appeared in the pre-training data, scores
+  overstate ability. Prefer held-out or recently created items.
+- **Fit.** A leaderboard rank says little about *your* task. A small
+  evaluation set drawn from your own data is usually more informative.
+- **Holistic view.** Accuracy alone hides calibration, robustness, and safety
+  trade-offs, which is the point HELM was built to make.
+
+> **Current practice (October 2026).** GLUE and SuperGLUE are of historical
+> interest for frontier models, and MMLU is close to saturated. Harder
+> successors such as MMLU-Pro [@wang2024mmlupro] and the expert-written GPQA
+> [@rein2023gpqa] took their place, along with agentic and coding benchmarks
+> and arena-style human-preference rankings. Leaderboards change quickly;
+> check current sources before quoting a score.
+
+## Key takeaways
+
+- Try prompting first. Fine-tune when examples are not enough, the context
+  window is tight, or the output must be consistent. Supply changing facts
+  through retrieval, not training.
+- Instruction fine-tuning is supervised next-token training on
+  prompt–completion pairs. Template diversity helps generalization.
+- Full fine-tuning on one task risks catastrophic forgetting. Always measure
+  the capabilities you need to keep.
+- Multi-task instruction tuning (FLAN) teaches general instruction following,
+  shown by gains on held-out task types.
+- PEFT trains a small number of parameters. LoRA learns a low-rank update that
+  can be merged with no inference cost. QLoRA adds a 4-bit base. Prompt tuning
+  learns input vectors and becomes competitive with full fine-tuning at large
+  scale.
+- ROUGE and BLEU measure surface overlap. They are useful for iteration and
+  misleading as final evidence. Pair them with held-out data, human or
+  calibrated judge review, and error analysis.
+
+## Interview checkpoints
+
+- **Fine-tuning vs. RAG?** Fine-tuning changes behaviour, format, and style.
+  Retrieval supplies current or private facts at inference. They are often
+  combined.
+- **Why does LoRA add no inference latency?** The update $BA$ can be merged into
+  $W_0$, so the deployed model has the original shape.
+- **LoRA parameter count for a $d \times k$ matrix?** $r(d + k)$ instead of
+  $dk$.
+- **Why is $B$ initialized to zero?** So that $\Delta W = 0$ and training starts
+  exactly at the pre-trained model.
+- **What does QLoRA add?** A 4-bit NF4 frozen base, double quantization, and
+  paged optimizers, so large models fit on one GPU.
+- **Prompt tuning vs. prompt engineering?** Learned continuous vectors vs.
+  hand-written discrete text. Prompt tuning needs training data and gradients.
+- **What is catastrophic forgetting, and how do you detect it?** Loss of
+  earlier skills after fine-tuning. Detect it with a fixed retained-capability
+  evaluation set.
+- **ROUGE-L vs. ROUGE-2?** ROUGE-L uses the longest common *subsequence*
+  (order-preserving, not contiguous). ROUGE-2 counts matching bigrams.
+- **Why does BLEU need a brevity penalty?** Precision alone rewards very short
+  outputs.
+- **Why distrust a high benchmark score?** Saturation, contamination, and
+  mismatch with the deployment task.

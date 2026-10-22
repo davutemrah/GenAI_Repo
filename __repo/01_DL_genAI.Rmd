@@ -1,191 +1,373 @@
-# Pre-training and Scaling Large Language Models
-
-1. **Generative AI Project Life Cycle Overview**  
-  
-   - The process begins with scoping the use case and determining how an LLM will integrate into the application.
-  
-   - Next, choose a model: either use an existing model or train one from scratch (the cost of the latter is discussed below).
-
-2. **Choosing a Model**  
-  
-   - Start with existing foundation models available on hubs like Hugging Face or PyTorch, which include model cards detailing use cases, training processes, and limitations.
-  
-   - The model choice depends on the task and the architecture's strengths.
-
-3. **Transformer Model Variants**  
-  
-   - **Encoder-Only Models (Autoencoding Models):**  
-  
-     - Pre-trained with **masked language modeling** to reconstruct input by predicting masked tokens.  
-  
-     - Suited for **sentence classification** (e.g., sentiment analysis) and **token classification** (e.g., named entity recognition).  
-  
-     - Examples: **BERT**, **RoBERTa**.  
-  
-   - **Decoder-Only Models (Autoregressive Models):**  
-  
-     - Pre-trained with **causal language modeling** to predict the next token.  
-  
-     - Best for **text generation** and capable of zero-shot inference.  
-  
-     - Examples: **GPT**, **BLOOM**.  
-  
-   - **Sequence-to-Sequence Models:**  
-  
-     - Utilize both encoder and decoder components.  
-  
-     - Pre-trained with tasks like **span corruption** (e.g., T5) or other methods.  
-  
-     - Ideal for **translation**, **summarization**, and **question answering**.  
-  
-     - Examples: **T5**, **BART**.  
-
-4. **Pre-Training Process**  
-  
-   - LLMs are trained on large datasets using self-supervised learning to capture language patterns.  
-  
-   - Data collection and preprocessing filter, deduplicate, document, and sample
-     training material. Retention rates are dataset-specific; filtering can
-     reduce some risks but does not guarantee unbiased data.
-  
-   - Large-scale compute resources and GPUs are required.
-
-5. **Model Size and Performance**  
-  
-   - Increasing model size, data, and compute can improve loss and downstream
-     performance under suitable scaling regimes, but architecture, data quality,
-     training recipe, and task fit also matter.
-  
-   - Advances in transformers, data availability, and compute power have driven the creation of increasingly larger models.  
-  
-   - However, training large models is expensive and resource-intensive, raising challenges in scaling.
-
-
-## Computational Challenges of pre-training
-
-Training large language models (LLMs) is constrained by GPU memory. The main
-responses are reduced numerical precision (quantization) and distributed
-computing:
-
-- Reduced-precision arithmetic and quantization are important options for
-  addressing memory and throughput constraints; the appropriate method depends
-  on hardware, training or inference stage, and acceptable numerical error.
-
-- BFLOAT16 offers an optimal trade-off between precision and memory savings and is increasingly used in modern GPUs.
-
-- Distributed computing enables scaling beyond GPU memory limits but incurs high costs and complexity.
-
-
-### Memory Challenges in Training LLMs
-
-1. **GPU Memory Limitations**:
-
-   - Storing model weights and additional overheads during training (e.g., gradients, optimizers) requires significant GPU memory.
-
-   - Example: A 1 billion parameter model needs ~24 GB of GPU RAM to train in 32-bit (FP32) precision.
-
-2. **Exponential Memory Requirements**:
-
-   - Large-scale models, often exceeding 50–100 billion parameters, demand tens of thousands of gigabytes of GPU memory, far exceeding single-GPU or consumer hardware capabilities.
-
-
-### Quantization Techniques
-
-1. **Concept**:
-
-   - Reduces the precision of floating-point numbers representing model weights and activations, minimizing memory usage while maintaining acceptable performance.
-
-2. **Popular Data Types**:
-
-   - **FP32** (Full Precision): 32 bits, highest precision; requires 4 bytes.
-
-   - **FP16** (Half Precision): 16 bits, uses 2 bytes; sacrifices precision.
-
-   - **BFLOAT16** (Brain Floating Point): A truncated 32-bit float using 16 bits, developed by Google Brain, offering a balance of precision and memory efficiency.
-
-   - **INT8**: 8-bit integers; extremely memory-efficient but with significant loss in precision.
-
-3. **Comparison of Precision**:
-
-   - **FP32**: Range \( -3 \times 10^{38} \) to \( 3 \times 10^{38} \).
-
-   - **FP16**: Range \( -65,504 \) to \( 65,504 \).
-
-   - **BFLOAT16**: Maintains the full dynamic range of FP32 but with only 7 bits for precision.
-
-   - **INT8**: Range \( -128 \) to \( 127 \); projects values like \( \pi \) to coarse approximations (e.g., 3).
-
-4. **Memory Savings**:
-
-   - **FP16**: Reduces memory by 50% compared to FP32.
-
-   - **INT8**: Reduces memory by 75%.
-
-
-### **Distributed Computing**
-
-1. **Scaling Beyond Single GPUs**:
-
-   - As model sizes grow, training on a single GPU becomes impractical.
-
-   - Distributed computing across hundreds of GPUs is required for training models with tens or hundreds of billions of parameters.
-
-   - Distributed setups are cost-prohibitive for many researchers, contributing to the dominance of pre-trained and fine-tuned models.
-
-
-### **Practical Use Cases of Quantization**
-
-1. **Fine-Tuning**:
-
-   - Even during fine-tuning, storing all model parameters in memory is necessary, making memory efficiency critical.
-
-   - Popular models like **FLAN-T5** are pre-trained with BFLOAT16, showcasing its widespread adoption.
-
-2. **Quantization-Aware Training (QAT)**:
-
-   - Modern frameworks support QAT, enabling scaling factors to be learned during training for optimal lower-precision projections.
-
-
-## Scaling Laws
-
-Scaling-law research studies how model size, training dataset size, and compute
-budget jointly determine language-model performance.
-
-1. **Pre-training Goals:** The goal of pre-training language models is to maximize performance by minimizing loss when predicting tokens. Improvements can be achieved by:
-
-   - Increasing the training dataset size.
-
-   - Increasing the number of model parameters.
-
-2. **Compute Budget Constraints:** Compute budgets, including hardware and time resources, are a practical constraint. A standard unit for compute resources is the *petaFLOP per second day*, which represents one quadrillion floating-point operations per second for one day.
-
-3. **Scaling Trade-Offs:** 
-
-   - Larger models and datasets generally require more compute resources to train effectively.
-
-   - There is a power-law relationship between compute budget, training dataset size, model size, and performance.
-
-4. **Research Insights:**
-
-   - OpenAI's research demonstrated how compute budget and training data size influence model performance, identifying clear trade-offs.
-
-   - With fixed compute budgets, optimizing dataset size and model parameters is key to improving performance.
-
-5. **Chinchilla Paper Findings:** 
-
-   - Many large language models (e.g., GPT-3) may be over-parameterized (too many parameters) and under-trained (not enough data).
-
-   - The Chinchilla experiments estimated a compute-optimal relationship of
-     roughly 20 training tokens per parameter for the studied model family and
-     compute range. Treat this as a historical empirical result, not a universal
-     constant for every architecture or objective.
-
-   - Models like Chinchilla, trained optimally, outperform larger, non-optimal models such as GPT-3.
-
-6. **Trends and Industry Implications:** 
-
-   - The Chinchilla study indicates that focusing on optimal training (not just larger models) can yield better results.
-
-   - Models like Bloomberg GPT show that compute-efficient training can achieve excellent task-specific performance with smaller parameter sizes.
-
-These results point towards a shift away from the "bigger is better" trend to a focus on compute-efficient and optimally trained models.
+# Pre-training and Scaling Large Language Models {#pre-training-and-scaling-large-language-models}
+
+After scoping a use case, the next lifecycle decision (Section
+\@ref(generative-ai-project-lifecycle)) is which model to build on. Almost
+always the answer is an existing pre-trained model. This chapter explains why,
+covering:
+
+- how pre-training works;
+- why training large models strains GPU memory, and the techniques that make
+  it feasible (number formats and distributed training);
+- the scaling laws that link model size, data, and compute; and
+- the narrow case where pre-training your own domain model can be worth it.
+
+## Choosing a starting model
+
+Open models are distributed through **model hubs** such as Hugging Face. Each
+model ships with a **model card** [@mitchell2019modelcards]. The card records
+the intended uses, training data and procedure, evaluation results, and known
+limitations. Read it before anything else. It tells you whether the model's
+architecture, licence, languages, and context length fit your task.
+
+## Pre-training objectives and architecture families
+
+**Pre-training** is self-supervised learning on a very large text corpus. The
+labels come from the text itself, so no human annotation is needed. What the
+model learns to do depends on its training objective, and the objective is
+tied to its architecture:
+
+| Family | Pre-training objective | What the model sees | Good at | Examples |
+|:-------|:-----------------------|:--------------------|:--------|:---------|
+| **Encoder-only** (autoencoding) | **Masked language modelling**: predict randomly masked tokens | Both sides of each token (bidirectional) | Classification, named-entity recognition, embeddings | BERT [@devlin2019bert], RoBERTa [@liu2019roberta] |
+| **Decoder-only** (autoregressive) | **Causal language modelling**: predict the next token | Only earlier tokens (left-to-right) | Text generation; at scale, zero-shot and few-shot on many tasks | GPT [@brown2020gpt3], BLOOM, Llama |
+| **Encoder–decoder** (sequence-to-sequence) | Varies. T5 uses **span corruption**: masked spans are replaced by sentinel tokens, and the decoder reconstructs them | Encoder: whole input; decoder: earlier outputs | Translation, summarization, input-to-output tasks | T5 [@raffel2020t5], BART |
+
+The two main losses, for a token sequence $x_1, \dots, x_T$:
+
+$$
+\mathcal{L}_{\text{causal}} = -\sum_{t=1}^{T} \log p_\theta(x_t \mid x_{<t}),
+\qquad
+\mathcal{L}_{\text{masked}} = -\sum_{t \in \mathcal{M}} \log p_\theta(x_t \mid x_{\setminus \mathcal{M}})
+$$
+
+Here $\mathcal{M}$ is the set of masked positions. BERT masks about 15% of
+tokens [@devlin2019bert].
+
+Today's general-purpose LLMs are almost all decoder-only. Encoder models
+remain the workhorses for classification and embeddings.
+
+**Data.** Pre-training corpora contain trillions of tokens drawn from web
+crawls, books, code, and curated collections. Raw web text needs heavy
+processing: language identification, quality filtering, deduplication, removal
+of personal data, and toxicity filtering. This usually discards a large share
+of the raw crawl. If you ever plan to pre-train, budget data collection for
+that loss. Filtering reduces some risks but does not guarantee unbiased or
+safe data.
+
+## Why training does not fit on one GPU {#memory-challenges-in-training-llms}
+
+Storing a model is cheap compared with training it. At 32-bit precision each
+parameter takes 4 bytes, so 1 billion parameters need **4 GB** just for the
+weights. Training also needs, for every parameter:
+
+| Component | FP32 training (bytes/param) | Mixed-precision training (bytes/param) |
+|:----------|---------------------------:|---------------------------------------:|
+| Weights used in forward/backward | 4 | 2 (16-bit copy) |
+| Gradients | 4 | 2 |
+| Adam optimizer: momentum + variance | 8 | 8 (kept in FP32) |
+| FP32 master copy of weights | — | 4 |
+| **Total, before activations** | **16** | **16** |
+
+**Activations** come on top. These are the intermediate outputs saved for the
+backward pass, and they grow with batch size and sequence length.
+**Activation checkpointing** saves memory by storing only some activations and
+recomputing the rest during the backward pass [@chen2016checkpointing].
+
+Rules of thumb:
+
+- **Training needs roughly 4–6× the memory of the FP32 weights.** That is
+  about 16 GB for a 1B-parameter model before activations, and around 24 GB
+  with a typical allowance for activations.
+- **A 175B-parameter model needs about 2.8 TB** for weights, gradients, and
+  optimizer states alone. No single GPU comes close.
+- **Fine-tuning has the same profile** when all weights are updated. That is
+  the main motivation for PEFT (Section \@ref(peft)).
+
+Two levers reduce the problem: smaller number formats (next section) and
+splitting the work across GPUs (the section after).
+
+## Number formats and quantization {#quantization-techniques}
+
+A floating-point number has three parts: a sign bit, **exponent** bits that set
+the **range**, and **fraction** (mantissa) bits that set the **precision**.
+
+| Format | Sign / exponent / fraction bits | Bytes | Largest value | $\pi$ stored as |
+|:-------|:-------------------------------|------:|:--------------|:----------------|
+| FP32 | 1 / 8 / 23 | 4 | $\approx 3.4 \times 10^{38}$ | 3.1415927 |
+| FP16 | 1 / 5 / 10 | 2 | 65,504 | 3.140625 |
+| BF16 | 1 / 8 / 7 | 2 | $\approx 3.4 \times 10^{38}$ | 3.140625 |
+| INT8 | 8-bit integer, $-128$ to $127$ | 1 | Set by a scale factor | Depends on the scale (see below) |
+
+**FP16 vs. BF16.** Both use 2 bytes and, for $\pi$, give the same rounded
+value. The difference is range. FP16 overflows above 65,504, so FP16 training
+needs *loss scaling* to keep small gradients from underflowing to zero
+[@micikevicius2018mixed]. **BF16** (brain floating point, from Google Brain)
+keeps FP32's 8 exponent bits. It trades precision for the full FP32 range,
+which makes training more stable. That is why it became the default 16-bit
+training format on hardware that supports it.
+
+**Mixed-precision training** runs the forward and backward passes in 16-bit
+but keeps an FP32 master copy of the weights for the optimizer update
+[@micikevicius2018mixed]. This gives most of the speed and activation-memory
+benefit of 16-bit arithmetic while preserving update accuracy.
+
+**Integer quantization** maps real values to integers through a scale factor
+$s$. With symmetric quantization, $q = \text{round}(x / s)$ and
+$s = \max|x| / 127$. Precision therefore depends on the range of the values
+being quantized. For example, if the largest weight magnitude in a tensor is
+4.0, then $s = 4/127 \approx 0.0315$. $\pi$ is stored as $q = 100$ and
+recovered as $100 \times 0.0315 \approx 3.150$. Choosing $s$ well is the
+central problem. **Quantization-aware training** learns the scale factors
+during training. **Post-training quantization** estimates them afterwards
+(Section \@ref(post-training-quantization)).
+
+> **Current practice (October 2026).** BF16 mixed precision is the baseline
+> for training. Recent accelerators also support 8-bit floating-point (FP8)
+> formats. Large models have been trained with FP8 mixed precision, for example
+> DeepSeek-V3 [@deepseek2024v3]. For inference, 8-bit and 4-bit weight
+> quantization are routine.
+
+## Distributed training
+
+Multiple GPUs serve two purposes: **speed** (process more data in parallel)
+and **capacity** (fit a model that one GPU cannot hold).
+
+### Data parallelism (DDP)
+
+**Distributed data parallel** (PyTorch DDP) puts a full copy of the model on
+every GPU and gives each GPU a different slice of every batch. After the
+backward pass, gradients are averaged across GPUs (an *all-reduce*), so every
+copy applies the same update and stays identical. DDP speeds up training
+almost linearly, but **each GPU must hold the full model, its gradients, and
+its optimizer states**. It adds speed, not capacity.
+
+### Sharding: ZeRO and FSDP
+
+Under DDP, every GPU stores identical copies of the same states, which is pure
+redundancy. **ZeRO** (Zero Redundancy Optimizer) [@rajbhandari2020zero]
+**shards** these states across the $N_d$ data-parallel GPUs instead, in three
+progressive stages. With $\Psi$ parameters and mixed-precision Adam (2 + 2 + 12
+bytes per parameter), the memory per GPU is:
+
+| Stage | What is sharded | Memory per GPU | 7.5B params, 64 GPUs |
+|:------|:----------------|:---------------|---------------------:|
+| Baseline (DDP) | Nothing | $16\Psi$ | 120 GB |
+| ZeRO-1 | Optimizer states | $4\Psi + 12\Psi / N_d$ | 31.4 GB |
+| ZeRO-2 | + gradients | $2\Psi + 14\Psi / N_d$ | 16.6 GB |
+| ZeRO-3 | + parameters | $16\Psi / N_d$ | 1.9 GB |
+
+Stages 1 and 2 cut memory by up to about 4× and 8×. Stage 3 cuts it in
+proportion to the number of GPUs. The example column is the paper's own
+illustration.
+
+**Fully Sharded Data Parallel** (PyTorch FSDP) [@zhao2023fsdp] implements the
+same idea natively in PyTorch:
+
+1. Before computing a layer, each GPU **gathers** that layer's full parameters
+   from the other GPUs (*all-gather*).
+2. It runs the forward or backward computation, then **frees** the gathered
+   copy.
+3. After the backward pass, gradients are **reduced and re-sharded**
+   (*reduce-scatter*), so each GPU updates only its own shard.
+
+The cost is extra communication. FSDP exposes this trade-off as a **sharding
+strategy**:
+
+- *Full sharding*: most memory saved, most communication.
+- *No sharding*: equivalent to DDP.
+- *Hybrid sharding*: shard within a machine and replicate across machines,
+  keeping heavy traffic on fast local links.
+- *CPU offload*: parameters or optimizer states can be moved to CPU memory, at
+  a further speed cost.
+
+### Model parallelism
+
+Sharding still runs each layer whole on one GPU at a time. The largest models
+also split the computation itself:
+
+- **Tensor parallelism** splits individual weight matrices across GPUs. This
+  is the Megatron-LM approach [@shoeybi2019megatron]. It needs very fast
+  interconnects, so it is usually kept within one machine.
+- **Pipeline parallelism** places different layers on different GPUs and
+  streams micro-batches through them to keep all stages busy
+  [@huang2019gpipe].
+
+Frontier training combines data, tensor, and pipeline parallelism ("3D
+parallelism") with sharding. As GPU count grows, communication overhead lowers
+the throughput per GPU. That is a real cost when planning a training run.
+
+## Scaling laws {#scaling-laws}
+
+Pre-training minimizes next-token loss. Three quantities determine how low the
+loss goes: model size $N$ (parameters), dataset size $D$ (training tokens),
+and compute $C$. For dense transformers, training compute is approximately
+
+$$
+C \approx 6ND \quad \text{FLOPs.}
+$$
+
+Large budgets are often quoted in **petaFLOP/s-days**. One petaFLOP/s-day is
+$10^{15}$ operations per second sustained for a day, which is
+$8.64 \times 10^{19}$ FLOPs. GPT-3 175B, trained on 300B tokens, used about
+$3.14 \times 10^{23}$ FLOPs, or roughly **3,640 petaFLOP/s-days**
+[@brown2020gpt3]. That matches $6 \times 175\text{B} \times 300\text{B}$.
+
+### Kaplan et al.: loss follows power laws
+
+@kaplan2020scaling found that test loss falls as a **power law** in each of
+$N$, $D$, and $C$, provided the other two are not the bottleneck. For example,
+$L(N) \approx (N_c / N)^{\alpha_N}$ with $\alpha_N \approx 0.076$. On log–log
+axes these are straight lines over many orders of magnitude. That makes loss
+**predictable**: small, cheap runs forecast the loss of large ones.
+
+In practice compute is the hard constraint (hardware, time, money). The
+practical question is therefore: **for a fixed compute budget, how should it
+be split between a bigger model and more data?** Kaplan et al. recommended
+putting most extra compute into model size. That reasoning shaped the very
+large models of 2020–21.
+
+### Chinchilla: scale data and parameters together
+
+@hoffmann2022chinchilla revisited the question with more careful experiments,
+including learning-rate schedules matched to each run's length. They fitted
+the loss as
+
+$$
+L(N, D) = E + \frac{A}{N^{\alpha}} + \frac{B}{D^{\beta}}.
+$$
+
+Here $E$ is the irreducible loss of the data, and the two other terms are the
+penalties for finite model size and finite data. Minimizing this subject to
+$C \approx 6ND$ gives the main result: **$N$ and $D$ should grow in roughly
+equal proportion**, which works out to about **20 training tokens per
+parameter**. This is a historical empirical estimate for their model family
+and setup, not a universal constant.
+
+The test: **Chinchilla** (70B parameters, 1.4T tokens) used the same compute
+as Gopher (280B parameters, 300B tokens). It outperformed Gopher, GPT-3, and
+other much larger models on a wide range of downstream tasks. Measured against
+the 20× rule, many earlier models were *over-parameterized and under-trained*:
+
+| Model | Parameters | Chinchilla-optimal tokens (~20×) | Actual training tokens |
+|:------|-----------:|---------------------------------:|-----------------------:|
+| GPT-3 [@brown2020gpt3] | 175B | ~3.5T | 300B |
+| BLOOM | 176B | ~3.5T | ~366B |
+| Chinchilla [@hoffmann2022chinchilla] | 70B | ~1.4T | 1.4T |
+| LLaMA-65B | 65B | ~1.3T | 1.4T |
+
+**Interpreting scaling laws:**
+
+- They predict **pre-training loss**, not specific downstream abilities.
+  Individual skills can improve unevenly.
+- They hold for the architecture, data mixture, and recipe they were fitted
+  on. Change those and you must re-fit.
+- "Compute-optimal" optimizes **training** compute only. It ignores the cost
+  of serving the model afterwards.
+
+> **Current practice (October 2026).** The last point changed practice. A
+> model that will serve billions of requests is cheaper overall if it is
+> smaller and trained on *far more* than 20 tokens per parameter
+> [@sardana2024beyond]. Llama 3's 8B model, for example, was trained on about
+> 15T tokens, close to 1,900 tokens per parameter [@dubey2024llama3].
+> "Over-training" small models is now normal. Chinchilla remains the reference
+> point for the training-compute trade-off.
+
+## Domain adaptation and pre-training your own model
+
+You rarely need to pre-train. The exception is a domain whose **language** is
+poorly represented in general corpora:
+
+- **Rare terms**: legal terms such as *mens rea* and *res judicata*.
+- **Everyday words with special meanings**: *consideration* in contract law
+  means the value exchanged that makes an agreement binding, not kindness.
+- **Shorthand**: a prescription note like "1 tab po qid pc & hs" means one
+  tablet by mouth four times a day, after meals and at bedtime.
+
+A model learns its vocabulary and representations in pre-training. Later
+stages build on those, so a domain the model barely saw may be handled
+poorly. Before committing to from-scratch training, climb this ladder of
+options, from cheapest to most expensive:
+
+1. Prompting and retrieval (Chapter \@ref(llm-applications)).
+2. Fine-tuning or PEFT on domain tasks (Chapter
+   \@ref(instruction-fine-tuning-and-evaluation)).
+3. **Continued (domain-adaptive) pre-training.** Keep pre-training an existing
+   model on unlabelled domain text. @gururangan2020dapt showed consistent
+   downstream gains from this across biomedical, computer-science, news, and
+   review domains.
+4. **Pre-training from scratch** on a mixed domain and general corpus.
+
+### Case study: BloombergGPT
+
+BloombergGPT [@wu2023bloomberggpt] is the best-known from-scratch domain
+model:
+
+- **Model and data.** A 50.6B-parameter decoder trained on a corpus of about
+  51% financial text (Bloomberg's own and public financial data) and 49%
+  general public text. The general data preserved broad language ability.
+- **Compute.** About 1.3 million A100 GPU-hours.
+- **Scaling choices.** The authors used Chinchilla scaling laws to size the
+  model for their budget, and the parameter count landed close to
+  compute-optimal. The training tokens (569B) fell *short* of the
+  compute-optimal amount, because there was not enough high-quality financial
+  text. Real data limits forced a trade-off.
+- **Result.** The paper reports that BloombergGPT outperformed similarly sized
+  open models on financial tasks by clear margins while staying competitive on
+  general-purpose benchmarks.
+
+The lesson is that from-scratch domain pre-training is justified only when the
+domain language is distinctive, high-quality domain data exists at scale, and
+the compute budget is large.
+
+> **Current practice (October 2026).** Given how capable general models now
+> are, combined with continued pre-training, fine-tuning, and retrieval,
+> from-scratch domain pre-training is a rare choice. Justify it with an
+> evaluation showing that the cheaper options fall short.
+
+## Key takeaways
+
+- Encoder-only models (masked LM) suit understanding tasks; decoder-only
+  models (causal LM) suit generation; encoder–decoder models suit
+  input-to-output tasks. Start from an existing model and read its model card.
+- Training memory is about 16 bytes per parameter before activations, which
+  is about 4× the FP32 weights. Large models therefore cannot train on one GPU.
+- BF16 keeps FP32's range at half the memory. Mixed precision keeps an FP32
+  master copy for stable updates. Integer quantization depends on a scale
+  factor.
+- DDP replicates the model for speed. ZeRO/FSDP shard optimizer states,
+  gradients, and parameters for capacity, at a communication cost. Tensor and
+  pipeline parallelism split the computation itself.
+- Loss scales as a power law in parameters, data, and compute. Chinchilla
+  showed that compute-optimal training scales $N$ and $D$ together (~20
+  tokens/parameter). Inference costs now push towards smaller, over-trained
+  models.
+- Domain pre-training (BloombergGPT) is the expensive end of a ladder that
+  starts with prompting, retrieval, fine-tuning, and continued pre-training.
+
+## Interview checkpoints
+
+- **Masked vs. causal language modelling?** Masked LM predicts hidden tokens
+  using both sides of the context. Causal LM predicts the next token using
+  only earlier ones.
+- **How much GPU memory does training a 7B-parameter model need?** With mixed
+  precision and Adam, about 16 bytes × 7B ≈ 112 GB before activations. That
+  calls for sharding, or PEFT for fine-tuning.
+- **Why BF16 over FP16?** The same 8-bit exponent as FP32 gives the full range,
+  so there is less overflow or underflow and no need for loss scaling. The
+  cost is lower precision.
+- **DDP vs. FSDP?** DDP replicates everything and adds speed only. FSDP shards
+  parameters, gradients, and optimizer states, which adds capacity at a
+  communication cost.
+- **The three ZeRO stages?** Shard optimizer states; then also gradients; then
+  also parameters.
+- **What is $C \approx 6ND$?** The approximate training FLOPs for a dense
+  transformer with $N$ parameters trained on $D$ tokens.
+- **The Chinchilla result in one line?** For a fixed training-compute budget,
+  scale parameters and tokens together, at about 20 tokens per parameter.
+  Many earlier models were under-trained.
+- **Why train beyond Chinchilla-optimal?** Serving costs dominate over a
+  model's life. A smaller model trained on more data is cheaper to run at the
+  same quality.
+- **When would you pre-train a domain model?** When the domain language is
+  distinctive, domain data is plentiful, the budget is large, and prompting,
+  RAG, fine-tuning, and continued pre-training have been shown to fall short.
