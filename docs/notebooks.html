@@ -312,13 +312,14 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="6.4" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#an-annotated-example"><i class="fa fa-check"></i><b>6.4</b> An annotated example</a></li>
 <li class="chapter" data-level="6.5" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#order-and-layout"><i class="fa fa-check"></i><b>6.5</b> Order and layout</a></li>
-<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.6</b> Offline example: assembling a prompt from parts</a></li>
-<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.7</b> Optional: sending the prompt to an API</a></li>
-<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.8</b> Common anatomy mistakes</a></li>
-<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.9</b> Checklist</a></li>
-<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.10</b> Exercise: dissect a prompt</a></li>
-<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.11</b> Key takeaways</a></li>
-<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.12</b> References</a></li>
+<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#system-prompt-altitude"><i class="fa fa-check"></i><b>6.6</b> Calibrating the system prompt</a></li>
+<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.7</b> Offline example: assembling a prompt from parts</a></li>
+<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.8</b> Optional: sending the prompt to an API</a></li>
+<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.9</b> Common anatomy mistakes</a></li>
+<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.10</b> Checklist</a></li>
+<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.11</b> Exercise: dissect a prompt</a></li>
+<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.12</b> Key takeaways</a></li>
+<li class="chapter" data-level="6.13" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.13</b> References</a></li>
 </ul></li>
 <li class="part"><span><b>III Agentic AI</b></span></li>
 <li class="chapter" data-level="7" data-path="agentic-workflows.html"><a href="agentic-workflows.html"><i class="fa fa-check"></i><b>7</b> Agentic Workflows</a>
@@ -895,174 +896,174 @@ SECTION 3: OUTPUTS
 <div id="section-1-setup" class="section level3 hasAnchor" number="20.2.1">
 <h3><span class="header-section-number">20.2.1</span> Section 1: Setup<a href="notebooks.html#section-1-setup" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p><strong>Purpose:</strong> Everything needed to run the notebook</p>
-<div class="sourceCode" id="cb108"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb108-1"><a href="notebooks.html#cb108-1" tabindex="-1"></a><span class="co"># SECTION 1: SETUP</span></span>
-<span id="cb108-2"><a href="notebooks.html#cb108-2" tabindex="-1"></a><span class="co"># ====================================</span></span>
-<span id="cb108-3"><a href="notebooks.html#cb108-3" tabindex="-1"></a></span>
-<span id="cb108-4"><a href="notebooks.html#cb108-4" tabindex="-1"></a><span class="co"># 1.1 Imports</span></span>
-<span id="cb108-5"><a href="notebooks.html#cb108-5" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb108-6"><a href="notebooks.html#cb108-6" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb108-7"><a href="notebooks.html#cb108-7" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb108-8"><a href="notebooks.html#cb108-8" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
-<span id="cb108-9"><a href="notebooks.html#cb108-9" tabindex="-1"></a><span class="im">from</span> sklearn.dummy <span class="im">import</span> DummyClassifier</span>
-<span id="cb108-10"><a href="notebooks.html#cb108-10" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestClassifier</span>
-<span id="cb108-11"><a href="notebooks.html#cb108-11" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> balanced_accuracy_score, classification_report</span>
-<span id="cb108-12"><a href="notebooks.html#cb108-12" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
-<span id="cb108-13"><a href="notebooks.html#cb108-13" tabindex="-1"></a></span>
-<span id="cb108-14"><a href="notebooks.html#cb108-14" tabindex="-1"></a><span class="co"># 1.2 Configuration</span></span>
-<span id="cb108-15"><a href="notebooks.html#cb108-15" tabindex="-1"></a>CONFIG <span class="op">=</span> {</span>
-<span id="cb108-16"><a href="notebooks.html#cb108-16" tabindex="-1"></a>    <span class="st">&#39;random_state&#39;</span>: <span class="dv">42</span>,</span>
-<span id="cb108-17"><a href="notebooks.html#cb108-17" tabindex="-1"></a>    <span class="st">&#39;test_size&#39;</span>: <span class="fl">0.2</span>,</span>
-<span id="cb108-18"><a href="notebooks.html#cb108-18" tabindex="-1"></a>    <span class="st">&#39;figsize&#39;</span>: (<span class="dv">12</span>, <span class="dv">8</span>),</span>
-<span id="cb108-19"><a href="notebooks.html#cb108-19" tabindex="-1"></a>    <span class="st">&#39;data_path&#39;</span>: Path(<span class="st">&#39;../data/customers.csv&#39;</span>),</span>
-<span id="cb108-20"><a href="notebooks.html#cb108-20" tabindex="-1"></a>    <span class="st">&#39;output_dir&#39;</span>: Path(<span class="st">&#39;../output&#39;</span>)</span>
-<span id="cb108-21"><a href="notebooks.html#cb108-21" tabindex="-1"></a>}</span>
-<span id="cb108-22"><a href="notebooks.html#cb108-22" tabindex="-1"></a></span>
-<span id="cb108-23"><a href="notebooks.html#cb108-23" tabindex="-1"></a><span class="co"># 1.3 Load Data</span></span>
-<span id="cb108-24"><a href="notebooks.html#cb108-24" tabindex="-1"></a>df_raw <span class="op">=</span> pd.read_csv(CONFIG[<span class="st">&#39;data_path&#39;</span>])</span>
-<span id="cb108-25"><a href="notebooks.html#cb108-25" tabindex="-1"></a></span>
-<span id="cb108-26"><a href="notebooks.html#cb108-26" tabindex="-1"></a><span class="co"># 1.4 Quick sanity check</span></span>
-<span id="cb108-27"><a href="notebooks.html#cb108-27" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Data shape: </span><span class="sc">{</span>df_raw<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb108-28"><a href="notebooks.html#cb108-28" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Missing values:</span><span class="ch">\n</span><span class="sc">{</span>df_raw<span class="sc">.</span>isnull()<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb109"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb109-1"><a href="notebooks.html#cb109-1" tabindex="-1"></a><span class="co"># SECTION 1: SETUP</span></span>
+<span id="cb109-2"><a href="notebooks.html#cb109-2" tabindex="-1"></a><span class="co"># ====================================</span></span>
+<span id="cb109-3"><a href="notebooks.html#cb109-3" tabindex="-1"></a></span>
+<span id="cb109-4"><a href="notebooks.html#cb109-4" tabindex="-1"></a><span class="co"># 1.1 Imports</span></span>
+<span id="cb109-5"><a href="notebooks.html#cb109-5" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb109-6"><a href="notebooks.html#cb109-6" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb109-7"><a href="notebooks.html#cb109-7" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb109-8"><a href="notebooks.html#cb109-8" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb109-9"><a href="notebooks.html#cb109-9" tabindex="-1"></a><span class="im">from</span> sklearn.dummy <span class="im">import</span> DummyClassifier</span>
+<span id="cb109-10"><a href="notebooks.html#cb109-10" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestClassifier</span>
+<span id="cb109-11"><a href="notebooks.html#cb109-11" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> balanced_accuracy_score, classification_report</span>
+<span id="cb109-12"><a href="notebooks.html#cb109-12" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb109-13"><a href="notebooks.html#cb109-13" tabindex="-1"></a></span>
+<span id="cb109-14"><a href="notebooks.html#cb109-14" tabindex="-1"></a><span class="co"># 1.2 Configuration</span></span>
+<span id="cb109-15"><a href="notebooks.html#cb109-15" tabindex="-1"></a>CONFIG <span class="op">=</span> {</span>
+<span id="cb109-16"><a href="notebooks.html#cb109-16" tabindex="-1"></a>    <span class="st">&#39;random_state&#39;</span>: <span class="dv">42</span>,</span>
+<span id="cb109-17"><a href="notebooks.html#cb109-17" tabindex="-1"></a>    <span class="st">&#39;test_size&#39;</span>: <span class="fl">0.2</span>,</span>
+<span id="cb109-18"><a href="notebooks.html#cb109-18" tabindex="-1"></a>    <span class="st">&#39;figsize&#39;</span>: (<span class="dv">12</span>, <span class="dv">8</span>),</span>
+<span id="cb109-19"><a href="notebooks.html#cb109-19" tabindex="-1"></a>    <span class="st">&#39;data_path&#39;</span>: Path(<span class="st">&#39;../data/customers.csv&#39;</span>),</span>
+<span id="cb109-20"><a href="notebooks.html#cb109-20" tabindex="-1"></a>    <span class="st">&#39;output_dir&#39;</span>: Path(<span class="st">&#39;../output&#39;</span>)</span>
+<span id="cb109-21"><a href="notebooks.html#cb109-21" tabindex="-1"></a>}</span>
+<span id="cb109-22"><a href="notebooks.html#cb109-22" tabindex="-1"></a></span>
+<span id="cb109-23"><a href="notebooks.html#cb109-23" tabindex="-1"></a><span class="co"># 1.3 Load Data</span></span>
+<span id="cb109-24"><a href="notebooks.html#cb109-24" tabindex="-1"></a>df_raw <span class="op">=</span> pd.read_csv(CONFIG[<span class="st">&#39;data_path&#39;</span>])</span>
+<span id="cb109-25"><a href="notebooks.html#cb109-25" tabindex="-1"></a></span>
+<span id="cb109-26"><a href="notebooks.html#cb109-26" tabindex="-1"></a><span class="co"># 1.4 Quick sanity check</span></span>
+<span id="cb109-27"><a href="notebooks.html#cb109-27" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Data shape: </span><span class="sc">{</span>df_raw<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb109-28"><a href="notebooks.html#cb109-28" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Missing values:</span><span class="ch">\n</span><span class="sc">{</span>df_raw<span class="sc">.</span>isnull()<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss">&quot;</span>)</span></code></pre></div>
 <p><strong>Key Principle:</strong> Someone should be able to run Section 1 and have everything working.</p>
 </div>
 <div id="section-2-analysis" class="section level3 hasAnchor" number="20.2.2">
 <h3><span class="header-section-number">20.2.2</span> Section 2: Analysis<a href="notebooks.html#section-2-analysis" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p><strong>Purpose:</strong> Your actual work (exploration, modeling, analysis)</p>
-<div class="sourceCode" id="cb109"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb109-1"><a href="notebooks.html#cb109-1" tabindex="-1"></a><span class="co"># SECTION 2: ANALYSIS</span></span>
-<span id="cb109-2"><a href="notebooks.html#cb109-2" tabindex="-1"></a><span class="co"># ====================================</span></span>
-<span id="cb109-3"><a href="notebooks.html#cb109-3" tabindex="-1"></a></span>
-<span id="cb109-4"><a href="notebooks.html#cb109-4" tabindex="-1"></a><span class="co"># 2.1 Data Exploration</span></span>
-<span id="cb109-5"><a href="notebooks.html#cb109-5" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
-<span id="cb109-6"><a href="notebooks.html#cb109-6" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;EXPLORATORY DATA ANALYSIS&quot;</span>)</span>
-<span id="cb109-7"><a href="notebooks.html#cb109-7" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
-<span id="cb109-8"><a href="notebooks.html#cb109-8" tabindex="-1"></a></span>
-<span id="cb109-9"><a href="notebooks.html#cb109-9" tabindex="-1"></a><span class="co"># Describe the data</span></span>
-<span id="cb109-10"><a href="notebooks.html#cb109-10" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Numerical Summary:&quot;</span>)</span>
-<span id="cb109-11"><a href="notebooks.html#cb109-11" tabindex="-1"></a><span class="bu">print</span>(df_raw.describe())</span>
-<span id="cb109-12"><a href="notebooks.html#cb109-12" tabindex="-1"></a></span>
-<span id="cb109-13"><a href="notebooks.html#cb109-13" tabindex="-1"></a><span class="co"># Check distributions</span></span>
-<span id="cb109-14"><a href="notebooks.html#cb109-14" tabindex="-1"></a>df_raw.hist(figsize<span class="op">=</span>CONFIG[<span class="st">&#39;figsize&#39;</span>])</span>
-<span id="cb109-15"><a href="notebooks.html#cb109-15" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb109-16"><a href="notebooks.html#cb109-16" tabindex="-1"></a>plt.show()</span>
-<span id="cb109-17"><a href="notebooks.html#cb109-17" tabindex="-1"></a></span>
-<span id="cb109-18"><a href="notebooks.html#cb109-18" tabindex="-1"></a><span class="co"># 2.2 Data Preparation</span></span>
-<span id="cb109-19"><a href="notebooks.html#cb109-19" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span> <span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
-<span id="cb109-20"><a href="notebooks.html#cb109-20" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;DATA PREPARATION&quot;</span>)</span>
-<span id="cb109-21"><a href="notebooks.html#cb109-21" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
-<span id="cb109-22"><a href="notebooks.html#cb109-22" tabindex="-1"></a></span>
-<span id="cb109-23"><a href="notebooks.html#cb109-23" tabindex="-1"></a><span class="co"># Feature engineering</span></span>
-<span id="cb109-24"><a href="notebooks.html#cb109-24" tabindex="-1"></a>df_model <span class="op">=</span> df_raw.copy()</span>
-<span id="cb109-25"><a href="notebooks.html#cb109-25" tabindex="-1"></a>source_required <span class="op">=</span> {</span>
-<span id="cb109-26"><a href="notebooks.html#cb109-26" tabindex="-1"></a>    <span class="st">&#39;customer_id&#39;</span>, <span class="st">&#39;days_since_purchase&#39;</span>,</span>
-<span id="cb109-27"><a href="notebooks.html#cb109-27" tabindex="-1"></a>    <span class="st">&#39;transactions_last_90_days&#39;</span>, <span class="st">&#39;purchased_flag&#39;</span></span>
-<span id="cb109-28"><a href="notebooks.html#cb109-28" tabindex="-1"></a>}</span>
-<span id="cb109-29"><a href="notebooks.html#cb109-29" tabindex="-1"></a>missing_columns <span class="op">=</span> source_required.difference(df_model.columns)</span>
-<span id="cb109-30"><a href="notebooks.html#cb109-30" tabindex="-1"></a><span class="cf">if</span> missing_columns:</span>
-<span id="cb109-31"><a href="notebooks.html#cb109-31" tabindex="-1"></a>    <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f&quot;Missing required columns: </span><span class="sc">{</span><span class="bu">sorted</span>(missing_columns)<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb109-32"><a href="notebooks.html#cb109-32" tabindex="-1"></a></span>
-<span id="cb109-33"><a href="notebooks.html#cb109-33" tabindex="-1"></a><span class="co"># These example features must be measured before the prediction outcome window.</span></span>
-<span id="cb109-34"><a href="notebooks.html#cb109-34" tabindex="-1"></a>df_model[<span class="st">&#39;recency&#39;</span>] <span class="op">=</span> df_model[<span class="st">&#39;days_since_purchase&#39;</span>].astype(<span class="bu">float</span>)</span>
-<span id="cb109-35"><a href="notebooks.html#cb109-35" tabindex="-1"></a>df_model[<span class="st">&#39;frequency&#39;</span>] <span class="op">=</span> df_model[<span class="st">&#39;transactions_last_90_days&#39;</span>].astype(<span class="bu">float</span>)</span>
-<span id="cb109-36"><a href="notebooks.html#cb109-36" tabindex="-1"></a></span>
-<span id="cb109-37"><a href="notebooks.html#cb109-37" tabindex="-1"></a><span class="co"># Handle missing values</span></span>
-<span id="cb109-38"><a href="notebooks.html#cb109-38" tabindex="-1"></a>required_columns <span class="op">=</span> [<span class="st">&#39;customer_id&#39;</span>, <span class="st">&#39;recency&#39;</span>, <span class="st">&#39;frequency&#39;</span>, <span class="st">&#39;purchased_flag&#39;</span>]</span>
-<span id="cb109-39"><a href="notebooks.html#cb109-39" tabindex="-1"></a>df_model <span class="op">=</span> df_model[required_columns].dropna().copy()</span>
-<span id="cb109-40"><a href="notebooks.html#cb109-40" tabindex="-1"></a></span>
-<span id="cb109-41"><a href="notebooks.html#cb109-41" tabindex="-1"></a><span class="co"># 2.3 Modeling</span></span>
-<span id="cb109-42"><a href="notebooks.html#cb109-42" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span> <span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
-<span id="cb109-43"><a href="notebooks.html#cb109-43" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;MODEL TRAINING&quot;</span>)</span>
-<span id="cb109-44"><a href="notebooks.html#cb109-44" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
-<span id="cb109-45"><a href="notebooks.html#cb109-45" tabindex="-1"></a></span>
-<span id="cb109-46"><a href="notebooks.html#cb109-46" tabindex="-1"></a><span class="co"># Prepare features and target</span></span>
-<span id="cb109-47"><a href="notebooks.html#cb109-47" tabindex="-1"></a>X <span class="op">=</span> df_model[[<span class="st">&#39;recency&#39;</span>, <span class="st">&#39;frequency&#39;</span>]]</span>
-<span id="cb109-48"><a href="notebooks.html#cb109-48" tabindex="-1"></a>y <span class="op">=</span> df_model[<span class="st">&#39;purchased_flag&#39;</span>]</span>
-<span id="cb109-49"><a href="notebooks.html#cb109-49" tabindex="-1"></a></span>
-<span id="cb109-50"><a href="notebooks.html#cb109-50" tabindex="-1"></a><span class="co"># Split before fitting any learned preprocessing or model.</span></span>
-<span id="cb109-51"><a href="notebooks.html#cb109-51" tabindex="-1"></a><span class="co"># Use a temporal or grouped split instead when random rows would leak information.</span></span>
-<span id="cb109-52"><a href="notebooks.html#cb109-52" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
-<span id="cb109-53"><a href="notebooks.html#cb109-53" tabindex="-1"></a>    X,</span>
-<span id="cb109-54"><a href="notebooks.html#cb109-54" tabindex="-1"></a>    y,</span>
-<span id="cb109-55"><a href="notebooks.html#cb109-55" tabindex="-1"></a>    test_size<span class="op">=</span>CONFIG[<span class="st">&#39;test_size&#39;</span>],</span>
-<span id="cb109-56"><a href="notebooks.html#cb109-56" tabindex="-1"></a>    random_state<span class="op">=</span>CONFIG[<span class="st">&#39;random_state&#39;</span>],</span>
-<span id="cb109-57"><a href="notebooks.html#cb109-57" tabindex="-1"></a>    stratify<span class="op">=</span>y</span>
-<span id="cb109-58"><a href="notebooks.html#cb109-58" tabindex="-1"></a>)</span>
-<span id="cb109-59"><a href="notebooks.html#cb109-59" tabindex="-1"></a></span>
-<span id="cb109-60"><a href="notebooks.html#cb109-60" tabindex="-1"></a><span class="co"># Establish a simple benchmark.</span></span>
-<span id="cb109-61"><a href="notebooks.html#cb109-61" tabindex="-1"></a>baseline <span class="op">=</span> DummyClassifier(strategy<span class="op">=</span><span class="st">&#39;most_frequent&#39;</span>)</span>
-<span id="cb109-62"><a href="notebooks.html#cb109-62" tabindex="-1"></a>baseline.fit(X_train, y_train)</span>
-<span id="cb109-63"><a href="notebooks.html#cb109-63" tabindex="-1"></a>baseline_predictions <span class="op">=</span> baseline.predict(X_test)</span>
-<span id="cb109-64"><a href="notebooks.html#cb109-64" tabindex="-1"></a>baseline_score <span class="op">=</span> balanced_accuracy_score(y_test, baseline_predictions)</span>
-<span id="cb109-65"><a href="notebooks.html#cb109-65" tabindex="-1"></a></span>
-<span id="cb109-66"><a href="notebooks.html#cb109-66" tabindex="-1"></a><span class="co"># Train model</span></span>
-<span id="cb109-67"><a href="notebooks.html#cb109-67" tabindex="-1"></a>model <span class="op">=</span> RandomForestClassifier(</span>
-<span id="cb109-68"><a href="notebooks.html#cb109-68" tabindex="-1"></a>    n_estimators<span class="op">=</span><span class="dv">100</span>,</span>
-<span id="cb109-69"><a href="notebooks.html#cb109-69" tabindex="-1"></a>    random_state<span class="op">=</span>CONFIG[<span class="st">&#39;random_state&#39;</span>]</span>
-<span id="cb109-70"><a href="notebooks.html#cb109-70" tabindex="-1"></a>)</span>
-<span id="cb109-71"><a href="notebooks.html#cb109-71" tabindex="-1"></a>model.fit(X_train, y_train)</span>
-<span id="cb109-72"><a href="notebooks.html#cb109-72" tabindex="-1"></a>test_predictions <span class="op">=</span> model.predict(X_test)</span>
-<span id="cb109-73"><a href="notebooks.html#cb109-73" tabindex="-1"></a>test_score <span class="op">=</span> balanced_accuracy_score(y_test, test_predictions)</span>
-<span id="cb109-74"><a href="notebooks.html#cb109-74" tabindex="-1"></a></span>
-<span id="cb109-75"><a href="notebooks.html#cb109-75" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Model trained and evaluated on held-out data.&quot;</span>)</span>
-<span id="cb109-76"><a href="notebooks.html#cb109-76" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Baseline balanced accuracy: </span><span class="sc">{</span>baseline_score<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb109-77"><a href="notebooks.html#cb109-77" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Model balanced accuracy: </span><span class="sc">{</span>test_score<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb109-78"><a href="notebooks.html#cb109-78" tabindex="-1"></a><span class="bu">print</span>(classification_report(y_test, test_predictions, zero_division<span class="op">=</span><span class="dv">0</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb110"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb110-1"><a href="notebooks.html#cb110-1" tabindex="-1"></a><span class="co"># SECTION 2: ANALYSIS</span></span>
+<span id="cb110-2"><a href="notebooks.html#cb110-2" tabindex="-1"></a><span class="co"># ====================================</span></span>
+<span id="cb110-3"><a href="notebooks.html#cb110-3" tabindex="-1"></a></span>
+<span id="cb110-4"><a href="notebooks.html#cb110-4" tabindex="-1"></a><span class="co"># 2.1 Data Exploration</span></span>
+<span id="cb110-5"><a href="notebooks.html#cb110-5" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
+<span id="cb110-6"><a href="notebooks.html#cb110-6" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;EXPLORATORY DATA ANALYSIS&quot;</span>)</span>
+<span id="cb110-7"><a href="notebooks.html#cb110-7" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
+<span id="cb110-8"><a href="notebooks.html#cb110-8" tabindex="-1"></a></span>
+<span id="cb110-9"><a href="notebooks.html#cb110-9" tabindex="-1"></a><span class="co"># Describe the data</span></span>
+<span id="cb110-10"><a href="notebooks.html#cb110-10" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Numerical Summary:&quot;</span>)</span>
+<span id="cb110-11"><a href="notebooks.html#cb110-11" tabindex="-1"></a><span class="bu">print</span>(df_raw.describe())</span>
+<span id="cb110-12"><a href="notebooks.html#cb110-12" tabindex="-1"></a></span>
+<span id="cb110-13"><a href="notebooks.html#cb110-13" tabindex="-1"></a><span class="co"># Check distributions</span></span>
+<span id="cb110-14"><a href="notebooks.html#cb110-14" tabindex="-1"></a>df_raw.hist(figsize<span class="op">=</span>CONFIG[<span class="st">&#39;figsize&#39;</span>])</span>
+<span id="cb110-15"><a href="notebooks.html#cb110-15" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb110-16"><a href="notebooks.html#cb110-16" tabindex="-1"></a>plt.show()</span>
+<span id="cb110-17"><a href="notebooks.html#cb110-17" tabindex="-1"></a></span>
+<span id="cb110-18"><a href="notebooks.html#cb110-18" tabindex="-1"></a><span class="co"># 2.2 Data Preparation</span></span>
+<span id="cb110-19"><a href="notebooks.html#cb110-19" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span> <span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
+<span id="cb110-20"><a href="notebooks.html#cb110-20" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;DATA PREPARATION&quot;</span>)</span>
+<span id="cb110-21"><a href="notebooks.html#cb110-21" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
+<span id="cb110-22"><a href="notebooks.html#cb110-22" tabindex="-1"></a></span>
+<span id="cb110-23"><a href="notebooks.html#cb110-23" tabindex="-1"></a><span class="co"># Feature engineering</span></span>
+<span id="cb110-24"><a href="notebooks.html#cb110-24" tabindex="-1"></a>df_model <span class="op">=</span> df_raw.copy()</span>
+<span id="cb110-25"><a href="notebooks.html#cb110-25" tabindex="-1"></a>source_required <span class="op">=</span> {</span>
+<span id="cb110-26"><a href="notebooks.html#cb110-26" tabindex="-1"></a>    <span class="st">&#39;customer_id&#39;</span>, <span class="st">&#39;days_since_purchase&#39;</span>,</span>
+<span id="cb110-27"><a href="notebooks.html#cb110-27" tabindex="-1"></a>    <span class="st">&#39;transactions_last_90_days&#39;</span>, <span class="st">&#39;purchased_flag&#39;</span></span>
+<span id="cb110-28"><a href="notebooks.html#cb110-28" tabindex="-1"></a>}</span>
+<span id="cb110-29"><a href="notebooks.html#cb110-29" tabindex="-1"></a>missing_columns <span class="op">=</span> source_required.difference(df_model.columns)</span>
+<span id="cb110-30"><a href="notebooks.html#cb110-30" tabindex="-1"></a><span class="cf">if</span> missing_columns:</span>
+<span id="cb110-31"><a href="notebooks.html#cb110-31" tabindex="-1"></a>    <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f&quot;Missing required columns: </span><span class="sc">{</span><span class="bu">sorted</span>(missing_columns)<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb110-32"><a href="notebooks.html#cb110-32" tabindex="-1"></a></span>
+<span id="cb110-33"><a href="notebooks.html#cb110-33" tabindex="-1"></a><span class="co"># These example features must be measured before the prediction outcome window.</span></span>
+<span id="cb110-34"><a href="notebooks.html#cb110-34" tabindex="-1"></a>df_model[<span class="st">&#39;recency&#39;</span>] <span class="op">=</span> df_model[<span class="st">&#39;days_since_purchase&#39;</span>].astype(<span class="bu">float</span>)</span>
+<span id="cb110-35"><a href="notebooks.html#cb110-35" tabindex="-1"></a>df_model[<span class="st">&#39;frequency&#39;</span>] <span class="op">=</span> df_model[<span class="st">&#39;transactions_last_90_days&#39;</span>].astype(<span class="bu">float</span>)</span>
+<span id="cb110-36"><a href="notebooks.html#cb110-36" tabindex="-1"></a></span>
+<span id="cb110-37"><a href="notebooks.html#cb110-37" tabindex="-1"></a><span class="co"># Handle missing values</span></span>
+<span id="cb110-38"><a href="notebooks.html#cb110-38" tabindex="-1"></a>required_columns <span class="op">=</span> [<span class="st">&#39;customer_id&#39;</span>, <span class="st">&#39;recency&#39;</span>, <span class="st">&#39;frequency&#39;</span>, <span class="st">&#39;purchased_flag&#39;</span>]</span>
+<span id="cb110-39"><a href="notebooks.html#cb110-39" tabindex="-1"></a>df_model <span class="op">=</span> df_model[required_columns].dropna().copy()</span>
+<span id="cb110-40"><a href="notebooks.html#cb110-40" tabindex="-1"></a></span>
+<span id="cb110-41"><a href="notebooks.html#cb110-41" tabindex="-1"></a><span class="co"># 2.3 Modeling</span></span>
+<span id="cb110-42"><a href="notebooks.html#cb110-42" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span> <span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
+<span id="cb110-43"><a href="notebooks.html#cb110-43" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;MODEL TRAINING&quot;</span>)</span>
+<span id="cb110-44"><a href="notebooks.html#cb110-44" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
+<span id="cb110-45"><a href="notebooks.html#cb110-45" tabindex="-1"></a></span>
+<span id="cb110-46"><a href="notebooks.html#cb110-46" tabindex="-1"></a><span class="co"># Prepare features and target</span></span>
+<span id="cb110-47"><a href="notebooks.html#cb110-47" tabindex="-1"></a>X <span class="op">=</span> df_model[[<span class="st">&#39;recency&#39;</span>, <span class="st">&#39;frequency&#39;</span>]]</span>
+<span id="cb110-48"><a href="notebooks.html#cb110-48" tabindex="-1"></a>y <span class="op">=</span> df_model[<span class="st">&#39;purchased_flag&#39;</span>]</span>
+<span id="cb110-49"><a href="notebooks.html#cb110-49" tabindex="-1"></a></span>
+<span id="cb110-50"><a href="notebooks.html#cb110-50" tabindex="-1"></a><span class="co"># Split before fitting any learned preprocessing or model.</span></span>
+<span id="cb110-51"><a href="notebooks.html#cb110-51" tabindex="-1"></a><span class="co"># Use a temporal or grouped split instead when random rows would leak information.</span></span>
+<span id="cb110-52"><a href="notebooks.html#cb110-52" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(</span>
+<span id="cb110-53"><a href="notebooks.html#cb110-53" tabindex="-1"></a>    X,</span>
+<span id="cb110-54"><a href="notebooks.html#cb110-54" tabindex="-1"></a>    y,</span>
+<span id="cb110-55"><a href="notebooks.html#cb110-55" tabindex="-1"></a>    test_size<span class="op">=</span>CONFIG[<span class="st">&#39;test_size&#39;</span>],</span>
+<span id="cb110-56"><a href="notebooks.html#cb110-56" tabindex="-1"></a>    random_state<span class="op">=</span>CONFIG[<span class="st">&#39;random_state&#39;</span>],</span>
+<span id="cb110-57"><a href="notebooks.html#cb110-57" tabindex="-1"></a>    stratify<span class="op">=</span>y</span>
+<span id="cb110-58"><a href="notebooks.html#cb110-58" tabindex="-1"></a>)</span>
+<span id="cb110-59"><a href="notebooks.html#cb110-59" tabindex="-1"></a></span>
+<span id="cb110-60"><a href="notebooks.html#cb110-60" tabindex="-1"></a><span class="co"># Establish a simple benchmark.</span></span>
+<span id="cb110-61"><a href="notebooks.html#cb110-61" tabindex="-1"></a>baseline <span class="op">=</span> DummyClassifier(strategy<span class="op">=</span><span class="st">&#39;most_frequent&#39;</span>)</span>
+<span id="cb110-62"><a href="notebooks.html#cb110-62" tabindex="-1"></a>baseline.fit(X_train, y_train)</span>
+<span id="cb110-63"><a href="notebooks.html#cb110-63" tabindex="-1"></a>baseline_predictions <span class="op">=</span> baseline.predict(X_test)</span>
+<span id="cb110-64"><a href="notebooks.html#cb110-64" tabindex="-1"></a>baseline_score <span class="op">=</span> balanced_accuracy_score(y_test, baseline_predictions)</span>
+<span id="cb110-65"><a href="notebooks.html#cb110-65" tabindex="-1"></a></span>
+<span id="cb110-66"><a href="notebooks.html#cb110-66" tabindex="-1"></a><span class="co"># Train model</span></span>
+<span id="cb110-67"><a href="notebooks.html#cb110-67" tabindex="-1"></a>model <span class="op">=</span> RandomForestClassifier(</span>
+<span id="cb110-68"><a href="notebooks.html#cb110-68" tabindex="-1"></a>    n_estimators<span class="op">=</span><span class="dv">100</span>,</span>
+<span id="cb110-69"><a href="notebooks.html#cb110-69" tabindex="-1"></a>    random_state<span class="op">=</span>CONFIG[<span class="st">&#39;random_state&#39;</span>]</span>
+<span id="cb110-70"><a href="notebooks.html#cb110-70" tabindex="-1"></a>)</span>
+<span id="cb110-71"><a href="notebooks.html#cb110-71" tabindex="-1"></a>model.fit(X_train, y_train)</span>
+<span id="cb110-72"><a href="notebooks.html#cb110-72" tabindex="-1"></a>test_predictions <span class="op">=</span> model.predict(X_test)</span>
+<span id="cb110-73"><a href="notebooks.html#cb110-73" tabindex="-1"></a>test_score <span class="op">=</span> balanced_accuracy_score(y_test, test_predictions)</span>
+<span id="cb110-74"><a href="notebooks.html#cb110-74" tabindex="-1"></a></span>
+<span id="cb110-75"><a href="notebooks.html#cb110-75" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">Model trained and evaluated on held-out data.&quot;</span>)</span>
+<span id="cb110-76"><a href="notebooks.html#cb110-76" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Baseline balanced accuracy: </span><span class="sc">{</span>baseline_score<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb110-77"><a href="notebooks.html#cb110-77" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Model balanced accuracy: </span><span class="sc">{</span>test_score<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb110-78"><a href="notebooks.html#cb110-78" tabindex="-1"></a><span class="bu">print</span>(classification_report(y_test, test_predictions, zero_division<span class="op">=</span><span class="dv">0</span>))</span></code></pre></div>
 </div>
 <div id="section-3-outputs" class="section level3 hasAnchor" number="20.2.3">
 <h3><span class="header-section-number">20.2.3</span> Section 3: Outputs<a href="notebooks.html#section-3-outputs" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p><strong>Purpose:</strong> Results, visualizations, saved files</p>
-<div class="sourceCode" id="cb110"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb110-1"><a href="notebooks.html#cb110-1" tabindex="-1"></a><span class="co"># SECTION 3: OUTPUTS</span></span>
-<span id="cb110-2"><a href="notebooks.html#cb110-2" tabindex="-1"></a><span class="co"># ====================================</span></span>
-<span id="cb110-3"><a href="notebooks.html#cb110-3" tabindex="-1"></a></span>
-<span id="cb110-4"><a href="notebooks.html#cb110-4" tabindex="-1"></a><span class="co"># 3.1 Results Summary</span></span>
-<span id="cb110-5"><a href="notebooks.html#cb110-5" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
-<span id="cb110-6"><a href="notebooks.html#cb110-6" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;RESULTS SUMMARY&quot;</span>)</span>
-<span id="cb110-7"><a href="notebooks.html#cb110-7" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
-<span id="cb110-8"><a href="notebooks.html#cb110-8" tabindex="-1"></a></span>
-<span id="cb110-9"><a href="notebooks.html#cb110-9" tabindex="-1"></a>results <span class="op">=</span> {</span>
-<span id="cb110-10"><a href="notebooks.html#cb110-10" tabindex="-1"></a>    <span class="st">&#39;rows_processed&#39;</span>: <span class="bu">len</span>(df_model),</span>
-<span id="cb110-11"><a href="notebooks.html#cb110-11" tabindex="-1"></a>    <span class="st">&#39;features_used&#39;</span>: <span class="bu">len</span>(X.columns),</span>
-<span id="cb110-12"><a href="notebooks.html#cb110-12" tabindex="-1"></a>    <span class="st">&#39;baseline_balanced_accuracy&#39;</span>: baseline_score,</span>
-<span id="cb110-13"><a href="notebooks.html#cb110-13" tabindex="-1"></a>    <span class="st">&#39;test_balanced_accuracy&#39;</span>: test_score,</span>
-<span id="cb110-14"><a href="notebooks.html#cb110-14" tabindex="-1"></a>    <span class="st">&#39;feature_importance&#39;</span>: pd.DataFrame({</span>
-<span id="cb110-15"><a href="notebooks.html#cb110-15" tabindex="-1"></a>        <span class="st">&#39;feature&#39;</span>: X.columns,</span>
-<span id="cb110-16"><a href="notebooks.html#cb110-16" tabindex="-1"></a>        <span class="st">&#39;importance&#39;</span>: model.feature_importances_</span>
-<span id="cb110-17"><a href="notebooks.html#cb110-17" tabindex="-1"></a>    }).sort_values(<span class="st">&#39;importance&#39;</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb110-18"><a href="notebooks.html#cb110-18" tabindex="-1"></a>}</span>
-<span id="cb110-19"><a href="notebooks.html#cb110-19" tabindex="-1"></a></span>
-<span id="cb110-20"><a href="notebooks.html#cb110-20" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="ch">\n</span><span class="ss">Rows processed: </span><span class="sc">{</span>results[<span class="st">&#39;rows_processed&#39;</span>]<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb110-21"><a href="notebooks.html#cb110-21" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Baseline balanced accuracy: </span><span class="sc">{</span>results[<span class="st">&#39;baseline_balanced_accuracy&#39;</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb110-22"><a href="notebooks.html#cb110-22" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Test balanced accuracy: </span><span class="sc">{</span>results[<span class="st">&#39;test_balanced_accuracy&#39;</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span>
-<span id="cb110-23"><a href="notebooks.html#cb110-23" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="ch">\n</span><span class="ss">Top features:</span><span class="ch">\n</span><span class="sc">{</span>results[<span class="st">&#39;feature_importance&#39;</span>]<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb110-24"><a href="notebooks.html#cb110-24" tabindex="-1"></a></span>
-<span id="cb110-25"><a href="notebooks.html#cb110-25" tabindex="-1"></a><span class="co"># 3.2 Visualizations</span></span>
-<span id="cb110-26"><a href="notebooks.html#cb110-26" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>CONFIG[<span class="st">&#39;figsize&#39;</span>])</span>
-<span id="cb110-27"><a href="notebooks.html#cb110-27" tabindex="-1"></a></span>
-<span id="cb110-28"><a href="notebooks.html#cb110-28" tabindex="-1"></a><span class="co"># Feature importance</span></span>
-<span id="cb110-29"><a href="notebooks.html#cb110-29" tabindex="-1"></a>results[<span class="st">&#39;feature_importance&#39;</span>].plot(</span>
-<span id="cb110-30"><a href="notebooks.html#cb110-30" tabindex="-1"></a>    x<span class="op">=</span><span class="st">&#39;feature&#39;</span>, y<span class="op">=</span><span class="st">&#39;importance&#39;</span>, kind<span class="op">=</span><span class="st">&#39;barh&#39;</span>, ax<span class="op">=</span>axes[<span class="dv">0</span>]</span>
-<span id="cb110-31"><a href="notebooks.html#cb110-31" tabindex="-1"></a>)</span>
-<span id="cb110-32"><a href="notebooks.html#cb110-32" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">&#39;Feature Importance&#39;</span>)</span>
-<span id="cb110-33"><a href="notebooks.html#cb110-33" tabindex="-1"></a></span>
-<span id="cb110-34"><a href="notebooks.html#cb110-34" tabindex="-1"></a><span class="co"># Model performance</span></span>
-<span id="cb110-35"><a href="notebooks.html#cb110-35" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix</span>
-<span id="cb110-36"><a href="notebooks.html#cb110-36" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, test_predictions)</span>
-<span id="cb110-37"><a href="notebooks.html#cb110-37" tabindex="-1"></a>axes[<span class="dv">1</span>].imshow(cm, cmap<span class="op">=</span><span class="st">&#39;Blues&#39;</span>)</span>
-<span id="cb110-38"><a href="notebooks.html#cb110-38" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">&#39;Confusion Matrix&#39;</span>)</span>
-<span id="cb110-39"><a href="notebooks.html#cb110-39" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb110-40"><a href="notebooks.html#cb110-40" tabindex="-1"></a>plt.show()</span>
-<span id="cb110-41"><a href="notebooks.html#cb110-41" tabindex="-1"></a></span>
-<span id="cb110-42"><a href="notebooks.html#cb110-42" tabindex="-1"></a><span class="co"># 3.3 Save Results</span></span>
-<span id="cb110-43"><a href="notebooks.html#cb110-43" tabindex="-1"></a>output_results <span class="op">=</span> pd.DataFrame({</span>
-<span id="cb110-44"><a href="notebooks.html#cb110-44" tabindex="-1"></a>    <span class="st">&#39;customer_id&#39;</span>: df_model.loc[X_test.index, <span class="st">&#39;customer_id&#39;</span>],</span>
-<span id="cb110-45"><a href="notebooks.html#cb110-45" tabindex="-1"></a>    <span class="st">&#39;actual_purchase&#39;</span>: y_test,</span>
-<span id="cb110-46"><a href="notebooks.html#cb110-46" tabindex="-1"></a>    <span class="st">&#39;predicted_purchase&#39;</span>: test_predictions,</span>
-<span id="cb110-47"><a href="notebooks.html#cb110-47" tabindex="-1"></a>    <span class="st">&#39;confidence&#39;</span>: model.predict_proba(X_test).<span class="bu">max</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb110-48"><a href="notebooks.html#cb110-48" tabindex="-1"></a>})</span>
-<span id="cb110-49"><a href="notebooks.html#cb110-49" tabindex="-1"></a></span>
-<span id="cb110-50"><a href="notebooks.html#cb110-50" tabindex="-1"></a>CONFIG[<span class="st">&#39;output_dir&#39;</span>].mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb110-51"><a href="notebooks.html#cb110-51" tabindex="-1"></a>output_path <span class="op">=</span> CONFIG[<span class="st">&#39;output_dir&#39;</span>] <span class="op">/</span> <span class="st">&#39;test_predictions.csv&#39;</span></span>
-<span id="cb110-52"><a href="notebooks.html#cb110-52" tabindex="-1"></a>output_results.to_csv(output_path, index<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb110-53"><a href="notebooks.html#cb110-53" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="ch">\n</span><span class="ss">Held-out predictions saved to &#39;</span><span class="sc">{</span>output_path<span class="sc">}</span><span class="ss">&#39;&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb111"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb111-1"><a href="notebooks.html#cb111-1" tabindex="-1"></a><span class="co"># SECTION 3: OUTPUTS</span></span>
+<span id="cb111-2"><a href="notebooks.html#cb111-2" tabindex="-1"></a><span class="co"># ====================================</span></span>
+<span id="cb111-3"><a href="notebooks.html#cb111-3" tabindex="-1"></a></span>
+<span id="cb111-4"><a href="notebooks.html#cb111-4" tabindex="-1"></a><span class="co"># 3.1 Results Summary</span></span>
+<span id="cb111-5"><a href="notebooks.html#cb111-5" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
+<span id="cb111-6"><a href="notebooks.html#cb111-6" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;RESULTS SUMMARY&quot;</span>)</span>
+<span id="cb111-7"><a href="notebooks.html#cb111-7" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;=&quot;</span> <span class="op">*</span> <span class="dv">50</span>)</span>
+<span id="cb111-8"><a href="notebooks.html#cb111-8" tabindex="-1"></a></span>
+<span id="cb111-9"><a href="notebooks.html#cb111-9" tabindex="-1"></a>results <span class="op">=</span> {</span>
+<span id="cb111-10"><a href="notebooks.html#cb111-10" tabindex="-1"></a>    <span class="st">&#39;rows_processed&#39;</span>: <span class="bu">len</span>(df_model),</span>
+<span id="cb111-11"><a href="notebooks.html#cb111-11" tabindex="-1"></a>    <span class="st">&#39;features_used&#39;</span>: <span class="bu">len</span>(X.columns),</span>
+<span id="cb111-12"><a href="notebooks.html#cb111-12" tabindex="-1"></a>    <span class="st">&#39;baseline_balanced_accuracy&#39;</span>: baseline_score,</span>
+<span id="cb111-13"><a href="notebooks.html#cb111-13" tabindex="-1"></a>    <span class="st">&#39;test_balanced_accuracy&#39;</span>: test_score,</span>
+<span id="cb111-14"><a href="notebooks.html#cb111-14" tabindex="-1"></a>    <span class="st">&#39;feature_importance&#39;</span>: pd.DataFrame({</span>
+<span id="cb111-15"><a href="notebooks.html#cb111-15" tabindex="-1"></a>        <span class="st">&#39;feature&#39;</span>: X.columns,</span>
+<span id="cb111-16"><a href="notebooks.html#cb111-16" tabindex="-1"></a>        <span class="st">&#39;importance&#39;</span>: model.feature_importances_</span>
+<span id="cb111-17"><a href="notebooks.html#cb111-17" tabindex="-1"></a>    }).sort_values(<span class="st">&#39;importance&#39;</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb111-18"><a href="notebooks.html#cb111-18" tabindex="-1"></a>}</span>
+<span id="cb111-19"><a href="notebooks.html#cb111-19" tabindex="-1"></a></span>
+<span id="cb111-20"><a href="notebooks.html#cb111-20" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="ch">\n</span><span class="ss">Rows processed: </span><span class="sc">{</span>results[<span class="st">&#39;rows_processed&#39;</span>]<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb111-21"><a href="notebooks.html#cb111-21" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Baseline balanced accuracy: </span><span class="sc">{</span>results[<span class="st">&#39;baseline_balanced_accuracy&#39;</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb111-22"><a href="notebooks.html#cb111-22" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Test balanced accuracy: </span><span class="sc">{</span>results[<span class="st">&#39;test_balanced_accuracy&#39;</span>]<span class="sc">:.3f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb111-23"><a href="notebooks.html#cb111-23" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="ch">\n</span><span class="ss">Top features:</span><span class="ch">\n</span><span class="sc">{</span>results[<span class="st">&#39;feature_importance&#39;</span>]<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb111-24"><a href="notebooks.html#cb111-24" tabindex="-1"></a></span>
+<span id="cb111-25"><a href="notebooks.html#cb111-25" tabindex="-1"></a><span class="co"># 3.2 Visualizations</span></span>
+<span id="cb111-26"><a href="notebooks.html#cb111-26" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>CONFIG[<span class="st">&#39;figsize&#39;</span>])</span>
+<span id="cb111-27"><a href="notebooks.html#cb111-27" tabindex="-1"></a></span>
+<span id="cb111-28"><a href="notebooks.html#cb111-28" tabindex="-1"></a><span class="co"># Feature importance</span></span>
+<span id="cb111-29"><a href="notebooks.html#cb111-29" tabindex="-1"></a>results[<span class="st">&#39;feature_importance&#39;</span>].plot(</span>
+<span id="cb111-30"><a href="notebooks.html#cb111-30" tabindex="-1"></a>    x<span class="op">=</span><span class="st">&#39;feature&#39;</span>, y<span class="op">=</span><span class="st">&#39;importance&#39;</span>, kind<span class="op">=</span><span class="st">&#39;barh&#39;</span>, ax<span class="op">=</span>axes[<span class="dv">0</span>]</span>
+<span id="cb111-31"><a href="notebooks.html#cb111-31" tabindex="-1"></a>)</span>
+<span id="cb111-32"><a href="notebooks.html#cb111-32" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">&#39;Feature Importance&#39;</span>)</span>
+<span id="cb111-33"><a href="notebooks.html#cb111-33" tabindex="-1"></a></span>
+<span id="cb111-34"><a href="notebooks.html#cb111-34" tabindex="-1"></a><span class="co"># Model performance</span></span>
+<span id="cb111-35"><a href="notebooks.html#cb111-35" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix</span>
+<span id="cb111-36"><a href="notebooks.html#cb111-36" tabindex="-1"></a>cm <span class="op">=</span> confusion_matrix(y_test, test_predictions)</span>
+<span id="cb111-37"><a href="notebooks.html#cb111-37" tabindex="-1"></a>axes[<span class="dv">1</span>].imshow(cm, cmap<span class="op">=</span><span class="st">&#39;Blues&#39;</span>)</span>
+<span id="cb111-38"><a href="notebooks.html#cb111-38" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">&#39;Confusion Matrix&#39;</span>)</span>
+<span id="cb111-39"><a href="notebooks.html#cb111-39" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb111-40"><a href="notebooks.html#cb111-40" tabindex="-1"></a>plt.show()</span>
+<span id="cb111-41"><a href="notebooks.html#cb111-41" tabindex="-1"></a></span>
+<span id="cb111-42"><a href="notebooks.html#cb111-42" tabindex="-1"></a><span class="co"># 3.3 Save Results</span></span>
+<span id="cb111-43"><a href="notebooks.html#cb111-43" tabindex="-1"></a>output_results <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb111-44"><a href="notebooks.html#cb111-44" tabindex="-1"></a>    <span class="st">&#39;customer_id&#39;</span>: df_model.loc[X_test.index, <span class="st">&#39;customer_id&#39;</span>],</span>
+<span id="cb111-45"><a href="notebooks.html#cb111-45" tabindex="-1"></a>    <span class="st">&#39;actual_purchase&#39;</span>: y_test,</span>
+<span id="cb111-46"><a href="notebooks.html#cb111-46" tabindex="-1"></a>    <span class="st">&#39;predicted_purchase&#39;</span>: test_predictions,</span>
+<span id="cb111-47"><a href="notebooks.html#cb111-47" tabindex="-1"></a>    <span class="st">&#39;confidence&#39;</span>: model.predict_proba(X_test).<span class="bu">max</span>(axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb111-48"><a href="notebooks.html#cb111-48" tabindex="-1"></a>})</span>
+<span id="cb111-49"><a href="notebooks.html#cb111-49" tabindex="-1"></a></span>
+<span id="cb111-50"><a href="notebooks.html#cb111-50" tabindex="-1"></a>CONFIG[<span class="st">&#39;output_dir&#39;</span>].mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb111-51"><a href="notebooks.html#cb111-51" tabindex="-1"></a>output_path <span class="op">=</span> CONFIG[<span class="st">&#39;output_dir&#39;</span>] <span class="op">/</span> <span class="st">&#39;test_predictions.csv&#39;</span></span>
+<span id="cb111-52"><a href="notebooks.html#cb111-52" tabindex="-1"></a>output_results.to_csv(output_path, index<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb111-53"><a href="notebooks.html#cb111-53" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="ch">\n</span><span class="ss">Held-out predictions saved to &#39;</span><span class="sc">{</span>output_path<span class="sc">}</span><span class="ss">&#39;&quot;</span>)</span></code></pre></div>
 </div>
 </div>
 <div id="best-practices-for-each-section" class="section level2 hasAnchor" number="20.3">
@@ -1134,26 +1135,26 @@ SECTION 3: OUTPUTS
 <h3><span class="header-section-number">20.4.2</span> Issue: Notebook runs slow<a href="notebooks.html#issue-notebook-runs-slow" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p><strong>Cause:</strong> Section 2 has expensive operations</p>
 <p><strong>Fix:</strong></p>
-<div class="sourceCode" id="cb111"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb111-1"><a href="notebooks.html#cb111-1" tabindex="-1"></a><span class="co"># Before: Load full dataset (1M rows)</span></span>
-<span id="cb111-2"><a href="notebooks.html#cb111-2" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">&#39;data.csv&#39;</span>)</span>
-<span id="cb111-3"><a href="notebooks.html#cb111-3" tabindex="-1"></a></span>
-<span id="cb111-4"><a href="notebooks.html#cb111-4" tabindex="-1"></a><span class="co"># After: Sample for development</span></span>
-<span id="cb111-5"><a href="notebooks.html#cb111-5" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">&#39;data.csv&#39;</span>, nrows<span class="op">=</span><span class="dv">10000</span>)</span>
-<span id="cb111-6"><a href="notebooks.html#cb111-6" tabindex="-1"></a><span class="co"># Change back to full data when finalizing</span></span></code></pre></div>
+<div class="sourceCode" id="cb112"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb112-1"><a href="notebooks.html#cb112-1" tabindex="-1"></a><span class="co"># Before: Load full dataset (1M rows)</span></span>
+<span id="cb112-2"><a href="notebooks.html#cb112-2" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">&#39;data.csv&#39;</span>)</span>
+<span id="cb112-3"><a href="notebooks.html#cb112-3" tabindex="-1"></a></span>
+<span id="cb112-4"><a href="notebooks.html#cb112-4" tabindex="-1"></a><span class="co"># After: Sample for development</span></span>
+<span id="cb112-5"><a href="notebooks.html#cb112-5" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">&#39;data.csv&#39;</span>, nrows<span class="op">=</span><span class="dv">10000</span>)</span>
+<span id="cb112-6"><a href="notebooks.html#cb112-6" tabindex="-1"></a><span class="co"># Change back to full data when finalizing</span></span></code></pre></div>
 </div>
 <div id="issue-results-dont-match-when-rerun" class="section level3 hasAnchor" number="20.4.3">
 <h3><span class="header-section-number">20.4.3</span> Issue: Results don’t match when rerun<a href="notebooks.html#issue-results-dont-match-when-rerun" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p><strong>Cause:</strong> Missing random seed setting</p>
 <p><strong>Fix:</strong></p>
-<div class="sourceCode" id="cb112"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb112-1"><a href="notebooks.html#cb112-1" tabindex="-1"></a><span class="co"># In Section 1 Setup</span></span>
-<span id="cb112-2"><a href="notebooks.html#cb112-2" tabindex="-1"></a><span class="im">import</span> random</span>
-<span id="cb112-3"><a href="notebooks.html#cb112-3" tabindex="-1"></a>np.random.seed(CONFIG[<span class="st">&#39;random_state&#39;</span>])</span>
-<span id="cb112-4"><a href="notebooks.html#cb112-4" tabindex="-1"></a>random.seed(CONFIG[<span class="st">&#39;random_state&#39;</span>])</span>
-<span id="cb112-5"><a href="notebooks.html#cb112-5" tabindex="-1"></a></span>
-<span id="cb112-6"><a href="notebooks.html#cb112-6" tabindex="-1"></a><span class="co"># In model training</span></span>
-<span id="cb112-7"><a href="notebooks.html#cb112-7" tabindex="-1"></a>model <span class="op">=</span> RandomForestClassifier(</span>
-<span id="cb112-8"><a href="notebooks.html#cb112-8" tabindex="-1"></a>    random_state<span class="op">=</span>CONFIG[<span class="st">&#39;random_state&#39;</span>]</span>
-<span id="cb112-9"><a href="notebooks.html#cb112-9" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb113"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb113-1"><a href="notebooks.html#cb113-1" tabindex="-1"></a><span class="co"># In Section 1 Setup</span></span>
+<span id="cb113-2"><a href="notebooks.html#cb113-2" tabindex="-1"></a><span class="im">import</span> random</span>
+<span id="cb113-3"><a href="notebooks.html#cb113-3" tabindex="-1"></a>np.random.seed(CONFIG[<span class="st">&#39;random_state&#39;</span>])</span>
+<span id="cb113-4"><a href="notebooks.html#cb113-4" tabindex="-1"></a>random.seed(CONFIG[<span class="st">&#39;random_state&#39;</span>])</span>
+<span id="cb113-5"><a href="notebooks.html#cb113-5" tabindex="-1"></a></span>
+<span id="cb113-6"><a href="notebooks.html#cb113-6" tabindex="-1"></a><span class="co"># In model training</span></span>
+<span id="cb113-7"><a href="notebooks.html#cb113-7" tabindex="-1"></a>model <span class="op">=</span> RandomForestClassifier(</span>
+<span id="cb113-8"><a href="notebooks.html#cb113-8" tabindex="-1"></a>    random_state<span class="op">=</span>CONFIG[<span class="st">&#39;random_state&#39;</span>]</span>
+<span id="cb113-9"><a href="notebooks.html#cb113-9" tabindex="-1"></a>)</span></code></pre></div>
 </div>
 </div>
 <div id="asking-claude-about-notebooks" class="section level2 hasAnchor" number="20.5">
@@ -1193,30 +1194,30 @@ Keep it professional and well-commented.</code></pre>
 <h2><span class="header-section-number">20.7</span> Performance Tips<a href="notebooks.html#performance-tips" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <div id="tip-1-use-sampling-for-development" class="section level3 hasAnchor" number="20.7.1">
 <h3><span class="header-section-number">20.7.1</span> Tip 1: Use Sampling for Development<a href="notebooks.html#tip-1-use-sampling-for-development" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb114"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb114-1"><a href="notebooks.html#cb114-1" tabindex="-1"></a><span class="co"># Quick iteration</span></span>
-<span id="cb114-2"><a href="notebooks.html#cb114-2" tabindex="-1"></a>df_work <span class="op">=</span> df.sample(n<span class="op">=</span><span class="dv">10000</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
-<span id="cb114-3"><a href="notebooks.html#cb114-3" tabindex="-1"></a></span>
-<span id="cb114-4"><a href="notebooks.html#cb114-4" tabindex="-1"></a><span class="co"># Final run</span></span>
-<span id="cb114-5"><a href="notebooks.html#cb114-5" tabindex="-1"></a>df_work <span class="op">=</span> df.copy()</span></code></pre></div>
+<div class="sourceCode" id="cb115"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb115-1"><a href="notebooks.html#cb115-1" tabindex="-1"></a><span class="co"># Quick iteration</span></span>
+<span id="cb115-2"><a href="notebooks.html#cb115-2" tabindex="-1"></a>df_work <span class="op">=</span> df.sample(n<span class="op">=</span><span class="dv">10000</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb115-3"><a href="notebooks.html#cb115-3" tabindex="-1"></a></span>
+<span id="cb115-4"><a href="notebooks.html#cb115-4" tabindex="-1"></a><span class="co"># Final run</span></span>
+<span id="cb115-5"><a href="notebooks.html#cb115-5" tabindex="-1"></a>df_work <span class="op">=</span> df.copy()</span></code></pre></div>
 </div>
 <div id="tip-2-cache-expensive-operations" class="section level3 hasAnchor" number="20.7.2">
 <h3><span class="header-section-number">20.7.2</span> Tip 2: Cache Expensive Operations<a href="notebooks.html#tip-2-cache-expensive-operations" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb115"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb115-1"><a href="notebooks.html#cb115-1" tabindex="-1"></a><span class="co"># First time: compute</span></span>
-<span id="cb115-2"><a href="notebooks.html#cb115-2" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> os.path.exists(<span class="st">&#39;processed_data.csv&#39;</span>):</span>
-<span id="cb115-3"><a href="notebooks.html#cb115-3" tabindex="-1"></a>    df_processed <span class="op">=</span> expensive_operation(df)</span>
-<span id="cb115-4"><a href="notebooks.html#cb115-4" tabindex="-1"></a>    df_processed.to_csv(<span class="st">&#39;processed_data.csv&#39;</span>)</span>
-<span id="cb115-5"><a href="notebooks.html#cb115-5" tabindex="-1"></a><span class="cf">else</span>:</span>
-<span id="cb115-6"><a href="notebooks.html#cb115-6" tabindex="-1"></a>    <span class="co"># Subsequent times: load cached version</span></span>
-<span id="cb115-7"><a href="notebooks.html#cb115-7" tabindex="-1"></a>    df_processed <span class="op">=</span> pd.read_csv(<span class="st">&#39;processed_data.csv&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb116"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb116-1"><a href="notebooks.html#cb116-1" tabindex="-1"></a><span class="co"># First time: compute</span></span>
+<span id="cb116-2"><a href="notebooks.html#cb116-2" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> os.path.exists(<span class="st">&#39;processed_data.csv&#39;</span>):</span>
+<span id="cb116-3"><a href="notebooks.html#cb116-3" tabindex="-1"></a>    df_processed <span class="op">=</span> expensive_operation(df)</span>
+<span id="cb116-4"><a href="notebooks.html#cb116-4" tabindex="-1"></a>    df_processed.to_csv(<span class="st">&#39;processed_data.csv&#39;</span>)</span>
+<span id="cb116-5"><a href="notebooks.html#cb116-5" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb116-6"><a href="notebooks.html#cb116-6" tabindex="-1"></a>    <span class="co"># Subsequent times: load cached version</span></span>
+<span id="cb116-7"><a href="notebooks.html#cb116-7" tabindex="-1"></a>    df_processed <span class="op">=</span> pd.read_csv(<span class="st">&#39;processed_data.csv&#39;</span>)</span></code></pre></div>
 </div>
 <div id="tip-3-profile-slow-code" class="section level3 hasAnchor" number="20.7.3">
 <h3><span class="header-section-number">20.7.3</span> Tip 3: Profile Slow Code<a href="notebooks.html#tip-3-profile-slow-code" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb116"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb116-1"><a href="notebooks.html#cb116-1" tabindex="-1"></a><span class="im">import</span> time</span>
-<span id="cb116-2"><a href="notebooks.html#cb116-2" tabindex="-1"></a></span>
-<span id="cb116-3"><a href="notebooks.html#cb116-3" tabindex="-1"></a>start <span class="op">=</span> time.time()</span>
-<span id="cb116-4"><a href="notebooks.html#cb116-4" tabindex="-1"></a><span class="co"># your code</span></span>
-<span id="cb116-5"><a href="notebooks.html#cb116-5" tabindex="-1"></a>end <span class="op">=</span> time.time()</span>
-<span id="cb116-6"><a href="notebooks.html#cb116-6" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Took </span><span class="sc">{</span>end <span class="op">-</span> start<span class="sc">:.2f}</span><span class="ss"> seconds&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb117"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb117-1"><a href="notebooks.html#cb117-1" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb117-2"><a href="notebooks.html#cb117-2" tabindex="-1"></a></span>
+<span id="cb117-3"><a href="notebooks.html#cb117-3" tabindex="-1"></a>start <span class="op">=</span> time.time()</span>
+<span id="cb117-4"><a href="notebooks.html#cb117-4" tabindex="-1"></a><span class="co"># your code</span></span>
+<span id="cb117-5"><a href="notebooks.html#cb117-5" tabindex="-1"></a>end <span class="op">=</span> time.time()</span>
+<span id="cb117-6"><a href="notebooks.html#cb117-6" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Took </span><span class="sc">{</span>end <span class="op">-</span> start<span class="sc">:.2f}</span><span class="ss"> seconds&quot;</span>)</span></code></pre></div>
 </div>
 </div>
 <div id="key-takeaways-19" class="section level2 hasAnchor" number="20.8">

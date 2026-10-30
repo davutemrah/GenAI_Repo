@@ -102,6 +102,7 @@ what-about-roles-and-personas
 mapping-to-the-earlier-question-framework
 an-annotated-example
 order-and-layout
+system-prompt-altitude
 offline-example-assembling-a-prompt-from-parts
 optional-sending-the-prompt-to-an-api
 common-anatomy-mistakes

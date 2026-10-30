@@ -312,13 +312,14 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="6.4" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#an-annotated-example"><i class="fa fa-check"></i><b>6.4</b> An annotated example</a></li>
 <li class="chapter" data-level="6.5" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#order-and-layout"><i class="fa fa-check"></i><b>6.5</b> Order and layout</a></li>
-<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.6</b> Offline example: assembling a prompt from parts</a></li>
-<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.7</b> Optional: sending the prompt to an API</a></li>
-<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.8</b> Common anatomy mistakes</a></li>
-<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.9</b> Checklist</a></li>
-<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.10</b> Exercise: dissect a prompt</a></li>
-<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.11</b> Key takeaways</a></li>
-<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.12</b> References</a></li>
+<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#system-prompt-altitude"><i class="fa fa-check"></i><b>6.6</b> Calibrating the system prompt</a></li>
+<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.7</b> Offline example: assembling a prompt from parts</a></li>
+<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.8</b> Optional: sending the prompt to an API</a></li>
+<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.9</b> Common anatomy mistakes</a></li>
+<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.10</b> Checklist</a></li>
+<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.11</b> Exercise: dissect a prompt</a></li>
+<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.12</b> Key takeaways</a></li>
+<li class="chapter" data-level="6.13" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.13</b> References</a></li>
 </ul></li>
 <li class="part"><span><b>III Agentic AI</b></span></li>
 <li class="chapter" data-level="7" data-path="agentic-workflows.html"><a href="agentic-workflows.html"><i class="fa fa-check"></i><b>7</b> Agentic Workflows</a>
@@ -1018,21 +1019,21 @@ email.</p>
 <p>A plan written as free text (“first, look up the shoes…”) is hard for code
 to execute reliably. A common practice is to ask for the plan in <strong>JSON</strong>
 (or with XML tags) according to a described format:</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb33-1"><a href="planning-multi-agent.html#cb33-1" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb33-2"><a href="planning-multi-agent.html#cb33-2" tabindex="-1"></a>  <span class="dt">&quot;plan&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb33-3"><a href="planning-multi-agent.html#cb33-3" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;step&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Find waterproof trail-running shoes&quot;</span><span class="fu">,</span></span>
-<span id="cb33-4"><a href="planning-multi-agent.html#cb33-4" tabindex="-1"></a>     <span class="dt">&quot;tool&quot;</span><span class="fu">:</span> <span class="st">&quot;search_products&quot;</span><span class="fu">,</span></span>
-<span id="cb33-5"><a href="planning-multi-agent.html#cb33-5" tabindex="-1"></a>     <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;waterproof trail running shoes&quot;</span><span class="fu">}}</span><span class="ot">,</span></span>
-<span id="cb33-6"><a href="planning-multi-agent.html#cb33-6" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;step&quot;</span><span class="fu">:</span> <span class="dv">2</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Keep products in stock in size 10&quot;</span><span class="fu">,</span></span>
-<span id="cb33-7"><a href="planning-multi-agent.html#cb33-7" tabindex="-1"></a>     <span class="dt">&quot;tool&quot;</span><span class="fu">:</span> <span class="st">&quot;check_inventory&quot;</span><span class="fu">,</span></span>
-<span id="cb33-8"><a href="planning-multi-agent.html#cb33-8" tabindex="-1"></a>     <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;sku&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;each sku from step 1&gt;&quot;</span><span class="fu">,</span> <span class="dt">&quot;size&quot;</span><span class="fu">:</span> <span class="st">&quot;10&quot;</span><span class="fu">},</span></span>
-<span id="cb33-9"><a href="planning-multi-agent.html#cb33-9" tabindex="-1"></a>     <span class="dt">&quot;depends_on&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="dv">1</span><span class="ot">]</span><span class="fu">}</span><span class="ot">,</span></span>
-<span id="cb33-10"><a href="planning-multi-agent.html#cb33-10" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;step&quot;</span><span class="fu">:</span> <span class="dv">3</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Keep products under $120&quot;</span><span class="fu">,</span></span>
-<span id="cb33-11"><a href="planning-multi-agent.html#cb33-11" tabindex="-1"></a>     <span class="dt">&quot;tool&quot;</span><span class="fu">:</span> <span class="st">&quot;get_price&quot;</span><span class="fu">,</span></span>
-<span id="cb33-12"><a href="planning-multi-agent.html#cb33-12" tabindex="-1"></a>     <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;sku&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;each sku from step 2&gt;&quot;</span><span class="fu">},</span></span>
-<span id="cb33-13"><a href="planning-multi-agent.html#cb33-13" tabindex="-1"></a>     <span class="dt">&quot;depends_on&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="dv">2</span><span class="ot">]</span><span class="fu">}</span></span>
-<span id="cb33-14"><a href="planning-multi-agent.html#cb33-14" tabindex="-1"></a>  <span class="ot">]</span></span>
-<span id="cb33-15"><a href="planning-multi-agent.html#cb33-15" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb34-1"><a href="planning-multi-agent.html#cb34-1" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb34-2"><a href="planning-multi-agent.html#cb34-2" tabindex="-1"></a>  <span class="dt">&quot;plan&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb34-3"><a href="planning-multi-agent.html#cb34-3" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;step&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Find waterproof trail-running shoes&quot;</span><span class="fu">,</span></span>
+<span id="cb34-4"><a href="planning-multi-agent.html#cb34-4" tabindex="-1"></a>     <span class="dt">&quot;tool&quot;</span><span class="fu">:</span> <span class="st">&quot;search_products&quot;</span><span class="fu">,</span></span>
+<span id="cb34-5"><a href="planning-multi-agent.html#cb34-5" tabindex="-1"></a>     <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;waterproof trail running shoes&quot;</span><span class="fu">}}</span><span class="ot">,</span></span>
+<span id="cb34-6"><a href="planning-multi-agent.html#cb34-6" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;step&quot;</span><span class="fu">:</span> <span class="dv">2</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Keep products in stock in size 10&quot;</span><span class="fu">,</span></span>
+<span id="cb34-7"><a href="planning-multi-agent.html#cb34-7" tabindex="-1"></a>     <span class="dt">&quot;tool&quot;</span><span class="fu">:</span> <span class="st">&quot;check_inventory&quot;</span><span class="fu">,</span></span>
+<span id="cb34-8"><a href="planning-multi-agent.html#cb34-8" tabindex="-1"></a>     <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;sku&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;each sku from step 1&gt;&quot;</span><span class="fu">,</span> <span class="dt">&quot;size&quot;</span><span class="fu">:</span> <span class="st">&quot;10&quot;</span><span class="fu">},</span></span>
+<span id="cb34-9"><a href="planning-multi-agent.html#cb34-9" tabindex="-1"></a>     <span class="dt">&quot;depends_on&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="dv">1</span><span class="ot">]</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb34-10"><a href="planning-multi-agent.html#cb34-10" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;step&quot;</span><span class="fu">:</span> <span class="dv">3</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Keep products under $120&quot;</span><span class="fu">,</span></span>
+<span id="cb34-11"><a href="planning-multi-agent.html#cb34-11" tabindex="-1"></a>     <span class="dt">&quot;tool&quot;</span><span class="fu">:</span> <span class="st">&quot;get_price&quot;</span><span class="fu">,</span></span>
+<span id="cb34-12"><a href="planning-multi-agent.html#cb34-12" tabindex="-1"></a>     <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="dt">&quot;sku&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;each sku from step 2&gt;&quot;</span><span class="fu">},</span></span>
+<span id="cb34-13"><a href="planning-multi-agent.html#cb34-13" tabindex="-1"></a>     <span class="dt">&quot;depends_on&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="dv">2</span><span class="ot">]</span><span class="fu">}</span></span>
+<span id="cb34-14"><a href="planning-multi-agent.html#cb34-14" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb34-15"><a href="planning-multi-agent.html#cb34-15" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 <p>The placeholders such as <code>"&lt;each sku from step 1&gt;"</code> tell the executor to fill
 an argument from an earlier step’s result. Many teams make this explicit with
 a reference syntax, for example <code>"sku": "$step1.results[*].sku"</code>, so that code,
@@ -1050,20 +1051,20 @@ so that “bad plan” and “good plan, bad execution” can be told apart.</li
 <p>Practitioners generally find JSON or XML plans more reliable to parse than
 Markdown lists, and Markdown lists more reliable than prose.</p>
 <p>Validation is a few lines of code, run before any step executes:</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb34-1"><a href="planning-multi-agent.html#cb34-1" tabindex="-1"></a><span class="kw">def</span> validate_plan(plan, tools):</span>
-<span id="cb34-2"><a href="planning-multi-agent.html#cb34-2" tabindex="-1"></a>    errors, seen <span class="op">=</span> [], <span class="bu">set</span>()</span>
-<span id="cb34-3"><a href="planning-multi-agent.html#cb34-3" tabindex="-1"></a>    <span class="cf">for</span> step <span class="kw">in</span> plan[<span class="st">&quot;plan&quot;</span>]:</span>
-<span id="cb34-4"><a href="planning-multi-agent.html#cb34-4" tabindex="-1"></a>        <span class="cf">if</span> step[<span class="st">&quot;tool&quot;</span>] <span class="kw">not</span> <span class="kw">in</span> tools:</span>
-<span id="cb34-5"><a href="planning-multi-agent.html#cb34-5" tabindex="-1"></a>            errors.append(<span class="ss">f&quot;Step </span><span class="sc">{</span>step[<span class="st">&#39;step&#39;</span>]<span class="sc">}</span><span class="ss">: unknown tool </span><span class="sc">{</span>step[<span class="st">&#39;tool&#39;</span>]<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb34-6"><a href="planning-multi-agent.html#cb34-6" tabindex="-1"></a>        <span class="cf">else</span>:</span>
-<span id="cb34-7"><a href="planning-multi-agent.html#cb34-7" tabindex="-1"></a>            missing <span class="op">=</span> <span class="bu">set</span>(tools[step[<span class="st">&quot;tool&quot;</span>]].required) <span class="op">-</span> <span class="bu">set</span>(step[<span class="st">&quot;args&quot;</span>])</span>
-<span id="cb34-8"><a href="planning-multi-agent.html#cb34-8" tabindex="-1"></a>            <span class="cf">if</span> missing:</span>
-<span id="cb34-9"><a href="planning-multi-agent.html#cb34-9" tabindex="-1"></a>                errors.append(<span class="ss">f&quot;Step </span><span class="sc">{</span>step[<span class="st">&#39;step&#39;</span>]<span class="sc">}</span><span class="ss">: missing args </span><span class="sc">{</span>missing<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb34-10"><a href="planning-multi-agent.html#cb34-10" tabindex="-1"></a>        <span class="cf">for</span> dep <span class="kw">in</span> step.get(<span class="st">&quot;depends_on&quot;</span>, []):</span>
-<span id="cb34-11"><a href="planning-multi-agent.html#cb34-11" tabindex="-1"></a>            <span class="cf">if</span> dep <span class="kw">not</span> <span class="kw">in</span> seen:</span>
-<span id="cb34-12"><a href="planning-multi-agent.html#cb34-12" tabindex="-1"></a>                errors.append(<span class="ss">f&quot;Step </span><span class="sc">{</span>step[<span class="st">&#39;step&#39;</span>]<span class="sc">}</span><span class="ss">: depends on later step </span><span class="sc">{</span>dep<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb34-13"><a href="planning-multi-agent.html#cb34-13" tabindex="-1"></a>        seen.add(step[<span class="st">&quot;step&quot;</span>])</span>
-<span id="cb34-14"><a href="planning-multi-agent.html#cb34-14" tabindex="-1"></a>    <span class="cf">return</span> errors      <span class="co"># empty list = safe to execute; otherwise send back to the planner</span></span></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb35-1"><a href="planning-multi-agent.html#cb35-1" tabindex="-1"></a><span class="kw">def</span> validate_plan(plan, tools):</span>
+<span id="cb35-2"><a href="planning-multi-agent.html#cb35-2" tabindex="-1"></a>    errors, seen <span class="op">=</span> [], <span class="bu">set</span>()</span>
+<span id="cb35-3"><a href="planning-multi-agent.html#cb35-3" tabindex="-1"></a>    <span class="cf">for</span> step <span class="kw">in</span> plan[<span class="st">&quot;plan&quot;</span>]:</span>
+<span id="cb35-4"><a href="planning-multi-agent.html#cb35-4" tabindex="-1"></a>        <span class="cf">if</span> step[<span class="st">&quot;tool&quot;</span>] <span class="kw">not</span> <span class="kw">in</span> tools:</span>
+<span id="cb35-5"><a href="planning-multi-agent.html#cb35-5" tabindex="-1"></a>            errors.append(<span class="ss">f&quot;Step </span><span class="sc">{</span>step[<span class="st">&#39;step&#39;</span>]<span class="sc">}</span><span class="ss">: unknown tool </span><span class="sc">{</span>step[<span class="st">&#39;tool&#39;</span>]<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb35-6"><a href="planning-multi-agent.html#cb35-6" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb35-7"><a href="planning-multi-agent.html#cb35-7" tabindex="-1"></a>            missing <span class="op">=</span> <span class="bu">set</span>(tools[step[<span class="st">&quot;tool&quot;</span>]].required) <span class="op">-</span> <span class="bu">set</span>(step[<span class="st">&quot;args&quot;</span>])</span>
+<span id="cb35-8"><a href="planning-multi-agent.html#cb35-8" tabindex="-1"></a>            <span class="cf">if</span> missing:</span>
+<span id="cb35-9"><a href="planning-multi-agent.html#cb35-9" tabindex="-1"></a>                errors.append(<span class="ss">f&quot;Step </span><span class="sc">{</span>step[<span class="st">&#39;step&#39;</span>]<span class="sc">}</span><span class="ss">: missing args </span><span class="sc">{</span>missing<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb35-10"><a href="planning-multi-agent.html#cb35-10" tabindex="-1"></a>        <span class="cf">for</span> dep <span class="kw">in</span> step.get(<span class="st">&quot;depends_on&quot;</span>, []):</span>
+<span id="cb35-11"><a href="planning-multi-agent.html#cb35-11" tabindex="-1"></a>            <span class="cf">if</span> dep <span class="kw">not</span> <span class="kw">in</span> seen:</span>
+<span id="cb35-12"><a href="planning-multi-agent.html#cb35-12" tabindex="-1"></a>                errors.append(<span class="ss">f&quot;Step </span><span class="sc">{</span>step[<span class="st">&#39;step&#39;</span>]<span class="sc">}</span><span class="ss">: depends on later step </span><span class="sc">{</span>dep<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb35-13"><a href="planning-multi-agent.html#cb35-13" tabindex="-1"></a>        seen.add(step[<span class="st">&quot;step&quot;</span>])</span>
+<span id="cb35-14"><a href="planning-multi-agent.html#cb35-14" tabindex="-1"></a>    <span class="cf">return</span> errors      <span class="co"># empty list = safe to execute; otherwise send back to the planner</span></span></code></pre></div>
 <p>Returning the errors to the planner and asking for a corrected plan is
 reflection with external feedback, applied to plans.</p>
 </div>
@@ -1085,22 +1086,22 @@ no tool for distinct counts, so someone writes <code>count_unique</code>.</li>
 <p>Teams that follow this path end up adding tools indefinitely and still
 missing cases. The alternative is to let the model write code against a data
 library and run it in a sandbox:</p>
-<div class="sourceCode" id="cb35"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb35-1"><a href="planning-multi-agent.html#cb35-1" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb35-2"><a href="planning-multi-agent.html#cb35-2" tabindex="-1"></a></span>
-<span id="cb35-3"><a href="planning-multi-agent.html#cb35-3" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">&quot;campaign_daily.csv&quot;</span>, parse_dates<span class="op">=</span>[<span class="st">&quot;date&quot;</span>])</span>
-<span id="cb35-4"><a href="planning-multi-agent.html#cb35-4" tabindex="-1"></a></span>
-<span id="cb35-5"><a href="planning-multi-agent.html#cb35-5" tabindex="-1"></a><span class="co"># Step 1: keep paid social only</span></span>
-<span id="cb35-6"><a href="planning-multi-agent.html#cb35-6" tabindex="-1"></a>social <span class="op">=</span> df[df[<span class="st">&quot;channel&quot;</span>] <span class="op">==</span> <span class="st">&quot;paid_social&quot;</span>]</span>
-<span id="cb35-7"><a href="planning-multi-agent.html#cb35-7" tabindex="-1"></a></span>
-<span id="cb35-8"><a href="planning-multi-agent.html#cb35-8" tabindex="-1"></a><span class="co"># Step 2: aggregate spend and conversions by week</span></span>
-<span id="cb35-9"><a href="planning-multi-agent.html#cb35-9" tabindex="-1"></a>weekly <span class="op">=</span> social.resample(<span class="st">&quot;W&quot;</span>, on<span class="op">=</span><span class="st">&quot;date&quot;</span>)[[<span class="st">&quot;spend&quot;</span>, <span class="st">&quot;conversions&quot;</span>]].<span class="bu">sum</span>()</span>
-<span id="cb35-10"><a href="planning-multi-agent.html#cb35-10" tabindex="-1"></a></span>
-<span id="cb35-11"><a href="planning-multi-agent.html#cb35-11" tabindex="-1"></a><span class="co"># Step 3: compute cost per conversion, ignoring weeks with no conversions</span></span>
-<span id="cb35-12"><a href="planning-multi-agent.html#cb35-12" tabindex="-1"></a>weekly <span class="op">=</span> weekly[weekly[<span class="st">&quot;conversions&quot;</span>] <span class="op">&gt;</span> <span class="dv">0</span>]</span>
-<span id="cb35-13"><a href="planning-multi-agent.html#cb35-13" tabindex="-1"></a>weekly[<span class="st">&quot;cpa&quot;</span>] <span class="op">=</span> weekly[<span class="st">&quot;spend&quot;</span>] <span class="op">/</span> weekly[<span class="st">&quot;conversions&quot;</span>]</span>
-<span id="cb35-14"><a href="planning-multi-agent.html#cb35-14" tabindex="-1"></a></span>
-<span id="cb35-15"><a href="planning-multi-agent.html#cb35-15" tabindex="-1"></a><span class="co"># Step 4: report the worst week</span></span>
-<span id="cb35-16"><a href="planning-multi-agent.html#cb35-16" tabindex="-1"></a><span class="bu">print</span>(weekly[<span class="st">&quot;cpa&quot;</span>].idxmax().date(), <span class="bu">round</span>(weekly[<span class="st">&quot;cpa&quot;</span>].<span class="bu">max</span>(), <span class="dv">2</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb36-1"><a href="planning-multi-agent.html#cb36-1" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb36-2"><a href="planning-multi-agent.html#cb36-2" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="planning-multi-agent.html#cb36-3" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">&quot;campaign_daily.csv&quot;</span>, parse_dates<span class="op">=</span>[<span class="st">&quot;date&quot;</span>])</span>
+<span id="cb36-4"><a href="planning-multi-agent.html#cb36-4" tabindex="-1"></a></span>
+<span id="cb36-5"><a href="planning-multi-agent.html#cb36-5" tabindex="-1"></a><span class="co"># Step 1: keep paid social only</span></span>
+<span id="cb36-6"><a href="planning-multi-agent.html#cb36-6" tabindex="-1"></a>social <span class="op">=</span> df[df[<span class="st">&quot;channel&quot;</span>] <span class="op">==</span> <span class="st">&quot;paid_social&quot;</span>]</span>
+<span id="cb36-7"><a href="planning-multi-agent.html#cb36-7" tabindex="-1"></a></span>
+<span id="cb36-8"><a href="planning-multi-agent.html#cb36-8" tabindex="-1"></a><span class="co"># Step 2: aggregate spend and conversions by week</span></span>
+<span id="cb36-9"><a href="planning-multi-agent.html#cb36-9" tabindex="-1"></a>weekly <span class="op">=</span> social.resample(<span class="st">&quot;W&quot;</span>, on<span class="op">=</span><span class="st">&quot;date&quot;</span>)[[<span class="st">&quot;spend&quot;</span>, <span class="st">&quot;conversions&quot;</span>]].<span class="bu">sum</span>()</span>
+<span id="cb36-10"><a href="planning-multi-agent.html#cb36-10" tabindex="-1"></a></span>
+<span id="cb36-11"><a href="planning-multi-agent.html#cb36-11" tabindex="-1"></a><span class="co"># Step 3: compute cost per conversion, ignoring weeks with no conversions</span></span>
+<span id="cb36-12"><a href="planning-multi-agent.html#cb36-12" tabindex="-1"></a>weekly <span class="op">=</span> weekly[weekly[<span class="st">&quot;conversions&quot;</span>] <span class="op">&gt;</span> <span class="dv">0</span>]</span>
+<span id="cb36-13"><a href="planning-multi-agent.html#cb36-13" tabindex="-1"></a>weekly[<span class="st">&quot;cpa&quot;</span>] <span class="op">=</span> weekly[<span class="st">&quot;spend&quot;</span>] <span class="op">/</span> weekly[<span class="st">&quot;conversions&quot;</span>]</span>
+<span id="cb36-14"><a href="planning-multi-agent.html#cb36-14" tabindex="-1"></a></span>
+<span id="cb36-15"><a href="planning-multi-agent.html#cb36-15" tabindex="-1"></a><span class="co"># Step 4: report the worst week</span></span>
+<span id="cb36-16"><a href="planning-multi-agent.html#cb36-16" tabindex="-1"></a><span class="bu">print</span>(weekly[<span class="st">&quot;cpa&quot;</span>].idxmax().date(), <span class="bu">round</span>(weekly[<span class="st">&quot;cpa&quot;</span>].<span class="bu">max</span>(), <span class="dv">2</span>))</span></code></pre></div>
 <p>The comments <em>are</em> the plan, and the code executes it. This works because a
 library such as pandas offers hundreds of functions that the model has seen
 used many times in its training data. It can compose them with variables,
@@ -1235,22 +1236,22 @@ team members are now the manager’s tools. Anthropic describes the same idea
 as the <em>orchestrator–workers</em> workflow <span class="citation">(<a href="#ref-anthropic2024effective">Schluntz and Zhang 2024</a>)</span>.</p>
 <p>In code, each worker is wrapped as a tool the manager can call, with its own
 prompt and tool set. An illustrative sketch:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb36-1"><a href="planning-multi-agent.html#cb36-1" tabindex="-1"></a><span class="kw">def</span> make_agent(role_prompt, tools, model):</span>
-<span id="cb36-2"><a href="planning-multi-agent.html#cb36-2" tabindex="-1"></a>    <span class="kw">def</span> run(task: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
-<span id="cb36-3"><a href="planning-multi-agent.html#cb36-3" tabindex="-1"></a>        <span class="cf">return</span> agent_loop(model<span class="op">=</span>model, system<span class="op">=</span>role_prompt, tools<span class="op">=</span>tools, user<span class="op">=</span>task)</span>
-<span id="cb36-4"><a href="planning-multi-agent.html#cb36-4" tabindex="-1"></a>    <span class="cf">return</span> run</span>
-<span id="cb36-5"><a href="planning-multi-agent.html#cb36-5" tabindex="-1"></a></span>
-<span id="cb36-6"><a href="planning-multi-agent.html#cb36-6" tabindex="-1"></a>researcher <span class="op">=</span> make_agent(RESEARCHER_PROMPT, [web_search, fetch_page], model<span class="op">=</span><span class="st">&quot;mid&quot;</span>)</span>
-<span id="cb36-7"><a href="planning-multi-agent.html#cb36-7" tabindex="-1"></a>designer   <span class="op">=</span> make_agent(DESIGNER_PROMPT,   [run_python, generate_image], model<span class="op">=</span><span class="st">&quot;mid&quot;</span>)</span>
-<span id="cb36-8"><a href="planning-multi-agent.html#cb36-8" tabindex="-1"></a>copywriter <span class="op">=</span> make_agent(COPYWRITER_PROMPT, [],                          model<span class="op">=</span><span class="st">&quot;strong&quot;</span>)</span>
-<span id="cb36-9"><a href="planning-multi-agent.html#cb36-9" tabindex="-1"></a></span>
-<span id="cb36-10"><a href="planning-multi-agent.html#cb36-10" tabindex="-1"></a>TEAM <span class="op">=</span> {</span>
-<span id="cb36-11"><a href="planning-multi-agent.html#cb36-11" tabindex="-1"></a>    <span class="st">&quot;researcher&quot;</span>: tool(researcher, <span class="st">&quot;Research trends and competitors. Returns a cited report.&quot;</span>),</span>
-<span id="cb36-12"><a href="planning-multi-agent.html#cb36-12" tabindex="-1"></a>    <span class="st">&quot;designer&quot;</span>:   tool(designer,   <span class="st">&quot;Create charts and visual concepts from a report.&quot;</span>),</span>
-<span id="cb36-13"><a href="planning-multi-agent.html#cb36-13" tabindex="-1"></a>    <span class="st">&quot;copywriter&quot;</span>: tool(copywriter, <span class="st">&quot;Write brochure and ad copy from research and visuals.&quot;</span>),</span>
-<span id="cb36-14"><a href="planning-multi-agent.html#cb36-14" tabindex="-1"></a>}</span>
-<span id="cb36-15"><a href="planning-multi-agent.html#cb36-15" tabindex="-1"></a></span>
-<span id="cb36-16"><a href="planning-multi-agent.html#cb36-16" tabindex="-1"></a>brochure <span class="op">=</span> agent_loop(model<span class="op">=</span><span class="st">&quot;strong&quot;</span>, system<span class="op">=</span>MANAGER_PROMPT, tools<span class="op">=</span>TEAM, user<span class="op">=</span>brief)</span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb37-1"><a href="planning-multi-agent.html#cb37-1" tabindex="-1"></a><span class="kw">def</span> make_agent(role_prompt, tools, model):</span>
+<span id="cb37-2"><a href="planning-multi-agent.html#cb37-2" tabindex="-1"></a>    <span class="kw">def</span> run(task: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb37-3"><a href="planning-multi-agent.html#cb37-3" tabindex="-1"></a>        <span class="cf">return</span> agent_loop(model<span class="op">=</span>model, system<span class="op">=</span>role_prompt, tools<span class="op">=</span>tools, user<span class="op">=</span>task)</span>
+<span id="cb37-4"><a href="planning-multi-agent.html#cb37-4" tabindex="-1"></a>    <span class="cf">return</span> run</span>
+<span id="cb37-5"><a href="planning-multi-agent.html#cb37-5" tabindex="-1"></a></span>
+<span id="cb37-6"><a href="planning-multi-agent.html#cb37-6" tabindex="-1"></a>researcher <span class="op">=</span> make_agent(RESEARCHER_PROMPT, [web_search, fetch_page], model<span class="op">=</span><span class="st">&quot;mid&quot;</span>)</span>
+<span id="cb37-7"><a href="planning-multi-agent.html#cb37-7" tabindex="-1"></a>designer   <span class="op">=</span> make_agent(DESIGNER_PROMPT,   [run_python, generate_image], model<span class="op">=</span><span class="st">&quot;mid&quot;</span>)</span>
+<span id="cb37-8"><a href="planning-multi-agent.html#cb37-8" tabindex="-1"></a>copywriter <span class="op">=</span> make_agent(COPYWRITER_PROMPT, [],                          model<span class="op">=</span><span class="st">&quot;strong&quot;</span>)</span>
+<span id="cb37-9"><a href="planning-multi-agent.html#cb37-9" tabindex="-1"></a></span>
+<span id="cb37-10"><a href="planning-multi-agent.html#cb37-10" tabindex="-1"></a>TEAM <span class="op">=</span> {</span>
+<span id="cb37-11"><a href="planning-multi-agent.html#cb37-11" tabindex="-1"></a>    <span class="st">&quot;researcher&quot;</span>: tool(researcher, <span class="st">&quot;Research trends and competitors. Returns a cited report.&quot;</span>),</span>
+<span id="cb37-12"><a href="planning-multi-agent.html#cb37-12" tabindex="-1"></a>    <span class="st">&quot;designer&quot;</span>:   tool(designer,   <span class="st">&quot;Create charts and visual concepts from a report.&quot;</span>),</span>
+<span id="cb37-13"><a href="planning-multi-agent.html#cb37-13" tabindex="-1"></a>    <span class="st">&quot;copywriter&quot;</span>: tool(copywriter, <span class="st">&quot;Write brochure and ad copy from research and visuals.&quot;</span>),</span>
+<span id="cb37-14"><a href="planning-multi-agent.html#cb37-14" tabindex="-1"></a>}</span>
+<span id="cb37-15"><a href="planning-multi-agent.html#cb37-15" tabindex="-1"></a></span>
+<span id="cb37-16"><a href="planning-multi-agent.html#cb37-16" tabindex="-1"></a>brochure <span class="op">=</span> agent_loop(model<span class="op">=</span><span class="st">&quot;strong&quot;</span>, system<span class="op">=</span>MANAGER_PROMPT, tools<span class="op">=</span>TEAM, user<span class="op">=</span>brief)</span></code></pre></div>
 <p>The manager’s loop is the ordinary tool loop from Chapter <a href="tool-use.html#tool-use">9</a>.
 Only the tools have changed: they are agents.</p>
 </div>

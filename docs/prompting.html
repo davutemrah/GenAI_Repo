@@ -312,13 +312,14 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="6.4" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#an-annotated-example"><i class="fa fa-check"></i><b>6.4</b> An annotated example</a></li>
 <li class="chapter" data-level="6.5" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#order-and-layout"><i class="fa fa-check"></i><b>6.5</b> Order and layout</a></li>
-<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.6</b> Offline example: assembling a prompt from parts</a></li>
-<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.7</b> Optional: sending the prompt to an API</a></li>
-<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.8</b> Common anatomy mistakes</a></li>
-<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.9</b> Checklist</a></li>
-<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.10</b> Exercise: dissect a prompt</a></li>
-<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.11</b> Key takeaways</a></li>
-<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.12</b> References</a></li>
+<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#system-prompt-altitude"><i class="fa fa-check"></i><b>6.6</b> Calibrating the system prompt</a></li>
+<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.7</b> Offline example: assembling a prompt from parts</a></li>
+<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.8</b> Optional: sending the prompt to an API</a></li>
+<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.9</b> Common anatomy mistakes</a></li>
+<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.10</b> Checklist</a></li>
+<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.11</b> Exercise: dissect a prompt</a></li>
+<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.12</b> Key takeaways</a></li>
+<li class="chapter" data-level="6.13" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.13</b> References</a></li>
 </ul></li>
 <li class="part"><span><b>III Agentic AI</b></span></li>
 <li class="chapter" data-level="7" data-path="agentic-workflows.html"><a href="agentic-workflows.html"><i class="fa fa-check"></i><b>7</b> Agentic Workflows</a>
@@ -1064,12 +1065,12 @@ Fix the issue</code></pre>
 <div id="pro-tip-use-comments-as-instructions" class="section level2 hasAnchor" number="13.9">
 <h2><span class="header-section-number">13.9</span> Pro Tip: Use Comments as Instructions<a href="prompting.html#pro-tip-use-comments-as-instructions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>When pasting code, add comments showing what you want:</p>
-<div class="sourceCode" id="cb56"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb56-1"><a href="prompting.html#cb56-1" tabindex="-1"></a><span class="kw">def</span> analyze_data(df):</span>
-<span id="cb56-2"><a href="prompting.html#cb56-2" tabindex="-1"></a>    <span class="co"># </span><span class="al">TODO</span><span class="co">: Filter for active users only</span></span>
-<span id="cb56-3"><a href="prompting.html#cb56-3" tabindex="-1"></a>    <span class="co"># </span><span class="al">TODO</span><span class="co">: Group by region</span></span>
-<span id="cb56-4"><a href="prompting.html#cb56-4" tabindex="-1"></a>    <span class="co"># </span><span class="al">TODO</span><span class="co">: Calculate total spending per region</span></span>
-<span id="cb56-5"><a href="prompting.html#cb56-5" tabindex="-1"></a>    <span class="co"># </span><span class="al">TODO</span><span class="co">: Sort by spending descending</span></span>
-<span id="cb56-6"><a href="prompting.html#cb56-6" tabindex="-1"></a>    <span class="cf">pass</span></span></code></pre></div>
+<div class="sourceCode" id="cb57"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb57-1"><a href="prompting.html#cb57-1" tabindex="-1"></a><span class="kw">def</span> analyze_data(df):</span>
+<span id="cb57-2"><a href="prompting.html#cb57-2" tabindex="-1"></a>    <span class="co"># </span><span class="al">TODO</span><span class="co">: Filter for active users only</span></span>
+<span id="cb57-3"><a href="prompting.html#cb57-3" tabindex="-1"></a>    <span class="co"># </span><span class="al">TODO</span><span class="co">: Group by region</span></span>
+<span id="cb57-4"><a href="prompting.html#cb57-4" tabindex="-1"></a>    <span class="co"># </span><span class="al">TODO</span><span class="co">: Calculate total spending per region</span></span>
+<span id="cb57-5"><a href="prompting.html#cb57-5" tabindex="-1"></a>    <span class="co"># </span><span class="al">TODO</span><span class="co">: Sort by spending descending</span></span>
+<span id="cb57-6"><a href="prompting.html#cb57-6" tabindex="-1"></a>    <span class="cf">pass</span></span></code></pre></div>
 <p>Claude will often see these comments and implement them!</p>
 </div>
 <div id="exercise-write-better-questions" class="section level2 hasAnchor" number="13.10">

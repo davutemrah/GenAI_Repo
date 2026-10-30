@@ -312,13 +312,14 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="6.4" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#an-annotated-example"><i class="fa fa-check"></i><b>6.4</b> An annotated example</a></li>
 <li class="chapter" data-level="6.5" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#order-and-layout"><i class="fa fa-check"></i><b>6.5</b> Order and layout</a></li>
-<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.6</b> Offline example: assembling a prompt from parts</a></li>
-<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.7</b> Optional: sending the prompt to an API</a></li>
-<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.8</b> Common anatomy mistakes</a></li>
-<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.9</b> Checklist</a></li>
-<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.10</b> Exercise: dissect a prompt</a></li>
-<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.11</b> Key takeaways</a></li>
-<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.12</b> References</a></li>
+<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#system-prompt-altitude"><i class="fa fa-check"></i><b>6.6</b> Calibrating the system prompt</a></li>
+<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.7</b> Offline example: assembling a prompt from parts</a></li>
+<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.8</b> Optional: sending the prompt to an API</a></li>
+<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.9</b> Common anatomy mistakes</a></li>
+<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.10</b> Checklist</a></li>
+<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.11</b> Exercise: dissect a prompt</a></li>
+<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.12</b> Key takeaways</a></li>
+<li class="chapter" data-level="6.13" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.13</b> References</a></li>
 </ul></li>
 <li class="part"><span><b>III Agentic AI</b></span></li>
 <li class="chapter" data-level="7" data-path="agentic-workflows.html"><a href="agentic-workflows.html"><i class="fa fa-check"></i><b>7</b> Agentic Workflows</a>
@@ -924,18 +925,18 @@ inside a shared skill.</p>
     └── summarize-changes/
         └── SKILL.md</code></pre>
 <p>A minimal <code>SKILL.md</code> contains YAML frontmatter and instructions:</p>
-<div class="sourceCode" id="cb93"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb93-1"><a href="claude-code-skills.html#cb93-1" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb93-2"><a href="claude-code-skills.html#cb93-2" tabindex="-1"></a><span class="an">description:</span><span class="co"> Summarize uncommitted changes and flag security, privacy, testing,</span></span>
-<span id="cb93-3"><a href="claude-code-skills.html#cb93-3" tabindex="-1"></a><span class="co">  or deployment risks. Use when reviewing a diff before a commit.</span></span>
-<span id="cb93-4"><a href="claude-code-skills.html#cb93-4" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb93-5"><a href="claude-code-skills.html#cb93-5" tabindex="-1"></a></span>
-<span id="cb93-6"><a href="claude-code-skills.html#cb93-6" tabindex="-1"></a><span class="fu"># Review procedure</span></span>
-<span id="cb93-7"><a href="claude-code-skills.html#cb93-7" tabindex="-1"></a></span>
-<span id="cb93-8"><a href="claude-code-skills.html#cb93-8" tabindex="-1"></a><span class="ss">1. </span>Inspect repository instructions and Git status.</span>
-<span id="cb93-9"><a href="claude-code-skills.html#cb93-9" tabindex="-1"></a><span class="ss">2. </span>Review source and generated-output diffs separately.</span>
-<span id="cb93-10"><a href="claude-code-skills.html#cb93-10" tabindex="-1"></a><span class="ss">3. </span>Identify secrets, personal data, large files, and unrelated changes.</span>
-<span id="cb93-11"><a href="claude-code-skills.html#cb93-11" tabindex="-1"></a><span class="ss">4. </span>Run the smallest relevant validation.</span>
-<span id="cb93-12"><a href="claude-code-skills.html#cb93-12" tabindex="-1"></a><span class="ss">5. </span>Report evidence, uncertainty, and remaining risks.</span></code></pre></div>
+<div class="sourceCode" id="cb94"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb94-1"><a href="claude-code-skills.html#cb94-1" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb94-2"><a href="claude-code-skills.html#cb94-2" tabindex="-1"></a><span class="an">description:</span><span class="co"> Summarize uncommitted changes and flag security, privacy, testing,</span></span>
+<span id="cb94-3"><a href="claude-code-skills.html#cb94-3" tabindex="-1"></a><span class="co">  or deployment risks. Use when reviewing a diff before a commit.</span></span>
+<span id="cb94-4"><a href="claude-code-skills.html#cb94-4" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb94-5"><a href="claude-code-skills.html#cb94-5" tabindex="-1"></a></span>
+<span id="cb94-6"><a href="claude-code-skills.html#cb94-6" tabindex="-1"></a><span class="fu"># Review procedure</span></span>
+<span id="cb94-7"><a href="claude-code-skills.html#cb94-7" tabindex="-1"></a></span>
+<span id="cb94-8"><a href="claude-code-skills.html#cb94-8" tabindex="-1"></a><span class="ss">1. </span>Inspect repository instructions and Git status.</span>
+<span id="cb94-9"><a href="claude-code-skills.html#cb94-9" tabindex="-1"></a><span class="ss">2. </span>Review source and generated-output diffs separately.</span>
+<span id="cb94-10"><a href="claude-code-skills.html#cb94-10" tabindex="-1"></a><span class="ss">3. </span>Identify secrets, personal data, large files, and unrelated changes.</span>
+<span id="cb94-11"><a href="claude-code-skills.html#cb94-11" tabindex="-1"></a><span class="ss">4. </span>Run the smallest relevant validation.</span>
+<span id="cb94-12"><a href="claude-code-skills.html#cb94-12" tabindex="-1"></a><span class="ss">5. </span>Report evidence, uncertainty, and remaining risks.</span></code></pre></div>
 <p>The directory name normally supplies the command name. The description should
 state both what the skill does and when it applies; vague descriptions lead to
 missed or inappropriate activation.</p>
@@ -980,21 +981,21 @@ snapshot identifiers.</li>
 </div>
 <div id="example-skill-notebook-review" class="section level2 hasAnchor" number="18.6">
 <h2><span class="header-section-number">18.6</span> Example skill: notebook review<a href="claude-code-skills.html#example-skill-notebook-review" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<div class="sourceCode" id="cb95"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb95-1"><a href="claude-code-skills.html#cb95-1" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb95-2"><a href="claude-code-skills.html#cb95-2" tabindex="-1"></a><span class="an">description:</span><span class="co"> Review a data-science notebook for reproducibility, leakage,</span></span>
-<span id="cb95-3"><a href="claude-code-skills.html#cb95-3" tabindex="-1"></a><span class="co">  methodological validity, privacy, and clear communication.</span></span>
-<span id="cb95-4"><a href="claude-code-skills.html#cb95-4" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb95-5"><a href="claude-code-skills.html#cb95-5" tabindex="-1"></a></span>
-<span id="cb95-6"><a href="claude-code-skills.html#cb95-6" tabindex="-1"></a><span class="fu"># Procedure</span></span>
-<span id="cb95-7"><a href="claude-code-skills.html#cb95-7" tabindex="-1"></a></span>
-<span id="cb95-8"><a href="claude-code-skills.html#cb95-8" tabindex="-1"></a><span class="ss">1. </span>Read the notebook from top to bottom and identify its analytical objective.</span>
-<span id="cb95-9"><a href="claude-code-skills.html#cb95-9" tabindex="-1"></a><span class="ss">2. </span>Check whether a clean kernel can run all cells in order.</span>
-<span id="cb95-10"><a href="claude-code-skills.html#cb95-10" tabindex="-1"></a><span class="ss">3. </span>Trace data splits and ensure preprocessing is learned from training data only.</span>
-<span id="cb95-11"><a href="claude-code-skills.html#cb95-11" tabindex="-1"></a><span class="ss">4. </span>Check metrics against the decision problem and baseline.</span>
-<span id="cb95-12"><a href="claude-code-skills.html#cb95-12" tabindex="-1"></a><span class="ss">5. </span>Identify secrets, personal data, absolute paths, or uncontrolled downloads.</span>
-<span id="cb95-13"><a href="claude-code-skills.html#cb95-13" tabindex="-1"></a><span class="ss">6. </span>Separate exploratory conclusions from validated findings.</span>
-<span id="cb95-14"><a href="claude-code-skills.html#cb95-14" tabindex="-1"></a><span class="ss">7. </span>Run the notebook only when execution is authorized and dependencies are safe.</span>
-<span id="cb95-15"><a href="claude-code-skills.html#cb95-15" tabindex="-1"></a><span class="ss">8. </span>Report findings by severity with file or cell references.</span></code></pre></div>
+<div class="sourceCode" id="cb96"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb96-1"><a href="claude-code-skills.html#cb96-1" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb96-2"><a href="claude-code-skills.html#cb96-2" tabindex="-1"></a><span class="an">description:</span><span class="co"> Review a data-science notebook for reproducibility, leakage,</span></span>
+<span id="cb96-3"><a href="claude-code-skills.html#cb96-3" tabindex="-1"></a><span class="co">  methodological validity, privacy, and clear communication.</span></span>
+<span id="cb96-4"><a href="claude-code-skills.html#cb96-4" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb96-5"><a href="claude-code-skills.html#cb96-5" tabindex="-1"></a></span>
+<span id="cb96-6"><a href="claude-code-skills.html#cb96-6" tabindex="-1"></a><span class="fu"># Procedure</span></span>
+<span id="cb96-7"><a href="claude-code-skills.html#cb96-7" tabindex="-1"></a></span>
+<span id="cb96-8"><a href="claude-code-skills.html#cb96-8" tabindex="-1"></a><span class="ss">1. </span>Read the notebook from top to bottom and identify its analytical objective.</span>
+<span id="cb96-9"><a href="claude-code-skills.html#cb96-9" tabindex="-1"></a><span class="ss">2. </span>Check whether a clean kernel can run all cells in order.</span>
+<span id="cb96-10"><a href="claude-code-skills.html#cb96-10" tabindex="-1"></a><span class="ss">3. </span>Trace data splits and ensure preprocessing is learned from training data only.</span>
+<span id="cb96-11"><a href="claude-code-skills.html#cb96-11" tabindex="-1"></a><span class="ss">4. </span>Check metrics against the decision problem and baseline.</span>
+<span id="cb96-12"><a href="claude-code-skills.html#cb96-12" tabindex="-1"></a><span class="ss">5. </span>Identify secrets, personal data, absolute paths, or uncontrolled downloads.</span>
+<span id="cb96-13"><a href="claude-code-skills.html#cb96-13" tabindex="-1"></a><span class="ss">6. </span>Separate exploratory conclusions from validated findings.</span>
+<span id="cb96-14"><a href="claude-code-skills.html#cb96-14" tabindex="-1"></a><span class="ss">7. </span>Run the notebook only when execution is authorized and dependencies are safe.</span>
+<span id="cb96-15"><a href="claude-code-skills.html#cb96-15" tabindex="-1"></a><span class="ss">8. </span>Report findings by severity with file or cell references.</span></code></pre></div>
 </div>
 <div id="evaluation-and-maintenance" class="section level2 hasAnchor" number="18.7">
 <h2><span class="header-section-number">18.7</span> Evaluation and maintenance<a href="claude-code-skills.html#evaluation-and-maintenance" class="anchor-section" aria-label="Anchor link to header"></a></h2>

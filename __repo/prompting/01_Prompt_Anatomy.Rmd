@@ -262,6 +262,73 @@ MUST...". Anthropic's current guidance notes that newer models are more
 responsive to system prompts and that such emphatic language can cause
 over-triggering; a plain instruction usually suffices.
 
+## Calibrating the system prompt {#system-prompt-altitude}
+
+The building blocks say *what* a system prompt contains. A separate decision
+is *how specific* each instruction should be. Anthropic's context engineering
+guide calls this finding the "right altitude" between two failure modes:
+hard-coding brittle if-then logic, and giving high-level guidance that
+wrongly assumes the model shares your context
+([effective context engineering](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)).
+The trade-off applies to any long-lived system prompt, whether for an
+assistant or an agent.
+
+Take an assistant that answers account managers' questions about weekly
+paid-media performance. Its system prompt could be written at three levels:
+
+| | Too specific | About right | Too vague |
+|:--|:--|:--|:--|
+| **Looks like** | Dozens of if-then rules: "If CTR is below 0.8%, write 'CTR is below benchmark'. If CPA rises more than 15% week on week, use template B. Always return exactly five bullets." | A role, the goal, a way to structure answers, a few principles with their reasons, and when to hand off | "You are a helpful marketing analytics assistant. Answer questions about campaign performance." |
+| **Works when** | The task is narrow and an exact behaviour is required, such as a legal disclaimer | Most assistants and agents that face varied questions | Quick, one-off questions where the model's defaults are acceptable |
+| **Fails when** | A case no rule covers arrives (a new channel, a budget-pacing question); rules start to contradict each other | Principles are missing for a frequent case; testing shows where | The model must guess the date window, the attribution model, or whether to speculate about causes; answers vary from run to run |
+| **Fix** | Replace each cluster of rules with the principle behind it; keep hard rules only where exactness matters | Add a principle or an example for each recurring failure | Add what a new colleague would need: the data, the definitions, the audience, the limits |
+
+The "about right" version, written out:
+
+```text
+SYSTEM
+You help account managers understand weekly paid-media performance for
+their clients. They repeat your answers in client calls, so accuracy and
+clear caveats matter more than speed.
+
+Data: the weekly_performance table (spend, impressions, clicks,
+conversions, revenue by campaign and channel). Use the metric definitions
+in the glossary below, not platform defaults.
+
+How to answer:
+1. Answer the question in one or two sentences.
+2. Show the numbers behind it, with the date window and comparison period.
+3. Suggest drivers only if the data supports them, and say how confident
+   you are.
+
+Principles:
+- Compare like with like (same weekday mix, same attribution window),
+  because mismatched periods produce false alarms.
+- Small campaigns are noisy; treat changes based on a few dozen
+  conversions as tentative.
+- Say "the data does not show this" rather than guessing.
+
+Hand off to the account lead when:
+- the question needs data outside this table (CRM, offline sales);
+- the answer would recommend a budget change or a client commitment.
+
+<glossary>
+...
+</glossary>
+```
+
+Each principle carries its reason, so the model can apply it to cases nobody
+wrote a rule for, such as a holiday week or a channel added last month. Hard
+rules remain where exactness matters: the hand-off conditions are stated
+plainly, not as heuristics.
+
+Altitude is not length. The "about right" prompt is longer than the vague one
+and may be longer than the brittle one; what matters is that each line is a
+definition, a principle, or an example rather than a patch for one past
+failure. The too-specific prompt is usually the kitchen-sink mistake (Section
+\@ref(common-anatomy-mistakes)) seen from the other side. As with every prompt
+choice, test the result, and include inputs that no rule anticipated.
+
 ## Offline example: assembling a prompt from parts
 
 Treating a prompt as data rather than a hand-edited string makes it easier to
@@ -400,7 +467,7 @@ print(response.output_text)
 Never hard-code an API key in a notebook or commit it to a repository; read it
 from the environment or a secrets manager.
 
-## Common anatomy mistakes
+## Common anatomy mistakes {#common-anatomy-mistakes}
 
 - **Burying the task.** The instruction appears after several paragraphs of
   background, or only implicitly.
@@ -453,12 +520,16 @@ Take a prompt you used recently at work or in study.
   constraints) cover most prompts; use the ones the task needs.
 - Put stable material first and the per-call input or question last; delimit
   data consistently.
+- Write system prompts at the right altitude: principles with reasons, not a
+  pile of if-then rules or a one-line brief.
 - A structured prompt is valuable mainly because it is testable.
 
 ## References
 
 - Anthropic. [Prompt engineering overview](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview)
   and [Prompting best practices](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices).
+  Accessed October 2026.
+- Anthropic. [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents).
   Accessed October 2026.
 - OpenAI. [Prompt engineering guide](https://developers.openai.com/api/docs/guides/prompt-engineering).
   Accessed October 2026.

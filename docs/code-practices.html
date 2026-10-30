@@ -312,13 +312,14 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="6.4" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#an-annotated-example"><i class="fa fa-check"></i><b>6.4</b> An annotated example</a></li>
 <li class="chapter" data-level="6.5" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#order-and-layout"><i class="fa fa-check"></i><b>6.5</b> Order and layout</a></li>
-<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.6</b> Offline example: assembling a prompt from parts</a></li>
-<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.7</b> Optional: sending the prompt to an API</a></li>
-<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.8</b> Common anatomy mistakes</a></li>
-<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.9</b> Checklist</a></li>
-<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.10</b> Exercise: dissect a prompt</a></li>
-<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.11</b> Key takeaways</a></li>
-<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.12</b> References</a></li>
+<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#system-prompt-altitude"><i class="fa fa-check"></i><b>6.6</b> Calibrating the system prompt</a></li>
+<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.7</b> Offline example: assembling a prompt from parts</a></li>
+<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.8</b> Optional: sending the prompt to an API</a></li>
+<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.9</b> Common anatomy mistakes</a></li>
+<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.10</b> Checklist</a></li>
+<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.11</b> Exercise: dissect a prompt</a></li>
+<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.12</b> Key takeaways</a></li>
+<li class="chapter" data-level="6.13" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.13</b> References</a></li>
 </ul></li>
 <li class="part"><span><b>III Agentic AI</b></span></li>
 <li class="chapter" data-level="7" data-path="agentic-workflows.html"><a href="agentic-workflows.html"><i class="fa fa-check"></i><b>7</b> Agentic Workflows</a>
@@ -895,31 +896,31 @@ Output: 3420.0  (sum of [100,150,90] * 12)</code></pre>
 <p>After Claude generates code, ask yourself:</p>
 <div id="does-it-work" class="section level3 hasAnchor" number="14.3.1">
 <h3><span class="header-section-number">14.3.1</span> ✅ Does It Work?<a href="code-practices.html#does-it-work" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb61"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb61-1"><a href="code-practices.html#cb61-1" tabindex="-1"></a><span class="co"># Copy the code</span></span>
-<span id="cb61-2"><a href="code-practices.html#cb61-2" tabindex="-1"></a><span class="co"># Run it immediately</span></span>
-<span id="cb61-3"><a href="code-practices.html#cb61-3" tabindex="-1"></a><span class="co"># Test with examples</span></span></code></pre></div>
+<div class="sourceCode" id="cb62"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb62-1"><a href="code-practices.html#cb62-1" tabindex="-1"></a><span class="co"># Copy the code</span></span>
+<span id="cb62-2"><a href="code-practices.html#cb62-2" tabindex="-1"></a><span class="co"># Run it immediately</span></span>
+<span id="cb62-3"><a href="code-practices.html#cb62-3" tabindex="-1"></a><span class="co"># Test with examples</span></span></code></pre></div>
 </div>
 <div id="is-it-readable" class="section level3 hasAnchor" number="14.3.2">
 <h3><span class="header-section-number">14.3.2</span> ✅ Is It Readable?<a href="code-practices.html#is-it-readable" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p><strong>Good variable names?</strong></p>
-<div class="sourceCode" id="cb62"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb62-1"><a href="code-practices.html#cb62-1" tabindex="-1"></a><span class="co"># GOOD</span></span>
-<span id="cb62-2"><a href="code-practices.html#cb62-2" tabindex="-1"></a><span class="kw">def</span> calculate_customer_ltv(transactions):</span>
-<span id="cb62-3"><a href="code-practices.html#cb62-3" tabindex="-1"></a>    valid <span class="op">=</span> [t <span class="cf">for</span> t <span class="kw">in</span> transactions <span class="cf">if</span> <span class="dv">0</span> <span class="op">&lt;=</span> t <span class="op">&lt;=</span> <span class="dv">10000</span>]</span>
-<span id="cb62-4"><a href="code-practices.html#cb62-4" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(valid) <span class="op">*</span> <span class="dv">12</span></span>
-<span id="cb62-5"><a href="code-practices.html#cb62-5" tabindex="-1"></a></span>
-<span id="cb62-6"><a href="code-practices.html#cb62-6" tabindex="-1"></a><span class="co"># BAD</span></span>
-<span id="cb62-7"><a href="code-practices.html#cb62-7" tabindex="-1"></a><span class="kw">def</span> f(x):</span>
-<span id="cb62-8"><a href="code-practices.html#cb62-8" tabindex="-1"></a>    y <span class="op">=</span> [a <span class="cf">for</span> a <span class="kw">in</span> x <span class="cf">if</span> a <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> a <span class="op">&lt;</span> <span class="dv">10000</span>]</span>
-<span id="cb62-9"><a href="code-practices.html#cb62-9" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(y) <span class="op">*</span> <span class="dv">12</span></span></code></pre></div>
+<div class="sourceCode" id="cb63"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb63-1"><a href="code-practices.html#cb63-1" tabindex="-1"></a><span class="co"># GOOD</span></span>
+<span id="cb63-2"><a href="code-practices.html#cb63-2" tabindex="-1"></a><span class="kw">def</span> calculate_customer_ltv(transactions):</span>
+<span id="cb63-3"><a href="code-practices.html#cb63-3" tabindex="-1"></a>    valid <span class="op">=</span> [t <span class="cf">for</span> t <span class="kw">in</span> transactions <span class="cf">if</span> <span class="dv">0</span> <span class="op">&lt;=</span> t <span class="op">&lt;=</span> <span class="dv">10000</span>]</span>
+<span id="cb63-4"><a href="code-practices.html#cb63-4" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(valid) <span class="op">*</span> <span class="dv">12</span></span>
+<span id="cb63-5"><a href="code-practices.html#cb63-5" tabindex="-1"></a></span>
+<span id="cb63-6"><a href="code-practices.html#cb63-6" tabindex="-1"></a><span class="co"># BAD</span></span>
+<span id="cb63-7"><a href="code-practices.html#cb63-7" tabindex="-1"></a><span class="kw">def</span> f(x):</span>
+<span id="cb63-8"><a href="code-practices.html#cb63-8" tabindex="-1"></a>    y <span class="op">=</span> [a <span class="cf">for</span> a <span class="kw">in</span> x <span class="cf">if</span> a <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> a <span class="op">&lt;</span> <span class="dv">10000</span>]</span>
+<span id="cb63-9"><a href="code-practices.html#cb63-9" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(y) <span class="op">*</span> <span class="dv">12</span></span></code></pre></div>
 <p><strong>Clear logic?</strong></p>
-<div class="sourceCode" id="cb63"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb63-1"><a href="code-practices.html#cb63-1" tabindex="-1"></a><span class="co"># GOOD - steps are obvious</span></span>
-<span id="cb63-2"><a href="code-practices.html#cb63-2" tabindex="-1"></a>transactions <span class="op">=</span> read_transactions()</span>
-<span id="cb63-3"><a href="code-practices.html#cb63-3" tabindex="-1"></a>valid_transactions <span class="op">=</span> filter_outliers(transactions)</span>
-<span id="cb63-4"><a href="code-practices.html#cb63-4" tabindex="-1"></a>ltv <span class="op">=</span> calculate_ltv(valid_transactions)</span>
-<span id="cb63-5"><a href="code-practices.html#cb63-5" tabindex="-1"></a><span class="cf">return</span> ltv</span>
-<span id="cb63-6"><a href="code-practices.html#cb63-6" tabindex="-1"></a></span>
-<span id="cb63-7"><a href="code-practices.html#cb63-7" tabindex="-1"></a><span class="co"># BAD - what&#39;s happening?</span></span>
-<span id="cb63-8"><a href="code-practices.html#cb63-8" tabindex="-1"></a><span class="cf">return</span> <span class="bu">sum</span>([t <span class="cf">for</span> t <span class="kw">in</span> read_transactions() <span class="cf">if</span> <span class="dv">0</span><span class="op">&lt;</span>t<span class="op">&lt;</span><span class="dv">10000</span>])<span class="op">*</span><span class="dv">12</span></span></code></pre></div>
+<div class="sourceCode" id="cb64"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb64-1"><a href="code-practices.html#cb64-1" tabindex="-1"></a><span class="co"># GOOD - steps are obvious</span></span>
+<span id="cb64-2"><a href="code-practices.html#cb64-2" tabindex="-1"></a>transactions <span class="op">=</span> read_transactions()</span>
+<span id="cb64-3"><a href="code-practices.html#cb64-3" tabindex="-1"></a>valid_transactions <span class="op">=</span> filter_outliers(transactions)</span>
+<span id="cb64-4"><a href="code-practices.html#cb64-4" tabindex="-1"></a>ltv <span class="op">=</span> calculate_ltv(valid_transactions)</span>
+<span id="cb64-5"><a href="code-practices.html#cb64-5" tabindex="-1"></a><span class="cf">return</span> ltv</span>
+<span id="cb64-6"><a href="code-practices.html#cb64-6" tabindex="-1"></a></span>
+<span id="cb64-7"><a href="code-practices.html#cb64-7" tabindex="-1"></a><span class="co"># BAD - what&#39;s happening?</span></span>
+<span id="cb64-8"><a href="code-practices.html#cb64-8" tabindex="-1"></a><span class="cf">return</span> <span class="bu">sum</span>([t <span class="cf">for</span> t <span class="kw">in</span> read_transactions() <span class="cf">if</span> <span class="dv">0</span><span class="op">&lt;</span>t<span class="op">&lt;</span><span class="dv">10000</span>])<span class="op">*</span><span class="dv">12</span></span></code></pre></div>
 </div>
 <div id="does-it-handle-edge-cases" class="section level3 hasAnchor" number="14.3.3">
 <h3><span class="header-section-number">14.3.3</span> ✅ Does It Handle Edge Cases?<a href="code-practices.html#does-it-handle-edge-cases" class="anchor-section" aria-label="Anchor link to header"></a></h3>
@@ -929,25 +930,25 @@ Output: 3420.0  (sum of [100,150,90] * 12)</code></pre>
 - What if numbers are very large? → overflow issues?
 - What if data is missing? → NaN/None handling?</p>
 <p><strong>Example:</strong></p>
-<div class="sourceCode" id="cb64"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb64-1"><a href="code-practices.html#cb64-1" tabindex="-1"></a><span class="co"># WORSE - no error handling</span></span>
-<span id="cb64-2"><a href="code-practices.html#cb64-2" tabindex="-1"></a><span class="kw">def</span> calculate_ltv(transactions):</span>
-<span id="cb64-3"><a href="code-practices.html#cb64-3" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(transactions) <span class="op">*</span> <span class="dv">12</span></span>
-<span id="cb64-4"><a href="code-practices.html#cb64-4" tabindex="-1"></a></span>
-<span id="cb64-5"><a href="code-practices.html#cb64-5" tabindex="-1"></a><span class="co"># BETTER - handles edge cases</span></span>
-<span id="cb64-6"><a href="code-practices.html#cb64-6" tabindex="-1"></a><span class="kw">def</span> calculate_ltv(transactions):</span>
-<span id="cb64-7"><a href="code-practices.html#cb64-7" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Calculate customer lifetime value.&quot;&quot;&quot;</span></span>
-<span id="cb64-8"><a href="code-practices.html#cb64-8" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> transactions:</span>
-<span id="cb64-9"><a href="code-practices.html#cb64-9" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span></span>
-<span id="cb64-10"><a href="code-practices.html#cb64-10" tabindex="-1"></a>    </span>
-<span id="cb64-11"><a href="code-practices.html#cb64-11" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> <span class="bu">isinstance</span>(transactions, (<span class="bu">list</span>, <span class="bu">tuple</span>)):</span>
-<span id="cb64-12"><a href="code-practices.html#cb64-12" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">TypeError</span>(<span class="st">&quot;transactions must be list or tuple&quot;</span>)</span>
-<span id="cb64-13"><a href="code-practices.html#cb64-13" tabindex="-1"></a>    </span>
-<span id="cb64-14"><a href="code-practices.html#cb64-14" tabindex="-1"></a>    valid <span class="op">=</span> [</span>
-<span id="cb64-15"><a href="code-practices.html#cb64-15" tabindex="-1"></a>        t <span class="cf">for</span> t <span class="kw">in</span> transactions </span>
-<span id="cb64-16"><a href="code-practices.html#cb64-16" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">isinstance</span>(t, (<span class="bu">int</span>, <span class="bu">float</span>)) <span class="kw">and</span> <span class="dv">0</span> <span class="op">&lt;=</span> t <span class="op">&lt;=</span> <span class="dv">10000</span></span>
-<span id="cb64-17"><a href="code-practices.html#cb64-17" tabindex="-1"></a>    ]</span>
-<span id="cb64-18"><a href="code-practices.html#cb64-18" tabindex="-1"></a>    </span>
-<span id="cb64-19"><a href="code-practices.html#cb64-19" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(valid) <span class="op">*</span> <span class="dv">12</span> <span class="cf">if</span> valid <span class="cf">else</span> <span class="va">None</span></span></code></pre></div>
+<div class="sourceCode" id="cb65"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb65-1"><a href="code-practices.html#cb65-1" tabindex="-1"></a><span class="co"># WORSE - no error handling</span></span>
+<span id="cb65-2"><a href="code-practices.html#cb65-2" tabindex="-1"></a><span class="kw">def</span> calculate_ltv(transactions):</span>
+<span id="cb65-3"><a href="code-practices.html#cb65-3" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(transactions) <span class="op">*</span> <span class="dv">12</span></span>
+<span id="cb65-4"><a href="code-practices.html#cb65-4" tabindex="-1"></a></span>
+<span id="cb65-5"><a href="code-practices.html#cb65-5" tabindex="-1"></a><span class="co"># BETTER - handles edge cases</span></span>
+<span id="cb65-6"><a href="code-practices.html#cb65-6" tabindex="-1"></a><span class="kw">def</span> calculate_ltv(transactions):</span>
+<span id="cb65-7"><a href="code-practices.html#cb65-7" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Calculate customer lifetime value.&quot;&quot;&quot;</span></span>
+<span id="cb65-8"><a href="code-practices.html#cb65-8" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> transactions:</span>
+<span id="cb65-9"><a href="code-practices.html#cb65-9" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb65-10"><a href="code-practices.html#cb65-10" tabindex="-1"></a>    </span>
+<span id="cb65-11"><a href="code-practices.html#cb65-11" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> <span class="bu">isinstance</span>(transactions, (<span class="bu">list</span>, <span class="bu">tuple</span>)):</span>
+<span id="cb65-12"><a href="code-practices.html#cb65-12" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">TypeError</span>(<span class="st">&quot;transactions must be list or tuple&quot;</span>)</span>
+<span id="cb65-13"><a href="code-practices.html#cb65-13" tabindex="-1"></a>    </span>
+<span id="cb65-14"><a href="code-practices.html#cb65-14" tabindex="-1"></a>    valid <span class="op">=</span> [</span>
+<span id="cb65-15"><a href="code-practices.html#cb65-15" tabindex="-1"></a>        t <span class="cf">for</span> t <span class="kw">in</span> transactions </span>
+<span id="cb65-16"><a href="code-practices.html#cb65-16" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">isinstance</span>(t, (<span class="bu">int</span>, <span class="bu">float</span>)) <span class="kw">and</span> <span class="dv">0</span> <span class="op">&lt;=</span> t <span class="op">&lt;=</span> <span class="dv">10000</span></span>
+<span id="cb65-17"><a href="code-practices.html#cb65-17" tabindex="-1"></a>    ]</span>
+<span id="cb65-18"><a href="code-practices.html#cb65-18" tabindex="-1"></a>    </span>
+<span id="cb65-19"><a href="code-practices.html#cb65-19" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(valid) <span class="op">*</span> <span class="dv">12</span> <span class="cf">if</span> valid <span class="cf">else</span> <span class="va">None</span></span></code></pre></div>
 </div>
 <div id="is-it-efficient" class="section level3 hasAnchor" number="14.3.4">
 <h3><span class="header-section-number">14.3.4</span> ✅ Is It Efficient?<a href="code-practices.html#is-it-efficient" class="anchor-section" aria-label="Anchor link to header"></a></h3>
@@ -956,45 +957,45 @@ Output: 3420.0  (sum of [100,150,90] * 12)</code></pre>
 <li>Could it use built-in functions?</li>
 <li>Will it work with large datasets?</li>
 </ul>
-<div class="sourceCode" id="cb65"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb65-1"><a href="code-practices.html#cb65-1" tabindex="-1"></a><span class="co"># INEFFICIENT</span></span>
-<span id="cb65-2"><a href="code-practices.html#cb65-2" tabindex="-1"></a><span class="kw">def</span> clean_data(df):</span>
-<span id="cb65-3"><a href="code-practices.html#cb65-3" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(df)):</span>
-<span id="cb65-4"><a href="code-practices.html#cb65-4" tabindex="-1"></a>        df.iloc[i, <span class="dv">0</span>] <span class="op">=</span> df.iloc[i, <span class="dv">0</span>].lower()</span>
-<span id="cb65-5"><a href="code-practices.html#cb65-5" tabindex="-1"></a></span>
-<span id="cb65-6"><a href="code-practices.html#cb65-6" tabindex="-1"></a><span class="co"># EFFICIENT</span></span>
-<span id="cb65-7"><a href="code-practices.html#cb65-7" tabindex="-1"></a><span class="kw">def</span> clean_data(df):</span>
-<span id="cb65-8"><a href="code-practices.html#cb65-8" tabindex="-1"></a>    df[df.columns[<span class="dv">0</span>]] <span class="op">=</span> df[df.columns[<span class="dv">0</span>]].<span class="bu">str</span>.lower()</span></code></pre></div>
+<div class="sourceCode" id="cb66"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb66-1"><a href="code-practices.html#cb66-1" tabindex="-1"></a><span class="co"># INEFFICIENT</span></span>
+<span id="cb66-2"><a href="code-practices.html#cb66-2" tabindex="-1"></a><span class="kw">def</span> clean_data(df):</span>
+<span id="cb66-3"><a href="code-practices.html#cb66-3" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(df)):</span>
+<span id="cb66-4"><a href="code-practices.html#cb66-4" tabindex="-1"></a>        df.iloc[i, <span class="dv">0</span>] <span class="op">=</span> df.iloc[i, <span class="dv">0</span>].lower()</span>
+<span id="cb66-5"><a href="code-practices.html#cb66-5" tabindex="-1"></a></span>
+<span id="cb66-6"><a href="code-practices.html#cb66-6" tabindex="-1"></a><span class="co"># EFFICIENT</span></span>
+<span id="cb66-7"><a href="code-practices.html#cb66-7" tabindex="-1"></a><span class="kw">def</span> clean_data(df):</span>
+<span id="cb66-8"><a href="code-practices.html#cb66-8" tabindex="-1"></a>    df[df.columns[<span class="dv">0</span>]] <span class="op">=</span> df[df.columns[<span class="dv">0</span>]].<span class="bu">str</span>.lower()</span></code></pre></div>
 </div>
 <div id="is-it-documented" class="section level3 hasAnchor" number="14.3.5">
 <h3><span class="header-section-number">14.3.5</span> ✅ Is It Documented?<a href="code-practices.html#is-it-documented" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb66"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb66-1"><a href="code-practices.html#cb66-1" tabindex="-1"></a><span class="co"># GOOD</span></span>
-<span id="cb66-2"><a href="code-practices.html#cb66-2" tabindex="-1"></a><span class="kw">def</span> calculate_ltv(transactions: <span class="bu">list</span>[<span class="bu">float</span>]) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb66-3"><a href="code-practices.html#cb66-3" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;</span></span>
-<span id="cb66-4"><a href="code-practices.html#cb66-4" tabindex="-1"></a><span class="co">    Calculate customer lifetime value from transaction history.</span></span>
-<span id="cb66-5"><a href="code-practices.html#cb66-5" tabindex="-1"></a><span class="co">    </span></span>
-<span id="cb66-6"><a href="code-practices.html#cb66-6" tabindex="-1"></a><span class="co">    Args:</span></span>
-<span id="cb66-7"><a href="code-practices.html#cb66-7" tabindex="-1"></a><span class="co">        transactions: List of transaction amounts (floats)</span></span>
-<span id="cb66-8"><a href="code-practices.html#cb66-8" tabindex="-1"></a><span class="co">        </span></span>
-<span id="cb66-9"><a href="code-practices.html#cb66-9" tabindex="-1"></a><span class="co">    Returns:</span></span>
-<span id="cb66-10"><a href="code-practices.html#cb66-10" tabindex="-1"></a><span class="co">        float: Estimated annual value (sum * 12)</span></span>
-<span id="cb66-11"><a href="code-practices.html#cb66-11" tabindex="-1"></a><span class="co">        </span></span>
-<span id="cb66-12"><a href="code-practices.html#cb66-12" tabindex="-1"></a><span class="co">    Raises:</span></span>
-<span id="cb66-13"><a href="code-practices.html#cb66-13" tabindex="-1"></a><span class="co">        TypeError: If transactions is not a list</span></span>
-<span id="cb66-14"><a href="code-practices.html#cb66-14" tabindex="-1"></a><span class="co">        </span></span>
-<span id="cb66-15"><a href="code-practices.html#cb66-15" tabindex="-1"></a><span class="co">    Example:</span></span>
-<span id="cb66-16"><a href="code-practices.html#cb66-16" tabindex="-1"></a><span class="co">        &gt;&gt;&gt; calculate_ltv([100, 150, 90])</span></span>
-<span id="cb66-17"><a href="code-practices.html#cb66-17" tabindex="-1"></a><span class="co">        4440.0</span></span>
-<span id="cb66-18"><a href="code-practices.html#cb66-18" tabindex="-1"></a><span class="co">    &quot;&quot;&quot;</span></span>
-<span id="cb66-19"><a href="code-practices.html#cb66-19" tabindex="-1"></a>    ...</span>
-<span id="cb66-20"><a href="code-practices.html#cb66-20" tabindex="-1"></a></span>
-<span id="cb66-21"><a href="code-practices.html#cb66-21" tabindex="-1"></a><span class="co"># OKAY</span></span>
-<span id="cb66-22"><a href="code-practices.html#cb66-22" tabindex="-1"></a><span class="kw">def</span> calculate_ltv(transactions):</span>
-<span id="cb66-23"><a href="code-practices.html#cb66-23" tabindex="-1"></a>    <span class="co"># Returns annual LTV</span></span>
-<span id="cb66-24"><a href="code-practices.html#cb66-24" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(transactions) <span class="op">*</span> <span class="dv">12</span></span>
-<span id="cb66-25"><a href="code-practices.html#cb66-25" tabindex="-1"></a></span>
-<span id="cb66-26"><a href="code-practices.html#cb66-26" tabindex="-1"></a><span class="co"># BAD</span></span>
-<span id="cb66-27"><a href="code-practices.html#cb66-27" tabindex="-1"></a><span class="kw">def</span> f(x):</span>
-<span id="cb66-28"><a href="code-practices.html#cb66-28" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(x) <span class="op">*</span> <span class="dv">12</span></span></code></pre></div>
+<div class="sourceCode" id="cb67"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb67-1"><a href="code-practices.html#cb67-1" tabindex="-1"></a><span class="co"># GOOD</span></span>
+<span id="cb67-2"><a href="code-practices.html#cb67-2" tabindex="-1"></a><span class="kw">def</span> calculate_ltv(transactions: <span class="bu">list</span>[<span class="bu">float</span>]) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb67-3"><a href="code-practices.html#cb67-3" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;</span></span>
+<span id="cb67-4"><a href="code-practices.html#cb67-4" tabindex="-1"></a><span class="co">    Calculate customer lifetime value from transaction history.</span></span>
+<span id="cb67-5"><a href="code-practices.html#cb67-5" tabindex="-1"></a><span class="co">    </span></span>
+<span id="cb67-6"><a href="code-practices.html#cb67-6" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb67-7"><a href="code-practices.html#cb67-7" tabindex="-1"></a><span class="co">        transactions: List of transaction amounts (floats)</span></span>
+<span id="cb67-8"><a href="code-practices.html#cb67-8" tabindex="-1"></a><span class="co">        </span></span>
+<span id="cb67-9"><a href="code-practices.html#cb67-9" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb67-10"><a href="code-practices.html#cb67-10" tabindex="-1"></a><span class="co">        float: Estimated annual value (sum * 12)</span></span>
+<span id="cb67-11"><a href="code-practices.html#cb67-11" tabindex="-1"></a><span class="co">        </span></span>
+<span id="cb67-12"><a href="code-practices.html#cb67-12" tabindex="-1"></a><span class="co">    Raises:</span></span>
+<span id="cb67-13"><a href="code-practices.html#cb67-13" tabindex="-1"></a><span class="co">        TypeError: If transactions is not a list</span></span>
+<span id="cb67-14"><a href="code-practices.html#cb67-14" tabindex="-1"></a><span class="co">        </span></span>
+<span id="cb67-15"><a href="code-practices.html#cb67-15" tabindex="-1"></a><span class="co">    Example:</span></span>
+<span id="cb67-16"><a href="code-practices.html#cb67-16" tabindex="-1"></a><span class="co">        &gt;&gt;&gt; calculate_ltv([100, 150, 90])</span></span>
+<span id="cb67-17"><a href="code-practices.html#cb67-17" tabindex="-1"></a><span class="co">        4440.0</span></span>
+<span id="cb67-18"><a href="code-practices.html#cb67-18" tabindex="-1"></a><span class="co">    &quot;&quot;&quot;</span></span>
+<span id="cb67-19"><a href="code-practices.html#cb67-19" tabindex="-1"></a>    ...</span>
+<span id="cb67-20"><a href="code-practices.html#cb67-20" tabindex="-1"></a></span>
+<span id="cb67-21"><a href="code-practices.html#cb67-21" tabindex="-1"></a><span class="co"># OKAY</span></span>
+<span id="cb67-22"><a href="code-practices.html#cb67-22" tabindex="-1"></a><span class="kw">def</span> calculate_ltv(transactions):</span>
+<span id="cb67-23"><a href="code-practices.html#cb67-23" tabindex="-1"></a>    <span class="co"># Returns annual LTV</span></span>
+<span id="cb67-24"><a href="code-practices.html#cb67-24" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(transactions) <span class="op">*</span> <span class="dv">12</span></span>
+<span id="cb67-25"><a href="code-practices.html#cb67-25" tabindex="-1"></a></span>
+<span id="cb67-26"><a href="code-practices.html#cb67-26" tabindex="-1"></a><span class="co"># BAD</span></span>
+<span id="cb67-27"><a href="code-practices.html#cb67-27" tabindex="-1"></a><span class="kw">def</span> f(x):</span>
+<span id="cb67-28"><a href="code-practices.html#cb67-28" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(x) <span class="op">*</span> <span class="dv">12</span></span></code></pre></div>
 </div>
 <div id="does-it-follow-standards" class="section level3 hasAnchor" number="14.3.6">
 <h3><span class="header-section-number">14.3.6</span> ✅ Does It Follow Standards?<a href="code-practices.html#does-it-follow-standards" class="anchor-section" aria-label="Anchor link to header"></a></h3>
@@ -1077,48 +1078,48 @@ Output: 3420.0  (sum of [100,150,90] * 12)</code></pre>
 <h2><span class="header-section-number">14.6</span> Common Code Problems Claude Might Miss<a href="code-practices.html#common-code-problems-claude-might-miss" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <div id="problem-1-mutating-input" class="section level3 hasAnchor" number="14.6.1">
 <h3><span class="header-section-number">14.6.1</span> ❌ Problem 1: Mutating Input<a href="code-practices.html#problem-1-mutating-input" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb68"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb68-1"><a href="code-practices.html#cb68-1" tabindex="-1"></a><span class="co"># WRONG - modifies input list!</span></span>
-<span id="cb68-2"><a href="code-practices.html#cb68-2" tabindex="-1"></a><span class="kw">def</span> process(items):</span>
-<span id="cb68-3"><a href="code-practices.html#cb68-3" tabindex="-1"></a>    items.sort()</span>
-<span id="cb68-4"><a href="code-practices.html#cb68-4" tabindex="-1"></a>    <span class="cf">return</span> items[<span class="dv">0</span>]</span>
-<span id="cb68-5"><a href="code-practices.html#cb68-5" tabindex="-1"></a></span>
-<span id="cb68-6"><a href="code-practices.html#cb68-6" tabindex="-1"></a><span class="co"># RIGHT - works on copy</span></span>
-<span id="cb68-7"><a href="code-practices.html#cb68-7" tabindex="-1"></a><span class="kw">def</span> process(items):</span>
-<span id="cb68-8"><a href="code-practices.html#cb68-8" tabindex="-1"></a>    sorted_items <span class="op">=</span> <span class="bu">sorted</span>(items)</span>
-<span id="cb68-9"><a href="code-practices.html#cb68-9" tabindex="-1"></a>    <span class="cf">return</span> sorted_items[<span class="dv">0</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb69"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb69-1"><a href="code-practices.html#cb69-1" tabindex="-1"></a><span class="co"># WRONG - modifies input list!</span></span>
+<span id="cb69-2"><a href="code-practices.html#cb69-2" tabindex="-1"></a><span class="kw">def</span> process(items):</span>
+<span id="cb69-3"><a href="code-practices.html#cb69-3" tabindex="-1"></a>    items.sort()</span>
+<span id="cb69-4"><a href="code-practices.html#cb69-4" tabindex="-1"></a>    <span class="cf">return</span> items[<span class="dv">0</span>]</span>
+<span id="cb69-5"><a href="code-practices.html#cb69-5" tabindex="-1"></a></span>
+<span id="cb69-6"><a href="code-practices.html#cb69-6" tabindex="-1"></a><span class="co"># RIGHT - works on copy</span></span>
+<span id="cb69-7"><a href="code-practices.html#cb69-7" tabindex="-1"></a><span class="kw">def</span> process(items):</span>
+<span id="cb69-8"><a href="code-practices.html#cb69-8" tabindex="-1"></a>    sorted_items <span class="op">=</span> <span class="bu">sorted</span>(items)</span>
+<span id="cb69-9"><a href="code-practices.html#cb69-9" tabindex="-1"></a>    <span class="cf">return</span> sorted_items[<span class="dv">0</span>]</span></code></pre></div>
 </div>
 <div id="problem-2-hardcoded-paths" class="section level3 hasAnchor" number="14.6.2">
 <h3><span class="header-section-number">14.6.2</span> ❌ Problem 2: Hardcoded Paths<a href="code-practices.html#problem-2-hardcoded-paths" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb69"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb69-1"><a href="code-practices.html#cb69-1" tabindex="-1"></a><span class="co"># WRONG - only works on one computer</span></span>
-<span id="cb69-2"><a href="code-practices.html#cb69-2" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">&#39;/Users/name/data.csv&#39;</span>)</span>
-<span id="cb69-3"><a href="code-practices.html#cb69-3" tabindex="-1"></a></span>
-<span id="cb69-4"><a href="code-practices.html#cb69-4" tabindex="-1"></a><span class="co"># RIGHT - relative path</span></span>
-<span id="cb69-5"><a href="code-practices.html#cb69-5" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">&#39;../data/customers.csv&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb70"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb70-1"><a href="code-practices.html#cb70-1" tabindex="-1"></a><span class="co"># WRONG - only works on one computer</span></span>
+<span id="cb70-2"><a href="code-practices.html#cb70-2" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">&#39;/Users/name/data.csv&#39;</span>)</span>
+<span id="cb70-3"><a href="code-practices.html#cb70-3" tabindex="-1"></a></span>
+<span id="cb70-4"><a href="code-practices.html#cb70-4" tabindex="-1"></a><span class="co"># RIGHT - relative path</span></span>
+<span id="cb70-5"><a href="code-practices.html#cb70-5" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">&#39;../data/customers.csv&#39;</span>)</span></code></pre></div>
 </div>
 <div id="problem-3-missing-imports" class="section level3 hasAnchor" number="14.6.3">
 <h3><span class="header-section-number">14.6.3</span> ❌ Problem 3: Missing Imports<a href="code-practices.html#problem-3-missing-imports" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb70"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb70-1"><a href="code-practices.html#cb70-1" tabindex="-1"></a><span class="co"># Claude writes code using &#39;os&#39;</span></span>
-<span id="cb70-2"><a href="code-practices.html#cb70-2" tabindex="-1"></a><span class="co"># But forgot to import it</span></span>
-<span id="cb70-3"><a href="code-practices.html#cb70-3" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb70-4"><a href="code-practices.html#cb70-4" tabindex="-1"></a><span class="co"># missing: import os</span></span>
-<span id="cb70-5"><a href="code-practices.html#cb70-5" tabindex="-1"></a></span>
-<span id="cb70-6"><a href="code-practices.html#cb70-6" tabindex="-1"></a>file_path <span class="op">=</span> os.path.join(<span class="st">&#39;data&#39;</span>, <span class="st">&#39;file.csv&#39;</span>)  <span class="co"># ERROR!</span></span></code></pre></div>
+<div class="sourceCode" id="cb71"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb71-1"><a href="code-practices.html#cb71-1" tabindex="-1"></a><span class="co"># Claude writes code using &#39;os&#39;</span></span>
+<span id="cb71-2"><a href="code-practices.html#cb71-2" tabindex="-1"></a><span class="co"># But forgot to import it</span></span>
+<span id="cb71-3"><a href="code-practices.html#cb71-3" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb71-4"><a href="code-practices.html#cb71-4" tabindex="-1"></a><span class="co"># missing: import os</span></span>
+<span id="cb71-5"><a href="code-practices.html#cb71-5" tabindex="-1"></a></span>
+<span id="cb71-6"><a href="code-practices.html#cb71-6" tabindex="-1"></a>file_path <span class="op">=</span> os.path.join(<span class="st">&#39;data&#39;</span>, <span class="st">&#39;file.csv&#39;</span>)  <span class="co"># ERROR!</span></span></code></pre></div>
 </div>
 <div id="problem-4-silent-failures" class="section level3 hasAnchor" number="14.6.4">
 <h3><span class="header-section-number">14.6.4</span> ❌ Problem 4: Silent Failures<a href="code-practices.html#problem-4-silent-failures" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb71"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb71-1"><a href="code-practices.html#cb71-1" tabindex="-1"></a><span class="co"># WRONG - silently returns None if error</span></span>
-<span id="cb71-2"><a href="code-practices.html#cb71-2" tabindex="-1"></a><span class="kw">def</span> get_value(data, key):</span>
-<span id="cb71-3"><a href="code-practices.html#cb71-3" tabindex="-1"></a>    <span class="cf">try</span>:</span>
-<span id="cb71-4"><a href="code-practices.html#cb71-4" tabindex="-1"></a>        <span class="cf">return</span> data[key]</span>
-<span id="cb71-5"><a href="code-practices.html#cb71-5" tabindex="-1"></a>    <span class="cf">except</span>:</span>
-<span id="cb71-6"><a href="code-practices.html#cb71-6" tabindex="-1"></a>        <span class="cf">pass</span>  <span class="co"># What error? Where? Lost forever.</span></span>
-<span id="cb71-7"><a href="code-practices.html#cb71-7" tabindex="-1"></a></span>
-<span id="cb71-8"><a href="code-practices.html#cb71-8" tabindex="-1"></a><span class="co"># RIGHT - logs or raises</span></span>
-<span id="cb71-9"><a href="code-practices.html#cb71-9" tabindex="-1"></a><span class="kw">def</span> get_value(data, key):</span>
-<span id="cb71-10"><a href="code-practices.html#cb71-10" tabindex="-1"></a>    <span class="cf">try</span>:</span>
-<span id="cb71-11"><a href="code-practices.html#cb71-11" tabindex="-1"></a>        <span class="cf">return</span> data[key]</span>
-<span id="cb71-12"><a href="code-practices.html#cb71-12" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">KeyError</span> <span class="im">as</span> e:</span>
-<span id="cb71-13"><a href="code-practices.html#cb71-13" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f&quot;Missing required key: </span><span class="sc">{</span>key<span class="sc">}</span><span class="ss">&quot;</span>) <span class="im">from</span> e</span></code></pre></div>
+<div class="sourceCode" id="cb72"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb72-1"><a href="code-practices.html#cb72-1" tabindex="-1"></a><span class="co"># WRONG - silently returns None if error</span></span>
+<span id="cb72-2"><a href="code-practices.html#cb72-2" tabindex="-1"></a><span class="kw">def</span> get_value(data, key):</span>
+<span id="cb72-3"><a href="code-practices.html#cb72-3" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb72-4"><a href="code-practices.html#cb72-4" tabindex="-1"></a>        <span class="cf">return</span> data[key]</span>
+<span id="cb72-5"><a href="code-practices.html#cb72-5" tabindex="-1"></a>    <span class="cf">except</span>:</span>
+<span id="cb72-6"><a href="code-practices.html#cb72-6" tabindex="-1"></a>        <span class="cf">pass</span>  <span class="co"># What error? Where? Lost forever.</span></span>
+<span id="cb72-7"><a href="code-practices.html#cb72-7" tabindex="-1"></a></span>
+<span id="cb72-8"><a href="code-practices.html#cb72-8" tabindex="-1"></a><span class="co"># RIGHT - logs or raises</span></span>
+<span id="cb72-9"><a href="code-practices.html#cb72-9" tabindex="-1"></a><span class="kw">def</span> get_value(data, key):</span>
+<span id="cb72-10"><a href="code-practices.html#cb72-10" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb72-11"><a href="code-practices.html#cb72-11" tabindex="-1"></a>        <span class="cf">return</span> data[key]</span>
+<span id="cb72-12"><a href="code-practices.html#cb72-12" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">KeyError</span> <span class="im">as</span> e:</span>
+<span id="cb72-13"><a href="code-practices.html#cb72-13" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f&quot;Missing required key: </span><span class="sc">{</span>key<span class="sc">}</span><span class="ss">&quot;</span>) <span class="im">from</span> e</span></code></pre></div>
 </div>
 </div>
 <div id="asking-claude-for-code-review" class="section level2 hasAnchor" number="14.7">

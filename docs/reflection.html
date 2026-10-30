@@ -312,13 +312,14 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="6.4" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#an-annotated-example"><i class="fa fa-check"></i><b>6.4</b> An annotated example</a></li>
 <li class="chapter" data-level="6.5" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#order-and-layout"><i class="fa fa-check"></i><b>6.5</b> Order and layout</a></li>
-<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.6</b> Offline example: assembling a prompt from parts</a></li>
-<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.7</b> Optional: sending the prompt to an API</a></li>
-<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.8</b> Common anatomy mistakes</a></li>
-<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.9</b> Checklist</a></li>
-<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.10</b> Exercise: dissect a prompt</a></li>
-<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.11</b> Key takeaways</a></li>
-<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.12</b> References</a></li>
+<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#system-prompt-altitude"><i class="fa fa-check"></i><b>6.6</b> Calibrating the system prompt</a></li>
+<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.7</b> Offline example: assembling a prompt from parts</a></li>
+<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.8</b> Optional: sending the prompt to an API</a></li>
+<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.9</b> Common anatomy mistakes</a></li>
+<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.10</b> Checklist</a></li>
+<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.11</b> Exercise: dissect a prompt</a></li>
+<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.12</b> Key takeaways</a></li>
+<li class="chapter" data-level="6.13" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.13</b> References</a></li>
 </ul></li>
 <li class="part"><span><b>III Agentic AI</b></span></li>
 <li class="chapter" data-level="7" data-path="agentic-workflows.html"><a href="agentic-workflows.html"><i class="fa fa-check"></i><b>7</b> Agentic Workflows</a>
@@ -1130,26 +1131,26 @@ one.</li>
 query, runs it, and feeds any error or suspicious result back to the model.
 It stops when the checks pass or after three rounds. The helper names are
 illustrative.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb18-1"><a href="reflection.html#cb18-1" tabindex="-1"></a><span class="kw">def</span> answer_with_sql(question, schema, max_rounds<span class="op">=</span><span class="dv">3</span>):</span>
-<span id="cb18-2"><a href="reflection.html#cb18-2" tabindex="-1"></a>    query <span class="op">=</span> llm(<span class="ss">f&quot;Schema:</span><span class="ch">\n</span><span class="sc">{</span>schema<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">Write one SQL query to answer: </span><span class="sc">{</span>question<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb18-3"><a href="reflection.html#cb18-3" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(max_rounds):</span>
-<span id="cb18-4"><a href="reflection.html#cb18-4" tabindex="-1"></a>        result <span class="op">=</span> run_sql(query)                 <span class="co"># tool: the outside world</span></span>
-<span id="cb18-5"><a href="reflection.html#cb18-5" tabindex="-1"></a>        problems <span class="op">=</span> check(result)                <span class="co"># code, not the model&#39;s opinion</span></span>
-<span id="cb18-6"><a href="reflection.html#cb18-6" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> problems:</span>
-<span id="cb18-7"><a href="reflection.html#cb18-7" tabindex="-1"></a>            <span class="cf">return</span> query, result                <span class="co"># stop: objective checks pass</span></span>
-<span id="cb18-8"><a href="reflection.html#cb18-8" tabindex="-1"></a>        query <span class="op">=</span> llm(</span>
-<span id="cb18-9"><a href="reflection.html#cb18-9" tabindex="-1"></a>            <span class="ss">f&quot;Question: </span><span class="sc">{</span>question<span class="sc">}</span><span class="ch">\n</span><span class="ss">Query:</span><span class="ch">\n</span><span class="sc">{</span>query<span class="sc">}</span><span class="ch">\n</span><span class="ss">&quot;</span></span>
-<span id="cb18-10"><a href="reflection.html#cb18-10" tabindex="-1"></a>            <span class="ss">f&quot;Problems found when running it: </span><span class="sc">{</span>problems<span class="sc">}</span><span class="ch">\n</span><span class="ss">&quot;</span></span>
-<span id="cb18-11"><a href="reflection.html#cb18-11" tabindex="-1"></a>            <span class="st">&quot;Return a corrected query only.&quot;</span></span>
-<span id="cb18-12"><a href="reflection.html#cb18-12" tabindex="-1"></a>        )</span>
-<span id="cb18-13"><a href="reflection.html#cb18-13" tabindex="-1"></a>    <span class="cf">return</span> query, <span class="va">None</span>                          <span class="co"># stop: round limit, flag for review</span></span>
-<span id="cb18-14"><a href="reflection.html#cb18-14" tabindex="-1"></a></span>
-<span id="cb18-15"><a href="reflection.html#cb18-15" tabindex="-1"></a><span class="kw">def</span> check(result):</span>
-<span id="cb18-16"><a href="reflection.html#cb18-16" tabindex="-1"></a>    <span class="cf">if</span> result.error:</span>
-<span id="cb18-17"><a href="reflection.html#cb18-17" tabindex="-1"></a>        <span class="cf">return</span> <span class="ss">f&quot;Database error: </span><span class="sc">{</span>result<span class="sc">.</span>error<span class="sc">}</span><span class="ss">&quot;</span></span>
-<span id="cb18-18"><a href="reflection.html#cb18-18" tabindex="-1"></a>    <span class="cf">if</span> result.row_count <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb18-19"><a href="reflection.html#cb18-19" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">&quot;The query returned no rows. Check filters and date ranges.&quot;</span></span>
-<span id="cb18-20"><a href="reflection.html#cb18-20" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">None</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb19-1"><a href="reflection.html#cb19-1" tabindex="-1"></a><span class="kw">def</span> answer_with_sql(question, schema, max_rounds<span class="op">=</span><span class="dv">3</span>):</span>
+<span id="cb19-2"><a href="reflection.html#cb19-2" tabindex="-1"></a>    query <span class="op">=</span> llm(<span class="ss">f&quot;Schema:</span><span class="ch">\n</span><span class="sc">{</span>schema<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">Write one SQL query to answer: </span><span class="sc">{</span>question<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb19-3"><a href="reflection.html#cb19-3" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(max_rounds):</span>
+<span id="cb19-4"><a href="reflection.html#cb19-4" tabindex="-1"></a>        result <span class="op">=</span> run_sql(query)                 <span class="co"># tool: the outside world</span></span>
+<span id="cb19-5"><a href="reflection.html#cb19-5" tabindex="-1"></a>        problems <span class="op">=</span> check(result)                <span class="co"># code, not the model&#39;s opinion</span></span>
+<span id="cb19-6"><a href="reflection.html#cb19-6" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> problems:</span>
+<span id="cb19-7"><a href="reflection.html#cb19-7" tabindex="-1"></a>            <span class="cf">return</span> query, result                <span class="co"># stop: objective checks pass</span></span>
+<span id="cb19-8"><a href="reflection.html#cb19-8" tabindex="-1"></a>        query <span class="op">=</span> llm(</span>
+<span id="cb19-9"><a href="reflection.html#cb19-9" tabindex="-1"></a>            <span class="ss">f&quot;Question: </span><span class="sc">{</span>question<span class="sc">}</span><span class="ch">\n</span><span class="ss">Query:</span><span class="ch">\n</span><span class="sc">{</span>query<span class="sc">}</span><span class="ch">\n</span><span class="ss">&quot;</span></span>
+<span id="cb19-10"><a href="reflection.html#cb19-10" tabindex="-1"></a>            <span class="ss">f&quot;Problems found when running it: </span><span class="sc">{</span>problems<span class="sc">}</span><span class="ch">\n</span><span class="ss">&quot;</span></span>
+<span id="cb19-11"><a href="reflection.html#cb19-11" tabindex="-1"></a>            <span class="st">&quot;Return a corrected query only.&quot;</span></span>
+<span id="cb19-12"><a href="reflection.html#cb19-12" tabindex="-1"></a>        )</span>
+<span id="cb19-13"><a href="reflection.html#cb19-13" tabindex="-1"></a>    <span class="cf">return</span> query, <span class="va">None</span>                          <span class="co"># stop: round limit, flag for review</span></span>
+<span id="cb19-14"><a href="reflection.html#cb19-14" tabindex="-1"></a></span>
+<span id="cb19-15"><a href="reflection.html#cb19-15" tabindex="-1"></a><span class="kw">def</span> check(result):</span>
+<span id="cb19-16"><a href="reflection.html#cb19-16" tabindex="-1"></a>    <span class="cf">if</span> result.error:</span>
+<span id="cb19-17"><a href="reflection.html#cb19-17" tabindex="-1"></a>        <span class="cf">return</span> <span class="ss">f&quot;Database error: </span><span class="sc">{</span>result<span class="sc">.</span>error<span class="sc">}</span><span class="ss">&quot;</span></span>
+<span id="cb19-18"><a href="reflection.html#cb19-18" tabindex="-1"></a>    <span class="cf">if</span> result.row_count <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb19-19"><a href="reflection.html#cb19-19" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">&quot;The query returned no rows. Check filters and date ranges.&quot;</span></span>
+<span id="cb19-20"><a href="reflection.html#cb19-20" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">None</span></span></code></pre></div>
 <p>Three things make this work. The feedback is specific (the actual error
 message). The stop condition is checked by code, not by asking the model if
 it is done. And the loop has a hard limit, with a failure path that a human
@@ -1383,24 +1384,24 @@ specific yes/no criteria. For a chart:</p>
 </ul>
 <p>Sum the passes to get a score. In code, the judge returns one 0 or 1 per
 criterion as JSON, so the scores can be added up and compared:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb20-1"><a href="reflection.html#cb20-1" tabindex="-1"></a>RUBRIC <span class="op">=</span> [<span class="st">&quot;clear_title&quot;</span>, <span class="st">&quot;axes_labeled_with_units&quot;</span>, <span class="st">&quot;appropriate_chart_type&quot;</span>,</span>
-<span id="cb20-2"><a href="reflection.html#cb20-2" tabindex="-1"></a>          <span class="st">&quot;sensible_axis_ranges&quot;</span>, <span class="st">&quot;series_distinguishable&quot;</span>, <span class="st">&quot;answers_question&quot;</span>]</span>
-<span id="cb20-3"><a href="reflection.html#cb20-3" tabindex="-1"></a></span>
-<span id="cb20-4"><a href="reflection.html#cb20-4" tabindex="-1"></a>JUDGE_PROMPT <span class="op">=</span> <span class="st">&quot;&quot;&quot;Grade this chart against each criterion. Score 1 if it fully</span></span>
-<span id="cb20-5"><a href="reflection.html#cb20-5" tabindex="-1"></a><span class="st">meets the criterion, otherwise 0.</span></span>
-<span id="cb20-6"><a href="reflection.html#cb20-6" tabindex="-1"></a><span class="st">Request: </span><span class="sc">{request}</span></span>
-<span id="cb20-7"><a href="reflection.html#cb20-7" tabindex="-1"></a><span class="st">Criteria: </span><span class="sc">{criteria}</span></span>
-<span id="cb20-8"><a href="reflection.html#cb20-8" tabindex="-1"></a><span class="st">Return JSON only, for example </span><span class="sc">{{</span><span class="st">&quot;clear_title&quot;: 1, &quot;axes_labeled_with_units&quot;: 0, ...</span><span class="sc">}}</span><span class="st">&quot;&quot;&quot;</span></span>
-<span id="cb20-9"><a href="reflection.html#cb20-9" tabindex="-1"></a></span>
-<span id="cb20-10"><a href="reflection.html#cb20-10" tabindex="-1"></a><span class="kw">def</span> rubric_score(request, chart_image):</span>
-<span id="cb20-11"><a href="reflection.html#cb20-11" tabindex="-1"></a>    raw <span class="op">=</span> judge_llm(JUDGE_PROMPT.<span class="bu">format</span>(request<span class="op">=</span>request, criteria<span class="op">=</span>RUBRIC),</span>
-<span id="cb20-12"><a href="reflection.html#cb20-12" tabindex="-1"></a>                    image<span class="op">=</span>chart_image)</span>
-<span id="cb20-13"><a href="reflection.html#cb20-13" tabindex="-1"></a>    scores <span class="op">=</span> json.loads(raw)</span>
-<span id="cb20-14"><a href="reflection.html#cb20-14" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(scores[c] <span class="cf">for</span> c <span class="kw">in</span> RUBRIC)          <span class="co"># 0 to 6</span></span>
-<span id="cb20-15"><a href="reflection.html#cb20-15" tabindex="-1"></a></span>
-<span id="cb20-16"><a href="reflection.html#cb20-16" tabindex="-1"></a>with_refl <span class="op">=</span> [rubric_score(r, make_chart(r, reflect<span class="op">=</span><span class="va">True</span>))  <span class="cf">for</span> r <span class="kw">in</span> requests]</span>
-<span id="cb20-17"><a href="reflection.html#cb20-17" tabindex="-1"></a>without   <span class="op">=</span> [rubric_score(r, make_chart(r, reflect<span class="op">=</span><span class="va">False</span>)) <span class="cf">for</span> r <span class="kw">in</span> requests]</span>
-<span id="cb20-18"><a href="reflection.html#cb20-18" tabindex="-1"></a><span class="bu">print</span>(mean(with_refl), mean(without))</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb21-1"><a href="reflection.html#cb21-1" tabindex="-1"></a>RUBRIC <span class="op">=</span> [<span class="st">&quot;clear_title&quot;</span>, <span class="st">&quot;axes_labeled_with_units&quot;</span>, <span class="st">&quot;appropriate_chart_type&quot;</span>,</span>
+<span id="cb21-2"><a href="reflection.html#cb21-2" tabindex="-1"></a>          <span class="st">&quot;sensible_axis_ranges&quot;</span>, <span class="st">&quot;series_distinguishable&quot;</span>, <span class="st">&quot;answers_question&quot;</span>]</span>
+<span id="cb21-3"><a href="reflection.html#cb21-3" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="reflection.html#cb21-4" tabindex="-1"></a>JUDGE_PROMPT <span class="op">=</span> <span class="st">&quot;&quot;&quot;Grade this chart against each criterion. Score 1 if it fully</span></span>
+<span id="cb21-5"><a href="reflection.html#cb21-5" tabindex="-1"></a><span class="st">meets the criterion, otherwise 0.</span></span>
+<span id="cb21-6"><a href="reflection.html#cb21-6" tabindex="-1"></a><span class="st">Request: </span><span class="sc">{request}</span></span>
+<span id="cb21-7"><a href="reflection.html#cb21-7" tabindex="-1"></a><span class="st">Criteria: </span><span class="sc">{criteria}</span></span>
+<span id="cb21-8"><a href="reflection.html#cb21-8" tabindex="-1"></a><span class="st">Return JSON only, for example </span><span class="sc">{{</span><span class="st">&quot;clear_title&quot;: 1, &quot;axes_labeled_with_units&quot;: 0, ...</span><span class="sc">}}</span><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb21-9"><a href="reflection.html#cb21-9" tabindex="-1"></a></span>
+<span id="cb21-10"><a href="reflection.html#cb21-10" tabindex="-1"></a><span class="kw">def</span> rubric_score(request, chart_image):</span>
+<span id="cb21-11"><a href="reflection.html#cb21-11" tabindex="-1"></a>    raw <span class="op">=</span> judge_llm(JUDGE_PROMPT.<span class="bu">format</span>(request<span class="op">=</span>request, criteria<span class="op">=</span>RUBRIC),</span>
+<span id="cb21-12"><a href="reflection.html#cb21-12" tabindex="-1"></a>                    image<span class="op">=</span>chart_image)</span>
+<span id="cb21-13"><a href="reflection.html#cb21-13" tabindex="-1"></a>    scores <span class="op">=</span> json.loads(raw)</span>
+<span id="cb21-14"><a href="reflection.html#cb21-14" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(scores[c] <span class="cf">for</span> c <span class="kw">in</span> RUBRIC)          <span class="co"># 0 to 6</span></span>
+<span id="cb21-15"><a href="reflection.html#cb21-15" tabindex="-1"></a></span>
+<span id="cb21-16"><a href="reflection.html#cb21-16" tabindex="-1"></a>with_refl <span class="op">=</span> [rubric_score(r, make_chart(r, reflect<span class="op">=</span><span class="va">True</span>))  <span class="cf">for</span> r <span class="kw">in</span> requests]</span>
+<span id="cb21-17"><a href="reflection.html#cb21-17" tabindex="-1"></a>without   <span class="op">=</span> [rubric_score(r, make_chart(r, reflect<span class="op">=</span><span class="va">False</span>)) <span class="cf">for</span> r <span class="kw">in</span> requests]</span>
+<span id="cb21-18"><a href="reflection.html#cb21-18" tabindex="-1"></a><span class="bu">print</span>(mean(with_refl), mean(without))</span></code></pre></div>
 <p>Each chart is graded on its own, so position bias does not arise. The
 per-criterion scores also show <em>which</em> criterion reflection improves. Practitioners widely report that several
 binary criteria give more consistent judgments than asking for a single 1–5

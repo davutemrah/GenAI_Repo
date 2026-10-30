@@ -312,13 +312,14 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="6.4" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#an-annotated-example"><i class="fa fa-check"></i><b>6.4</b> An annotated example</a></li>
 <li class="chapter" data-level="6.5" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#order-and-layout"><i class="fa fa-check"></i><b>6.5</b> Order and layout</a></li>
-<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.6</b> Offline example: assembling a prompt from parts</a></li>
-<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.7</b> Optional: sending the prompt to an API</a></li>
-<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.8</b> Common anatomy mistakes</a></li>
-<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.9</b> Checklist</a></li>
-<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.10</b> Exercise: dissect a prompt</a></li>
-<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.11</b> Key takeaways</a></li>
-<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.12</b> References</a></li>
+<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#system-prompt-altitude"><i class="fa fa-check"></i><b>6.6</b> Calibrating the system prompt</a></li>
+<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.7</b> Offline example: assembling a prompt from parts</a></li>
+<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.8</b> Optional: sending the prompt to an API</a></li>
+<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.9</b> Common anatomy mistakes</a></li>
+<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.10</b> Checklist</a></li>
+<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.11</b> Exercise: dissect a prompt</a></li>
+<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.12</b> Key takeaways</a></li>
+<li class="chapter" data-level="6.13" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.13</b> References</a></li>
 </ul></li>
 <li class="part"><span><b>III Agentic AI</b></span></li>
 <li class="chapter" data-level="7" data-path="agentic-workflows.html"><a href="agentic-workflows.html"><i class="fa fa-check"></i><b>7</b> Agentic Workflows</a>
@@ -1097,7 +1098,8 @@ for parallel, separable work, not by default.</li>
 <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Anthropic guide</a>:</p>
 <ul>
 <li>Write system prompts at the “right altitude”: specific enough to guide
-behavior, but heuristic rather than a brittle list of rules.</li>
+behavior, but heuristic rather than a brittle list of rules (Section
+<a href="prompt-anatomy.html#system-prompt-altitude">6.6</a> compares the three levels).</li>
 <li>Use a few diverse, canonical examples rather than every edge case.</li>
 <li>Make tools self-contained, robust to errors, and clearly distinct from one
 another. Return compact tool outputs, not raw dumps.</li>
@@ -1412,28 +1414,28 @@ whether its lift or overlap summary is correct.</li>
 <p>This illustrative check implements the third caution. It is an instructional
 example, not tested production code, and the regular expression handles only
 simple number formats.</p>
-<div class="sourceCode" id="cb122"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb122-1"><a href="context-harness-engineering.html#cb122-1" tabindex="-1"></a><span class="im">import</span> re</span>
-<span id="cb122-2"><a href="context-harness-engineering.html#cb122-2" tabindex="-1"></a></span>
-<span id="cb122-3"><a href="context-harness-engineering.html#cb122-3" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb122-4"><a href="context-harness-engineering.html#cb122-4" tabindex="-1"></a></span>
-<span id="cb122-5"><a href="context-harness-engineering.html#cb122-5" tabindex="-1"></a></span>
-<span id="cb122-6"><a href="context-harness-engineering.html#cb122-6" tabindex="-1"></a><span class="kw">def</span> numbers_in_text(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">set</span>[<span class="bu">float</span>]:</span>
-<span id="cb122-7"><a href="context-harness-engineering.html#cb122-7" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Extract plain numbers such as 12, 3.5, 1,200 or 45% from narrative text.&quot;&quot;&quot;</span></span>
-<span id="cb122-8"><a href="context-harness-engineering.html#cb122-8" tabindex="-1"></a>    tokens <span class="op">=</span> re.findall(<span class="vs">r&quot;-</span><span class="op">?</span><span class="dv">\d</span><span class="pp">[</span><span class="dv">\d</span><span class="pp">,]</span><span class="op">*</span><span class="ch">\.</span><span class="op">?</span><span class="dv">\d</span><span class="op">*</span><span class="vs">&quot;</span>, text)</span>
-<span id="cb122-9"><a href="context-harness-engineering.html#cb122-9" tabindex="-1"></a>    <span class="cf">return</span> {<span class="bu">round</span>(<span class="bu">float</span>(t.replace(<span class="st">&quot;,&quot;</span>, <span class="st">&quot;&quot;</span>)), <span class="dv">2</span>) <span class="cf">for</span> t <span class="kw">in</span> tokens}</span>
-<span id="cb122-10"><a href="context-harness-engineering.html#cb122-10" tabindex="-1"></a></span>
-<span id="cb122-11"><a href="context-harness-engineering.html#cb122-11" tabindex="-1"></a></span>
-<span id="cb122-12"><a href="context-harness-engineering.html#cb122-12" tabindex="-1"></a><span class="kw">def</span> unsupported_numbers(narrative: <span class="bu">str</span>, result: pd.DataFrame) <span class="op">-&gt;</span> <span class="bu">set</span>[<span class="bu">float</span>]:</span>
-<span id="cb122-13"><a href="context-harness-engineering.html#cb122-13" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Return numbers in the narrative that do not appear in the result table.&quot;&quot;&quot;</span></span>
-<span id="cb122-14"><a href="context-harness-engineering.html#cb122-14" tabindex="-1"></a>    numeric <span class="op">=</span> result.select_dtypes(<span class="st">&quot;number&quot;</span>).to_numpy().ravel()</span>
-<span id="cb122-15"><a href="context-harness-engineering.html#cb122-15" tabindex="-1"></a>    allowed <span class="op">=</span> {<span class="bu">round</span>(<span class="bu">float</span>(x), <span class="dv">2</span>) <span class="cf">for</span> x <span class="kw">in</span> numeric}</span>
-<span id="cb122-16"><a href="context-harness-engineering.html#cb122-16" tabindex="-1"></a>    allowed <span class="op">|=</span> {<span class="bu">round</span>(<span class="bu">float</span>(x) <span class="op">*</span> <span class="dv">100</span>, <span class="dv">2</span>) <span class="cf">for</span> x <span class="kw">in</span> numeric}  <span class="co"># shares shown as %</span></span>
-<span id="cb122-17"><a href="context-harness-engineering.html#cb122-17" tabindex="-1"></a>    <span class="cf">return</span> numbers_in_text(narrative) <span class="op">-</span> allowed</span>
-<span id="cb122-18"><a href="context-harness-engineering.html#cb122-18" tabindex="-1"></a></span>
-<span id="cb122-19"><a href="context-harness-engineering.html#cb122-19" tabindex="-1"></a></span>
-<span id="cb122-20"><a href="context-harness-engineering.html#cb122-20" tabindex="-1"></a>result <span class="op">=</span> pd.DataFrame({<span class="st">&quot;segment&quot;</span>: [<span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>], <span class="st">&quot;overlap_rate&quot;</span>: [<span class="fl">0.18</span>, <span class="fl">0.07</span>]})</span>
-<span id="cb122-21"><a href="context-harness-engineering.html#cb122-21" tabindex="-1"></a>narrative <span class="op">=</span> <span class="st">&quot;Segment A overlaps 18% with the seed audience, versus 9</span><span class="sc">% f</span><span class="st">or B.&quot;</span></span>
-<span id="cb122-22"><a href="context-harness-engineering.html#cb122-22" tabindex="-1"></a><span class="bu">print</span>(unsupported_numbers(narrative, result))  <span class="co"># {9.0} -&gt; flag for review</span></span></code></pre></div>
+<div class="sourceCode" id="cb123"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb123-1"><a href="context-harness-engineering.html#cb123-1" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb123-2"><a href="context-harness-engineering.html#cb123-2" tabindex="-1"></a></span>
+<span id="cb123-3"><a href="context-harness-engineering.html#cb123-3" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb123-4"><a href="context-harness-engineering.html#cb123-4" tabindex="-1"></a></span>
+<span id="cb123-5"><a href="context-harness-engineering.html#cb123-5" tabindex="-1"></a></span>
+<span id="cb123-6"><a href="context-harness-engineering.html#cb123-6" tabindex="-1"></a><span class="kw">def</span> numbers_in_text(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">set</span>[<span class="bu">float</span>]:</span>
+<span id="cb123-7"><a href="context-harness-engineering.html#cb123-7" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Extract plain numbers such as 12, 3.5, 1,200 or 45% from narrative text.&quot;&quot;&quot;</span></span>
+<span id="cb123-8"><a href="context-harness-engineering.html#cb123-8" tabindex="-1"></a>    tokens <span class="op">=</span> re.findall(<span class="vs">r&quot;-</span><span class="op">?</span><span class="dv">\d</span><span class="pp">[</span><span class="dv">\d</span><span class="pp">,]</span><span class="op">*</span><span class="ch">\.</span><span class="op">?</span><span class="dv">\d</span><span class="op">*</span><span class="vs">&quot;</span>, text)</span>
+<span id="cb123-9"><a href="context-harness-engineering.html#cb123-9" tabindex="-1"></a>    <span class="cf">return</span> {<span class="bu">round</span>(<span class="bu">float</span>(t.replace(<span class="st">&quot;,&quot;</span>, <span class="st">&quot;&quot;</span>)), <span class="dv">2</span>) <span class="cf">for</span> t <span class="kw">in</span> tokens}</span>
+<span id="cb123-10"><a href="context-harness-engineering.html#cb123-10" tabindex="-1"></a></span>
+<span id="cb123-11"><a href="context-harness-engineering.html#cb123-11" tabindex="-1"></a></span>
+<span id="cb123-12"><a href="context-harness-engineering.html#cb123-12" tabindex="-1"></a><span class="kw">def</span> unsupported_numbers(narrative: <span class="bu">str</span>, result: pd.DataFrame) <span class="op">-&gt;</span> <span class="bu">set</span>[<span class="bu">float</span>]:</span>
+<span id="cb123-13"><a href="context-harness-engineering.html#cb123-13" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Return numbers in the narrative that do not appear in the result table.&quot;&quot;&quot;</span></span>
+<span id="cb123-14"><a href="context-harness-engineering.html#cb123-14" tabindex="-1"></a>    numeric <span class="op">=</span> result.select_dtypes(<span class="st">&quot;number&quot;</span>).to_numpy().ravel()</span>
+<span id="cb123-15"><a href="context-harness-engineering.html#cb123-15" tabindex="-1"></a>    allowed <span class="op">=</span> {<span class="bu">round</span>(<span class="bu">float</span>(x), <span class="dv">2</span>) <span class="cf">for</span> x <span class="kw">in</span> numeric}</span>
+<span id="cb123-16"><a href="context-harness-engineering.html#cb123-16" tabindex="-1"></a>    allowed <span class="op">|=</span> {<span class="bu">round</span>(<span class="bu">float</span>(x) <span class="op">*</span> <span class="dv">100</span>, <span class="dv">2</span>) <span class="cf">for</span> x <span class="kw">in</span> numeric}  <span class="co"># shares shown as %</span></span>
+<span id="cb123-17"><a href="context-harness-engineering.html#cb123-17" tabindex="-1"></a>    <span class="cf">return</span> numbers_in_text(narrative) <span class="op">-</span> allowed</span>
+<span id="cb123-18"><a href="context-harness-engineering.html#cb123-18" tabindex="-1"></a></span>
+<span id="cb123-19"><a href="context-harness-engineering.html#cb123-19" tabindex="-1"></a></span>
+<span id="cb123-20"><a href="context-harness-engineering.html#cb123-20" tabindex="-1"></a>result <span class="op">=</span> pd.DataFrame({<span class="st">&quot;segment&quot;</span>: [<span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>], <span class="st">&quot;overlap_rate&quot;</span>: [<span class="fl">0.18</span>, <span class="fl">0.07</span>]})</span>
+<span id="cb123-21"><a href="context-harness-engineering.html#cb123-21" tabindex="-1"></a>narrative <span class="op">=</span> <span class="st">&quot;Segment A overlaps 18% with the seed audience, versus 9</span><span class="sc">% f</span><span class="st">or B.&quot;</span></span>
+<span id="cb123-22"><a href="context-harness-engineering.html#cb123-22" tabindex="-1"></a><span class="bu">print</span>(unsupported_numbers(narrative, result))  <span class="co"># {9.0} -&gt; flag for review</span></span></code></pre></div>
 <p>In a harness, this check runs after the model writes its summary. If it finds
 unsupported numbers, the app either asks the model to revise using only the
 table or shows the table without the narrative.</p>

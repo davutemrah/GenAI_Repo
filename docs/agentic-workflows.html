@@ -312,13 +312,14 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="6.4" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#an-annotated-example"><i class="fa fa-check"></i><b>6.4</b> An annotated example</a></li>
 <li class="chapter" data-level="6.5" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#order-and-layout"><i class="fa fa-check"></i><b>6.5</b> Order and layout</a></li>
-<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.6</b> Offline example: assembling a prompt from parts</a></li>
-<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.7</b> Optional: sending the prompt to an API</a></li>
-<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.8</b> Common anatomy mistakes</a></li>
-<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.9</b> Checklist</a></li>
-<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.10</b> Exercise: dissect a prompt</a></li>
-<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.11</b> Key takeaways</a></li>
-<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.12</b> References</a></li>
+<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#system-prompt-altitude"><i class="fa fa-check"></i><b>6.6</b> Calibrating the system prompt</a></li>
+<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.7</b> Offline example: assembling a prompt from parts</a></li>
+<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.8</b> Optional: sending the prompt to an API</a></li>
+<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.9</b> Common anatomy mistakes</a></li>
+<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.10</b> Checklist</a></li>
+<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.11</b> Exercise: dissect a prompt</a></li>
+<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.12</b> Key takeaways</a></li>
+<li class="chapter" data-level="6.13" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.13</b> References</a></li>
 </ul></li>
 <li class="part"><span><b>III Agentic AI</b></span></li>
 <li class="chapter" data-level="7" data-path="agentic-workflows.html"><a href="agentic-workflows.html"><i class="fa fa-check"></i><b>7</b> Agentic Workflows</a>
@@ -1003,21 +1004,21 @@ range of requests but are harder to control and predict.</p>
 clearly in code. In a fixed workflow, the developer writes the sequence. In an
 agent, the model picks the next step inside a loop. Both sketches below are
 illustrative, not a specific library.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a href="agentic-workflows.html#cb16-1" tabindex="-1"></a><span class="co"># Workflow: the developer fixes every step.</span></span>
-<span id="cb16-2"><a href="agentic-workflows.html#cb16-2" tabindex="-1"></a><span class="kw">def</span> weekly_report(week):</span>
-<span id="cb16-3"><a href="agentic-workflows.html#cb16-3" tabindex="-1"></a>    spend <span class="op">=</span> query_db(<span class="st">&quot;SELECT channel, spend, conversions FROM ads WHERE week = ?&quot;</span>, week)</span>
-<span id="cb16-4"><a href="agentic-workflows.html#cb16-4" tabindex="-1"></a>    notes <span class="op">=</span> llm(<span class="st">&quot;Summarize what changed versus last week:</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span> spend)</span>
-<span id="cb16-5"><a href="agentic-workflows.html#cb16-5" tabindex="-1"></a>    <span class="cf">return</span> llm(<span class="st">&quot;Write a one-page report for the CMO:</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span> notes)</span>
-<span id="cb16-6"><a href="agentic-workflows.html#cb16-6" tabindex="-1"></a></span>
-<span id="cb16-7"><a href="agentic-workflows.html#cb16-7" tabindex="-1"></a><span class="co"># Agent: the model decides which tool to call next, and when to stop.</span></span>
-<span id="cb16-8"><a href="agentic-workflows.html#cb16-8" tabindex="-1"></a><span class="kw">def</span> weekly_report_agent(week, tools, max_steps<span class="op">=</span><span class="dv">10</span>):</span>
-<span id="cb16-9"><a href="agentic-workflows.html#cb16-9" tabindex="-1"></a>    history <span class="op">=</span> [<span class="ss">f&quot;Write the weekly campaign report for </span><span class="sc">{</span>week<span class="sc">}</span><span class="ss">.&quot;</span>]</span>
-<span id="cb16-10"><a href="agentic-workflows.html#cb16-10" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(max_steps):</span>
-<span id="cb16-11"><a href="agentic-workflows.html#cb16-11" tabindex="-1"></a>        action <span class="op">=</span> llm_choose_action(history, tools)   <span class="co"># e.g. query_db, web_search, finish</span></span>
-<span id="cb16-12"><a href="agentic-workflows.html#cb16-12" tabindex="-1"></a>        <span class="cf">if</span> action.name <span class="op">==</span> <span class="st">&quot;finish&quot;</span>:</span>
-<span id="cb16-13"><a href="agentic-workflows.html#cb16-13" tabindex="-1"></a>            <span class="cf">return</span> action.text</span>
-<span id="cb16-14"><a href="agentic-workflows.html#cb16-14" tabindex="-1"></a>        history.append(tools[action.name](<span class="op">**</span>action.args))</span>
-<span id="cb16-15"><a href="agentic-workflows.html#cb16-15" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">&quot;Stopped: step limit reached.&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="agentic-workflows.html#cb17-1" tabindex="-1"></a><span class="co"># Workflow: the developer fixes every step.</span></span>
+<span id="cb17-2"><a href="agentic-workflows.html#cb17-2" tabindex="-1"></a><span class="kw">def</span> weekly_report(week):</span>
+<span id="cb17-3"><a href="agentic-workflows.html#cb17-3" tabindex="-1"></a>    spend <span class="op">=</span> query_db(<span class="st">&quot;SELECT channel, spend, conversions FROM ads WHERE week = ?&quot;</span>, week)</span>
+<span id="cb17-4"><a href="agentic-workflows.html#cb17-4" tabindex="-1"></a>    notes <span class="op">=</span> llm(<span class="st">&quot;Summarize what changed versus last week:</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span> spend)</span>
+<span id="cb17-5"><a href="agentic-workflows.html#cb17-5" tabindex="-1"></a>    <span class="cf">return</span> llm(<span class="st">&quot;Write a one-page report for the CMO:</span><span class="ch">\n</span><span class="st">&quot;</span> <span class="op">+</span> notes)</span>
+<span id="cb17-6"><a href="agentic-workflows.html#cb17-6" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="agentic-workflows.html#cb17-7" tabindex="-1"></a><span class="co"># Agent: the model decides which tool to call next, and when to stop.</span></span>
+<span id="cb17-8"><a href="agentic-workflows.html#cb17-8" tabindex="-1"></a><span class="kw">def</span> weekly_report_agent(week, tools, max_steps<span class="op">=</span><span class="dv">10</span>):</span>
+<span id="cb17-9"><a href="agentic-workflows.html#cb17-9" tabindex="-1"></a>    history <span class="op">=</span> [<span class="ss">f&quot;Write the weekly campaign report for </span><span class="sc">{</span>week<span class="sc">}</span><span class="ss">.&quot;</span>]</span>
+<span id="cb17-10"><a href="agentic-workflows.html#cb17-10" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(max_steps):</span>
+<span id="cb17-11"><a href="agentic-workflows.html#cb17-11" tabindex="-1"></a>        action <span class="op">=</span> llm_choose_action(history, tools)   <span class="co"># e.g. query_db, web_search, finish</span></span>
+<span id="cb17-12"><a href="agentic-workflows.html#cb17-12" tabindex="-1"></a>        <span class="cf">if</span> action.name <span class="op">==</span> <span class="st">&quot;finish&quot;</span>:</span>
+<span id="cb17-13"><a href="agentic-workflows.html#cb17-13" tabindex="-1"></a>            <span class="cf">return</span> action.text</span>
+<span id="cb17-14"><a href="agentic-workflows.html#cb17-14" tabindex="-1"></a>        history.append(tools[action.name](<span class="op">**</span>action.args))</span>
+<span id="cb17-15"><a href="agentic-workflows.html#cb17-15" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">&quot;Stopped: step limit reached.&quot;</span></span></code></pre></div>
 <p>The workflow always runs the same three steps, so it is easy to test. The
 agent can look up a competitor’s promotion when conversions drop, but you
 cannot know in advance which steps it will take. Note the step limit: an
@@ -1319,15 +1320,15 @@ measure one step.</li>
 wrong. Systematically reading them is <strong>error analysis</strong>.</li>
 </ul>
 <p>A code-based check for the competitor problem takes a few lines:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="agentic-workflows.html#cb17-1" tabindex="-1"></a>COMPETITORS <span class="op">=</span> [<span class="st">&quot;rivalco&quot;</span>, <span class="st">&quot;shopmart&quot;</span>, <span class="st">&quot;dealzone&quot;</span>]</span>
-<span id="cb17-2"><a href="agentic-workflows.html#cb17-2" tabindex="-1"></a></span>
-<span id="cb17-3"><a href="agentic-workflows.html#cb17-3" tabindex="-1"></a><span class="kw">def</span> mentions_competitor(reply: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">bool</span>:</span>
-<span id="cb17-4"><a href="agentic-workflows.html#cb17-4" tabindex="-1"></a>    text <span class="op">=</span> reply.lower()</span>
-<span id="cb17-5"><a href="agentic-workflows.html#cb17-5" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">any</span>(name <span class="kw">in</span> text <span class="cf">for</span> name <span class="kw">in</span> COMPETITORS)</span>
-<span id="cb17-6"><a href="agentic-workflows.html#cb17-6" tabindex="-1"></a></span>
-<span id="cb17-7"><a href="agentic-workflows.html#cb17-7" tabindex="-1"></a>replies <span class="op">=</span> [run_agent(email) <span class="cf">for</span> email <span class="kw">in</span> test_emails]   <span class="co"># 20-50 real emails</span></span>
-<span id="cb17-8"><a href="agentic-workflows.html#cb17-8" tabindex="-1"></a>error_rate <span class="op">=</span> <span class="bu">sum</span>(mentions_competitor(r) <span class="cf">for</span> r <span class="kw">in</span> replies) <span class="op">/</span> <span class="bu">len</span>(replies)</span>
-<span id="cb17-9"><a href="agentic-workflows.html#cb17-9" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Replies naming a competitor: </span><span class="sc">{</span>error_rate<span class="sc">:.0%}</span><span class="ss">&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb18-1"><a href="agentic-workflows.html#cb18-1" tabindex="-1"></a>COMPETITORS <span class="op">=</span> [<span class="st">&quot;rivalco&quot;</span>, <span class="st">&quot;shopmart&quot;</span>, <span class="st">&quot;dealzone&quot;</span>]</span>
+<span id="cb18-2"><a href="agentic-workflows.html#cb18-2" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="agentic-workflows.html#cb18-3" tabindex="-1"></a><span class="kw">def</span> mentions_competitor(reply: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">bool</span>:</span>
+<span id="cb18-4"><a href="agentic-workflows.html#cb18-4" tabindex="-1"></a>    text <span class="op">=</span> reply.lower()</span>
+<span id="cb18-5"><a href="agentic-workflows.html#cb18-5" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">any</span>(name <span class="kw">in</span> text <span class="cf">for</span> name <span class="kw">in</span> COMPETITORS)</span>
+<span id="cb18-6"><a href="agentic-workflows.html#cb18-6" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="agentic-workflows.html#cb18-7" tabindex="-1"></a>replies <span class="op">=</span> [run_agent(email) <span class="cf">for</span> email <span class="kw">in</span> test_emails]   <span class="co"># 20-50 real emails</span></span>
+<span id="cb18-8"><a href="agentic-workflows.html#cb18-8" tabindex="-1"></a>error_rate <span class="op">=</span> <span class="bu">sum</span>(mentions_competitor(r) <span class="cf">for</span> r <span class="kw">in</span> replies) <span class="op">/</span> <span class="bu">len</span>(replies)</span>
+<span id="cb18-9"><a href="agentic-workflows.html#cb18-9" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;Replies naming a competitor: </span><span class="sc">{</span>error_rate<span class="sc">:.0%}</span><span class="ss">&quot;</span>)</span></code></pre></div>
 <p>Run it after every change to the prompt or model. If the rate goes up, the
 change made things worse, whatever else improved.</p>
 <p>Chapter <a href="evaluating-agentic-systems.html#evaluating-agentic-systems">10</a> develops all of this. It is the

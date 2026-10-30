@@ -31,8 +31,17 @@ Phase 5 (2026-10-25): source edits done. By-name references converted to
 action: the screenshot is the degrees-of-autonomy slide (already in A1), and
 the text file is the lab's package list.
 
-Next: full render + book-wide link check (not yet run), then commit on
-Davut's request.
+Full render + book-wide link check done (2026-10-29): clean, no broken
+refs, citations, links, or images. Committed and pushed as `e648258`;
+GitHub Pages deploy verified.
+
+Gap 4 (2026-10-29): done, awaiting Davut's review. New section
+`{#system-prompt-altitude}` in `prompting/01_Prompt_Anatomy.Rmd`
+(three-level comparison table plus the full "about right" prompt for a
+paid-media reporting assistant), one key takeaway, Anthropic context
+engineering reference, link from `claude/11`. Full render clean.
+
+Next: the lab breakdowns.
 
 ## Phase 6: step-by-step chapter review (planned 2026-10-25)
 
@@ -142,11 +151,11 @@ Progress:
   boxes, five-line summary. Ch 2: one sentence under three objectives, a
   parallelism decision table, a compute-optimal sizing example, 7 "In
   short" boxes, five-line summary. Full render clean.
-- LLM part complete. Remaining Phase 6 items: gap 4 (too-specific / right /
-  too-vague system-prompt table in `prompting/01_Prompt_Anatomy.Rmd`); then
-  the lab breakdowns; then archive the course folders (Davut's call);
-  full-book link check and commit on Davut's request. Gap 4 (system-prompt table) belongs to the
-  prompting chapter; do it after the LLM part.
+  Davut approved Ch 1 and Ch 2 (2026-10-29).
+- LLM part complete; all ten chapters approved. Remaining Phase 6 items:
+  gap 4 (too-specific / right / too-vague system-prompt table in
+  `prompting/01_Prompt_Anatomy.Rmd`); then the lab breakdowns; then archive
+  the course folders (Davut's call).
 
 ## Rules (carried over from the Coursera LLM integration)
 

@@ -312,13 +312,14 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="6.4" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#an-annotated-example"><i class="fa fa-check"></i><b>6.4</b> An annotated example</a></li>
 <li class="chapter" data-level="6.5" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#order-and-layout"><i class="fa fa-check"></i><b>6.5</b> Order and layout</a></li>
-<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.6</b> Offline example: assembling a prompt from parts</a></li>
-<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.7</b> Optional: sending the prompt to an API</a></li>
-<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.8</b> Common anatomy mistakes</a></li>
-<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.9</b> Checklist</a></li>
-<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.10</b> Exercise: dissect a prompt</a></li>
-<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.11</b> Key takeaways</a></li>
-<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.12</b> References</a></li>
+<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#system-prompt-altitude"><i class="fa fa-check"></i><b>6.6</b> Calibrating the system prompt</a></li>
+<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.7</b> Offline example: assembling a prompt from parts</a></li>
+<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.8</b> Optional: sending the prompt to an API</a></li>
+<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.9</b> Common anatomy mistakes</a></li>
+<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.10</b> Checklist</a></li>
+<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.11</b> Exercise: dissect a prompt</a></li>
+<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.12</b> Key takeaways</a></li>
+<li class="chapter" data-level="6.13" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.13</b> References</a></li>
 </ul></li>
 <li class="part"><span><b>III Agentic AI</b></span></li>
 <li class="chapter" data-level="7" data-path="agentic-workflows.html"><a href="agentic-workflows.html"><i class="fa fa-check"></i><b>7</b> Agentic Workflows</a>
@@ -916,21 +917,21 @@ receives an explicit decision.</p>
 <div id="example-format-edited-python-files" class="section level2 hasAnchor" number="17.4">
 <h2><span class="header-section-number">17.4</span> Example: format edited Python files<a href="claude-code-hooks.html#example-format-edited-python-files" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>The following project setting illustrates a narrowly scoped post-edit hook:</p>
-<div class="sourceCode" id="cb91"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb91-1"><a href="claude-code-hooks.html#cb91-1" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb91-2"><a href="claude-code-hooks.html#cb91-2" tabindex="-1"></a>  <span class="dt">&quot;hooks&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb91-3"><a href="claude-code-hooks.html#cb91-3" tabindex="-1"></a>    <span class="dt">&quot;PostToolUse&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb91-4"><a href="claude-code-hooks.html#cb91-4" tabindex="-1"></a>      <span class="fu">{</span></span>
-<span id="cb91-5"><a href="claude-code-hooks.html#cb91-5" tabindex="-1"></a>        <span class="dt">&quot;matcher&quot;</span><span class="fu">:</span> <span class="st">&quot;Edit|Write&quot;</span><span class="fu">,</span></span>
-<span id="cb91-6"><a href="claude-code-hooks.html#cb91-6" tabindex="-1"></a>        <span class="dt">&quot;hooks&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb91-7"><a href="claude-code-hooks.html#cb91-7" tabindex="-1"></a>          <span class="fu">{</span></span>
-<span id="cb91-8"><a href="claude-code-hooks.html#cb91-8" tabindex="-1"></a>            <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;command&quot;</span><span class="fu">,</span></span>
-<span id="cb91-9"><a href="claude-code-hooks.html#cb91-9" tabindex="-1"></a>            <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;python .claude/hooks/format_python.py&quot;</span></span>
-<span id="cb91-10"><a href="claude-code-hooks.html#cb91-10" tabindex="-1"></a>          <span class="fu">}</span></span>
-<span id="cb91-11"><a href="claude-code-hooks.html#cb91-11" tabindex="-1"></a>        <span class="ot">]</span></span>
-<span id="cb91-12"><a href="claude-code-hooks.html#cb91-12" tabindex="-1"></a>      <span class="fu">}</span></span>
-<span id="cb91-13"><a href="claude-code-hooks.html#cb91-13" tabindex="-1"></a>    <span class="ot">]</span></span>
-<span id="cb91-14"><a href="claude-code-hooks.html#cb91-14" tabindex="-1"></a>  <span class="fu">}</span></span>
-<span id="cb91-15"><a href="claude-code-hooks.html#cb91-15" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb92"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb92-1"><a href="claude-code-hooks.html#cb92-1" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb92-2"><a href="claude-code-hooks.html#cb92-2" tabindex="-1"></a>  <span class="dt">&quot;hooks&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb92-3"><a href="claude-code-hooks.html#cb92-3" tabindex="-1"></a>    <span class="dt">&quot;PostToolUse&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb92-4"><a href="claude-code-hooks.html#cb92-4" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb92-5"><a href="claude-code-hooks.html#cb92-5" tabindex="-1"></a>        <span class="dt">&quot;matcher&quot;</span><span class="fu">:</span> <span class="st">&quot;Edit|Write&quot;</span><span class="fu">,</span></span>
+<span id="cb92-6"><a href="claude-code-hooks.html#cb92-6" tabindex="-1"></a>        <span class="dt">&quot;hooks&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb92-7"><a href="claude-code-hooks.html#cb92-7" tabindex="-1"></a>          <span class="fu">{</span></span>
+<span id="cb92-8"><a href="claude-code-hooks.html#cb92-8" tabindex="-1"></a>            <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;command&quot;</span><span class="fu">,</span></span>
+<span id="cb92-9"><a href="claude-code-hooks.html#cb92-9" tabindex="-1"></a>            <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;python .claude/hooks/format_python.py&quot;</span></span>
+<span id="cb92-10"><a href="claude-code-hooks.html#cb92-10" tabindex="-1"></a>          <span class="fu">}</span></span>
+<span id="cb92-11"><a href="claude-code-hooks.html#cb92-11" tabindex="-1"></a>        <span class="ot">]</span></span>
+<span id="cb92-12"><a href="claude-code-hooks.html#cb92-12" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb92-13"><a href="claude-code-hooks.html#cb92-13" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb92-14"><a href="claude-code-hooks.html#cb92-14" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb92-15"><a href="claude-code-hooks.html#cb92-15" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 <p>The script should read the event JSON from standard input, validate the supplied
 path, do nothing for non-Python files, and invoke the project’s pinned formatter.
 Avoid interpolating untrusted paths directly into a shell command. Prefer a

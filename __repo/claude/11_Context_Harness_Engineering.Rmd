@@ -177,7 +177,8 @@ Supporting guidance from the
 [Anthropic guide](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents):
 
 - Write system prompts at the "right altitude": specific enough to guide
-  behavior, but heuristic rather than a brittle list of rules.
+  behavior, but heuristic rather than a brittle list of rules (Section
+  \@ref(system-prompt-altitude) compares the three levels).
 - Use a few diverse, canonical examples rather than every edge case.
 - Make tools self-contained, robust to errors, and clearly distinct from one
   another. Return compact tool outputs, not raw dumps.

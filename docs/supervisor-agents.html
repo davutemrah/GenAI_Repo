@@ -312,13 +312,14 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="6.4" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#an-annotated-example"><i class="fa fa-check"></i><b>6.4</b> An annotated example</a></li>
 <li class="chapter" data-level="6.5" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#order-and-layout"><i class="fa fa-check"></i><b>6.5</b> Order and layout</a></li>
-<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.6</b> Offline example: assembling a prompt from parts</a></li>
-<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.7</b> Optional: sending the prompt to an API</a></li>
-<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.8</b> Common anatomy mistakes</a></li>
-<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.9</b> Checklist</a></li>
-<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.10</b> Exercise: dissect a prompt</a></li>
-<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.11</b> Key takeaways</a></li>
-<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.12</b> References</a></li>
+<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#system-prompt-altitude"><i class="fa fa-check"></i><b>6.6</b> Calibrating the system prompt</a></li>
+<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.7</b> Offline example: assembling a prompt from parts</a></li>
+<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.8</b> Optional: sending the prompt to an API</a></li>
+<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.9</b> Common anatomy mistakes</a></li>
+<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.10</b> Checklist</a></li>
+<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.11</b> Exercise: dissect a prompt</a></li>
+<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.12</b> Key takeaways</a></li>
+<li class="chapter" data-level="6.13" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.13</b> References</a></li>
 </ul></li>
 <li class="part"><span><b>III Agentic AI</b></span></li>
 <li class="chapter" data-level="7" data-path="agentic-workflows.html"><a href="agentic-workflows.html"><i class="fa fa-check"></i><b>7</b> Agentic Workflows</a>
@@ -1120,17 +1121,17 @@ Python examples for applications such as a Streamlit app on Databricks Apps.</li
 <h3><span class="header-section-number">25.3.7</span> Managing supervisors with the SDK (Beta)<a href="supervisor-agents.html#managing-supervisors-with-the-sdk-beta" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>The Databricks SDK for Python can create supervisors and manage their tools.
 From the documentation:</p>
-<div class="sourceCode" id="cb127"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb127-1"><a href="supervisor-agents.html#cb127-1" tabindex="-1"></a><span class="im">from</span> databricks.sdk <span class="im">import</span> WorkspaceClient</span>
-<span id="cb127-2"><a href="supervisor-agents.html#cb127-2" tabindex="-1"></a><span class="im">from</span> databricks.sdk.service.supervisoragents <span class="im">import</span> SupervisorAgent</span>
-<span id="cb127-3"><a href="supervisor-agents.html#cb127-3" tabindex="-1"></a></span>
-<span id="cb127-4"><a href="supervisor-agents.html#cb127-4" tabindex="-1"></a>w <span class="op">=</span> WorkspaceClient()</span>
-<span id="cb127-5"><a href="supervisor-agents.html#cb127-5" tabindex="-1"></a>supervisor_agent <span class="op">=</span> SupervisorAgent(</span>
-<span id="cb127-6"><a href="supervisor-agents.html#cb127-6" tabindex="-1"></a>    display_name<span class="op">=</span><span class="st">&quot;&lt;display-name&gt;&quot;</span>,</span>
-<span id="cb127-7"><a href="supervisor-agents.html#cb127-7" tabindex="-1"></a>    description<span class="op">=</span><span class="st">&quot;&lt;description&gt;&quot;</span>,</span>
-<span id="cb127-8"><a href="supervisor-agents.html#cb127-8" tabindex="-1"></a>    instructions<span class="op">=</span><span class="st">&quot;&lt;instructions&gt;&quot;</span>,</span>
-<span id="cb127-9"><a href="supervisor-agents.html#cb127-9" tabindex="-1"></a>)</span>
-<span id="cb127-10"><a href="supervisor-agents.html#cb127-10" tabindex="-1"></a>created <span class="op">=</span> w.supervisor_agents.create_supervisor_agent(supervisor_agent<span class="op">=</span>supervisor_agent)</span>
-<span id="cb127-11"><a href="supervisor-agents.html#cb127-11" tabindex="-1"></a><span class="bu">print</span>(created)</span></code></pre></div>
+<div class="sourceCode" id="cb128"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb128-1"><a href="supervisor-agents.html#cb128-1" tabindex="-1"></a><span class="im">from</span> databricks.sdk <span class="im">import</span> WorkspaceClient</span>
+<span id="cb128-2"><a href="supervisor-agents.html#cb128-2" tabindex="-1"></a><span class="im">from</span> databricks.sdk.service.supervisoragents <span class="im">import</span> SupervisorAgent</span>
+<span id="cb128-3"><a href="supervisor-agents.html#cb128-3" tabindex="-1"></a></span>
+<span id="cb128-4"><a href="supervisor-agents.html#cb128-4" tabindex="-1"></a>w <span class="op">=</span> WorkspaceClient()</span>
+<span id="cb128-5"><a href="supervisor-agents.html#cb128-5" tabindex="-1"></a>supervisor_agent <span class="op">=</span> SupervisorAgent(</span>
+<span id="cb128-6"><a href="supervisor-agents.html#cb128-6" tabindex="-1"></a>    display_name<span class="op">=</span><span class="st">&quot;&lt;display-name&gt;&quot;</span>,</span>
+<span id="cb128-7"><a href="supervisor-agents.html#cb128-7" tabindex="-1"></a>    description<span class="op">=</span><span class="st">&quot;&lt;description&gt;&quot;</span>,</span>
+<span id="cb128-8"><a href="supervisor-agents.html#cb128-8" tabindex="-1"></a>    instructions<span class="op">=</span><span class="st">&quot;&lt;instructions&gt;&quot;</span>,</span>
+<span id="cb128-9"><a href="supervisor-agents.html#cb128-9" tabindex="-1"></a>)</span>
+<span id="cb128-10"><a href="supervisor-agents.html#cb128-10" tabindex="-1"></a>created <span class="op">=</span> w.supervisor_agents.create_supervisor_agent(supervisor_agent<span class="op">=</span>supervisor_agent)</span>
+<span id="cb128-11"><a href="supervisor-agents.html#cb128-11" tabindex="-1"></a><span class="bu">print</span>(created)</span></code></pre></div>
 <p>Tools (subagents) are added with <code>w.supervisor_agents.create_tool(...)</code>, and
 their descriptions can be updated with <code>update_tool</code>. This lets a team keep
 supervisor configurations in version control and recreate them across

@@ -312,13 +312,14 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="6.4" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#an-annotated-example"><i class="fa fa-check"></i><b>6.4</b> An annotated example</a></li>
 <li class="chapter" data-level="6.5" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#order-and-layout"><i class="fa fa-check"></i><b>6.5</b> Order and layout</a></li>
-<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.6</b> Offline example: assembling a prompt from parts</a></li>
-<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.7</b> Optional: sending the prompt to an API</a></li>
-<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.8</b> Common anatomy mistakes</a></li>
-<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.9</b> Checklist</a></li>
-<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.10</b> Exercise: dissect a prompt</a></li>
-<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.11</b> Key takeaways</a></li>
-<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.12</b> References</a></li>
+<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#system-prompt-altitude"><i class="fa fa-check"></i><b>6.6</b> Calibrating the system prompt</a></li>
+<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.7</b> Offline example: assembling a prompt from parts</a></li>
+<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.8</b> Optional: sending the prompt to an API</a></li>
+<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.9</b> Common anatomy mistakes</a></li>
+<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.10</b> Checklist</a></li>
+<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.11</b> Exercise: dissect a prompt</a></li>
+<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.12</b> Key takeaways</a></li>
+<li class="chapter" data-level="6.13" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.13</b> References</a></li>
 </ul></li>
 <li class="part"><span><b>III Agentic AI</b></span></li>
 <li class="chapter" data-level="7" data-path="agentic-workflows.html"><a href="agentic-workflows.html"><i class="fa fa-check"></i><b>7</b> Agentic Workflows</a>
@@ -963,14 +964,14 @@ input has its own correct answer or key points) or a <strong>shared criterion</s
 <p>Prefer code whenever the criterion is objective. It is cheap, fast, and
 deterministic. Make outputs easy to check: if the prompt tells the model to
 write dates as <code>YYYY-MM-DD</code>, a few lines of code can grade them.</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb29-1"><a href="evaluating-agentic-systems.html#cb29-1" tabindex="-1"></a><span class="im">import</span> re</span>
-<span id="cb29-2"><a href="evaluating-agentic-systems.html#cb29-2" tabindex="-1"></a></span>
-<span id="cb29-3"><a href="evaluating-agentic-systems.html#cb29-3" tabindex="-1"></a><span class="kw">def</span> due_date_correct(output: <span class="bu">str</span>, label: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">bool</span>:</span>
-<span id="cb29-4"><a href="evaluating-agentic-systems.html#cb29-4" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Compare the first ISO date in the model output with the labeled due date.&quot;&quot;&quot;</span></span>
-<span id="cb29-5"><a href="evaluating-agentic-systems.html#cb29-5" tabindex="-1"></a>    match <span class="op">=</span> re.search(<span class="vs">r&quot;</span><span class="dv">\d</span><span class="op">{4}</span><span class="vs">-</span><span class="dv">\d</span><span class="op">{2}</span><span class="vs">-</span><span class="dv">\d</span><span class="op">{2}</span><span class="vs">&quot;</span>, output)</span>
-<span id="cb29-6"><a href="evaluating-agentic-systems.html#cb29-6" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">bool</span>(match) <span class="kw">and</span> match.group() <span class="op">==</span> label</span>
-<span id="cb29-7"><a href="evaluating-agentic-systems.html#cb29-7" tabindex="-1"></a></span>
-<span id="cb29-8"><a href="evaluating-agentic-systems.html#cb29-8" tabindex="-1"></a>accuracy <span class="op">=</span> <span class="bu">sum</span>(due_date_correct(o, y) <span class="cf">for</span> o, y <span class="kw">in</span> <span class="bu">zip</span>(outputs, labels)) <span class="op">/</span> <span class="bu">len</span>(labels)</span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb30-1"><a href="evaluating-agentic-systems.html#cb30-1" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb30-2"><a href="evaluating-agentic-systems.html#cb30-2" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="evaluating-agentic-systems.html#cb30-3" tabindex="-1"></a><span class="kw">def</span> due_date_correct(output: <span class="bu">str</span>, label: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">bool</span>:</span>
+<span id="cb30-4"><a href="evaluating-agentic-systems.html#cb30-4" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Compare the first ISO date in the model output with the labeled due date.&quot;&quot;&quot;</span></span>
+<span id="cb30-5"><a href="evaluating-agentic-systems.html#cb30-5" tabindex="-1"></a>    match <span class="op">=</span> re.search(<span class="vs">r&quot;</span><span class="dv">\d</span><span class="op">{4}</span><span class="vs">-</span><span class="dv">\d</span><span class="op">{2}</span><span class="vs">-</span><span class="dv">\d</span><span class="op">{2}</span><span class="vs">&quot;</span>, output)</span>
+<span id="cb30-6"><a href="evaluating-agentic-systems.html#cb30-6" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">bool</span>(match) <span class="kw">and</span> match.group() <span class="op">==</span> label</span>
+<span id="cb30-7"><a href="evaluating-agentic-systems.html#cb30-7" tabindex="-1"></a></span>
+<span id="cb30-8"><a href="evaluating-agentic-systems.html#cb30-8" tabindex="-1"></a>accuracy <span class="op">=</span> <span class="bu">sum</span>(due_date_correct(o, y) <span class="cf">for</span> o, y <span class="kw">in</span> <span class="bu">zip</span>(outputs, labels)) <span class="op">/</span> <span class="bu">len</span>(labels)</span></code></pre></div>
 <p>For the ad-copy example there is no per-example label; the check is simply
 <code>len(headline) &lt;= 30</code> for every output.</p>
 </div>
