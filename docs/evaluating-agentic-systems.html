@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 10 Evaluating and Improving Agentic Systems | Generative AI, Large Language Models, and Coding Agents</title>
+  <meta name="description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
+  <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 10 Evaluating and Improving Agentic Systems | Generative AI, Large Language Models, and Coding Agents" />
+  <meta property="og:type" content="book" />
+  
+  <meta property="og:description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
+  <meta name="github-repo" content="davutemrah/GenAI_Repo" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 10 Evaluating and Improving Agentic Systems | Generative AI, Large Language Models, and Coding Agents" />
+  
+  <meta name="twitter:description" content="Study notes on generative AI and large language models, with practical, verification-centered workflows for Claude and AI coding agents." />
+  
+
+<meta name="author" content="Davut Ayan" />
+
+
+<meta name="date" content="2026-10-29" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="tool-use.html"/>
+<link rel="next" href="planning-multi-agent.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+
+
+<style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">GenAI &amp; Coding Agents</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a>
+<ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#how-to-use-this-book"><i class="fa fa-check"></i>How to use this book</a></li>
+</ul></li>
+<li class="part"><span><b>I LLM Foundations</b></span></li>
+<li class="chapter" data-level="1" data-path="foundations-of-generative-ai-and-llms.html"><a href="foundations-of-generative-ai-and-llms.html"><i class="fa fa-check"></i><b>1</b> Foundations of Generative AI and LLMs</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="foundations-of-generative-ai-and-llms.html"><a href="foundations-of-generative-ai-and-llms.html#what-generative-ai-is"><i class="fa fa-check"></i><b>1.1</b> What generative AI is</a></li>
+<li class="chapter" data-level="1.2" data-path="foundations-of-generative-ai-and-llms.html"><a href="foundations-of-generative-ai-and-llms.html#what-llms-are-used-for"><i class="fa fa-check"></i><b>1.2</b> What LLMs are used for</a></li>
+<li class="chapter" data-level="1.3" data-path="foundations-of-generative-ai-and-llms.html"><a href="foundations-of-generative-ai-and-llms.html#before-transformers-recurrent-networks"><i class="fa fa-check"></i><b>1.3</b> Before transformers: recurrent networks</a></li>
+<li class="chapter" data-level="1.4" data-path="foundations-of-generative-ai-and-llms.html"><a href="foundations-of-generative-ai-and-llms.html#the-transformer"><i class="fa fa-check"></i><b>1.4</b> The transformer</a>
+<ul>
+<li class="chapter" data-level="1.4.1" data-path="foundations-of-generative-ai-and-llms.html"><a href="foundations-of-generative-ai-and-llms.html#from-text-to-vectors"><i class="fa fa-check"></i><b>1.4.1</b> From text to vectors</a></li>
+<li class="chapter" data-level="1.4.2" data-path="foundations-of-generative-ai-and-llms.html"><a href="foundations-of-generative-ai-and-llms.html#self-attention"><i class="fa fa-check"></i><b>1.4.2</b> Self-attention</a></li>
+<li class="chapter" data-level="1.4.3" data-path="foundations-of-generative-ai-and-llms.html"><a href="foundations-of-generative-ai-and-llms.html#the-rest-of-a-transformer-block"><i class="fa fa-check"></i><b>1.4.3</b> The rest of a transformer block</a></li>
+<li class="chapter" data-level="1.4.4" data-path="foundations-of-generative-ai-and-llms.html"><a href="foundations-of-generative-ai-and-llms.html#encoder-decoder-and-the-three-model-families"><i class="fa fa-check"></i><b>1.4.4</b> Encoder, decoder, and the three model families</a></li>
+<li class="chapter" data-level="1.4.5" data-path="foundations-of-generative-ai-and-llms.html"><a href="foundations-of-generative-ai-and-llms.html#generating-text-end-to-end"><i class="fa fa-check"></i><b>1.4.5</b> Generating text, end to end</a></li>
+<li class="chapter" data-level="1.4.6" data-path="foundations-of-generative-ai-and-llms.html"><a href="foundations-of-generative-ai-and-llms.html#landmark-models"><i class="fa fa-check"></i><b>1.4.6</b> Landmark models</a></li>
+</ul></li>
+<li class="chapter" data-level="1.5" data-path="foundations-of-generative-ai-and-llms.html"><a href="foundations-of-generative-ai-and-llms.html#prompt-engineering"><i class="fa fa-check"></i><b>1.5</b> Prompting and in-context learning</a></li>
+<li class="chapter" data-level="1.6" data-path="foundations-of-generative-ai-and-llms.html"><a href="foundations-of-generative-ai-and-llms.html#configuring-generative-ai-models"><i class="fa fa-check"></i><b>1.6</b> Configuring generation</a></li>
+<li class="chapter" data-level="1.7" data-path="foundations-of-generative-ai-and-llms.html"><a href="foundations-of-generative-ai-and-llms.html#generative-ai-project-lifecycle"><i class="fa fa-check"></i><b>1.7</b> The generative AI project lifecycle</a>
+<ul>
+<li class="chapter" data-level="1.7.1" data-path="foundations-of-generative-ai-and-llms.html"><a href="foundations-of-generative-ai-and-llms.html#what-each-lever-costs"><i class="fa fa-check"></i><b>1.7.1</b> What each lever costs</a></li>
+</ul></li>
+<li class="chapter" data-level="1.8" data-path="foundations-of-generative-ai-and-llms.html"><a href="foundations-of-generative-ai-and-llms.html#key-takeaways"><i class="fa fa-check"></i><b>1.8</b> Key takeaways</a></li>
+<li class="chapter" data-level="1.9" data-path="foundations-of-generative-ai-and-llms.html"><a href="foundations-of-generative-ai-and-llms.html#interview-checkpoints"><i class="fa fa-check"></i><b>1.9</b> Interview checkpoints</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="pre-training-and-scaling-large-language-models.html"><a href="pre-training-and-scaling-large-language-models.html"><i class="fa fa-check"></i><b>2</b> Pre-training and Scaling Large Language Models</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="pre-training-and-scaling-large-language-models.html"><a href="pre-training-and-scaling-large-language-models.html#choosing-a-starting-model"><i class="fa fa-check"></i><b>2.1</b> Choosing a starting model</a></li>
+<li class="chapter" data-level="2.2" data-path="pre-training-and-scaling-large-language-models.html"><a href="pre-training-and-scaling-large-language-models.html#pre-training-objectives-and-architecture-families"><i class="fa fa-check"></i><b>2.2</b> Pre-training objectives and architecture families</a></li>
+<li class="chapter" data-level="2.3" data-path="pre-training-and-scaling-large-language-models.html"><a href="pre-training-and-scaling-large-language-models.html#memory-challenges-in-training-llms"><i class="fa fa-check"></i><b>2.3</b> Why training does not fit on one GPU</a></li>
+<li class="chapter" data-level="2.4" data-path="pre-training-and-scaling-large-language-models.html"><a href="pre-training-and-scaling-large-language-models.html#quantization-techniques"><i class="fa fa-check"></i><b>2.4</b> Number formats and quantization</a></li>
+<li class="chapter" data-level="2.5" data-path="pre-training-and-scaling-large-language-models.html"><a href="pre-training-and-scaling-large-language-models.html#distributed-training"><i class="fa fa-check"></i><b>2.5</b> Distributed training</a>
+<ul>
+<li class="chapter" data-level="2.5.1" data-path="pre-training-and-scaling-large-language-models.html"><a href="pre-training-and-scaling-large-language-models.html#data-parallelism-ddp"><i class="fa fa-check"></i><b>2.5.1</b> Data parallelism (DDP)</a></li>
+<li class="chapter" data-level="2.5.2" data-path="pre-training-and-scaling-large-language-models.html"><a href="pre-training-and-scaling-large-language-models.html#sharding-zero-and-fsdp"><i class="fa fa-check"></i><b>2.5.2</b> Sharding: ZeRO and FSDP</a></li>
+<li class="chapter" data-level="2.5.3" data-path="pre-training-and-scaling-large-language-models.html"><a href="pre-training-and-scaling-large-language-models.html#model-parallelism"><i class="fa fa-check"></i><b>2.5.3</b> Model parallelism</a></li>
+</ul></li>
+<li class="chapter" data-level="2.6" data-path="pre-training-and-scaling-large-language-models.html"><a href="pre-training-and-scaling-large-language-models.html#scaling-laws"><i class="fa fa-check"></i><b>2.6</b> Scaling laws</a>
+<ul>
+<li class="chapter" data-level="2.6.1" data-path="pre-training-and-scaling-large-language-models.html"><a href="pre-training-and-scaling-large-language-models.html#kaplan-et-al.-loss-follows-power-laws"><i class="fa fa-check"></i><b>2.6.1</b> Kaplan et al.: loss follows power laws</a></li>
+<li class="chapter" data-level="2.6.2" data-path="pre-training-and-scaling-large-language-models.html"><a href="pre-training-and-scaling-large-language-models.html#chinchilla-scale-data-and-parameters-together"><i class="fa fa-check"></i><b>2.6.2</b> Chinchilla: scale data and parameters together</a></li>
+</ul></li>
+<li class="chapter" data-level="2.7" data-path="pre-training-and-scaling-large-language-models.html"><a href="pre-training-and-scaling-large-language-models.html#domain-adaptation-and-pre-training-your-own-model"><i class="fa fa-check"></i><b>2.7</b> Domain adaptation and pre-training your own model</a>
+<ul>
+<li class="chapter" data-level="2.7.1" data-path="pre-training-and-scaling-large-language-models.html"><a href="pre-training-and-scaling-large-language-models.html#case-study-bloomberggpt"><i class="fa fa-check"></i><b>2.7.1</b> Case study: BloombergGPT</a></li>
+</ul></li>
+<li class="chapter" data-level="2.8" data-path="pre-training-and-scaling-large-language-models.html"><a href="pre-training-and-scaling-large-language-models.html#key-takeaways-1"><i class="fa fa-check"></i><b>2.8</b> Key takeaways</a></li>
+<li class="chapter" data-level="2.9" data-path="pre-training-and-scaling-large-language-models.html"><a href="pre-training-and-scaling-large-language-models.html#interview-checkpoints-1"><i class="fa fa-check"></i><b>2.9</b> Interview checkpoints</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html"><i class="fa fa-check"></i><b>3</b> Fine-Tuning and Evaluation</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#why-fine-tune-instead-of-prompting"><i class="fa fa-check"></i><b>3.1</b> Why fine-tune instead of prompting</a></li>
+<li class="chapter" data-level="3.2" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#instruction-fine-tuning"><i class="fa fa-check"></i><b>3.2</b> Instruction fine-tuning</a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#building-the-dataset"><i class="fa fa-check"></i><b>3.2.1</b> Building the dataset</a></li>
+<li class="chapter" data-level="3.2.2" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#training-objective"><i class="fa fa-check"></i><b>3.2.2</b> Training objective</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#single-task-fine-tuning-and-catastrophic-forgetting"><i class="fa fa-check"></i><b>3.3</b> Single-task fine-tuning and catastrophic forgetting</a></li>
+<li class="chapter" data-level="3.4" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#multi-task-instruction-fine-tuning-and-flan"><i class="fa fa-check"></i><b>3.4</b> Multi-task instruction fine-tuning and FLAN</a></li>
+<li class="chapter" data-level="3.5" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#peft"><i class="fa fa-check"></i><b>3.5</b> Parameter-efficient fine-tuning (PEFT)</a>
+<ul>
+<li class="chapter" data-level="3.5.1" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#three-families-of-methods"><i class="fa fa-check"></i><b>3.5.1</b> Three families of methods</a></li>
+<li class="chapter" data-level="3.5.2" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#lora-low-rank-adaptation"><i class="fa fa-check"></i><b>3.5.2</b> LoRA: low-rank adaptation</a></li>
+<li class="chapter" data-level="3.5.3" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#qlora-lora-on-a-quantized-base"><i class="fa fa-check"></i><b>3.5.3</b> QLoRA: LoRA on a quantized base</a></li>
+<li class="chapter" data-level="3.5.4" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#prompt-tuning-with-soft-prompts"><i class="fa fa-check"></i><b>3.5.4</b> Prompt tuning with soft prompts</a></li>
+<li class="chapter" data-level="3.5.5" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#choosing-an-adaptation-method"><i class="fa fa-check"></i><b>3.5.5</b> Choosing an adaptation method</a></li>
+</ul></li>
+<li class="chapter" data-level="3.6" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#evaluating-model-performance-in-language-tasks"><i class="fa fa-check"></i><b>3.6</b> Evaluating fine-tuned models</a>
+<ul>
+<li class="chapter" data-level="3.6.1" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#rouge"><i class="fa fa-check"></i><b>3.6.1</b> ROUGE</a></li>
+<li class="chapter" data-level="3.6.2" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#bleu"><i class="fa fa-check"></i><b>3.6.2</b> BLEU</a></li>
+<li class="chapter" data-level="3.6.3" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#beyond-overlap-metrics"><i class="fa fa-check"></i><b>3.6.3</b> Beyond overlap metrics</a></li>
+</ul></li>
+<li class="chapter" data-level="3.7" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#benchmarks"><i class="fa fa-check"></i><b>3.7</b> Benchmarks</a></li>
+<li class="chapter" data-level="3.8" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#key-takeaways-2"><i class="fa fa-check"></i><b>3.8</b> Key takeaways</a></li>
+<li class="chapter" data-level="3.9" data-path="instruction-fine-tuning-and-evaluation.html"><a href="instruction-fine-tuning-and-evaluation.html#interview-checkpoints-2"><i class="fa fa-check"></i><b>3.9</b> Interview checkpoints</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="alignment-human-feedback.html"><a href="alignment-human-feedback.html"><i class="fa fa-check"></i><b>4</b> Aligning LLMs with Human Feedback</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="alignment-human-feedback.html"><a href="alignment-human-feedback.html#why-preferences-instead-of-demonstrations"><i class="fa fa-check"></i><b>4.1</b> Why preferences instead of demonstrations</a></li>
+<li class="chapter" data-level="4.2" data-path="alignment-human-feedback.html"><a href="alignment-human-feedback.html#reinforcement-learning-mapped-to-language-models"><i class="fa fa-check"></i><b>4.2</b> Reinforcement learning, mapped to language models</a></li>
+<li class="chapter" data-level="4.3" data-path="alignment-human-feedback.html"><a href="alignment-human-feedback.html#the-rlhf-pipeline"><i class="fa fa-check"></i><b>4.3</b> The RLHF pipeline</a>
+<ul>
+<li class="chapter" data-level="4.3.1" data-path="alignment-human-feedback.html"><a href="alignment-human-feedback.html#collecting-human-feedback"><i class="fa fa-check"></i><b>4.3.1</b> Collecting human feedback</a></li>
+<li class="chapter" data-level="4.3.2" data-path="alignment-human-feedback.html"><a href="alignment-human-feedback.html#training-the-reward-model"><i class="fa fa-check"></i><b>4.3.2</b> Training the reward model</a></li>
+<li class="chapter" data-level="4.3.3" data-path="alignment-human-feedback.html"><a href="alignment-human-feedback.html#the-rl-objective-and-the-kl-penalty"><i class="fa fa-check"></i><b>4.3.3</b> The RL objective and the KL penalty</a></li>
+<li class="chapter" data-level="4.3.4" data-path="alignment-human-feedback.html"><a href="alignment-human-feedback.html#ppo-in-the-llm-setting"><i class="fa fa-check"></i><b>4.3.4</b> PPO in the LLM setting</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="alignment-human-feedback.html"><a href="alignment-human-feedback.html#reward-hacking"><i class="fa fa-check"></i><b>4.4</b> Reward hacking</a></li>
+<li class="chapter" data-level="4.5" data-path="alignment-human-feedback.html"><a href="alignment-human-feedback.html#evaluating-an-aligned-model"><i class="fa fa-check"></i><b>4.5</b> Evaluating an aligned model</a></li>
+<li class="chapter" data-level="4.6" data-path="alignment-human-feedback.html"><a href="alignment-human-feedback.html#scaling-feedback-constitutional-ai-and-rlaif"><i class="fa fa-check"></i><b>4.6</b> Scaling feedback: Constitutional AI and RLAIF</a></li>
+<li class="chapter" data-level="4.7" data-path="alignment-human-feedback.html"><a href="alignment-human-feedback.html#beyond-ppo-current-alignment-methods"><i class="fa fa-check"></i><b>4.7</b> Beyond PPO: current alignment methods</a>
+<ul>
+<li class="chapter" data-level="4.7.1" data-path="alignment-human-feedback.html"><a href="alignment-human-feedback.html#direct-preference-optimization-dpo"><i class="fa fa-check"></i><b>4.7.1</b> Direct Preference Optimization (DPO)</a></li>
+<li class="chapter" data-level="4.7.2" data-path="alignment-human-feedback.html"><a href="alignment-human-feedback.html#rl-with-verifiable-rewards-and-grpo"><i class="fa fa-check"></i><b>4.7.2</b> RL with verifiable rewards and GRPO</a></li>
+<li class="chapter" data-level="4.7.3" data-path="alignment-human-feedback.html"><a href="alignment-human-feedback.html#method-comparison"><i class="fa fa-check"></i><b>4.7.3</b> Method comparison</a></li>
+</ul></li>
+<li class="chapter" data-level="4.8" data-path="alignment-human-feedback.html"><a href="alignment-human-feedback.html#key-takeaways-3"><i class="fa fa-check"></i><b>4.8</b> Key takeaways</a></li>
+<li class="chapter" data-level="4.9" data-path="alignment-human-feedback.html"><a href="alignment-human-feedback.html#interview-checkpoints-3"><i class="fa fa-check"></i><b>4.9</b> Interview checkpoints</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="llm-applications.html"><a href="llm-applications.html"><i class="fa fa-check"></i><b>5</b> From Model to Application</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="llm-applications.html"><a href="llm-applications.html#optimizing-models-for-inference"><i class="fa fa-check"></i><b>5.1</b> Optimizing models for inference</a>
+<ul>
+<li class="chapter" data-level="5.1.1" data-path="llm-applications.html"><a href="llm-applications.html#knowledge-distillation"><i class="fa fa-check"></i><b>5.1.1</b> Knowledge distillation</a></li>
+<li class="chapter" data-level="5.1.2" data-path="llm-applications.html"><a href="llm-applications.html#post-training-quantization"><i class="fa fa-check"></i><b>5.1.2</b> Post-training quantization</a></li>
+<li class="chapter" data-level="5.1.3" data-path="llm-applications.html"><a href="llm-applications.html#pruning"><i class="fa fa-check"></i><b>5.1.3</b> Pruning</a></li>
+<li class="chapter" data-level="5.1.4" data-path="llm-applications.html"><a href="llm-applications.html#serving-side-optimizations"><i class="fa fa-check"></i><b>5.1.4</b> Serving-side optimizations</a></li>
+<li class="chapter" data-level="5.1.5" data-path="llm-applications.html"><a href="llm-applications.html#effort-across-the-lifecycle"><i class="fa fa-check"></i><b>5.1.5</b> Effort across the lifecycle</a></li>
+</ul></li>
+<li class="chapter" data-level="5.2" data-path="llm-applications.html"><a href="llm-applications.html#problems-that-training-alone-does-not-solve"><i class="fa fa-check"></i><b>5.2</b> Problems that training alone does not solve</a></li>
+<li class="chapter" data-level="5.3" data-path="llm-applications.html"><a href="llm-applications.html#retrieval-augmented-generation-rag"><i class="fa fa-check"></i><b>5.3</b> Retrieval-augmented generation (RAG)</a>
+<ul>
+<li class="chapter" data-level="5.3.1" data-path="llm-applications.html"><a href="llm-applications.html#the-original-formulation"><i class="fa fa-check"></i><b>5.3.1</b> The original formulation</a></li>
+<li class="chapter" data-level="5.3.2" data-path="llm-applications.html"><a href="llm-applications.html#a-typical-rag-pipeline-today"><i class="fa fa-check"></i><b>5.3.2</b> A typical RAG pipeline today</a></li>
+<li class="chapter" data-level="5.3.3" data-path="llm-applications.html"><a href="llm-applications.html#what-makes-rag-work-or-fail"><i class="fa fa-check"></i><b>5.3.3</b> What makes RAG work or fail</a></li>
+</ul></li>
+<li class="chapter" data-level="5.4" data-path="llm-applications.html"><a href="llm-applications.html#helping-models-reason"><i class="fa fa-check"></i><b>5.4</b> Helping models reason</a>
+<ul>
+<li class="chapter" data-level="5.4.1" data-path="llm-applications.html"><a href="llm-applications.html#chain-of-thought-prompting"><i class="fa fa-check"></i><b>5.4.1</b> Chain-of-thought prompting</a></li>
+<li class="chapter" data-level="5.4.2" data-path="llm-applications.html"><a href="llm-applications.html#program-aided-language-models-pal"><i class="fa fa-check"></i><b>5.4.2</b> Program-aided language models (PAL)</a></li>
+<li class="chapter" data-level="5.4.3" data-path="llm-applications.html"><a href="llm-applications.html#react-reasoning-plus-acting"><i class="fa fa-check"></i><b>5.4.3</b> ReAct: reasoning plus acting</a></li>
+</ul></li>
+<li class="chapter" data-level="5.5" data-path="llm-applications.html"><a href="llm-applications.html#the-application-stack"><i class="fa fa-check"></i><b>5.5</b> The application stack</a></li>
+<li class="chapter" data-level="5.6" data-path="llm-applications.html"><a href="llm-applications.html#responsible-generative-ai"><i class="fa fa-check"></i><b>5.6</b> Responsible generative AI</a></li>
+<li class="chapter" data-level="5.7" data-path="llm-applications.html"><a href="llm-applications.html#key-takeaways-4"><i class="fa fa-check"></i><b>5.7</b> Key takeaways</a></li>
+<li class="chapter" data-level="5.8" data-path="llm-applications.html"><a href="llm-applications.html#interview-checkpoints-4"><i class="fa fa-check"></i><b>5.8</b> Interview checkpoints</a></li>
+</ul></li>
+<li class="part"><span><b>II Prompt Engineering</b></span></li>
+<li class="chapter" data-level="6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html"><i class="fa fa-check"></i><b>6</b> Anatomy of a Prompt</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#what-a-prompt-is"><i class="fa fa-check"></i><b>6.1</b> What a prompt is</a></li>
+<li class="chapter" data-level="6.2" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#messages-and-roles"><i class="fa fa-check"></i><b>6.2</b> Messages and roles</a></li>
+<li class="chapter" data-level="6.3" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#the-building-blocks"><i class="fa fa-check"></i><b>6.3</b> The building blocks</a>
+<ul>
+<li class="chapter" data-level="6.3.1" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#task"><i class="fa fa-check"></i><b>6.3.1</b> Task</a></li>
+<li class="chapter" data-level="6.3.2" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#context-and-motivation"><i class="fa fa-check"></i><b>6.3.2</b> Context and motivation</a></li>
+<li class="chapter" data-level="6.3.3" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#input-data"><i class="fa fa-check"></i><b>6.3.3</b> Input data</a></li>
+<li class="chapter" data-level="6.3.4" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#examples"><i class="fa fa-check"></i><b>6.3.4</b> Examples</a></li>
+<li class="chapter" data-level="6.3.5" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#output-format"><i class="fa fa-check"></i><b>6.3.5</b> Output format</a></li>
+<li class="chapter" data-level="6.3.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#constraints"><i class="fa fa-check"></i><b>6.3.6</b> Constraints</a></li>
+<li class="chapter" data-level="6.3.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#what-about-roles-and-personas"><i class="fa fa-check"></i><b>6.3.7</b> What about roles and personas?</a></li>
+<li class="chapter" data-level="6.3.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#mapping-to-the-earlier-question-framework"><i class="fa fa-check"></i><b>6.3.8</b> Mapping to the earlier question framework</a></li>
+</ul></li>
+<li class="chapter" data-level="6.4" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#an-annotated-example"><i class="fa fa-check"></i><b>6.4</b> An annotated example</a></li>
+<li class="chapter" data-level="6.5" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#order-and-layout"><i class="fa fa-check"></i><b>6.5</b> Order and layout</a></li>
+<li class="chapter" data-level="6.6" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#offline-example-assembling-a-prompt-from-parts"><i class="fa fa-check"></i><b>6.6</b> Offline example: assembling a prompt from parts</a></li>
+<li class="chapter" data-level="6.7" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#optional-sending-the-prompt-to-an-api"><i class="fa fa-check"></i><b>6.7</b> Optional: sending the prompt to an API</a></li>
+<li class="chapter" data-level="6.8" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#common-anatomy-mistakes"><i class="fa fa-check"></i><b>6.8</b> Common anatomy mistakes</a></li>
+<li class="chapter" data-level="6.9" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#checklist"><i class="fa fa-check"></i><b>6.9</b> Checklist</a></li>
+<li class="chapter" data-level="6.10" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#exercise-dissect-a-prompt"><i class="fa fa-check"></i><b>6.10</b> Exercise: dissect a prompt</a></li>
+<li class="chapter" data-level="6.11" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#key-takeaways-5"><i class="fa fa-check"></i><b>6.11</b> Key takeaways</a></li>
+<li class="chapter" data-level="6.12" data-path="prompt-anatomy.html"><a href="prompt-anatomy.html#references"><i class="fa fa-check"></i><b>6.12</b> References</a></li>
+</ul></li>
+<li class="part"><span><b>III Agentic AI</b></span></li>
+<li class="chapter" data-level="7" data-path="agentic-workflows.html"><a href="agentic-workflows.html"><i class="fa fa-check"></i><b>7</b> Agentic Workflows</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="agentic-workflows.html"><a href="agentic-workflows.html#from-direct-generation-to-agentic-workflows"><i class="fa fa-check"></i><b>7.1</b> From direct generation to agentic workflows</a></li>
+<li class="chapter" data-level="7.2" data-path="agentic-workflows.html"><a href="agentic-workflows.html#degrees-of-autonomy"><i class="fa fa-check"></i><b>7.2</b> Degrees of autonomy</a></li>
+<li class="chapter" data-level="7.3" data-path="agentic-workflows.html"><a href="agentic-workflows.html#why-agentic-workflows-help"><i class="fa fa-check"></i><b>7.3</b> Why agentic workflows help</a></li>
+<li class="chapter" data-level="7.4" data-path="agentic-workflows.html"><a href="agentic-workflows.html#which-applications-are-easy-or-hard"><i class="fa fa-check"></i><b>7.4</b> Which applications are easy or hard</a>
+<ul>
+<li class="chapter" data-level="7.4.1" data-path="agentic-workflows.html"><a href="agentic-workflows.html#when-you-do-not-need-an-agentic-workflow"><i class="fa fa-check"></i><b>7.4.1</b> When you do not need an agentic workflow</a></li>
+</ul></li>
+<li class="chapter" data-level="7.5" data-path="agentic-workflows.html"><a href="agentic-workflows.html#task-decomposition"><i class="fa fa-check"></i><b>7.5</b> Task decomposition</a></li>
+<li class="chapter" data-level="7.6" data-path="agentic-workflows.html"><a href="agentic-workflows.html#building-blocks"><i class="fa fa-check"></i><b>7.6</b> Building blocks</a></li>
+<li class="chapter" data-level="7.7" data-path="agentic-workflows.html"><a href="agentic-workflows.html#evaluate-from-the-start"><i class="fa fa-check"></i><b>7.7</b> Evaluate from the start</a></li>
+<li class="chapter" data-level="7.8" data-path="agentic-workflows.html"><a href="agentic-workflows.html#the-four-design-patterns"><i class="fa fa-check"></i><b>7.8</b> The four design patterns</a></li>
+<li class="chapter" data-level="7.9" data-path="agentic-workflows.html"><a href="agentic-workflows.html#costs-and-risks"><i class="fa fa-check"></i><b>7.9</b> Costs and risks</a></li>
+<li class="chapter" data-level="7.10" data-path="agentic-workflows.html"><a href="agentic-workflows.html#key-takeaways-6"><i class="fa fa-check"></i><b>7.10</b> Key takeaways</a></li>
+<li class="chapter" data-level="7.11" data-path="agentic-workflows.html"><a href="agentic-workflows.html#interview-checkpoints-5"><i class="fa fa-check"></i><b>7.11</b> Interview checkpoints</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="reflection.html"><a href="reflection.html"><i class="fa fa-check"></i><b>8</b> Reflection</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="reflection.html"><a href="reflection.html#the-basic-pattern"><i class="fa fa-check"></i><b>8.1</b> The basic pattern</a>
+<ul>
+<li class="chapter" data-level="8.1.1" data-path="reflection.html"><a href="reflection.html#same-model-or-a-different-one"><i class="fa fa-check"></i><b>8.1.1</b> Same model or a different one?</a></li>
+</ul></li>
+<li class="chapter" data-level="8.2" data-path="reflection.html"><a href="reflection.html#what-the-evidence-says"><i class="fa fa-check"></i><b>8.2</b> What the evidence says</a></li>
+<li class="chapter" data-level="8.3" data-path="reflection.html"><a href="reflection.html#reflection-with-external-feedback"><i class="fa fa-check"></i><b>8.3</b> Reflection with external feedback</a>
+<ul>
+<li class="chapter" data-level="8.3.1" data-path="reflection.html"><a href="reflection.html#a-practitioners-view-of-the-improvement-curve"><i class="fa fa-check"></i><b>8.3.1</b> A practitioner’s view of the improvement curve</a></li>
+</ul></li>
+<li class="chapter" data-level="8.4" data-path="reflection.html"><a href="reflection.html#multimodal-reflection-charts-and-images"><i class="fa fa-check"></i><b>8.4</b> Multimodal reflection: charts and images</a></li>
+<li class="chapter" data-level="8.5" data-path="reflection.html"><a href="reflection.html#writing-reflection-prompts"><i class="fa fa-check"></i><b>8.5</b> Writing reflection prompts</a></li>
+<li class="chapter" data-level="8.6" data-path="reflection.html"><a href="reflection.html#design-choices-and-costs"><i class="fa fa-check"></i><b>8.6</b> Design choices and costs</a></li>
+<li class="chapter" data-level="8.7" data-path="reflection.html"><a href="reflection.html#measuring-whether-reflection-helps"><i class="fa fa-check"></i><b>8.7</b> Measuring whether reflection helps</a></li>
+<li class="chapter" data-level="8.8" data-path="reflection.html"><a href="reflection.html#key-takeaways-7"><i class="fa fa-check"></i><b>8.8</b> Key takeaways</a></li>
+<li class="chapter" data-level="8.9" data-path="reflection.html"><a href="reflection.html#interview-checkpoints-6"><i class="fa fa-check"></i><b>8.9</b> Interview checkpoints</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="tool-use.html"><a href="tool-use.html"><i class="fa fa-check"></i><b>9</b> Tool Use and Code Execution</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="tool-use.html"><a href="tool-use.html#what-a-tool-is"><i class="fa fa-check"></i><b>9.1</b> What a tool is</a></li>
+<li class="chapter" data-level="9.2" data-path="tool-use.html"><a href="tool-use.html#how-tool-calling-works"><i class="fa fa-check"></i><b>9.2</b> How tool calling works</a>
+<ul>
+<li class="chapter" data-level="9.2.1" data-path="tool-use.html"><a href="tool-use.html#the-manual-protocol"><i class="fa fa-check"></i><b>9.2.1</b> The manual protocol</a></li>
+<li class="chapter" data-level="9.2.2" data-path="tool-use.html"><a href="tool-use.html#native-tool-calling"><i class="fa fa-check"></i><b>9.2.2</b> Native tool calling</a></li>
+<li class="chapter" data-level="9.2.3" data-path="tool-use.html"><a href="tool-use.html#vendor-formats"><i class="fa fa-check"></i><b>9.2.3</b> Vendor formats</a></li>
+</ul></li>
+<li class="chapter" data-level="9.3" data-path="tool-use.html"><a href="tool-use.html#designing-tools-a-model-can-use-well"><i class="fa fa-check"></i><b>9.3</b> Designing tools a model can use well</a></li>
+<li class="chapter" data-level="9.4" data-path="tool-use.html"><a href="tool-use.html#code-execution-the-general-purpose-tool"><i class="fa fa-check"></i><b>9.4</b> Code execution: the general-purpose tool</a>
+<ul>
+<li class="chapter" data-level="9.4.1" data-path="tool-use.html"><a href="tool-use.html#running-generated-code-safely"><i class="fa fa-check"></i><b>9.4.1</b> Running generated code safely</a></li>
+</ul></li>
+<li class="chapter" data-level="9.5" data-path="tool-use.html"><a href="tool-use.html#connecting-to-many-tools-mcp"><i class="fa fa-check"></i><b>9.5</b> Connecting to many tools: MCP</a></li>
+<li class="chapter" data-level="9.6" data-path="tool-use.html"><a href="tool-use.html#security-and-governance"><i class="fa fa-check"></i><b>9.6</b> Security and governance</a></li>
+<li class="chapter" data-level="9.7" data-path="tool-use.html"><a href="tool-use.html#evaluating-tool-use"><i class="fa fa-check"></i><b>9.7</b> Evaluating tool use</a></li>
+<li class="chapter" data-level="9.8" data-path="tool-use.html"><a href="tool-use.html#key-takeaways-8"><i class="fa fa-check"></i><b>9.8</b> Key takeaways</a></li>
+<li class="chapter" data-level="9.9" data-path="tool-use.html"><a href="tool-use.html#interview-checkpoints-7"><i class="fa fa-check"></i><b>9.9</b> Interview checkpoints</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html"><i class="fa fa-check"></i><b>10</b> Evaluating and Improving Agentic Systems</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#build-first-then-look"><i class="fa fa-check"></i><b>10.1</b> Build first, then look</a></li>
+<li class="chapter" data-level="10.2" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#end-to-end-evals"><i class="fa fa-check"></i><b>10.2</b> End-to-end evals</a>
+<ul>
+<li class="chapter" data-level="10.2.1" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#code-graded-evals"><i class="fa fa-check"></i><b>10.2.1</b> Code-graded evals</a></li>
+<li class="chapter" data-level="10.2.2" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#llm-judged-evals"><i class="fa fa-check"></i><b>10.2.2</b> LLM-judged evals</a></li>
+<li class="chapter" data-level="10.2.3" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#making-llm-judges-trustworthy"><i class="fa fa-check"></i><b>10.2.3</b> Making LLM judges trustworthy</a></li>
+<li class="chapter" data-level="10.2.4" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#start-small-then-grow-the-set"><i class="fa fa-check"></i><b>10.2.4</b> Start small, then grow the set</a></li>
+<li class="chapter" data-level="10.2.5" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#how-much-should-you-trust-a-score"><i class="fa fa-check"></i><b>10.2.5</b> How much should you trust a score?</a></li>
+</ul></li>
+<li class="chapter" data-level="10.3" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#traces-and-spans"><i class="fa fa-check"></i><b>10.3</b> Traces and spans</a></li>
+<li class="chapter" data-level="10.4" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#agentic-error-analysis"><i class="fa fa-check"></i><b>10.4</b> Error analysis</a>
+<ul>
+<li class="chapter" data-level="10.4.1" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#the-procedure"><i class="fa fa-check"></i><b>10.4.1</b> The procedure</a></li>
+<li class="chapter" data-level="10.4.2" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#from-counts-to-priorities"><i class="fa fa-check"></i><b>10.4.2</b> From counts to priorities</a></li>
+</ul></li>
+<li class="chapter" data-level="10.5" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#component-level-evals"><i class="fa fa-check"></i><b>10.5</b> Component-level evals</a></li>
+<li class="chapter" data-level="10.6" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#improving-a-component"><i class="fa fa-check"></i><b>10.6</b> Improving a component</a>
+<ul>
+<li class="chapter" data-level="10.6.1" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#building-intuition-about-models"><i class="fa fa-check"></i><b>10.6.1</b> Building intuition about models</a></li>
+</ul></li>
+<li class="chapter" data-level="10.7" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#agentic-cost-latency"><i class="fa fa-check"></i><b>10.7</b> Cost and latency</a></li>
+<li class="chapter" data-level="10.8" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#the-buildanalyze-loop"><i class="fa fa-check"></i><b>10.8</b> The build–analyze loop</a></li>
+<li class="chapter" data-level="10.9" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#key-takeaways-9"><i class="fa fa-check"></i><b>10.9</b> Key takeaways</a></li>
+<li class="chapter" data-level="10.10" data-path="evaluating-agentic-systems.html"><a href="evaluating-agentic-systems.html#interview-checkpoints-8"><i class="fa fa-check"></i><b>10.10</b> Interview checkpoints</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="planning-multi-agent.html"><a href="planning-multi-agent.html"><i class="fa fa-check"></i><b>11</b> Planning and Multi-Agent Systems</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="planning-multi-agent.html"><a href="planning-multi-agent.html#planning"><i class="fa fa-check"></i><b>11.1</b> Planning</a>
+<ul>
+<li class="chapter" data-level="11.1.1" data-path="planning-multi-agent.html"><a href="planning-multi-agent.html#why-let-the-model-plan"><i class="fa fa-check"></i><b>11.1.1</b> Why let the model plan?</a></li>
+<li class="chapter" data-level="11.1.2" data-path="planning-multi-agent.html"><a href="planning-multi-agent.html#plan-then-execute"><i class="fa fa-check"></i><b>11.1.2</b> Plan, then execute</a></li>
+<li class="chapter" data-level="11.1.3" data-path="planning-multi-agent.html"><a href="planning-multi-agent.html#plan-up-front-or-step-by-step"><i class="fa fa-check"></i><b>11.1.3</b> Plan up front or step by step?</a></li>
+<li class="chapter" data-level="11.1.4" data-path="planning-multi-agent.html"><a href="planning-multi-agent.html#structured-plans-json-or-xml"><i class="fa fa-check"></i><b>11.1.4</b> Structured plans: JSON or XML</a></li>
+<li class="chapter" data-level="11.1.5" data-path="planning-multi-agent.html"><a href="planning-multi-agent.html#code-as-plan"><i class="fa fa-check"></i><b>11.1.5</b> Code as the plan</a></li>
+<li class="chapter" data-level="11.1.6" data-path="planning-multi-agent.html"><a href="planning-multi-agent.html#where-planning-works-today"><i class="fa fa-check"></i><b>11.1.6</b> Where planning works today</a></li>
+</ul></li>
+<li class="chapter" data-level="11.2" data-path="planning-multi-agent.html"><a href="planning-multi-agent.html#multi-agent-systems"><i class="fa fa-check"></i><b>11.2</b> Multi-agent systems</a>
+<ul>
+<li class="chapter" data-level="11.2.1" data-path="planning-multi-agent.html"><a href="planning-multi-agent.html#why-use-several-agents-when-it-is-the-same-model"><i class="fa fa-check"></i><b>11.2.1</b> Why use several agents when it is the same model?</a></li>
+<li class="chapter" data-level="11.2.2" data-path="planning-multi-agent.html"><a href="planning-multi-agent.html#example-a-campaign-launch-team"><i class="fa fa-check"></i><b>11.2.2</b> Example: a campaign-launch team</a></li>
+<li class="chapter" data-level="11.2.3" data-path="planning-multi-agent.html"><a href="planning-multi-agent.html#communication-patterns"><i class="fa fa-check"></i><b>11.2.3</b> Communication patterns</a></li>
+<li class="chapter" data-level="11.2.4" data-path="planning-multi-agent.html"><a href="planning-multi-agent.html#when-multi-agent-systems-help-and-when-they-hurt"><i class="fa fa-check"></i><b>11.2.4</b> When multi-agent systems help, and when they hurt</a></li>
+<li class="chapter" data-level="11.2.5" data-path="planning-multi-agent.html"><a href="planning-multi-agent.html#designing-and-evaluating-a-multi-agent-system"><i class="fa fa-check"></i><b>11.2.5</b> Designing and evaluating a multi-agent system</a></li>
+</ul></li>
+<li class="chapter" data-level="11.3" data-path="planning-multi-agent.html"><a href="planning-multi-agent.html#choosing-the-level-of-autonomy"><i class="fa fa-check"></i><b>11.3</b> Choosing the level of autonomy</a></li>
+<li class="chapter" data-level="11.4" data-path="planning-multi-agent.html"><a href="planning-multi-agent.html#key-takeaways-10"><i class="fa fa-check"></i><b>11.4</b> Key takeaways</a></li>
+<li class="chapter" data-level="11.5" data-path="planning-multi-agent.html"><a href="planning-multi-agent.html#interview-checkpoints-9"><i class="fa fa-check"></i><b>11.5</b> Interview checkpoints</a></li>
+</ul></li>
+<li class="part"><span><b>IV Claude and Coding Agents</b></span></li>
+<li class="chapter" data-level="12" data-path="claude-fundamentals.html"><a href="claude-fundamentals.html"><i class="fa fa-check"></i><b>12</b> Claude Fundamentals and Product Context</a>
+<ul>
+<li class="chapter" data-level="12.1" data-path="claude-fundamentals.html"><a href="claude-fundamentals.html#claude-is-a-model-family-not-one-fixed-interface"><i class="fa fa-check"></i><b>12.1</b> Claude is a model family, not one fixed interface</a></li>
+<li class="chapter" data-level="12.2" data-path="claude-fundamentals.html"><a href="claude-fundamentals.html#a-practical-mental-model"><i class="fa fa-check"></i><b>12.2</b> A practical mental model</a></li>
+<li class="chapter" data-level="12.3" data-path="claude-fundamentals.html"><a href="claude-fundamentals.html#useful-strengths"><i class="fa fa-check"></i><b>12.3</b> Useful strengths</a></li>
+<li class="chapter" data-level="12.4" data-path="claude-fundamentals.html"><a href="claude-fundamentals.html#important-limitations"><i class="fa fa-check"></i><b>12.4</b> Important limitations</a>
+<ul>
+<li class="chapter" data-level="12.4.1" data-path="claude-fundamentals.html"><a href="claude-fundamentals.html#outputs-can-be-wrong"><i class="fa fa-check"></i><b>12.4.1</b> Outputs can be wrong</a></li>
+<li class="chapter" data-level="12.4.2" data-path="claude-fundamentals.html"><a href="claude-fundamentals.html#product-capabilities-vary"><i class="fa fa-check"></i><b>12.4.2</b> Product capabilities vary</a></li>
+<li class="chapter" data-level="12.4.3" data-path="claude-fundamentals.html"><a href="claude-fundamentals.html#context-is-finite"><i class="fa fa-check"></i><b>12.4.3</b> Context is finite</a></li>
+<li class="chapter" data-level="12.4.4" data-path="claude-fundamentals.html"><a href="claude-fundamentals.html#current-information-requires-retrieval"><i class="fa fa-check"></i><b>12.4.4</b> Current information requires retrieval</a></li>
+<li class="chapter" data-level="12.4.5" data-path="claude-fundamentals.html"><a href="claude-fundamentals.html#tool-use-creates-real-risk"><i class="fa fa-check"></i><b>12.4.5</b> Tool use creates real risk</a></li>
+</ul></li>
+<li class="chapter" data-level="12.5" data-path="claude-fundamentals.html"><a href="claude-fundamentals.html#a-verification-centered-partnership"><i class="fa fa-check"></i><b>12.5</b> A verification-centered partnership</a></li>
+<li class="chapter" data-level="12.6" data-path="claude-fundamentals.html"><a href="claude-fundamentals.html#exercise-compare-environments"><i class="fa fa-check"></i><b>12.6</b> Exercise: compare environments</a></li>
+<li class="chapter" data-level="12.7" data-path="claude-fundamentals.html"><a href="claude-fundamentals.html#key-takeaways-11"><i class="fa fa-check"></i><b>12.7</b> Key takeaways</a></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="prompting.html"><a href="prompting.html"><i class="fa fa-check"></i><b>13</b> Prompting Strategies: Ask Better Questions</a>
+<ul>
+<li class="chapter" data-level="13.1" data-path="prompting.html"><a href="prompting.html#the-principle-clarity-improves-controllability"><i class="fa fa-check"></i><b>13.1</b> The Principle: Clarity Improves Controllability</a></li>
+<li class="chapter" data-level="13.2" data-path="prompting.html"><a href="prompting.html#structure-of-a-good-question"><i class="fa fa-check"></i><b>13.2</b> Structure of a Good Question</a>
+<ul>
+<li class="chapter" data-level="13.2.1" data-path="prompting.html"><a href="prompting.html#what-what-do-you-want"><i class="fa fa-check"></i><b>13.2.1</b> 1. <strong>What (What do you want?)</strong></a></li>
+<li class="chapter" data-level="13.2.2" data-path="prompting.html"><a href="prompting.html#why-why-do-you-need-it"><i class="fa fa-check"></i><b>13.2.2</b> 2. <strong>Why (Why do you need it?)</strong></a></li>
+<li class="chapter" data-level="13.2.3" data-path="prompting.html"><a href="prompting.html#how-how-should-it-work"><i class="fa fa-check"></i><b>13.2.3</b> 3. <strong>How (How should it work?)</strong></a></li>
+<li class="chapter" data-level="13.2.4" data-path="prompting.html"><a href="prompting.html#constraints-what-are-the-limits"><i class="fa fa-check"></i><b>13.2.4</b> 4. <strong>Constraints (What are the limits?)</strong></a></li>
+</ul></li>
+<li class="chapter" data-level="13.3" data-path="prompting.html"><a href="prompting.html#a-clear-working-mnemonic"><i class="fa fa-check"></i><b>13.3</b> A CLEAR Working Mnemonic</a></li>
+<li class="chapter" data-level="13.4" data-path="prompting.html"><a href="prompting.html#comparison-bad-vs.-good-questions"><i class="fa fa-check"></i><b>13.4</b> Comparison: Bad vs. Good Questions</a>
+<ul>
+<li class="chapter" data-level="13.4.1" data-path="prompting.html"><a href="prompting.html#bad-question"><i class="fa fa-check"></i><b>13.4.1</b> ❌ Bad Question</a></li>
+<li class="chapter" data-level="13.4.2" data-path="prompting.html"><a href="prompting.html#good-question"><i class="fa fa-check"></i><b>13.4.2</b> ✅ Good Question</a></li>
+</ul></li>
+<li class="chapter" data-level="13.5" data-path="prompting.html"><a href="prompting.html#question-templates-youll-use-often"><i class="fa fa-check"></i><b>13.5</b> Question Templates You’ll Use Often</a>
+<ul>
+<li class="chapter" data-level="13.5.1" data-path="prompting.html"><a href="prompting.html#template-1-code-generation"><i class="fa fa-check"></i><b>13.5.1</b> Template 1: Code Generation</a></li>
+<li class="chapter" data-level="13.5.2" data-path="prompting.html"><a href="prompting.html#template-2-code-explanation"><i class="fa fa-check"></i><b>13.5.2</b> Template 2: Code Explanation</a></li>
+<li class="chapter" data-level="13.5.3" data-path="prompting.html"><a href="prompting.html#template-3-debugging"><i class="fa fa-check"></i><b>13.5.3</b> Template 3: Debugging</a></li>
+<li class="chapter" data-level="13.5.4" data-path="prompting.html"><a href="prompting.html#template-4-learning"><i class="fa fa-check"></i><b>13.5.4</b> Template 4: Learning</a></li>
+</ul></li>
+<li class="chapter" data-level="13.6" data-path="prompting.html"><a href="prompting.html#prompting-tips-tricks"><i class="fa fa-check"></i><b>13.6</b> Prompting Tips &amp; Tricks</a>
+<ul>
+<li class="chapter" data-level="13.6.1" data-path="prompting.html"><a href="prompting.html#do-provide-context"><i class="fa fa-check"></i><b>13.6.1</b> ✅ DO: Provide Context</a></li>
+<li class="chapter" data-level="13.6.2" data-path="prompting.html"><a href="prompting.html#do-show-your-attempt"><i class="fa fa-check"></i><b>13.6.2</b> ✅ DO: Show Your Attempt</a></li>
+<li class="chapter" data-level="13.6.3" data-path="prompting.html"><a href="prompting.html#do-be-specific-about-format"><i class="fa fa-check"></i><b>13.6.3</b> ✅ DO: Be Specific About Format</a></li>
+<li class="chapter" data-level="13.6.4" data-path="prompting.html"><a href="prompting.html#do-mention-constraints"><i class="fa fa-check"></i><b>13.6.4</b> ✅ DO: Mention Constraints</a></li>
+<li class="chapter" data-level="13.6.5" data-path="prompting.html"><a href="prompting.html#do-ask-follow-up-questions"><i class="fa fa-check"></i><b>13.6.5</b> ✅ DO: Ask Follow-up Questions</a></li>
+</ul></li>
+<li class="chapter" data-level="13.7" data-path="prompting.html"><a href="prompting.html#dont-common-mistakes"><i class="fa fa-check"></i><b>13.7</b> ❌ DON’T: Common Mistakes</a>
+<ul>
+<li class="chapter" data-level="13.7.1" data-path="prompting.html"><a href="prompting.html#dont-provide-indiscriminate-context"><i class="fa fa-check"></i><b>13.7.1</b> ❌ DON’T: Provide Indiscriminate Context</a></li>
+<li class="chapter" data-level="13.7.2" data-path="prompting.html"><a href="prompting.html#dont-vague-requirements"><i class="fa fa-check"></i><b>13.7.2</b> ❌ DON’T: Vague Requirements</a></li>
+<li class="chapter" data-level="13.7.3" data-path="prompting.html"><a href="prompting.html#dont-expect-perfect-first-answer"><i class="fa fa-check"></i><b>13.7.3</b> ❌ DON’T: Expect Perfect First Answer</a></li>
+<li class="chapter" data-level="13.7.4" data-path="prompting.html"><a href="prompting.html#dont-skip-error-messages"><i class="fa fa-check"></i><b>13.7.4</b> ❌ DON’T: Skip Error Messages</a></li>
+<li class="chapter" data-level="13.7.5" data-path="prompting.html"><a href="prompting.html#dont-ignore-language-versions"><i class="fa fa-check"></i><b>13.7.5</b> ❌ DON’T: Ignore Language Versions</a></li>
+</ul></li>
+<li class="chapter" data-level="13.8" data-path="prompting.html"><a href="prompting.html#the-iteration-loop"><i class="fa fa-check"></i><b>13.8</b> The Iteration Loop</a></li>
+<li class="chapter" data-level="13.9" data-path="prompting.html"><a href="prompting.html#pro-tip-use-comments-as-instructions"><i class="fa fa-check"></i><b>13.9</b> Pro Tip: Use Comments as Instructions</a></li>
+<li class="chapter" data-level="13.10" data-path="prompting.html"><a href="prompting.html#exercise-write-better-questions"><i class="fa fa-check"></i><b>13.10</b> Exercise: Write Better Questions</a></li>
+<li class="chapter" data-level="13.11" data-path="prompting.html"><a href="prompting.html#key-takeaways-12"><i class="fa fa-check"></i><b>13.11</b> Key Takeaways</a></li>
+</ul></li>
+<li class="chapter" data-level="14" data-path="code-practices.html"><a href="code-practices.html"><i class="fa fa-check"></i><b>14</b> Code Best Practices: Generate &amp; Review Code</a>
+<ul>
+<li class="chapter" data-level="14.1" data-path="code-practices.html"><a href="code-practices.html#the-generate-review-refine-workflow"><i class="fa fa-check"></i><b>14.1</b> The Generate-Review-Refine Workflow</a></li>
+<li class="chapter" data-level="14.2" data-path="code-practices.html"><a href="code-practices.html#phase-1-generate"><i class="fa fa-check"></i><b>14.2</b> Phase 1: Generate</a></li>
+<li class="chapter" data-level="14.3" data-path="code-practices.html"><a href="code-practices.html#phase-2-review---the-quality-checklist"><i class="fa fa-check"></i><b>14.3</b> Phase 2: Review - The Quality Checklist</a>
+<ul>
+<li class="chapter" data-level="14.3.1" data-path="code-practices.html"><a href="code-practices.html#does-it-work"><i class="fa fa-check"></i><b>14.3.1</b> ✅ Does It Work?</a></li>
+<li class="chapter" data-level="14.3.2" data-path="code-practices.html"><a href="code-practices.html#is-it-readable"><i class="fa fa-check"></i><b>14.3.2</b> ✅ Is It Readable?</a></li>
+<li class="chapter" data-level="14.3.3" data-path="code-practices.html"><a href="code-practices.html#does-it-handle-edge-cases"><i class="fa fa-check"></i><b>14.3.3</b> ✅ Does It Handle Edge Cases?</a></li>
+<li class="chapter" data-level="14.3.4" data-path="code-practices.html"><a href="code-practices.html#is-it-efficient"><i class="fa fa-check"></i><b>14.3.4</b> ✅ Is It Efficient?</a></li>
+<li class="chapter" data-level="14.3.5" data-path="code-practices.html"><a href="code-practices.html#is-it-documented"><i class="fa fa-check"></i><b>14.3.5</b> ✅ Is It Documented?</a></li>
+<li class="chapter" data-level="14.3.6" data-path="code-practices.html"><a href="code-practices.html#does-it-follow-standards"><i class="fa fa-check"></i><b>14.3.6</b> ✅ Does It Follow Standards?</a></li>
+</ul></li>
+<li class="chapter" data-level="14.4" data-path="code-practices.html"><a href="code-practices.html#phase-3-refine"><i class="fa fa-check"></i><b>14.4</b> Phase 3: Refine</a></li>
+<li class="chapter" data-level="14.5" data-path="code-practices.html"><a href="code-practices.html#code-quality-checklist"><i class="fa fa-check"></i><b>14.5</b> Code Quality Checklist</a>
+<ul>
+<li class="chapter" data-level="14.5.1" data-path="code-practices.html"><a href="code-practices.html#functionality"><i class="fa fa-check"></i><b>14.5.1</b> Functionality ✓</a></li>
+<li class="chapter" data-level="14.5.2" data-path="code-practices.html"><a href="code-practices.html#readability"><i class="fa fa-check"></i><b>14.5.2</b> Readability ✓</a></li>
+<li class="chapter" data-level="14.5.3" data-path="code-practices.html"><a href="code-practices.html#robustness"><i class="fa fa-check"></i><b>14.5.3</b> Robustness ✓</a></li>
+<li class="chapter" data-level="14.5.4" data-path="code-practices.html"><a href="code-practices.html#documentation"><i class="fa fa-check"></i><b>14.5.4</b> Documentation ✓</a></li>
+<li class="chapter" data-level="14.5.5" data-path="code-practices.html"><a href="code-practices.html#performance"><i class="fa fa-check"></i><b>14.5.5</b> Performance ✓</a></li>
+<li class="chapter" data-level="14.5.6" data-path="code-practices.html"><a href="code-practices.html#maintainability"><i class="fa fa-check"></i><b>14.5.6</b> Maintainability ✓</a></li>
+</ul></li>
+<li class="chapter" data-level="14.6" data-path="code-practices.html"><a href="code-practices.html#common-code-problems-claude-might-miss"><i class="fa fa-check"></i><b>14.6</b> Common Code Problems Claude Might Miss</a>
+<ul>
+<li class="chapter" data-level="14.6.1" data-path="code-practices.html"><a href="code-practices.html#problem-1-mutating-input"><i class="fa fa-check"></i><b>14.6.1</b> ❌ Problem 1: Mutating Input</a></li>
+<li class="chapter" data-level="14.6.2" data-path="code-practices.html"><a href="code-practices.html#problem-2-hardcoded-paths"><i class="fa fa-check"></i><b>14.6.2</b> ❌ Problem 2: Hardcoded Paths</a></li>
+<li class="chapter" data-level="14.6.3" data-path="code-practices.html"><a href="code-practices.html#problem-3-missing-imports"><i class="fa fa-check"></i><b>14.6.3</b> ❌ Problem 3: Missing Imports</a></li>
+<li class="chapter" data-level="14.6.4" data-path="code-practices.html"><a href="code-practices.html#problem-4-silent-failures"><i class="fa fa-check"></i><b>14.6.4</b> ❌ Problem 4: Silent Failures</a></li>
+</ul></li>
+<li class="chapter" data-level="14.7" data-path="code-practices.html"><a href="code-practices.html#asking-claude-for-code-review"><i class="fa fa-check"></i><b>14.7</b> Asking Claude for Code Review</a></li>
+<li class="chapter" data-level="14.8" data-path="code-practices.html"><a href="code-practices.html#exercise-review-real-code"><i class="fa fa-check"></i><b>14.8</b> Exercise: Review Real Code</a></li>
+<li class="chapter" data-level="14.9" data-path="code-practices.html"><a href="code-practices.html#key-takeaways-13"><i class="fa fa-check"></i><b>14.9</b> Key Takeaways</a></li>
+</ul></li>
+<li class="chapter" data-level="15" data-path="advanced.html"><a href="advanced.html"><i class="fa fa-check"></i><b>15</b> Advanced Techniques: Power User Features</a>
+<ul>
+<li class="chapter" data-level="15.1" data-path="advanced.html"><a href="advanced.html#when-to-use-advanced-techniques"><i class="fa fa-check"></i><b>15.1</b> When to Use Advanced Techniques</a></li>
+<li class="chapter" data-level="15.2" data-path="advanced.html"><a href="advanced.html#technique-1-plan-before-implementation"><i class="fa fa-check"></i><b>15.2</b> Technique 1: Plan Before Implementation</a></li>
+<li class="chapter" data-level="15.3" data-path="advanced.html"><a href="advanced.html#technique-2-context-stacking"><i class="fa fa-check"></i><b>15.3</b> Technique 2: Context Stacking</a></li>
+<li class="chapter" data-level="15.4" data-path="advanced.html"><a href="advanced.html#technique-3-role-based-prompting"><i class="fa fa-check"></i><b>15.4</b> Technique 3: Role-Based Prompting</a></li>
+<li class="chapter" data-level="15.5" data-path="advanced.html"><a href="advanced.html#technique-4-constraint-based-design"><i class="fa fa-check"></i><b>15.5</b> Technique 4: Constraint-Based Design</a></li>
+<li class="chapter" data-level="15.6" data-path="advanced.html"><a href="advanced.html#technique-5-assumption-surfacing"><i class="fa fa-check"></i><b>15.6</b> Technique 5: Assumption Surfacing</a></li>
+<li class="chapter" data-level="15.7" data-path="advanced.html"><a href="advanced.html#technique-6-comparative-analysis"><i class="fa fa-check"></i><b>15.7</b> Technique 6: Comparative Analysis</a></li>
+<li class="chapter" data-level="15.8" data-path="advanced.html"><a href="advanced.html#technique-7-systematic-testing-strategy"><i class="fa fa-check"></i><b>15.8</b> Technique 7: Systematic Testing Strategy</a></li>
+<li class="chapter" data-level="15.9" data-path="advanced.html"><a href="advanced.html#technique-8-documentation-first-design"><i class="fa fa-check"></i><b>15.9</b> Technique 8: Documentation-First Design</a></li>
+<li class="chapter" data-level="15.10" data-path="advanced.html"><a href="advanced.html#technique-9-architectural-review"><i class="fa fa-check"></i><b>15.10</b> Technique 9: Architectural Review</a></li>
+<li class="chapter" data-level="15.11" data-path="advanced.html"><a href="advanced.html#technique-10-iterative-refinement"><i class="fa fa-check"></i><b>15.11</b> Technique 10: Iterative Refinement</a></li>
+<li class="chapter" data-level="15.12" data-path="advanced.html"><a href="advanced.html#advanced-pattern-complete-system-design"><i class="fa fa-check"></i><b>15.12</b> Advanced Pattern: Complete System Design</a></li>
+<li class="chapter" data-level="15.13" data-path="advanced.html"><a href="advanced.html#when-to-use-each-technique"><i class="fa fa-check"></i><b>15.13</b> When to Use Each Technique</a></li>
+<li class="chapter" data-level="15.14" data-path="advanced.html"><a href="advanced.html#asking-claude-about-advanced-techniques"><i class="fa fa-check"></i><b>15.14</b> Asking Claude About Advanced Techniques</a></li>
+<li class="chapter" data-level="15.15" data-path="advanced.html"><a href="advanced.html#exercise-practice-advanced-techniques"><i class="fa fa-check"></i><b>15.15</b> Exercise: Practice Advanced Techniques</a></li>
+<li class="chapter" data-level="15.16" data-path="advanced.html"><a href="advanced.html#key-takeaways-14"><i class="fa fa-check"></i><b>15.16</b> Key Takeaways</a></li>
+</ul></li>
+<li class="chapter" data-level="16" data-path="real-world.html"><a href="real-world.html"><i class="fa fa-check"></i><b>16</b> Real-World Patterns: Practical Scenarios</a>
+<ul>
+<li class="chapter" data-level="16.1" data-path="real-world.html"><a href="real-world.html#introduction-1"><i class="fa fa-check"></i><b>16.1</b> Introduction</a></li>
+<li class="chapter" data-level="16.2" data-path="real-world.html"><a href="real-world.html#pattern-1-the-it-works-in-dev-fails-in-prod-problem"><i class="fa fa-check"></i><b>16.2</b> Pattern 1: The “It Works in Dev, Fails in Prod” Problem</a>
+<ul>
+<li class="chapter" data-level="16.2.1" data-path="real-world.html"><a href="real-world.html#the-scenario"><i class="fa fa-check"></i><b>16.2.1</b> The Scenario</a></li>
+<li class="chapter" data-level="16.2.2" data-path="real-world.html"><a href="real-world.html#the-solution"><i class="fa fa-check"></i><b>16.2.2</b> The Solution</a></li>
+<li class="chapter" data-level="16.2.3" data-path="real-world.html"><a href="real-world.html#key-practices"><i class="fa fa-check"></i><b>16.2.3</b> Key Practices</a></li>
+</ul></li>
+<li class="chapter" data-level="16.3" data-path="real-world.html"><a href="real-world.html#pattern-2-the-colleague-cant-understand-my-code-problem"><i class="fa fa-check"></i><b>16.3</b> Pattern 2: The “Colleague Can’t Understand My Code” Problem</a>
+<ul>
+<li class="chapter" data-level="16.3.1" data-path="real-world.html"><a href="real-world.html#the-scenario-1"><i class="fa fa-check"></i><b>16.3.1</b> The Scenario</a></li>
+<li class="chapter" data-level="16.3.2" data-path="real-world.html"><a href="real-world.html#the-solution-1"><i class="fa fa-check"></i><b>16.3.2</b> The Solution</a></li>
+<li class="chapter" data-level="16.3.3" data-path="real-world.html"><a href="real-world.html#key-practices-1"><i class="fa fa-check"></i><b>16.3.3</b> Key Practices</a></li>
+</ul></li>
+<li class="chapter" data-level="16.4" data-path="real-world.html"><a href="real-world.html#pattern-3-the-model-performance-degradation-problem"><i class="fa fa-check"></i><b>16.4</b> Pattern 3: The “Model Performance Degradation” Problem</a>
+<ul>
+<li class="chapter" data-level="16.4.1" data-path="real-world.html"><a href="real-world.html#the-scenario-2"><i class="fa fa-check"></i><b>16.4.1</b> The Scenario</a></li>
+<li class="chapter" data-level="16.4.2" data-path="real-world.html"><a href="real-world.html#the-solution-2"><i class="fa fa-check"></i><b>16.4.2</b> The Solution</a></li>
+<li class="chapter" data-level="16.4.3" data-path="real-world.html"><a href="real-world.html#key-practices-2"><i class="fa fa-check"></i><b>16.4.3</b> Key Practices</a></li>
+</ul></li>
+<li class="chapter" data-level="16.5" data-path="real-world.html"><a href="real-world.html#pattern-4-the-we-need-to-scale-this-problem"><i class="fa fa-check"></i><b>16.5</b> Pattern 4: The “We Need to Scale This” Problem</a>
+<ul>
+<li class="chapter" data-level="16.5.1" data-path="real-world.html"><a href="real-world.html#the-scenario-3"><i class="fa fa-check"></i><b>16.5.1</b> The Scenario</a></li>
+<li class="chapter" data-level="16.5.2" data-path="real-world.html"><a href="real-world.html#the-solution-3"><i class="fa fa-check"></i><b>16.5.2</b> The Solution</a></li>
+<li class="chapter" data-level="16.5.3" data-path="real-world.html"><a href="real-world.html#key-practices-3"><i class="fa fa-check"></i><b>16.5.3</b> Key Practices</a></li>
+</ul></li>
+<li class="chapter" data-level="16.6" data-path="real-world.html"><a href="real-world.html#pattern-5-the-unclear-requirements-problem"><i class="fa fa-check"></i><b>16.6</b> Pattern 5: The “Unclear Requirements” Problem</a>
+<ul>
+<li class="chapter" data-level="16.6.1" data-path="real-world.html"><a href="real-world.html#the-scenario-4"><i class="fa fa-check"></i><b>16.6.1</b> The Scenario</a></li>
+<li class="chapter" data-level="16.6.2" data-path="real-world.html"><a href="real-world.html#the-solution-4"><i class="fa fa-check"></i><b>16.6.2</b> The Solution</a></li>
+<li class="chapter" data-level="16.6.3" data-path="real-world.html"><a href="real-world.html#key-practices-4"><i class="fa fa-check"></i><b>16.6.3</b> Key Practices</a></li>
+</ul></li>
+<li class="chapter" data-level="16.7" data-path="real-world.html"><a href="real-world.html#general-approach-for-any-situation"><i class="fa fa-check"></i><b>16.7</b> General Approach for Any Situation</a></li>
+<li class="chapter" data-level="16.8" data-path="real-world.html"><a href="real-world.html#exercise-handle-a-real-problem"><i class="fa fa-check"></i><b>16.8</b> Exercise: Handle a Real Problem</a></li>
+<li class="chapter" data-level="16.9" data-path="real-world.html"><a href="real-world.html#key-takeaways-15"><i class="fa fa-check"></i><b>16.9</b> Key Takeaways</a></li>
+</ul></li>
+<li class="chapter" data-level="17" data-path="claude-code-hooks.html"><a href="claude-code-hooks.html"><i class="fa fa-check"></i><b>17</b> Claude Code Hooks: Deterministic Automation</a>
+<ul>
+<li class="chapter" data-level="17.1" data-path="claude-code-hooks.html"><a href="claude-code-hooks.html#what-hooks-are"><i class="fa fa-check"></i><b>17.1</b> What hooks are</a></li>
+<li class="chapter" data-level="17.2" data-path="claude-code-hooks.html"><a href="claude-code-hooks.html#when-a-hook-is-appropriate"><i class="fa fa-check"></i><b>17.2</b> When a hook is appropriate</a></li>
+<li class="chapter" data-level="17.3" data-path="claude-code-hooks.html"><a href="claude-code-hooks.html#core-lifecycle-pattern"><i class="fa fa-check"></i><b>17.3</b> Core lifecycle pattern</a></li>
+<li class="chapter" data-level="17.4" data-path="claude-code-hooks.html"><a href="claude-code-hooks.html#example-format-edited-python-files"><i class="fa fa-check"></i><b>17.4</b> Example: format edited Python files</a></li>
+<li class="chapter" data-level="17.5" data-path="claude-code-hooks.html"><a href="claude-code-hooks.html#example-protect-sensitive-paths"><i class="fa fa-check"></i><b>17.5</b> Example: protect sensitive paths</a></li>
+<li class="chapter" data-level="17.6" data-path="claude-code-hooks.html"><a href="claude-code-hooks.html#safe-design-checklist"><i class="fa fa-check"></i><b>17.6</b> Safe design checklist</a></li>
+<li class="chapter" data-level="17.7" data-path="claude-code-hooks.html"><a href="claude-code-hooks.html#choosing-between-instructions-skills-and-hooks"><i class="fa fa-check"></i><b>17.7</b> Choosing between instructions, skills, and hooks</a></li>
+<li class="chapter" data-level="17.8" data-path="claude-code-hooks.html"><a href="claude-code-hooks.html#exercise-design-before-enabling"><i class="fa fa-check"></i><b>17.8</b> Exercise: design before enabling</a></li>
+<li class="chapter" data-level="17.9" data-path="claude-code-hooks.html"><a href="claude-code-hooks.html#key-takeaways-16"><i class="fa fa-check"></i><b>17.9</b> Key takeaways</a></li>
+</ul></li>
+<li class="chapter" data-level="18" data-path="claude-code-skills.html"><a href="claude-code-skills.html"><i class="fa fa-check"></i><b>18</b> Claude Code Skills: Reusable Procedures</a>
+<ul>
+<li class="chapter" data-level="18.1" data-path="claude-code-skills.html"><a href="claude-code-skills.html#what-a-skill-is"><i class="fa fa-check"></i><b>18.1</b> What a skill is</a></li>
+<li class="chapter" data-level="18.2" data-path="claude-code-skills.html"><a href="claude-code-skills.html#where-skills-live"><i class="fa fa-check"></i><b>18.2</b> Where skills live</a></li>
+<li class="chapter" data-level="18.3" data-path="claude-code-skills.html"><a href="claude-code-skills.html#minimal-structure"><i class="fa fa-check"></i><b>18.3</b> Minimal structure</a></li>
+<li class="chapter" data-level="18.4" data-path="claude-code-skills.html"><a href="claude-code-skills.html#progressive-disclosure"><i class="fa fa-check"></i><b>18.4</b> Progressive disclosure</a></li>
+<li class="chapter" data-level="18.5" data-path="claude-code-skills.html"><a href="claude-code-skills.html#methodologically-sound-data-science-skills"><i class="fa fa-check"></i><b>18.5</b> Methodologically sound data-science skills</a></li>
+<li class="chapter" data-level="18.6" data-path="claude-code-skills.html"><a href="claude-code-skills.html#example-skill-notebook-review"><i class="fa fa-check"></i><b>18.6</b> Example skill: notebook review</a></li>
+<li class="chapter" data-level="18.7" data-path="claude-code-skills.html"><a href="claude-code-skills.html#evaluation-and-maintenance"><i class="fa fa-check"></i><b>18.7</b> Evaluation and maintenance</a></li>
+<li class="chapter" data-level="18.8" data-path="claude-code-skills.html"><a href="claude-code-skills.html#skills-are-not-enforcement"><i class="fa fa-check"></i><b>18.8</b> Skills are not enforcement</a></li>
+<li class="chapter" data-level="18.9" data-path="claude-code-skills.html"><a href="claude-code-skills.html#exercise-create-one-project-skill"><i class="fa fa-check"></i><b>18.9</b> Exercise: create one project skill</a></li>
+<li class="chapter" data-level="18.10" data-path="claude-code-skills.html"><a href="claude-code-skills.html#key-takeaways-17"><i class="fa fa-check"></i><b>18.10</b> Key takeaways</a></li>
+</ul></li>
+<li class="chapter" data-level="19" data-path="verification-loops.html"><a href="verification-loops.html"><i class="fa fa-check"></i><b>19</b> Verification Loops for Agent-Assisted Work</a>
+<ul>
+<li class="chapter" data-level="19.1" data-path="verification-loops.html"><a href="verification-loops.html#what-are-quality-loops"><i class="fa fa-check"></i><b>19.1</b> What Are Quality Loops?</a></li>
+<li class="chapter" data-level="19.2" data-path="verification-loops.html"><a href="verification-loops.html#loop-1-execution-loop"><i class="fa fa-check"></i><b>19.2</b> Loop 1: Execution Loop</a>
+<ul>
+<li class="chapter" data-level="19.2.1" data-path="verification-loops.html"><a href="verification-loops.html#the-execution-loop-process"><i class="fa fa-check"></i><b>19.2.1</b> The execution-loop process</a></li>
+<li class="chapter" data-level="19.2.2" data-path="verification-loops.html"><a href="verification-loops.html#execution-loop-checklist"><i class="fa fa-check"></i><b>19.2.2</b> Execution-loop checklist</a></li>
+<li class="chapter" data-level="19.2.3" data-path="verification-loops.html"><a href="verification-loops.html#example-execution-loop-in-action"><i class="fa fa-check"></i><b>19.2.3</b> Example: execution loop in action</a></li>
+</ul></li>
+<li class="chapter" data-level="19.3" data-path="verification-loops.html"><a href="verification-loops.html#loop-2-quality-loop"><i class="fa fa-check"></i><b>19.3</b> Loop 2: Quality Loop</a>
+<ul>
+<li class="chapter" data-level="19.3.1" data-path="verification-loops.html"><a href="verification-loops.html#quality-loop-process"><i class="fa fa-check"></i><b>19.3.1</b> Quality Loop Process</a></li>
+<li class="chapter" data-level="19.3.2" data-path="verification-loops.html"><a href="verification-loops.html#quality-loop-checklist"><i class="fa fa-check"></i><b>19.3.2</b> Quality Loop Checklist</a></li>
+<li class="chapter" data-level="19.3.3" data-path="verification-loops.html"><a href="verification-loops.html#example-quality-loop"><i class="fa fa-check"></i><b>19.3.3</b> Example: Quality Loop</a></li>
+</ul></li>
+<li class="chapter" data-level="19.4" data-path="verification-loops.html"><a href="verification-loops.html#loop-3-outcome-validation-loop"><i class="fa fa-check"></i><b>19.4</b> Loop 3: Outcome-Validation Loop</a>
+<ul>
+<li class="chapter" data-level="19.4.1" data-path="verification-loops.html"><a href="verification-loops.html#validation-loop-process"><i class="fa fa-check"></i><b>19.4.1</b> Validation Loop Process</a></li>
+<li class="chapter" data-level="19.4.2" data-path="verification-loops.html"><a href="verification-loops.html#validation-loop-checklist"><i class="fa fa-check"></i><b>19.4.2</b> Validation Loop Checklist</a></li>
+<li class="chapter" data-level="19.4.3" data-path="verification-loops.html"><a href="verification-loops.html#example-validation-loop"><i class="fa fa-check"></i><b>19.4.3</b> Example: Validation Loop</a></li>
+</ul></li>
+<li class="chapter" data-level="19.5" data-path="verification-loops.html"><a href="verification-loops.html#combining-all-three-loops"><i class="fa fa-check"></i><b>19.5</b> Combining All Three Loops</a></li>
+<li class="chapter" data-level="19.6" data-path="verification-loops.html"><a href="verification-loops.html#tips-for-effective-loops"><i class="fa fa-check"></i><b>19.6</b> Tips for Effective Loops</a>
+<ul>
+<li class="chapter" data-level="19.6.1" data-path="verification-loops.html"><a href="verification-loops.html#execution-loop-tips"><i class="fa fa-check"></i><b>19.6.1</b> ✅ Execution-loop tips</a></li>
+<li class="chapter" data-level="19.6.2" data-path="verification-loops.html"><a href="verification-loops.html#quality-loop-tips"><i class="fa fa-check"></i><b>19.6.2</b> ✅ Quality Loop Tips</a></li>
+<li class="chapter" data-level="19.6.3" data-path="verification-loops.html"><a href="verification-loops.html#validation-loop-tips"><i class="fa fa-check"></i><b>19.6.3</b> ✅ Validation Loop Tips</a></li>
+</ul></li>
+<li class="chapter" data-level="19.7" data-path="verification-loops.html"><a href="verification-loops.html#common-mistakes"><i class="fa fa-check"></i><b>19.7</b> Common Mistakes</a>
+<ul>
+<li class="chapter" data-level="19.7.1" data-path="verification-loops.html"><a href="verification-loops.html#skipping-execution-loop-testing"><i class="fa fa-check"></i><b>19.7.1</b> ❌ Skipping execution-loop testing</a></li>
+<li class="chapter" data-level="19.7.2" data-path="verification-loops.html"><a href="verification-loops.html#skipping-quality-loop"><i class="fa fa-check"></i><b>19.7.2</b> ❌ Skipping Quality Loop</a></li>
+<li class="chapter" data-level="19.7.3" data-path="verification-loops.html"><a href="verification-loops.html#skipping-validation-loop"><i class="fa fa-check"></i><b>19.7.3</b> ❌ Skipping Validation Loop</a></li>
+</ul></li>
+<li class="chapter" data-level="19.8" data-path="verification-loops.html"><a href="verification-loops.html#exercise-practice-loops"><i class="fa fa-check"></i><b>19.8</b> Exercise: Practice Loops</a></li>
+<li class="chapter" data-level="19.9" data-path="verification-loops.html"><a href="verification-loops.html#key-takeaways-18"><i class="fa fa-check"></i><b>19.9</b> Key Takeaways</a></li>
+</ul></li>
+<li class="chapter" data-level="20" data-path="notebooks.html"><a href="notebooks.html"><i class="fa fa-check"></i><b>20</b> Interactive Notebooks: Professional Data Science Workflows</a>
+<ul>
+<li class="chapter" data-level="20.1" data-path="notebooks.html"><a href="notebooks.html#why-professional-notebooks-matter"><i class="fa fa-check"></i><b>20.1</b> Why Professional Notebooks Matter</a></li>
+<li class="chapter" data-level="20.2" data-path="notebooks.html"><a href="notebooks.html#the-3-section-notebook-structure"><i class="fa fa-check"></i><b>20.2</b> The 3-Section Notebook Structure</a>
+<ul>
+<li class="chapter" data-level="20.2.1" data-path="notebooks.html"><a href="notebooks.html#section-1-setup"><i class="fa fa-check"></i><b>20.2.1</b> Section 1: Setup</a></li>
+<li class="chapter" data-level="20.2.2" data-path="notebooks.html"><a href="notebooks.html#section-2-analysis"><i class="fa fa-check"></i><b>20.2.2</b> Section 2: Analysis</a></li>
+<li class="chapter" data-level="20.2.3" data-path="notebooks.html"><a href="notebooks.html#section-3-outputs"><i class="fa fa-check"></i><b>20.2.3</b> Section 3: Outputs</a></li>
+</ul></li>
+<li class="chapter" data-level="20.3" data-path="notebooks.html"><a href="notebooks.html#best-practices-for-each-section"><i class="fa fa-check"></i><b>20.3</b> Best Practices for Each Section</a>
+<ul>
+<li class="chapter" data-level="20.3.1" data-path="notebooks.html"><a href="notebooks.html#section-1-setup-best-practices"><i class="fa fa-check"></i><b>20.3.1</b> Section 1: Setup Best Practices</a></li>
+<li class="chapter" data-level="20.3.2" data-path="notebooks.html"><a href="notebooks.html#section-2-analysis-best-practices"><i class="fa fa-check"></i><b>20.3.2</b> Section 2: Analysis Best Practices</a></li>
+<li class="chapter" data-level="20.3.3" data-path="notebooks.html"><a href="notebooks.html#section-3-outputs-best-practices"><i class="fa fa-check"></i><b>20.3.3</b> Section 3: Outputs Best Practices</a></li>
+</ul></li>
+<li class="chapter" data-level="20.4" data-path="notebooks.html"><a href="notebooks.html#debugging-notebook-issues"><i class="fa fa-check"></i><b>20.4</b> Debugging Notebook Issues</a>
+<ul>
+<li class="chapter" data-level="20.4.1" data-path="notebooks.html"><a href="notebooks.html#issue-notebook-works-first-run-then-fails"><i class="fa fa-check"></i><b>20.4.1</b> Issue: Notebook “works” first run, then fails</a></li>
+<li class="chapter" data-level="20.4.2" data-path="notebooks.html"><a href="notebooks.html#issue-notebook-runs-slow"><i class="fa fa-check"></i><b>20.4.2</b> Issue: Notebook runs slow</a></li>
+<li class="chapter" data-level="20.4.3" data-path="notebooks.html"><a href="notebooks.html#issue-results-dont-match-when-rerun"><i class="fa fa-check"></i><b>20.4.3</b> Issue: Results don’t match when rerun</a></li>
+</ul></li>
+<li class="chapter" data-level="20.5" data-path="notebooks.html"><a href="notebooks.html#asking-claude-about-notebooks"><i class="fa fa-check"></i><b>20.5</b> Asking Claude About Notebooks</a></li>
+<li class="chapter" data-level="20.6" data-path="notebooks.html"><a href="notebooks.html#exercise-restructure-an-existing-notebook"><i class="fa fa-check"></i><b>20.6</b> Exercise: Restructure an Existing Notebook</a></li>
+<li class="chapter" data-level="20.7" data-path="notebooks.html"><a href="notebooks.html#performance-tips"><i class="fa fa-check"></i><b>20.7</b> Performance Tips</a>
+<ul>
+<li class="chapter" data-level="20.7.1" data-path="notebooks.html"><a href="notebooks.html#tip-1-use-sampling-for-development"><i class="fa fa-check"></i><b>20.7.1</b> Tip 1: Use Sampling for Development</a></li>
+<li class="chapter" data-level="20.7.2" data-path="notebooks.html"><a href="notebooks.html#tip-2-cache-expensive-operations"><i class="fa fa-check"></i><b>20.7.2</b> Tip 2: Cache Expensive Operations</a></li>
+<li class="chapter" data-level="20.7.3" data-path="notebooks.html"><a href="notebooks.html#tip-3-profile-slow-code"><i class="fa fa-check"></i><b>20.7.3</b> Tip 3: Profile Slow Code</a></li>
+</ul></li>
+<li class="chapter" data-level="20.8" data-path="notebooks.html"><a href="notebooks.html#key-takeaways-19"><i class="fa fa-check"></i><b>20.8</b> Key Takeaways</a></li>
+</ul></li>
+<li class="chapter" data-level="21" data-path="model-context-protocol.html"><a href="model-context-protocol.html"><i class="fa fa-check"></i><b>21</b> Model Context Protocol (MCP): Connecting Agents to Data and Tools</a>
+<ul>
+<li class="chapter" data-level="21.1" data-path="model-context-protocol.html"><a href="model-context-protocol.html#why-this-chapter-exists"><i class="fa fa-check"></i><b>21.1</b> Why this chapter exists</a></li>
+<li class="chapter" data-level="21.2" data-path="model-context-protocol.html"><a href="model-context-protocol.html#the-problem-mcp-solves"><i class="fa fa-check"></i><b>21.2</b> The problem MCP solves</a></li>
+<li class="chapter" data-level="21.3" data-path="model-context-protocol.html"><a href="model-context-protocol.html#core-architecture"><i class="fa fa-check"></i><b>21.3</b> Core architecture</a>
+<ul>
+<li class="chapter" data-level="21.3.1" data-path="model-context-protocol.html"><a href="model-context-protocol.html#two-layers"><i class="fa fa-check"></i><b>21.3.1</b> Two layers</a></li>
+</ul></li>
+<li class="chapter" data-level="21.4" data-path="model-context-protocol.html"><a href="model-context-protocol.html#the-primitives"><i class="fa fa-check"></i><b>21.4</b> The primitives</a>
+<ul>
+<li class="chapter" data-level="21.4.1" data-path="model-context-protocol.html"><a href="model-context-protocol.html#what-a-tool-definition-looks-like"><i class="fa fa-check"></i><b>21.4.1</b> What a tool definition looks like</a></li>
+</ul></li>
+<li class="chapter" data-level="21.5" data-path="model-context-protocol.html"><a href="model-context-protocol.html#mcp-compared-with-related-ideas"><i class="fa fa-check"></i><b>21.5</b> MCP compared with related ideas</a></li>
+<li class="chapter" data-level="21.6" data-path="model-context-protocol.html"><a href="model-context-protocol.html#common-examples"><i class="fa fa-check"></i><b>21.6</b> Common examples</a></li>
+<li class="chapter" data-level="21.7" data-path="model-context-protocol.html"><a href="model-context-protocol.html#mcp-in-a-databricks-marketing-analytics-stack"><i class="fa fa-check"></i><b>21.7</b> MCP in a Databricks marketing-analytics stack</a>
+<ul>
+<li class="chapter" data-level="21.7.1" data-path="model-context-protocol.html"><a href="model-context-protocol.html#three-ways-databricks-supports-mcp"><i class="fa fa-check"></i><b>21.7.1</b> Three ways Databricks supports MCP</a></li>
+<li class="chapter" data-level="21.7.2" data-path="model-context-protocol.html"><a href="model-context-protocol.html#pattern-1-governed-analytics-as-unity-catalog-functions"><i class="fa fa-check"></i><b>21.7.2</b> Pattern 1: Governed analytics as Unity Catalog functions</a></li>
+<li class="chapter" data-level="21.7.3" data-path="model-context-protocol.html"><a href="model-context-protocol.html#pattern-2-a-custom-server-for-long-running-jobs"><i class="fa fa-check"></i><b>21.7.3</b> Pattern 2: A custom server for long-running jobs</a></li>
+<li class="chapter" data-level="21.7.4" data-path="model-context-protocol.html"><a href="model-context-protocol.html#pattern-3-an-ai-assisted-streamlit-app-as-an-mcp-host"><i class="fa fa-check"></i><b>21.7.4</b> Pattern 3: An AI-assisted Streamlit app as an MCP host</a></li>
+<li class="chapter" data-level="21.7.5" data-path="model-context-protocol.html"><a href="model-context-protocol.html#pattern-4-coding-agents-connected-to-the-workspace"><i class="fa fa-check"></i><b>21.7.5</b> Pattern 4: Coding agents connected to the workspace</a></li>
+</ul></li>
+<li class="chapter" data-level="21.8" data-path="model-context-protocol.html"><a href="model-context-protocol.html#choosing-the-right-integration"><i class="fa fa-check"></i><b>21.8</b> Choosing the right integration</a></li>
+<li class="chapter" data-level="21.9" data-path="model-context-protocol.html"><a href="model-context-protocol.html#security-governance-and-failure-modes"><i class="fa fa-check"></i><b>21.9</b> Security, governance, and failure modes</a></li>
+<li class="chapter" data-level="21.10" data-path="model-context-protocol.html"><a href="model-context-protocol.html#exercise-expose-one-analysis-as-a-governed-tool"><i class="fa fa-check"></i><b>21.10</b> Exercise: expose one analysis as a governed tool</a></li>
+<li class="chapter" data-level="21.11" data-path="model-context-protocol.html"><a href="model-context-protocol.html#key-takeaways-20"><i class="fa fa-check"></i><b>21.11</b> Key takeaways</a></li>
+<li class="chapter" data-level="21.12" data-path="model-context-protocol.html"><a href="model-context-protocol.html#references-1"><i class="fa fa-check"></i><b>21.12</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="22" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html"><i class="fa fa-check"></i><b>22</b> Context Engineering and Harness Engineering</a>
+<ul>
+<li class="chapter" data-level="22.1" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#why-these-two-terms-matter"><i class="fa fa-check"></i><b>22.1</b> Why these two terms matter</a></li>
+<li class="chapter" data-level="22.2" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#where-the-terms-came-from"><i class="fa fa-check"></i><b>22.2</b> Where the terms came from</a>
+<ul>
+<li class="chapter" data-level="22.2.1" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-engineering-mid-2025"><i class="fa fa-check"></i><b>22.2.1</b> Context engineering (mid-2025)</a></li>
+<li class="chapter" data-level="22.2.2" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#harness-engineering-early-2026"><i class="fa fa-check"></i><b>22.2.2</b> Harness engineering (early 2026)</a></li>
+</ul></li>
+<li class="chapter" data-level="22.3" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#how-prompt-context-and-harness-relate"><i class="fa fa-check"></i><b>22.3</b> How prompt, context, and harness relate</a></li>
+<li class="chapter" data-level="22.4" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-engineering"><i class="fa fa-check"></i><b>22.4</b> Context engineering</a>
+<ul>
+<li class="chapter" data-level="22.4.1" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-is-a-finite-attention-budget"><i class="fa fa-check"></i><b>22.4.1</b> Context is a finite attention budget</a></li>
+<li class="chapter" data-level="22.4.2" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#four-ways-context-fails"><i class="fa fa-check"></i><b>22.4.2</b> Four ways context fails</a></li>
+<li class="chapter" data-level="22.4.3" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#four-families-of-technique-write-select-compress-isolate"><i class="fa fa-check"></i><b>22.4.3</b> Four families of technique: write, select, compress, isolate</a></li>
+<li class="chapter" data-level="22.4.4" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#cost-the-overlooked-dimension"><i class="fa fa-check"></i><b>22.4.4</b> Cost: the overlooked dimension</a></li>
+<li class="chapter" data-level="22.4.5" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-features-are-becoming-platform-features"><i class="fa fa-check"></i><b>22.4.5</b> Context features are becoming platform features</a></li>
+</ul></li>
+<li class="chapter" data-level="22.5" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#harness-engineering"><i class="fa fa-check"></i><b>22.5</b> Harness engineering</a>
+<ul>
+<li class="chapter" data-level="22.5.1" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#what-is-in-a-harness"><i class="fa fa-check"></i><b>22.5.1</b> What is in a harness</a></li>
+<li class="chapter" data-level="22.5.2" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#guides-and-sensors"><i class="fa fa-check"></i><b>22.5.2</b> Guides and sensors</a></li>
+<li class="chapter" data-level="22.5.3" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#each-pattern-fixes-a-named-failure"><i class="fa fa-check"></i><b>22.5.3</b> Each pattern fixes a named failure</a></li>
+<li class="chapter" data-level="22.5.4" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#the-thin-harness-debate"><i class="fa fa-check"></i><b>22.5.4</b> The thin-harness debate</a></li>
+<li class="chapter" data-level="22.5.5" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#evaluation-is-a-harness-too"><i class="fa fa-check"></i><b>22.5.5</b> Evaluation is a harness too</a></li>
+</ul></li>
+<li class="chapter" data-level="22.6" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#applying-both-to-databricks-analytics-apps"><i class="fa fa-check"></i><b>22.6</b> Applying both to Databricks analytics apps</a>
+<ul>
+<li class="chapter" data-level="22.6.1" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#metadata-is-the-highest-return-context"><i class="fa fa-check"></i><b>22.6.1</b> Metadata is the highest-return context</a></li>
+<li class="chapter" data-level="22.6.2" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#mapping-to-the-three-workloads"><i class="fa fa-check"></i><b>22.6.2</b> Mapping to the three workloads</a></li>
+<li class="chapter" data-level="22.6.3" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#three-cautions-for-marketing-data"><i class="fa fa-check"></i><b>22.6.3</b> Three cautions for marketing data</a></li>
+</ul></li>
+<li class="chapter" data-level="22.7" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#a-minimal-sketch-the-number-check-sensor"><i class="fa fa-check"></i><b>22.7</b> A minimal sketch: the number-check sensor</a></li>
+<li class="chapter" data-level="22.8" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#exercise-audit-one-ai-assisted-app"><i class="fa fa-check"></i><b>22.8</b> Exercise: audit one AI-assisted app</a></li>
+<li class="chapter" data-level="22.9" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#key-takeaways-21"><i class="fa fa-check"></i><b>22.9</b> Key takeaways</a></li>
+<li class="chapter" data-level="22.10" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#references-2"><i class="fa fa-check"></i><b>22.10</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="23" data-path="ai-marketing-analytics.html"><a href="ai-marketing-analytics.html"><i class="fa fa-check"></i><b>23</b> AI Models in Marketing Analytics</a>
+<ul>
+<li class="chapter" data-level="23.1" data-path="ai-marketing-analytics.html"><a href="ai-marketing-analytics.html#introduction-2"><i class="fa fa-check"></i><b>23.1</b> Introduction</a></li>
+<li class="chapter" data-level="23.2" data-path="ai-marketing-analytics.html"><a href="ai-marketing-analytics.html#a-map-of-ai-model-families-in-marketing"><i class="fa fa-check"></i><b>23.2</b> A map of AI model families in marketing</a></li>
+<li class="chapter" data-level="23.3" data-path="ai-marketing-analytics.html"><a href="ai-marketing-analytics.html#audience-and-customer-modeling"><i class="fa fa-check"></i><b>23.3</b> Audience and customer modeling</a></li>
+<li class="chapter" data-level="23.4" data-path="ai-marketing-analytics.html"><a href="ai-marketing-analytics.html#measurement-attribution-and-incrementality"><i class="fa fa-check"></i><b>23.4</b> Measurement, attribution, and incrementality</a></li>
+<li class="chapter" data-level="23.5" data-path="ai-marketing-analytics.html"><a href="ai-marketing-analytics.html#media-planning-reach-and-audience-overlap"><i class="fa fa-check"></i><b>23.5</b> Media planning, reach, and audience overlap</a></li>
+<li class="chapter" data-level="23.6" data-path="ai-marketing-analytics.html"><a href="ai-marketing-analytics.html#basket-analysis-and-recommendations"><i class="fa fa-check"></i><b>23.6</b> Basket analysis and recommendations</a></li>
+<li class="chapter" data-level="23.7" data-path="ai-marketing-analytics.html"><a href="ai-marketing-analytics.html#generative-ai-for-content-and-creative"><i class="fa fa-check"></i><b>23.7</b> Generative AI for content and creative</a></li>
+<li class="chapter" data-level="23.8" data-path="ai-marketing-analytics.html"><a href="ai-marketing-analytics.html#voice-of-the-customer-text-reviews-and-social"><i class="fa fa-check"></i><b>23.8</b> Voice of the customer: text, reviews, and social</a></li>
+<li class="chapter" data-level="23.9" data-path="ai-marketing-analytics.html"><a href="ai-marketing-analytics.html#ai-assisted-analytics-workflows"><i class="fa fa-check"></i><b>23.9</b> AI-assisted analytics workflows</a></li>
+<li class="chapter" data-level="23.10" data-path="ai-marketing-analytics.html"><a href="ai-marketing-analytics.html#agents-in-marketing-operations"><i class="fa fa-check"></i><b>23.10</b> Agents in marketing operations</a></li>
+<li class="chapter" data-level="23.11" data-path="ai-marketing-analytics.html"><a href="ai-marketing-analytics.html#data-foundations-and-privacy"><i class="fa fa-check"></i><b>23.11</b> Data foundations and privacy</a></li>
+<li class="chapter" data-level="23.12" data-path="ai-marketing-analytics.html"><a href="ai-marketing-analytics.html#evaluation-and-governance"><i class="fa fa-check"></i><b>23.12</b> Evaluation and governance</a></li>
+<li class="chapter" data-level="23.13" data-path="ai-marketing-analytics.html"><a href="ai-marketing-analytics.html#interview-takeaways"><i class="fa fa-check"></i><b>23.13</b> Interview takeaways</a></li>
+<li class="chapter" data-level="23.14" data-path="ai-marketing-analytics.html"><a href="ai-marketing-analytics.html#key-takeaways-22"><i class="fa fa-check"></i><b>23.14</b> Key takeaways</a></li>
+</ul></li>
+<li class="chapter" data-level="24" data-path="classification-lookalike.html"><a href="classification-lookalike.html"><i class="fa fa-check"></i><b>24</b> Classification and Lookalike Modeling: PU Learning, Two-Tower Networks, and Typed Decision Models</a>
+<ul>
+<li class="chapter" data-level="24.1" data-path="classification-lookalike.html"><a href="classification-lookalike.html#introduction-3"><i class="fa fa-check"></i><b>24.1</b> Introduction</a></li>
+<li class="chapter" data-level="24.2" data-path="classification-lookalike.html"><a href="classification-lookalike.html#choosing-a-model-family"><i class="fa fa-check"></i><b>24.2</b> Choosing a model family</a></li>
+<li class="chapter" data-level="24.3" data-path="classification-lookalike.html"><a href="classification-lookalike.html#lookalike-modeling-as-positive-unlabeled-learning"><i class="fa fa-check"></i><b>24.3</b> Lookalike modeling as positive-unlabeled learning</a>
+<ul>
+<li class="chapter" data-level="24.3.1" data-path="classification-lookalike.html"><a href="classification-lookalike.html#the-problem-no-true-negatives"><i class="fa fa-check"></i><b>24.3.1</b> The problem: no true negatives</a></li>
+<li class="chapter" data-level="24.3.2" data-path="classification-lookalike.html"><a href="classification-lookalike.html#the-key-assumption-and-a-useful-result"><i class="fa fa-check"></i><b>24.3.2</b> The key assumption and a useful result</a></li>
+<li class="chapter" data-level="24.3.3" data-path="classification-lookalike.html"><a href="classification-lookalike.html#common-strategies"><i class="fa fa-check"></i><b>24.3.3</b> Common strategies</a></li>
+<li class="chapter" data-level="24.3.4" data-path="classification-lookalike.html"><a href="classification-lookalike.html#worked-example-a-retailers-lookalike-audience"><i class="fa fa-check"></i><b>24.3.4</b> Worked example: a retailer’s lookalike audience</a></li>
+<li class="chapter" data-level="24.3.5" data-path="classification-lookalike.html"><a href="classification-lookalike.html#a-runnable-illustration"><i class="fa fa-check"></i><b>24.3.5</b> A runnable illustration</a></li>
+<li class="chapter" data-level="24.3.6" data-path="classification-lookalike.html"><a href="classification-lookalike.html#an-enterprise-example"><i class="fa fa-check"></i><b>24.3.6</b> An enterprise example</a></li>
+</ul></li>
+<li class="chapter" data-level="24.4" data-path="classification-lookalike.html"><a href="classification-lookalike.html#two-tower-networks-for-retrieval-and-lookalikes"><i class="fa fa-check"></i><b>24.4</b> Two-tower networks for retrieval and lookalikes</a>
+<ul>
+<li class="chapter" data-level="24.4.1" data-path="classification-lookalike.html"><a href="classification-lookalike.html#architecture"><i class="fa fa-check"></i><b>24.4.1</b> Architecture</a></li>
+<li class="chapter" data-level="24.4.2" data-path="classification-lookalike.html"><a href="classification-lookalike.html#why-it-scales-late-interaction-and-approximate-search"><i class="fa fa-check"></i><b>24.4.2</b> Why it scales: late interaction and approximate search</a></li>
+<li class="chapter" data-level="24.4.3" data-path="classification-lookalike.html"><a href="classification-lookalike.html#using-embeddings-for-lookalike-audiences"><i class="fa fa-check"></i><b>24.4.3</b> Using embeddings for lookalike audiences</a></li>
+<li class="chapter" data-level="24.4.4" data-path="classification-lookalike.html"><a href="classification-lookalike.html#worked-example-dot-product-versus-cosine"><i class="fa fa-check"></i><b>24.4.4</b> Worked example: dot product versus cosine</a></li>
+<li class="chapter" data-level="24.4.5" data-path="classification-lookalike.html"><a href="classification-lookalike.html#worked-example-why-a-single-centroid-can-fail"><i class="fa fa-check"></i><b>24.4.5</b> Worked example: why a single centroid can fail</a></li>
+<li class="chapter" data-level="24.4.6" data-path="classification-lookalike.html"><a href="classification-lookalike.html#training-choices-that-matter"><i class="fa fa-check"></i><b>24.4.6</b> Training choices that matter</a></li>
+</ul></li>
+<li class="chapter" data-level="24.5" data-path="classification-lookalike.html"><a href="classification-lookalike.html#typed-decision-models-jev-and-system-one-classification"><i class="fa fa-check"></i><b>24.5</b> Typed decision models: Jev and “System One” classification</a>
+<ul>
+<li class="chapter" data-level="24.5.1" data-path="classification-lookalike.html"><a href="classification-lookalike.html#why-a-different-model-type"><i class="fa fa-check"></i><b>24.5.1</b> Why a different model type</a></li>
+<li class="chapter" data-level="24.5.2" data-path="classification-lookalike.html"><a href="classification-lookalike.html#what-jev-is"><i class="fa fa-check"></i><b>24.5.2</b> What Jev is</a></li>
+<li class="chapter" data-level="24.5.3" data-path="classification-lookalike.html"><a href="classification-lookalike.html#confidence-is-not-calibration"><i class="fa fa-check"></i><b>24.5.3</b> Confidence is not calibration</a></li>
+<li class="chapter" data-level="24.5.4" data-path="classification-lookalike.html"><a href="classification-lookalike.html#worked-examples-computing-confidence-by-hand"><i class="fa fa-check"></i><b>24.5.4</b> Worked examples: computing confidence by hand</a></li>
+<li class="chapter" data-level="24.5.5" data-path="classification-lookalike.html"><a href="classification-lookalike.html#vendor-reported-performance"><i class="fa fa-check"></i><b>24.5.5</b> Vendor-reported performance</a></li>
+<li class="chapter" data-level="24.5.6" data-path="classification-lookalike.html"><a href="classification-lookalike.html#where-a-typed-decision-model-fits"><i class="fa fa-check"></i><b>24.5.6</b> Where a typed decision model fits</a></li>
+</ul></li>
+<li class="chapter" data-level="24.6" data-path="classification-lookalike.html"><a href="classification-lookalike.html#validating-classifiers-before-automation"><i class="fa fa-check"></i><b>24.6</b> Validating classifiers before automation</a>
+<ul>
+<li class="chapter" data-level="24.6.1" data-path="classification-lookalike.html"><a href="classification-lookalike.html#worked-example-from-calibration-to-an-automation-threshold"><i class="fa fa-check"></i><b>24.6.1</b> Worked example: from calibration to an automation threshold</a></li>
+</ul></li>
+<li class="chapter" data-level="24.7" data-path="classification-lookalike.html"><a href="classification-lookalike.html#putting-the-pieces-together"><i class="fa fa-check"></i><b>24.7</b> Putting the pieces together</a></li>
+<li class="chapter" data-level="24.8" data-path="classification-lookalike.html"><a href="classification-lookalike.html#implementing-this-in-a-databricks-marketing-practice"><i class="fa fa-check"></i><b>24.8</b> Implementing this in a Databricks marketing practice</a>
+<ul>
+<li class="chapter" data-level="24.8.1" data-path="classification-lookalike.html"><a href="classification-lookalike.html#project-1-upgrade-the-lookalike-job-to-be-pu-aware"><i class="fa fa-check"></i><b>24.8.1</b> Project 1: upgrade the lookalike job to be PU-aware</a></li>
+<li class="chapter" data-level="24.8.2" data-path="classification-lookalike.html"><a href="classification-lookalike.html#project-2-embedding-based-lookalikes-and-recommendations"><i class="fa fa-check"></i><b>24.8.2</b> Project 2: embedding-based lookalikes and recommendations</a></li>
+<li class="chapter" data-level="24.8.3" data-path="classification-lookalike.html"><a href="classification-lookalike.html#project-3-high-volume-text-classification-for-voice-of-the-customer"><i class="fa fa-check"></i><b>24.8.3</b> Project 3: high-volume text classification for voice of the customer</a></li>
+<li class="chapter" data-level="24.8.4" data-path="classification-lookalike.html"><a href="classification-lookalike.html#project-4-a-calibration-check-as-a-reusable-tool"><i class="fa fa-check"></i><b>24.8.4</b> Project 4: a calibration check as a reusable tool</a></li>
+<li class="chapter" data-level="24.8.5" data-path="classification-lookalike.html"><a href="classification-lookalike.html#where-to-start"><i class="fa fa-check"></i><b>24.8.5</b> Where to start</a></li>
+</ul></li>
+<li class="chapter" data-level="24.9" data-path="classification-lookalike.html"><a href="classification-lookalike.html#interview-takeaways-1"><i class="fa fa-check"></i><b>24.9</b> Interview takeaways</a></li>
+<li class="chapter" data-level="24.10" data-path="classification-lookalike.html"><a href="classification-lookalike.html#key-takeaways-23"><i class="fa fa-check"></i><b>24.10</b> Key takeaways</a></li>
+<li class="chapter" data-level="24.11" data-path="classification-lookalike.html"><a href="classification-lookalike.html#references-3"><i class="fa fa-check"></i><b>24.11</b> References</a></li>
+</ul></li>
+<li class="chapter" data-level="25" data-path="supervisor-agents.html"><a href="supervisor-agents.html"><i class="fa fa-check"></i><b>25</b> Supervisor Agents and Multi-Agent Systems on Databricks</a>
+<ul>
+<li class="chapter" data-level="25.1" data-path="supervisor-agents.html"><a href="supervisor-agents.html#introduction-4"><i class="fa fa-check"></i><b>25.1</b> Introduction</a></li>
+<li class="chapter" data-level="25.2" data-path="supervisor-agents.html"><a href="supervisor-agents.html#the-supervisor-pattern"><i class="fa fa-check"></i><b>25.2</b> The supervisor pattern</a>
+<ul>
+<li class="chapter" data-level="25.2.1" data-path="supervisor-agents.html"><a href="supervisor-agents.html#what-a-supervisor-does"><i class="fa fa-check"></i><b>25.2.1</b> What a supervisor does</a></li>
+<li class="chapter" data-level="25.2.2" data-path="supervisor-agents.html"><a href="supervisor-agents.html#common-multi-agent-shapes"><i class="fa fa-check"></i><b>25.2.2</b> Common multi-agent shapes</a></li>
+<li class="chapter" data-level="25.2.3" data-path="supervisor-agents.html"><a href="supervisor-agents.html#when-multiple-agents-help-and-when-they-hurt"><i class="fa fa-check"></i><b>25.2.3</b> When multiple agents help, and when they hurt</a></li>
+</ul></li>
+<li class="chapter" data-level="25.3" data-path="supervisor-agents.html"><a href="supervisor-agents.html#databricks-supervisor-agent"><i class="fa fa-check"></i><b>25.3</b> Databricks Supervisor Agent</a>
+<ul>
+<li class="chapter" data-level="25.3.1" data-path="supervisor-agents.html"><a href="supervisor-agents.html#what-it-provides"><i class="fa fa-check"></i><b>25.3.1</b> What it provides</a></li>
+<li class="chapter" data-level="25.3.2" data-path="supervisor-agents.html"><a href="supervisor-agents.html#requirements"><i class="fa fa-check"></i><b>25.3.2</b> Requirements</a></li>
+<li class="chapter" data-level="25.3.3" data-path="supervisor-agents.html"><a href="supervisor-agents.html#supported-subagents-and-required-end-user-permissions"><i class="fa fa-check"></i><b>25.3.3</b> Supported subagents and required end-user permissions</a></li>
+<li class="chapter" data-level="25.3.4" data-path="supervisor-agents.html"><a href="supervisor-agents.html#built-in-code-execution"><i class="fa fa-check"></i><b>25.3.4</b> Built-in code execution</a></li>
+<li class="chapter" data-level="25.3.5" data-path="supervisor-agents.html"><a href="supervisor-agents.html#web-search"><i class="fa fa-check"></i><b>25.3.5</b> Web search</a></li>
+<li class="chapter" data-level="25.3.6" data-path="supervisor-agents.html"><a href="supervisor-agents.html#building-one-five-steps"><i class="fa fa-check"></i><b>25.3.6</b> Building one: five steps</a></li>
+<li class="chapter" data-level="25.3.7" data-path="supervisor-agents.html"><a href="supervisor-agents.html#managing-supervisors-with-the-sdk-beta"><i class="fa fa-check"></i><b>25.3.7</b> Managing supervisors with the SDK (Beta)</a></li>
+<li class="chapter" data-level="25.3.8" data-path="supervisor-agents.html"><a href="supervisor-agents.html#limitations"><i class="fa fa-check"></i><b>25.3.8</b> Limitations</a></li>
+</ul></li>
+<li class="chapter" data-level="25.4" data-path="supervisor-agents.html"><a href="supervisor-agents.html#what-to-use-for-new-work-october-2026"><i class="fa fa-check"></i><b>25.4</b> What to use for new work (October 2026)</a></li>
+<li class="chapter" data-level="25.5" data-path="supervisor-agents.html"><a href="supervisor-agents.html#worked-example-a-campaign-insights-supervisor"><i class="fa fa-check"></i><b>25.5</b> Worked example: a campaign insights supervisor</a>
+<ul>
+<li class="chapter" data-level="25.5.1" data-path="supervisor-agents.html"><a href="supervisor-agents.html#the-specialists"><i class="fa fa-check"></i><b>25.5.1</b> The specialists</a></li>
+<li class="chapter" data-level="25.5.2" data-path="supervisor-agents.html"><a href="supervisor-agents.html#write-descriptions-that-route-well"><i class="fa fa-check"></i><b>25.5.2</b> Write descriptions that route well</a></li>
+<li class="chapter" data-level="25.5.3" data-path="supervisor-agents.html"><a href="supervisor-agents.html#test-questions-and-expected-routing"><i class="fa fa-check"></i><b>25.5.3</b> Test questions and expected routing</a></li>
+<li class="chapter" data-level="25.5.4" data-path="supervisor-agents.html"><a href="supervisor-agents.html#expert-guidelines"><i class="fa fa-check"></i><b>25.5.4</b> Expert guidelines</a></li>
+<li class="chapter" data-level="25.5.5" data-path="supervisor-agents.html"><a href="supervisor-agents.html#agency-specific-design-choices"><i class="fa fa-check"></i><b>25.5.5</b> Agency-specific design choices</a></li>
+</ul></li>
+<li class="chapter" data-level="25.6" data-path="supervisor-agents.html"><a href="supervisor-agents.html#evaluating-a-supervisor"><i class="fa fa-check"></i><b>25.6</b> Evaluating a supervisor</a></li>
+<li class="chapter" data-level="25.7" data-path="supervisor-agents.html"><a href="supervisor-agents.html#common-pitfalls"><i class="fa fa-check"></i><b>25.7</b> Common pitfalls</a></li>
+<li class="chapter" data-level="25.8" data-path="supervisor-agents.html"><a href="supervisor-agents.html#exercise-design-a-supervisor-on-paper"><i class="fa fa-check"></i><b>25.8</b> Exercise: design a supervisor on paper</a></li>
+<li class="chapter" data-level="25.9" data-path="supervisor-agents.html"><a href="supervisor-agents.html#key-takeaways-24"><i class="fa fa-check"></i><b>25.9</b> Key takeaways</a></li>
+<li class="chapter" data-level="25.10" data-path="supervisor-agents.html"><a href="supervisor-agents.html#references-4"><i class="fa fa-check"></i><b>25.10</b> References</a></li>
+</ul></li>
+<li class="appendix"><span><b>Appendix</b></span></li>
+<li class="chapter" data-level="A" data-path="course-labs.html"><a href="course-labs.html"><i class="fa fa-check"></i><b>A</b> Course Labs: Walkthroughs</a>
+<ul>
+<li class="chapter" data-level="A.1" data-path="course-labs.html"><a href="course-labs.html#common-setup"><i class="fa fa-check"></i><b>A.1</b> Common setup</a></li>
+<li class="chapter" data-level="A.2" data-path="course-labs.html"><a href="course-labs.html#lab-1-summarization-with-prompting-and-generation-settings"><i class="fa fa-check"></i><b>A.2</b> Lab 1: Summarization with prompting and generation settings</a></li>
+<li class="chapter" data-level="A.3" data-path="course-labs.html"><a href="course-labs.html#lab-2-full-fine-tuning-vs.-lora"><i class="fa fa-check"></i><b>A.3</b> Lab 2: Full fine-tuning vs. LoRA</a></li>
+<li class="chapter" data-level="A.4" data-path="course-labs.html"><a href="course-labs.html#lab-3-detoxifying-with-rlhf-ppo"><i class="fa fa-check"></i><b>A.4</b> Lab 3: Detoxifying with RLHF (PPO)</a></li>
+<li class="chapter" data-level="A.5" data-path="course-labs.html"><a href="course-labs.html#what-the-three-labs-show-together"><i class="fa fa-check"></i><b>A.5</b> What the three labs show together</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="bibliography.html"><a href="bibliography.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://davutemrah.github.io" target="_blank" rel="noopener">Back to Portfolio</a></li>
+<li><a href="https://davutemrah.github.io/notebooks/" target="_blank" rel="noopener">Back to Learning Library</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Generative AI, Large Language Models, and Coding Agents</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="evaluating-agentic-systems" class="section level1 hasAnchor" number="10">
+<h1><span class="header-section-number">Chapter 10</span> Evaluating and Improving Agentic Systems<a href="evaluating-agentic-systems.html#evaluating-agentic-systems" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>An agentic system has many parts: prompts, models, retrievers, tools, and the
+code that connects them. When it does not work well enough, which is most of
+the time during development, almost any part could be to blame. Teams that
+improve quickly differ from teams that stall mainly in how they decide <strong>what
+to work on next</strong>. In Andrew Ng’s experience, a disciplined process of
+evaluation and error analysis is one of the strongest predictors of how
+effective a team will be.</p>
+<p>This chapter covers that process:</p>
+<ol style="list-style-type: decimal">
+<li>build a quick prototype and look at its outputs;</li>
+<li>turn recurring problems into <strong>end-to-end evals</strong>;</li>
+<li>read <strong>traces</strong> and run <strong>error analysis</strong> to find the component
+responsible;</li>
+<li>build <strong>component-level evals</strong> to improve that component efficiently; and</li>
+<li>once quality is good enough, optimize <strong>cost and latency</strong>.</li>
+</ol>
+<p>The reflection chapter (Section <a href="reflection.html#measuring-whether-reflection-helps">8.7</a>)
+used a small version of this process to decide whether a reflection step was
+worth keeping. Here it becomes a general method.</p>
+<div id="build-first-then-look" class="section level2 hasAnchor" number="10.1">
+<h2><span class="header-section-number">10.1</span> Build first, then look<a href="evaluating-agentic-systems.html#build-first-then-look" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>It is hard to predict where an agentic system will fail. Weeks of up-front
+design often guess wrong. The more productive approach is to <strong>build a quick,
+safe prototype</strong>, one that does not leak data or take irreversible actions,
+and then <strong>read its outputs</strong>.</p>
+<p>Take 10 to 20 realistic inputs, run them, and note what is wrong with each
+output in a spreadsheet. Patterns appear quickly:</p>
+<ul>
+<li>An <strong>invoice-processing</strong> workflow keeps extracting the <em>issue</em> date when the
+task needs the <em>due</em> date.</li>
+<li>An <strong>ad-copy</strong> assistant writes good headlines, but many exceed the
+30-character headline limit of Google search ads.</li>
+<li>A <strong>campaign-insights</strong> agent writes fluent summaries but sometimes misses
+the point a senior analyst would lead with, such as a budget overspend.</li>
+</ul>
+<p>Each observation leads to one of two actions. If the fix is obvious, such as a
+missing instruction, <strong>just fix it</strong>. If improving it will take sustained
+iteration, <strong>build an eval</strong> for that problem so you can measure progress.</p>
+<p>Looking at outputs also tells you <em>what</em> to evaluate. You cannot write a good
+rubric before seeing how the system fails. <span class="citation">Shankar et al. (<a href="#ref-shankar2024validators">2024</a>)</span> call this
+<strong>criteria drift</strong>: people need criteria to grade outputs, but grading outputs
+is how they discover their criteria. Expect your evals to change as you learn.</p>
+<blockquote>
+<p><strong>In short.</strong></p>
+<ul>
+<li>You cannot predict the failures; build a safe prototype and read 10–20
+outputs.</li>
+<li>Fix obvious problems directly; build an eval for anything that needs
+sustained work.</li>
+<li>Criteria come from reading outputs, so expect them to change.</li>
+</ul>
+</blockquote>
+</div>
+<div id="end-to-end-evals" class="section level2 hasAnchor" number="10.2">
+<h2><span class="header-section-number">10.2</span> End-to-end evals<a href="evaluating-agentic-systems.html#end-to-end-evals" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>An <strong>end-to-end eval</strong> measures the final output for a given input, treating
+the whole system as one unit. End-to-end evals differ along two axes:</p>
+<ul>
+<li><strong>Who grades:</strong> code (objective checks) or an LLM judge (subjective
+judgments).</li>
+<li><strong>What the output is compared with:</strong> a <strong>per-example reference</strong> (each
+input has its own correct answer or key points) or a <strong>shared criterion</strong>
+(the same rule applies to every example).</li>
+</ul>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="left"><strong>Per-example reference</strong></th>
+<th align="left"><strong>Shared criterion</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>Code grades</strong></td>
+<td align="left">Invoice due date matches the labeled date</td>
+<td align="left">Headline is at most 30 characters; output is valid JSON; no competitor names</td>
+</tr>
+<tr>
+<td align="left"><strong>LLM judge grades</strong></td>
+<td align="left">Report mentions the 3–5 key points an expert listed for this question</td>
+<td align="left">Chart passes a rubric (title, axis labels, chart type); reply has a professional tone</td>
+</tr>
+</tbody>
+</table>
+<div id="code-graded-evals" class="section level3 hasAnchor" number="10.2.1">
+<h3><span class="header-section-number">10.2.1</span> Code-graded evals<a href="evaluating-agentic-systems.html#code-graded-evals" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Prefer code whenever the criterion is objective. It is cheap, fast, and
+deterministic. Make outputs easy to check: if the prompt tells the model to
+write dates as <code>YYYY-MM-DD</code>, a few lines of code can grade them.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb29-1"><a href="evaluating-agentic-systems.html#cb29-1" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb29-2"><a href="evaluating-agentic-systems.html#cb29-2" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="evaluating-agentic-systems.html#cb29-3" tabindex="-1"></a><span class="kw">def</span> due_date_correct(output: <span class="bu">str</span>, label: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">bool</span>:</span>
+<span id="cb29-4"><a href="evaluating-agentic-systems.html#cb29-4" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Compare the first ISO date in the model output with the labeled due date.&quot;&quot;&quot;</span></span>
+<span id="cb29-5"><a href="evaluating-agentic-systems.html#cb29-5" tabindex="-1"></a>    match <span class="op">=</span> re.search(<span class="vs">r&quot;</span><span class="dv">\d</span><span class="op">{4}</span><span class="vs">-</span><span class="dv">\d</span><span class="op">{2}</span><span class="vs">-</span><span class="dv">\d</span><span class="op">{2}</span><span class="vs">&quot;</span>, output)</span>
+<span id="cb29-6"><a href="evaluating-agentic-systems.html#cb29-6" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">bool</span>(match) <span class="kw">and</span> match.group() <span class="op">==</span> label</span>
+<span id="cb29-7"><a href="evaluating-agentic-systems.html#cb29-7" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="evaluating-agentic-systems.html#cb29-8" tabindex="-1"></a>accuracy <span class="op">=</span> <span class="bu">sum</span>(due_date_correct(o, y) <span class="cf">for</span> o, y <span class="kw">in</span> <span class="bu">zip</span>(outputs, labels)) <span class="op">/</span> <span class="bu">len</span>(labels)</span></code></pre></div>
+<p>For the ad-copy example there is no per-example label; the check is simply
+<code>len(headline) &lt;= 30</code> for every output.</p>
+</div>
+<div id="llm-judged-evals" class="section level3 hasAnchor" number="10.2.2">
+<h3><span class="header-section-number">10.2.2</span> LLM-judged evals<a href="evaluating-agentic-systems.html#llm-judged-evals" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>When the criterion needs reading comprehension, use an LLM judge. Suppose
+that for each question in the campaign-insights eval set, an analyst has
+written the three to five points a good answer must cover. Key points can be
+phrased in many ways, so string matching fails, but a judge can count them:</p>
+<pre class="text"><code>You are grading a campaign-performance summary.
+
+&lt;question&gt;{question}&lt;/question&gt;
+&lt;key_points&gt;{expert_key_points}&lt;/key_points&gt;
+&lt;summary&gt;{agent_output}&lt;/summary&gt;
+
+For each key point, decide whether the summary states it clearly
+(paraphrase is fine). Return JSON:
+{&quot;explanation&quot;: &quot;&lt;one line per key point&gt;&quot;, &quot;points_covered&quot;: &lt;integer&gt;}</code></pre>
+<p>Asking for the explanation <strong>before</strong> the score makes the judge commit to its
+reasoning first, and the explanation is what you read when the score looks
+wrong.</p>
+</div>
+<div id="making-llm-judges-trustworthy" class="section level3 hasAnchor" number="10.2.3">
+<h3><span class="header-section-number">10.2.3</span> Making LLM judges trustworthy<a href="evaluating-agentic-systems.html#making-llm-judges-trustworthy" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>LLM judges have known biases, including position bias, a preference for longer
+answers, and a preference for their own outputs <span class="citation">(<a href="#ref-zheng2023judge"><span class="nocase">Zheng et al.</span> 2023</a>)</span>. The
+fine-tuning chapter introduced them (Section <a href="instruction-fine-tuning-and-evaluation.html#beyond-overlap-metrics">3.6.3</a>),
+and the reflection
+chapter showed how position bias can reverse direction. Practical defenses:</p>
+<ul>
+<li><strong>Grade one output at a time against a rubric</strong> of specific yes/no
+criteria, instead of asking which of two outputs is better.</li>
+<li><strong>Give the judge references</strong> (key points, a correct answer, the source
+document) whenever you have them.</li>
+<li><strong>If you must compare pairs, evaluate both orders</strong> and count only
+consistent verdicts.</li>
+<li><strong>Use a different model family as judge</strong> from the one that generated the
+outputs, to reduce self-preference.</li>
+<li><strong>Validate the judge against human labels.</strong> Have a person grade 50 to 100
+examples and measure agreement with the judge. Raw agreement can look high
+when most outputs pass, so also report <strong>Cohen’s kappa</strong>, which corrects for
+agreement expected by chance <span class="citation">(<a href="#ref-cohen1960kappa">Cohen 1960</a>)</span>. Re-check whenever the judge
+prompt or model changes.</li>
+</ul>
+<p><strong>Example: why raw agreement misleads.</strong> A person and a judge each grade 100
+replies. Each passes 90 of them, and they agree on 90 (85 both pass, 5 both
+fail). Raw agreement is 90%, which sounds excellent. But two graders who pass
+90% of replies at random would agree <span class="math inline">\(0.9 \times 0.9 + 0.1 \times 0.1 = 82\%\)</span>
+of the time. Kappa measures agreement beyond that baseline:</p>
+<p><span class="math display">\[
+\kappa = \frac{p_o - p_e}{1 - p_e} = \frac{0.90 - 0.82}{1 - 0.82} \approx 0.44
+\]</span></p>
+<p>That is only moderate agreement. The judge agrees with the person mostly
+because almost everything passes. It catches only half of the 10 failures
+the person found, and those failures are what the eval exists to find.</p>
+</div>
+<div id="start-small-then-grow-the-set" class="section level3 hasAnchor" number="10.2.4">
+<h3><span class="header-section-number">10.2.4</span> Start small, then grow the set<a href="evaluating-agentic-systems.html#start-small-then-grow-the-set" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Teams sometimes delay evals because they imagine a multi-week project. A
+first eval with 10 to 20 examples and a simple metric is far better than
+none. Use it <strong>alongside</strong> reading outputs, not instead of it. As the eval
+grows and proves reliable, you can trust the metric more and read fewer
+outputs after each change.</p>
+<p>Improve the eval as you go:</p>
+<ul>
+<li><strong>When the metric disagrees with your judgment</strong>, such as when you are sure
+a change helped but the score did not move, treat that as a bug in the eval.
+Add examples or change how outputs are graded.</li>
+<li><strong>Add examples from real failures</strong>, edge cases, and inputs where the system
+falls short of an expert. For tasks that people already do, places where the
+system is worse than a skilled human are the best guide to what to improve.</li>
+<li><strong>Keep a held-out set.</strong> If you tune prompts against the same 20 examples
+for weeks, you will overfit to them, just as with training data in machine
+learning. Check the final configuration on examples you did not tune on.</li>
+</ul>
+</div>
+<div id="how-much-should-you-trust-a-score" class="section level3 hasAnchor" number="10.2.5">
+<h3><span class="header-section-number">10.2.5</span> How much should you trust a score?<a href="evaluating-agentic-systems.html#how-much-should-you-trust-a-score" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>An eval score is an estimate from a sample, so it has sampling error. For an
+accuracy <span class="math inline">\(\hat p\)</span> measured on <span class="math inline">\(n\)</span> independent examples, the standard error is
+<span class="math inline">\(\sqrt{\hat p (1 - \hat p) / n}\)</span>. At <span class="math inline">\(\hat p = 0.8\)</span>:</p>
+<table>
+<thead>
+<tr>
+<th align="right">Examples (<span class="math inline">\(n\)</span>)</th>
+<th align="right">Standard error</th>
+<th align="left">Approximate 95% interval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="right">20</td>
+<td align="right">8.9 points</td>
+<td align="left">80% ± 17.5 points</td>
+</tr>
+<tr>
+<td align="right">100</td>
+<td align="right">4.0 points</td>
+<td align="left">80% ± 7.8 points</td>
+</tr>
+<tr>
+<td align="right">400</td>
+<td align="right">2.0 points</td>
+<td align="left">80% ± 3.9 points</td>
+</tr>
+</tbody>
+</table>
+<p>A 20-example eval is good for catching large regressions and for guiding early
+work. It cannot distinguish 80% from 85%. <span class="citation">Miller (<a href="#ref-miller2024errorbars">2024</a>)</span> sets out a
+statistical approach to model evals that applies directly here:</p>
+<ul>
+<li><strong>Report standard errors</strong> with every score.</li>
+<li><strong>Use clustered standard errors</strong> when examples come in related groups,
+such as several questions about the same campaign.</li>
+<li><strong>Analyze paired differences</strong> when comparing two systems on the same
+examples. The question-level comparison is far more precise than comparing
+two overall accuracies (McNemar’s test is the binary case).</li>
+<li><strong>Reduce variance by resampling.</strong> Run each example several times when
+outputs are non-deterministic and average the results. For agents that users
+run repeatedly, also report how often <em>all</em> of <span class="math inline">\(k\)</span> runs succeed (pass^k,
+Section <a href="context-harness-engineering.html#evaluation-is-a-harness-too">22.5.5</a>).</li>
+<li><strong>Do a power analysis</strong> before concluding that a change made no difference.
+The eval may simply be too small to detect it.</li>
+</ul>
+<blockquote>
+<p><strong>In short.</strong></p>
+<ul>
+<li>End-to-end evals have two axes: code or LLM judge, per-example reference
+or shared criterion. Use code whenever the criterion is objective.</li>
+<li>Trust a judge only after checking it against human labels, with kappa,
+not just raw agreement.</li>
+<li>Start with 10–20 examples, grow from real failures, keep a held-out set,
+and report error bars.</li>
+</ul>
+</blockquote>
+</div>
+</div>
+<div id="traces-and-spans" class="section level2 hasAnchor" number="10.3">
+<h2><span class="header-section-number">10.3</span> Traces and spans<a href="evaluating-agentic-systems.html#traces-and-spans" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>End-to-end evals tell you <em>that</em> something is wrong, not <em>where</em>. For that,
+you need the <strong>trace</strong>: the record of everything the system did for one
+input. The terms come from software observability. In OpenTelemetry, a
+<strong>trace</strong> is the path of one request through an application, and a <strong>span</strong>
+is one unit of work within it, with its own timing and attributes
+<span class="citation">(<a href="#ref-otel2024traces">OpenTelemetry Authors 2024</a>)</span>. In an agentic system, each LLM call, tool call, or
+retrieval step is a span.</p>
+<p>For each span, log at least:</p>
+<ul>
+<li>its inputs and outputs (the full prompt and completion for LLM calls);</li>
+<li>the model, prompt version, and parameters;</li>
+<li>tool names, arguments, results, and errors;</li>
+<li>tokens, latency, and cost.</li>
+</ul>
+<p>A trace for one run of the campaign-insights agent might look like this
+(simplified):</p>
+<pre class="text"><code>trace  q-0117  &quot;Why did CPA rise on Search last week?&quot;        total 27.4 s  $0.07
+├─ span interpret_question  llm  2.1 s   in 1,200 tok  out 150 tok
+│    output: {&quot;channel&quot;: &quot;Search&quot;, &quot;metric&quot;: &quot;CPA&quot;, &quot;period&quot;: &quot;2026-10-12..18&quot;}
+├─ span write_sql           llm  3.8 s   in 2,900 tok  out 240 tok
+│    output: SELECT ... WHERE order_date BETWEEN &#39;2026-10-12&#39; AND &#39;2026-10-18&#39;
+├─ span run_query           tool 9.3 s   rows 14
+└─ span write_narrative     llm 12.2 s   in 6,400 tok  out 610 tok
+     output: &quot;CPA on Search rose 18%, driven by ...&quot;</code></pre>
+<p>Reading it, an analyst would spot that the SQL filters on <code>order_date</code> when
+the metric needs the conversion date. Nothing in the final narrative reveals
+that; only the trace does.</p>
+<p>The habit that matters most is simple: <strong>read traces regularly</strong>, not only
+when something breaks. Many tools exist to collect and browse traces. On
+Databricks, for example, MLflow Tracing records agent runs and connects to
+MLflow’s evaluation tooling (Chapter <a href="context-harness-engineering.html#context-harness-engineering">22</a>).</p>
+<blockquote>
+<p><strong>In short.</strong></p>
+<ul>
+<li>A trace is the record of one run; a span is one step in it.</li>
+<li>Log inputs, outputs, versions, tool calls, tokens, latency, and cost for
+every span.</li>
+<li>Read traces regularly; they show failures the final output hides.</li>
+</ul>
+</blockquote>
+</div>
+<div id="agentic-error-analysis" class="section level2 hasAnchor" number="10.4">
+<h2><span class="header-section-number">10.4</span> Error analysis<a href="evaluating-agentic-systems.html#agentic-error-analysis" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Error analysis</strong> is the systematic reading of traces for examples where the
+system failed, in order to find which component is responsible.</p>
+<p>Consider a campaign-insights agent with four steps: <strong>interpret</strong> the
+question, <strong>write SQL</strong>, <strong>run the query</strong> on the warehouse, and <strong>write the
+narrative</strong>. The end-to-end eval shows that summaries often miss key points.
+Any step could be the cause. The question might be misread, the SQL might
+filter the wrong dates, the warehouse might hold stale data, or the writer
+might ignore a number it was given. Picking a component by gut feeling
+sometimes works. It also sometimes leads to months of work on a part that was
+never the problem.</p>
+<div id="the-procedure" class="section level3 hasAnchor" number="10.4.1">
+<h3><span class="header-section-number">10.4.1</span> The procedure<a href="evaluating-agentic-systems.html#the-procedure" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ol style="list-style-type: decimal">
+<li><strong>Collect failures.</strong> Set aside the examples the system got right. Gather
+10 to 100 examples where the final output was unsatisfactory.</li>
+<li><strong>Walk each trace step by step.</strong> For each component, ask: <em>given the
+input this component received</em>, is its output clearly worse than what a
+skilled person would produce?</li>
+<li><strong>Blame a component only for its own work.</strong> If the query returned stale
+data, the writer cannot be faulted for reporting it. The writer did as well
+as anyone could with what it was given.</li>
+<li><strong>Record the judgment in a spreadsheet</strong>, one row per failed example and
+one column per component, with a short note.</li>
+<li><strong>Count.</strong> For each component, compute the share of failed examples in
+which it erred.</li>
+</ol>
+<p>An illustrative result for 20 failed examples:</p>
+<table>
+<colgroup>
+<col width="13%" />
+<col width="18%" />
+<col width="18%" />
+<col width="18%" />
+<col width="18%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr>
+<th align="left">Example</th>
+<th align="center">Interpret question</th>
+<th align="center">Write SQL</th>
+<th align="center">Warehouse data</th>
+<th align="center">Write narrative</th>
+<th align="left">Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">1</td>
+<td align="center"></td>
+<td align="center">✗</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="left">Filtered on order date instead of conversion date</td>
+</tr>
+<tr>
+<td align="left">2</td>
+<td align="center"></td>
+<td align="center">✗</td>
+<td align="center"></td>
+<td align="center">✗</td>
+<td align="left">Wrong join; summary also buried the main result</td>
+</tr>
+<tr>
+<td align="left">3</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center">✗</td>
+<td align="center"></td>
+<td align="left">Yesterday’s spend not loaded</td>
+</tr>
+<tr>
+<td align="left">…</td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><strong>Share of failures</strong></td>
+<td align="center"><strong>10%</strong></td>
+<td align="center"><strong>60%</strong></td>
+<td align="center"><strong>10%</strong></td>
+<td align="center"><strong>35%</strong></td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<p>The shares add up to more than 100% because one example can have errors in
+several components.</p>
+</div>
+<div id="from-counts-to-priorities" class="section level3 hasAnchor" number="10.4.2">
+<h3><span class="header-section-number">10.4.2</span> From counts to priorities<a href="evaluating-agentic-systems.html#from-counts-to-priorities" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The counts are evidence, not a decision. Prioritize a component when:</p>
+<ul>
+<li>it causes a <strong>large share</strong> of failures;</li>
+<li>you have <strong>concrete ideas</strong> for improving it; and</li>
+<li>those ideas are <strong>affordable</strong> in time and cost.</li>
+</ul>
+<p>Here, SQL generation is the clear first target, and the narrative step comes
+second. Remember that the shares are fractions of <em>failures</em>. If 30% of
+outputs fail overall and SQL errors appear in 60% of those, eliminating SQL
+errors entirely would cut the failure rate by at most 18 percentage points.
+That is an upper bound, because some of those examples also have other
+errors. A related check from classic machine learning practice is <strong>ceiling
+analysis</strong>: substitute a correct output for one component (for example,
+hand-written SQL) and measure how much the end-to-end score rises. That tells
+you how much fixing the component could ever be worth.</p>
+<p>The same procedure applies to simpler workflows. For the invoice workflow,
+the question is whether the PDF-to-text step garbled the dates (so that even
+a person could not read them from its output) or whether the LLM picked the
+wrong date from clean text. If the LLM step accounts for most errors, weeks
+spent tuning the PDF converter would be wasted. In a research agent, the
+usual culprit is search: when the sources are poor, the writing step cannot
+recover, and a component eval on search (Section
+<a href="evaluating-agentic-systems.html#component-level-evals">10.5</a>) is the right next step.</p>
+<p><strong>Starting the categories.</strong> If you do not yet know which failure types to
+count, write a free-text note for each failed example first. Then group the
+notes into categories and count those. The categories usually map onto
+components or onto specific behaviors, such as “ignored date filter” or
+“invented a metric”, that can each become an eval.</p>
+<blockquote>
+<p><strong>In short.</strong></p>
+<ul>
+<li>Read the traces of failed examples and blame each component only for its
+own output, given its input.</li>
+<li>Count the share of failures per component; the shares can sum past 100%.</li>
+<li>Prioritize components that cause many failures and that you know how to
+improve. Ceiling analysis bounds the gain.</li>
+</ul>
+</blockquote>
+</div>
+</div>
+<div id="component-level-evals" class="section level2 hasAnchor" number="10.5">
+<h2><span class="header-section-number">10.5</span> Component-level evals<a href="evaluating-agentic-systems.html#component-level-evals" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Once error analysis has pointed to a component, improving it by rerunning the
+full system after every change is slow and expensive. It is also noisy:
+randomness in the other components can hide a small real improvement. A
+<strong>component-level eval</strong> measures that one component directly.</p>
+<p><strong>Example: retrieval or web search.</strong> For a set of queries, have an expert
+list the sources a good search should find. Then score each configuration on
+how well its results match:</p>
+<ul>
+<li><strong>Precision</strong>: the fraction of returned results that are relevant.</li>
+<li><strong>Recall</strong>: the fraction of relevant results that were returned.</li>
+<li><strong>F1</strong>: the harmonic mean of the two, <span class="math inline">\(2PR/(P+R)\)</span>.</li>
+</ul>
+<p>For one query, suppose the expert lists 5 sources and the search returns 8
+results, 3 of which are on the expert’s list. Precision is <span class="math inline">\(3/8 = 0.375\)</span>,
+recall is <span class="math inline">\(3/5 = 0.6\)</span>, and F1 is <span class="math inline">\(2 \times 0.375 \times 0.6 / 0.975 \approx
+0.46\)</span>. Average these over the query set to score a configuration.</p>
+<p>Ranked variants such as <a href="mailto:precision@k" class="email">precision@k</a> and <a href="mailto:recall@k" class="email">recall@k</a> are standard in information
+retrieval <span class="citation">(<a href="#ref-manning2008ir">Manning et al. 2008</a>)</span>. With this eval you can quickly compare search
+providers, the number of results, date ranges, or chunking strategies.</p>
+<p><strong>Example: SQL generation.</strong> Compare the <em>result</em> of the generated query with
+the result of a reference query, not the SQL text. Many different queries are
+correct.</p>
+<p><strong>Example: tool use.</strong> Measure tool-selection and argument accuracy on
+labeled requests (Section <a href="tool-use.html#evaluating-tool-use">9.7</a>).</p>
+<p>Component evals also let a team own one clear metric without running the
+whole system. They have one danger: a component metric can improve while the
+end-to-end result does not, because the metric does not capture what
+downstream steps need. <strong>Always confirm with the end-to-end eval</strong> before
+declaring a component improvement done.</p>
+<blockquote>
+<p><strong>In short.</strong></p>
+<ul>
+<li>A component eval measures one step directly: faster, cheaper, and less
+noisy than rerunning the whole system.</li>
+<li>Retrieval: precision, recall, F1 against expert-chosen sources. SQL:
+compare query results, not query text.</li>
+<li>Confirm every component gain end to end.</li>
+</ul>
+</blockquote>
+</div>
+<div id="improving-a-component" class="section level2 hasAnchor" number="10.6">
+<h2><span class="header-section-number">10.6</span> Improving a component<a href="evaluating-agentic-systems.html#improving-a-component" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><strong>Non-LLM components</strong> (search engines, retrievers, OCR, classifiers) usually
+have settings to tune or alternatives to swap:</p>
+<ul>
+<li>web search: the provider, number of results, date range, domain filters;</li>
+<li>retrieval (Section <a href="llm-applications.html#retrieval-augmented-generation-rag">5.3</a>): chunk size,
+embedding model, similarity threshold, number of chunks;</li>
+<li>a detector or classifier: the decision threshold, which trades false
+positives against false negatives.</li>
+</ul>
+<p><strong>LLM components</strong> have a standard ladder of options, roughly from cheapest to
+most expensive:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Improve the prompt.</strong> Add explicit instructions, context, and a few
+input–output examples (Chapter <a href="prompt-anatomy.html#prompt-anatomy">6</a>).</li>
+<li><strong>Try a different model.</strong> Use your evals to choose. A multi-provider
+interface makes this cheap to test.</li>
+<li><strong>Decompose the step.</strong> A prompt with many instructions may be too much for
+one call. Split it into two or three simpler calls (Chapter
+<a href="agentic-workflows.html#agentic-workflows">7</a>), or add a reflection step (Chapter
+<a href="reflection.html#reflection">8</a>).</li>
+<li><strong>Fine-tune.</strong> Fine-tuning can add the last few points on a mature system
+with enough labeled data, but it costs the most development time
+(Chapter <a href="instruction-fine-tuning-and-evaluation.html#instruction-fine-tuning-and-evaluation">3</a>). Try the cheaper
+options first.</li>
+</ol>
+<div id="building-intuition-about-models" class="section level3 hasAnchor" number="10.6.1">
+<h3><span class="header-section-number">10.6.1</span> Building intuition about models<a href="evaluating-agentic-systems.html#building-intuition-about-models" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Choosing models well is faster when you have a feel for what each one is
+good at. Models differ: some are stronger at coding, some at following long
+instructions, some at particular domains, and they differ in price and speed.
+Smaller models often answer simple factual questions well but follow complex,
+multi-part instructions less reliably. Benchmarks of <strong>verifiable
+instructions</strong>, such as IFEval’s “write more than 400 words” or “mention a
+keyword at least three times”, measure this ability with code
+<span class="citation">(<a href="#ref-zhou2023ifeval">J. Zhou et al. 2023</a>)</span>.</p>
+<p>Consider redacting personal information from customer-call summaries before
+analysis. A capable model removes every name, address, and account number,
+and returns exactly the requested format. A weaker model may miss a name,
+redact an address only partly, or add a list nobody asked for. You can catch
+this with a component eval: label the personal-information spans in 50
+summaries and check, in code, that none survive.</p>
+<p>Ways to build this intuition:</p>
+<ul>
+<li><strong>Try new models when they are released</strong>, on a small personal set of
+prompts that you reuse across models.</li>
+<li><strong>Read other people’s prompts</strong>, including those in respected open-source
+projects, to learn what instructions models follow well.</li>
+<li><strong>Swap models within your own workflows</strong> and compare them with traces and
+evals, noting quality, price, and speed.</li>
+</ul>
+<blockquote>
+<p><strong>In short.</strong></p>
+<ul>
+<li>Non-LLM components: tune settings or swap providers.</li>
+<li>LLM components, cheapest first: better prompt, different model,
+decompose or add reflection, fine-tune last.</li>
+<li>Build model intuition by testing new models on your own small prompt set.</li>
+</ul>
+</blockquote>
+</div>
+</div>
+<div id="agentic-cost-latency" class="section level2 hasAnchor" number="10.7">
+<h2><span class="header-section-number">10.7</span> Cost and latency<a href="evaluating-agentic-systems.html#agentic-cost-latency" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Get output quality right first. It is usually the hardest part, and a fast,
+cheap system that gives wrong answers has no value. Once quality is
+acceptable, and especially once usage grows, cost and latency start to matter.</p>
+<p>The method mirrors error analysis: <strong>measure each step</strong>, then optimize the
+steps that dominate. Steps are billed in different ways:</p>
+<ul>
+<li><strong>LLM calls</strong> are billed <strong>per token</strong>, input and output priced separately.</li>
+<li><strong>External APIs</strong> (search, data providers, PDF conversion) are usually
+billed <strong>per call</strong> or per page.</li>
+<li><strong>Compute</strong> (a warehouse query, a code sandbox, a self-hosted model) is
+billed by <strong>capacity used</strong>, such as seconds of compute or server hours.</li>
+</ul>
+<p>An illustrative breakdown for one run of the campaign-insights agent, with
+one extra step that pulls competitor benchmarks from a paid data API. The
+dollar figures are made up for the example, not real prices:</p>
+<table>
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<thead>
+<tr>
+<th align="left">Step</th>
+<th align="left">Billing basis</th>
+<th align="right">Latency</th>
+<th align="right">Cost per run</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">Interpret question (small LLM)</td>
+<td align="left">Per token</td>
+<td align="right">2 s</td>
+<td align="right">$0.001</td>
+</tr>
+<tr>
+<td align="left">Write SQL (mid-size LLM, schema in prompt)</td>
+<td align="left">Per token</td>
+<td align="right">4 s</td>
+<td align="right">$0.010</td>
+</tr>
+<tr>
+<td align="left">Run query (warehouse)</td>
+<td align="left">Compute time</td>
+<td align="right">9 s</td>
+<td align="right">$0.015</td>
+</tr>
+<tr>
+<td align="left">Pull competitor benchmarks (paid data API)</td>
+<td align="left">Per call</td>
+<td align="right">3 s</td>
+<td align="right">$0.080</td>
+</tr>
+<tr>
+<td align="left">Write narrative (strong LLM, long context)</td>
+<td align="left">Per token</td>
+<td align="right">12 s</td>
+<td align="right">$0.060</td>
+</tr>
+<tr>
+<td align="left"><strong>Total</strong></td>
+<td align="left"></td>
+<td align="right"><strong>30 s</strong></td>
+<td align="right"><strong>$0.166</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Two lessons. For <strong>latency</strong>, speeding up the interpretation step barely
+matters; the narrative and the query are the targets. As Amdahl’s law says,
+the overall speed-up is limited by the share of time spent in the part you
+improve. For <strong>cost</strong>, the single API call costs more than all three LLM
+steps together ($0.071). Switching to a cheaper model would barely help;
+caching benchmark results, or calling the API only when the question needs
+it, would. Only measuring each step shows this.</p>
+<p>Levers for <strong>latency</strong>:</p>
+<ul>
+<li>run independent steps <strong>in parallel</strong>, such as several searches or fetches;</li>
+<li>use a <strong>smaller or faster model</strong> for a step, if its eval still passes;</li>
+<li>try a <strong>faster serving provider</strong> for the same model;</li>
+<li><strong>stream</strong> the final output so users see progress; and</li>
+<li><strong>trim context</strong>, because long prompts take longer to process.</li>
+</ul>
+<p>Levers for <strong>cost</strong>:</p>
+<ul>
+<li>a <strong>cheaper model</strong> for steps that do not need the strongest one;</li>
+<li><strong>prompt caching</strong> for long, repeated prefixes such as instructions and tool
+definitions;</li>
+<li><strong>batch APIs</strong> for work that does not need an immediate answer;</li>
+<li><strong>fewer tokens</strong>: shorter prompts, concise tool results, capped loops; and</li>
+<li><strong>cheaper tools or plans</strong> where per-call API fees dominate.</li>
+</ul>
+<p>Measuring often shows that some steps are not worth optimizing at all.</p>
+<blockquote>
+<p><strong>In short.</strong></p>
+<ul>
+<li>Quality first; then measure latency and cost per step and work on the
+steps that dominate.</li>
+<li>LLMs bill per token, APIs per call, compute by capacity. A non-LLM step
+can be the most expensive one.</li>
+<li>Latency: parallelize, smaller models, faster providers, trimmed context,
+streaming. Cost: cheaper models, caching, batching, fewer tokens.</li>
+</ul>
+</blockquote>
+</div>
+<div id="the-buildanalyze-loop" class="section level2 hasAnchor" number="10.8">
+<h2><span class="header-section-number">10.8</span> The build–analyze loop<a href="evaluating-agentic-systems.html#the-buildanalyze-loop" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Developing an agentic system alternates between two activities: <strong>building</strong>
+(writing code, prompts, and tools) and <strong>analyzing</strong> (reading outputs and
+traces, running evals and error analysis). Analysis can feel like it is not
+progress, but it is what makes the building effective. Less experienced teams
+tend to spend too much time building and too little analyzing.</p>
+<p>The analysis becomes more rigorous as the system matures:</p>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr>
+<th align="left">Stage</th>
+<th align="left">Analysis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">Prototype</td>
+<td align="left">Read final outputs and a few traces; fix obvious problems</td>
+</tr>
+<tr>
+<td align="left">Early</td>
+<td align="left">Small end-to-end evals (10–20 examples) on the problems you found</td>
+</tr>
+<tr>
+<td align="left">Maturing</td>
+<td align="left">Systematic error analysis: count which components cause failures</td>
+</tr>
+<tr>
+<td align="left">Mature</td>
+<td align="left">Component-level evals for the parts you are actively improving; larger, held-out end-to-end evals with error bars</td>
+</tr>
+</tbody>
+</table>
+<p>The process is not linear. You will move back and forth between tuning the
+whole system, analyzing errors, and improving single components.</p>
+<blockquote>
+<p><strong>Current practice (October 2026).</strong> Many platforms record traces, run
+evals, and track cost: open-source and commercial LLM observability tools,
+MLflow on Databricks, and the providers’ own consoles. They save
+engineering time. However, most agentic workflows are custom, so the most
+useful evals are usually the ones you write for the specific failures you
+found in your own error analysis.</p>
+</blockquote>
+<blockquote>
+<p><strong>In short.</strong></p>
+<ul>
+<li>Development alternates between building and analyzing; most teams
+under-invest in analysis.</li>
+<li>The analysis grows with the system: read outputs, small evals, error
+analysis, then component evals and larger held-out sets.</li>
+</ul>
+</blockquote>
+</div>
+<div id="key-takeaways-9" class="section level2 hasAnchor" number="10.9">
+<h2><span class="header-section-number">10.9</span> Key takeaways<a href="evaluating-agentic-systems.html#key-takeaways-9" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The section summaries above hold the details. The chapter in five lines:</p>
+<ul>
+<li><strong>Look first:</strong> build a safe prototype and read outputs; failures tell you
+what to evaluate.</li>
+<li><strong>Measure the whole:</strong> end-to-end evals graded by code where possible, by
+validated LLM judges otherwise, with error bars.</li>
+<li><strong>Find the cause:</strong> read traces of failures and count which component is
+to blame.</li>
+<li><strong>Fix the part:</strong> component evals to iterate fast, the cheapest fix first,
+then confirm end to end.</li>
+<li><strong>Then optimize:</strong> cost and latency per step, after quality is good.</li>
+</ul>
+</div>
+<div id="interview-checkpoints-8" class="section level2 hasAnchor" number="10.10">
+<h2><span class="header-section-number">10.10</span> Interview checkpoints<a href="evaluating-agentic-systems.html#interview-checkpoints-8" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ul>
+<li><strong>You built an agent and it is not good enough. What do you do first?</strong> Run
+it on realistic inputs, read the outputs and traces, and note the recurring
+failures. Fix the obvious ones; build evals for the rest.</li>
+<li><strong>Describe the two axes of end-to-end evals, with an example in each
+quadrant.</strong> Code vs. LLM judge, and per-example reference vs. shared
+criterion. Examples: extracted date vs. label (code, reference); length limit
+(code, shared); key points covered (judge, reference); chart rubric (judge,
+shared).</li>
+<li><strong>When would you use an LLM judge instead of code?</strong> When the criterion
+requires understanding language, such as whether a point was made in
+different words, or tone. Use code for anything objective.</li>
+<li><strong>How do you know an LLM judge is reliable?</strong> Compare it with human labels on
+a sample. Report agreement and Cohen’s kappa, and re-check after changing the
+judge prompt or model.</li>
+<li><strong>What is a trace? What is a span?</strong> A trace is the full record of one run
+through the system. A span is one step within it, such as an LLM call or a
+tool call, with its inputs, outputs, and timing.</li>
+<li><strong>Walk through error analysis.</strong> Collect failed examples, step through each
+trace, mark the components whose output was clearly worse than an expert’s
+given the same input, and count the share of failures per component.</li>
+<li><strong>Why don’t the error-analysis percentages sum to 100%?</strong> One failed example
+can have errors in more than one component.</li>
+<li><strong>The search step returned poor sources, and the selection step picked the
+best of them. Is selection at fault?</strong> No. It did as well as possible with
+its input. The fault lies with search.</li>
+<li><strong>What is a component-level eval, and why use one?</strong> It measures one
+component directly, for example retrieval precision and recall against
+expert-chosen sources. It is faster, cheaper, and less noisy than rerunning
+the whole system. Confirm the gains end to end.</li>
+<li><strong>Your eval has 20 examples, and a change moved accuracy from 80% to 85%.
+Did it help?</strong> You cannot tell. The 95% interval at <span class="math inline">\(n = 20\)</span> is about ±17
+points. Look at paired differences on the same examples, add examples, and
+run repeated trials if outputs vary.</li>
+<li><strong>Your metric says no improvement, but you are sure the new version is
+better. What now?</strong> Treat it as a problem with the eval. Inspect the
+examples, add cases that capture the difference, or change the grading.</li>
+<li><strong>What options do you have to improve an LLM component?</strong> Better prompts and
+examples, a different model, decomposition or reflection, and fine-tuning as
+the last resort.</li>
+<li><strong>How do you reduce latency in an agentic workflow?</strong> Time each step, then
+parallelize independent steps, use smaller or faster models where evals
+allow, choose faster providers, trim context, and stream the output.</li>
+<li><strong>When should you optimize cost?</strong> After quality is acceptable. Measure the
+cost of each step and target the dominant ones with cheaper models, caching,
+batching, and fewer tokens.</li>
+</ul>
+
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-cohen1960kappa" class="csl-entry">
+Cohen, Jacob. 1960. <span>“A Coefficient of Agreement for Nominal Scales.”</span> <em>Educational and Psychological Measurement</em> 20 (1): 37–46.
+</div>
+<div id="ref-manning2008ir" class="csl-entry">
+Manning, Christopher D., Prabhakar Raghavan, and Hinrich Schütze. 2008. <em>Introduction to Information Retrieval</em>. Cambridge University Press.
+</div>
+<div id="ref-miller2024errorbars" class="csl-entry">
+Miller, Evan. 2024. <em>Adding Error Bars to Evals: A Statistical Approach to Language Model Evaluations</em>. <a href="https://arxiv.org/abs/2411.00640">https://arxiv.org/abs/2411.00640</a>.
+</div>
+<div id="ref-otel2024traces" class="csl-entry">
+OpenTelemetry Authors. 2024. <em>Traces</em>. OpenTelemetry documentation. <a href="https://opentelemetry.io/docs/concepts/signals/traces/">https://opentelemetry.io/docs/concepts/signals/traces/</a>.
+</div>
+<div id="ref-shankar2024validators" class="csl-entry">
+Shankar, Shreya, J. D. Zamfirescu-Pereira, Björn Hartmann, Aditya G. Parameswaran, and Ian Arawjo. 2024. <em>Who Validates the Validators? Aligning <span>LLM</span>-Assisted Evaluation of <span>LLM</span> Outputs with Human Preferences</em>. <a href="https://arxiv.org/abs/2404.12272">https://arxiv.org/abs/2404.12272</a>.
+</div>
+<div id="ref-zheng2023judge" class="csl-entry">
+<span class="nocase">Zheng, Lianmin, Wei-Lin Chiang, Ying Sheng, et al.</span> 2023. <span>“Judging <span>LLM</span>-as-a-Judge with <span>MT-Bench</span> and Chatbot Arena.”</span> <em>Advances in Neural Information Processing Systems (Datasets and Benchmarks Track)</em>. <a href="https://arxiv.org/abs/2306.05685">https://arxiv.org/abs/2306.05685</a>.
+</div>
+<div id="ref-zhou2023ifeval" class="csl-entry">
+Zhou, Jeffrey, Tianjian Lu, Swaroop Mishra, et al. 2023. <em>Instruction-Following Evaluation for Large Language Models</em>. <a href="https://arxiv.org/abs/2311.07911">https://arxiv.org/abs/2311.07911</a>.
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="tool-use.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="planning-multi-agent.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

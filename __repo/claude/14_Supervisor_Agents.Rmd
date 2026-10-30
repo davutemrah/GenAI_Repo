@@ -78,6 +78,9 @@ synthesizes their results
 
 A good rule: **start with one well-scoped agent, and add a supervisor only when
 routing between distinct, well-defined specialists is the actual problem.**
+Chapter \@ref(planning-multi-agent) covers the vendor-neutral theory:
+communication patterns, the evidence on when multi-agent systems help, and
+their common failure modes.
 
 ## Databricks Supervisor Agent
 

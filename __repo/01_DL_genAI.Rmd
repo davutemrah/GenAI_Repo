@@ -19,6 +19,11 @@ the intended uses, training data and procedure, evaluation results, and known
 limitations. Read it before anything else. It tells you whether the model's
 architecture, licence, languages, and context length fit your task.
 
+> **In short.**
+>
+> - Start from an existing model on a hub, and read its model card first:
+>   intended use, data, evaluations, limits, licence.
+
 ## Pre-training objectives and architecture families
 
 **Pre-training** is self-supervised learning on a very large text corpus. The
@@ -43,6 +48,18 @@ $$
 Here $\mathcal{M}$ is the set of masked positions. BERT masks about 15% of
 tokens [@devlin2019bert].
 
+**Example: one sentence, three objectives.** Take "The spring campaign lifted
+online sales by twelve percent."
+
+| Objective | Input the model sees | What it must predict |
+|:----------|:---------------------|:---------------------|
+| Masked LM (BERT) | The spring campaign `[MASK]` online sales by twelve `[MASK]`. | "lifted" and "percent", using words on both sides |
+| Causal LM (GPT) | The spring campaign lifted online | "sales", then each later word in turn, seeing only what came before |
+| Span corruption (T5) | The spring campaign `<X>` by twelve percent. | `<X>` lifted online sales |
+
+The data are identical; the objective decides whether the model learns to
+fill gaps from both sides, to continue text, or to rebuild missing spans.
+
 Today's general-purpose LLMs are almost all decoder-only. Encoder models
 remain the workhorses for classification and embeddings.
 
@@ -53,6 +70,15 @@ of personal data, and toxicity filtering. This usually discards a large share
 of the raw crawl. If you ever plan to pre-train, budget data collection for
 that loss. Filtering reduces some risks but does not guarantee unbiased or
 safe data.
+
+> **In short.**
+>
+> - Pre-training is self-supervised: the text supplies its own labels.
+> - Masked LM (encoders) for understanding and embeddings; causal LM
+>   (decoders) for generation; span corruption (encoder–decoders) for
+>   input-to-output tasks.
+> - Corpora have trillions of tokens, after heavy filtering and
+>   deduplication.
 
 ## Why training does not fit on one GPU {#memory-challenges-in-training-llms}
 
@@ -85,6 +111,14 @@ Rules of thumb:
 
 Two levers reduce the problem: smaller number formats (next section) and
 splitting the work across GPUs (the section after).
+
+> **In short.**
+>
+> - Training needs about 16 bytes per parameter before activations:
+>   weights, gradients, and Adam states.
+> - A 7B model therefore needs about 112 GB, more than one 80 GB GPU, and a
+>   175B model about 2.8 TB.
+> - Full fine-tuning has the same profile, which is why PEFT exists.
 
 ## Number formats and quantization {#quantization-techniques}
 
@@ -126,6 +160,14 @@ during training. **Post-training quantization** estimates them afterwards
 > formats. Large models have been trained with FP8 mixed precision, for example
 > DeepSeek-V3 [@deepseek2024v3]. For inference, 8-bit and 4-bit weight
 > quantization are routine.
+
+> **In short.**
+>
+> - Exponent bits set range; fraction bits set precision.
+> - BF16 keeps FP32's range at half the size, so it trains stably; FP16
+>   needs loss scaling.
+> - Mixed precision computes in 16-bit but updates an FP32 master copy;
+>   integer quantization depends on a well-chosen scale factor.
 
 ## Distributed training
 
@@ -196,6 +238,23 @@ Frontier training combines data, tensor, and pipeline parallelism ("3D
 parallelism") with sharding. As GPU count grows, communication overhead lowers
 the throughput per GPU. That is a real cost when planning a training run.
 
+**Which strategy when:**
+
+| Situation | Usual choice |
+|:----------|:-------------|
+| The model, gradients, and optimizer states fit on one GPU; you want speed | DDP |
+| They do not fit on one GPU, but each layer does | FSDP or ZeRO (stage 2 or 3) |
+| A single layer's computation is too large, or the model is very large | Add tensor parallelism within a machine and pipeline parallelism across machines |
+| Fine-tuning a large model on few GPUs | PEFT (LoRA or QLoRA) first; shard only if still needed |
+
+> **In short.**
+>
+> - DDP copies the model to every GPU: more speed, no more capacity.
+> - ZeRO and FSDP shard optimizer states, gradients, and parameters:
+>   capacity at a communication cost.
+> - Tensor and pipeline parallelism split the computation itself; frontier
+>   runs combine all three.
+
 ## Scaling laws {#scaling-laws}
 
 Pre-training minimizes next-token loss. Three quantities determine how low the
@@ -243,6 +302,13 @@ equal proportion**, which works out to about **20 training tokens per
 parameter**. This is a historical empirical estimate for their model family
 and setup, not a universal constant.
 
+**Example: sizing a model for a budget.** With $C = 6ND$ and $D = 20N$,
+compute is $C = 120N^2$, so $N = \sqrt{C / 120}$. For a budget of
+$10^{23}$ FLOPs, $N \approx 2.9 \times 10^{10}$ (about 29B parameters) and
+$D \approx 580$B tokens. A team with that budget that instead trained a
+175B model would get only about 95B tokens, far short of the roughly 3.5T
+that size would need.
+
 The test: **Chinchilla** (70B parameters, 1.4T tokens) used the same compute
 as Gopher (280B parameters, 300B tokens). It outperformed Gopher, GPT-3, and
 other much larger models on a wide range of downstream tasks. Measured against
@@ -271,6 +337,14 @@ the 20× rule, many earlier models were *over-parameterized and under-trained*:
 > 15T tokens, close to 1,900 tokens per parameter [@dubey2024llama3].
 > "Over-training" small models is now normal. Chinchilla remains the reference
 > point for the training-compute trade-off.
+
+> **In short.**
+>
+> - Training compute is about $6ND$ FLOPs; loss falls as a power law in
+>   parameters, data, and compute.
+> - Chinchilla: for a fixed training budget, grow parameters and tokens
+>   together, about 20 tokens per parameter.
+> - Serving costs now favour smaller models trained on far more tokens.
 
 ## Domain adaptation and pre-training your own model
 
@@ -324,25 +398,28 @@ the compute budget is large.
 > from-scratch domain pre-training is a rare choice. Justify it with an
 > evaluation showing that the cheaper options fall short.
 
+> **In short.**
+>
+> - Pre-train only when the domain's language is distinctive, high-quality
+>   domain data exist at scale, and the budget is large.
+> - First climb the cheaper ladder: prompting and retrieval, fine-tuning,
+>   continued pre-training.
+> - BloombergGPT shows the trade-offs: Chinchilla-sized, but data-limited.
+
 ## Key takeaways
 
-- Encoder-only models (masked LM) suit understanding tasks; decoder-only
-  models (causal LM) suit generation; encoder–decoder models suit
-  input-to-output tasks. Start from an existing model and read its model card.
-- Training memory is about 16 bytes per parameter before activations, which
-  is about 4× the FP32 weights. Large models therefore cannot train on one GPU.
-- BF16 keeps FP32's range at half the memory. Mixed precision keeps an FP32
-  master copy for stable updates. Integer quantization depends on a scale
-  factor.
-- DDP replicates the model for speed. ZeRO/FSDP shard optimizer states,
-  gradients, and parameters for capacity, at a communication cost. Tensor and
-  pipeline parallelism split the computation itself.
-- Loss scales as a power law in parameters, data, and compute. Chinchilla
-  showed that compute-optimal training scales $N$ and $D$ together (~20
-  tokens/parameter). Inference costs now push towards smaller, over-trained
-  models.
-- Domain pre-training (BloombergGPT) is the expensive end of a ladder that
-  starts with prompting, retrieval, fine-tuning, and continued pre-training.
+The section summaries above hold the details. The chapter in five lines:
+
+- **Start:** from an existing model; the objective (masked, causal, span)
+  matches the architecture and the task.
+- **Memory:** about 16 bytes per parameter to train, so large models need
+  BF16, mixed precision, and sharding.
+- **Distribution:** DDP for speed; ZeRO/FSDP for capacity; tensor and
+  pipeline parallelism for the largest models.
+- **Scaling:** loss follows power laws; Chinchilla's ~20 tokens per
+  parameter for training compute, more when serving costs count.
+- **Domain models:** the expensive end of a ladder; justify them with
+  evidence that cheaper options fall short.
 
 ## Interview checkpoints
 

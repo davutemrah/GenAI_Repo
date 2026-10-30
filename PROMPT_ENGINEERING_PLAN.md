@@ -17,6 +17,10 @@ only when it is written.
 - Chapter 1 refers to later chapters by name (core techniques, evaluation,
   robustness); replace these with `\@ref()` links as the chapters are added.
 - The short Prompt Engineering section in `00_DL_genAI.Rmd` stays as a pointer.
+- System-level evals (end-to-end and component evals, LLM judges, error
+  analysis, error bars) live in the Agentic AI chapter
+  `{#evaluating-agentic-systems}`. Chapter 5 here covers prompt-level test
+  sets and regression only, and links there instead of repeating it.
 
 ## Chapters
 

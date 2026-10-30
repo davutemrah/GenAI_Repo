@@ -11,6 +11,11 @@ rmd_files:
   - __repo/03_00_Alignment.Rmd
   - __repo/04_00_LLM_Applications.Rmd
   - __repo/prompting/01_Prompt_Anatomy.Rmd
+  - __repo/agentic/01_Agentic_Workflows.Rmd
+  - __repo/agentic/02_Reflection.Rmd
+  - __repo/agentic/03_Tool_Use.Rmd
+  - __repo/agentic/04_Evals_Error_Analysis.Rmd
+  - __repo/agentic/05_Planning_Multi_Agent.Rmd
   - __repo/claude/01_Fundamentals.Rmd
   - __repo/claude/02_Prompting.Rmd
   - __repo/claude/03_Code-Best-Practices.Rmd

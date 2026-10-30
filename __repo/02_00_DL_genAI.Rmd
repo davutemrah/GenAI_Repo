@@ -32,6 +32,20 @@ format, style, or domain vocabulary). It is a poor way to add **facts that
 change**. Fresh or private facts are better supplied at inference time through
 retrieval, which a later chapter covers.
 
+**Example: one marketing assistant, three needs.**
+
+| Need | Best lever | Why |
+|:-----|:-----------|:----|
+| Always write in the brand's voice and house format | Fine-tuning | Stable behaviour, needed on every call |
+| Quote this week's promotions and prices | Retrieval | Facts that change weekly |
+| Handle an unusual one-off request | Prompting | No training data, and it may never recur |
+
+> **In short.**
+>
+> - Try prompting first; fine-tune when examples don't work, eat the
+>   context window, cost too much per call, or give inconsistent output.
+> - Fine-tuning teaches behaviour; retrieval supplies changing facts.
+
 ## Instruction fine-tuning
 
 **Instruction fine-tuning** (also called supervised fine-tuning, SFT) continues
@@ -77,6 +91,15 @@ $$
 
 The loss is commonly computed only on the completion tokens. The prompt tokens
 are masked out, so the model is not trained to reproduce the instruction.
+For the review example above:
+
+```text
+Tokens:   Classify this review: "I loved this book ..."  Sentiment: positive
+In loss:  no       no   no      no  no   no   no   ...   yes        yes
+```
+
+The model still reads the whole sequence, but only the completion tokens
+produce gradients.
 Gradients from batches of examples update the weights over one or more epochs.
 The validation loss or metric is tracked to choose when to stop.
 
@@ -84,6 +107,14 @@ Full fine-tuning has the same memory profile as training. Weights, gradients,
 and optimizer states must all fit in memory (Section
 \@ref(memory-challenges-in-training-llms)). That cost motivates the
 parameter-efficient methods in Section \@ref(peft).
+
+> **In short.**
+>
+> - Instruction fine-tuning is supervised next-token training on
+>   prompt–completion pairs, with the loss usually on the completion only.
+> - Templates turn existing datasets into instructions; several phrasings
+>   per task help generalization.
+> - Full fine-tuning updates every weight and needs training-level memory.
 
 ## Single-task fine-tuning and catastrophic forgetting
 
@@ -117,6 +148,13 @@ Whatever you choose, evaluate **both** the target task and a fixed set of
 capabilities you need to keep. Without the second set, forgetting goes
 unnoticed.
 
+> **In short.**
+>
+> - One task often needs only hundreds to a few thousand good examples.
+> - The risk is catastrophic forgetting of other skills.
+> - Mitigate with replay, regularization, PEFT, or multi-task training, and
+>   always measure retained capabilities.
+
 ## Multi-task instruction fine-tuning and FLAN
 
 **Multi-task instruction fine-tuning** trains on a mixture of tasks
@@ -137,7 +175,40 @@ Net*):
   datasets in 146 task categories) and released Flan-T5 and Flan-PaLM. Two
   findings matter: performance kept improving as both the number of tasks and
   the model size grew, and including chain-of-thought examples in the mixture
-  preserved the models' step-by-step reasoning ability.
+  preserved the models' step-by-step reasoning ability. Instruction tuning
+  was also cheap: for Flan-PaLM 540B it used about 0.2% of the pre-training
+  compute.
+
+The Flan 2022 paper uses three terms precisely [@chung2022scaling]:
+
+- a **dataset** is an original data source, such as SQuAD;
+- a **task category** is a kind of task setup, such as extractive question
+  answering or question generation (one dataset can serve several);
+- a **task** is one (dataset, task category) pair, such as question
+  generation on SQuAD, with any number of instruction templates.
+
+The fine-tuning mixture combined four collections, and evaluation used
+benchmarks kept out of training:
+
+| Collection | Datasets | Task categories | Tasks | What it adds |
+|:-----------|---------:|----------------:|------:|:-------------|
+| Muffin | 69 | 27 | 80 | The original FLAN tasks plus dialogue and program synthesis |
+| T0-SF | 55 | 14 | 193 | Tasks from T0 that do not overlap with Muffin ("sans Flan") |
+| Natural Instructions v2 | 372 | 108 | 1,554 | A large crowd-sourced task collection (MMLU-related tasks removed) |
+| CoT | 9 | 1 | 9 | Reasoning tasks with human-written chains of thought |
+| **Total** | **473** | **146** | **1,836** | Some datasets appear in more than one collection |
+
+| Held-out benchmark | What it tests | Size |
+|:-------------------|:--------------|:-----|
+| MMLU | Exam-style knowledge across subjects | 57 tasks |
+| BBH (BIG-Bench Hard) | Hard reasoning tasks where models trailed average human raters | 23 tasks (27 subtasks) |
+| TyDiQA | Information-seeking question answering | 8 languages |
+| MGSM | Grade-school math word problems | 10 languages |
+
+The point of the split is the claim being tested. A gain on tasks the model
+never saw during fine-tuning is evidence that it learned to follow
+instructions in general, not just the training tasks. The authors removed 44
+MMLU-related tasks from the training mixture for exactly this reason.
 
 One dataset in the FLAN mixture is **SAMSum**: about 16,000 messenger-style
 dialogues with summaries, written by linguists [@gliwa2019samsum]. It explains
@@ -153,6 +224,15 @@ summary [@chen2021dialogsum]. In production, permissioned internal data (your
 own support transcripts and the summaries your team wants) is usually the
 better choice. Even then, evaluate hallucination, privacy, and distribution
 shift separately.
+
+> **In short.**
+>
+> - Training on many tasks at once improves many tasks instead of trading
+>   them off.
+> - FLAN's evidence: gains on benchmarks held out of training, so the model
+>   learned to follow instructions in general.
+> - A general instruct model may still need a further round of tuning on
+>   data close to your deployment.
 
 ## Parameter-efficient fine-tuning (PEFT) {#peft}
 
@@ -307,6 +387,15 @@ only at the input, giving it more capacity per virtual token [@li2021prefix].
 > method. Supervised fine-tuning is now usually one stage in a pipeline that
 > also includes preference-based alignment (next chapter).
 
+> **In short.**
+>
+> - PEFT freezes most weights and trains a small add-on: less memory, tiny
+>   task files, less forgetting.
+> - LoRA learns a low-rank update $BA$, mergeable with no inference cost;
+>   apply it to all linear layers.
+> - QLoRA adds a 4-bit frozen base; prompt tuning learns input vectors and
+>   catches up with full fine-tuning at large scale.
+
 ## Evaluating fine-tuned models {#evaluating-model-performance-in-language-tasks}
 
 Classifier accuracy is easy to compute because there is one right label.
@@ -389,6 +478,10 @@ $$
 - BLEU was defined at the corpus level. Sentence-level BLEU is noisy and needs
   smoothing, because a single missing 4-gram makes the geometric mean zero.
 
+For example, a 4-word translation against a 5-word reference gets
+$\text{BP} = e^{1 - 5/4} \approx 0.78$. Even with perfect n-gram precision,
+its BLEU cannot exceed 0.78.
+
 ### Beyond overlap metrics
 
 ROUGE and BLEU are cheap diagnostics. They cannot judge factual correctness,
@@ -408,7 +501,17 @@ scales human-like judgments cheaply. @zheng2023judge found that strong judges
 agree with human preferences about as often as humans agree with each other.
 They also documented systematic biases: position bias, a preference for longer
 answers, and a tendency to favour the judge's own outputs. Calibrate a judge
-against human labels before trusting it.
+against human labels before trusting it. Chapter
+\@ref(evaluating-agentic-systems) shows how to do this, and how to build
+rubric-based evals for multi-step systems.
+
+> **In short.**
+>
+> - ROUGE (recall-leaning, summaries) and BLEU (precision plus brevity
+>   penalty, translation) measure surface overlap with references.
+> - They miss meaning, so use them for iteration, not as the final verdict.
+> - Combine held-out data, task metrics, human or calibrated-judge review,
+>   error analysis, and retained-capability checks.
 
 ## Benchmarks {#benchmarks}
 
@@ -443,24 +546,26 @@ skills:
 > and arena-style human-preference rankings. Leaderboards change quickly;
 > check current sources before quoting a score.
 
+> **In short.**
+>
+> - Benchmarks compare models on fixed public tasks: GLUE, SuperGLUE, MMLU,
+>   BIG-bench, HELM.
+> - Read them with care: saturation, contamination, and poor fit to your
+>   task. Your own small eval set usually tells you more.
+
 ## Key takeaways
 
-- Try prompting first. Fine-tune when examples are not enough, the context
-  window is tight, or the output must be consistent. Supply changing facts
-  through retrieval, not training.
-- Instruction fine-tuning is supervised next-token training on
-  prompt–completion pairs. Template diversity helps generalization.
-- Full fine-tuning on one task risks catastrophic forgetting. Always measure
-  the capabilities you need to keep.
-- Multi-task instruction tuning (FLAN) teaches general instruction following,
-  shown by gains on held-out task types.
-- PEFT trains a small number of parameters. LoRA learns a low-rank update that
-  can be merged with no inference cost. QLoRA adds a 4-bit base. Prompt tuning
-  learns input vectors and becomes competitive with full fine-tuning at large
-  scale.
-- ROUGE and BLEU measure surface overlap. They are useful for iteration and
-  misleading as final evidence. Pair them with held-out data, human or
-  calibrated judge review, and error analysis.
+The section summaries above hold the details. The chapter in five lines:
+
+- **When:** prompt first; fine-tune for behaviour, retrieve for facts.
+- **How:** supervised next-token training on instruction pairs; many tasks
+  at once (FLAN) generalize to held-out tasks.
+- **Risk:** catastrophic forgetting; always test the skills you need to
+  keep.
+- **Cheaply:** PEFT, usually LoRA or QLoRA, trains under 1% of the
+  parameters with no inference cost once merged.
+- **Measured:** overlap metrics for iteration; held-out data, human or
+  judge review, and error analysis for the verdict.
 
 ## Interview checkpoints
 
@@ -486,3 +591,9 @@ skills:
   outputs.
 - **Why distrust a high benchmark score?** Saturation, contamination, and
   mismatch with the deployment task.
+- **In FLAN, what is the difference between a dataset, a task category, and
+  a task?** A dataset is a data source (SQuAD); a task category is a task
+  setup (question generation); a task is one dataset–category pair.
+- **How did Flan 2022 show that instruction tuning generalizes?** By
+  evaluating on benchmarks held out of training (MMLU, BBH, TyDiQA, MGSM),
+  after removing overlapping tasks from the mixture.

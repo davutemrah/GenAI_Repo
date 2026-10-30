@@ -1,0 +1,470 @@
+# Reflection {#reflection}
+
+People rarely send the first draft of anything important. They reread it,
+notice that "next week" is ambiguous or that a figure is wrong, and fix it.
+**Reflection** gives an LLM workflow the same step. The model, or a second
+model, reviews an output and produces an improved version.
+
+Reflection is the easiest agentic pattern to add to an existing system. It is
+also the easiest one to overrate. This chapter explains how it works, when it
+helps, why it often fails without outside information, and how to measure
+whether it is worth its cost.
+
+## The basic pattern
+
+A reflection workflow has two or more LLM calls in sequence:
+
+1. **Generate.** Prompt the model for a first draft (version 1).
+2. **Critique.** Pass version 1 to a model with a different prompt. Ask it to
+   review the draft against stated criteria and list the problems.
+3. **Revise.** Ask the model to write version 2 that fixes those problems.
+
+Steps 2 and 3 are often combined into a single "review and rewrite" prompt.
+Keeping them separate makes the critique visible, which helps with debugging
+and evaluation.
+
+The critique step does not always lead to a rewrite. It can also **filter**:
+generate twenty candidate taglines, then have the critic keep only the three
+that meet every criterion. Brainstorm-then-filter is often cheaper and safer
+than asking for one perfect answer.
+
+**Example.** An analyst asks a model to draft a short client email summarizing
+a campaign's results. The first draft says "performance improved last month"
+and quotes a click-through rate that does not match the report. A reflection
+prompt that says "check every number against the attached report and replace
+vague time references with dates" catches both problems. The revised draft
+names the month and uses the correct figure.
+
+The same structure works for many outputs:
+
+| Output | What the critique step looks for |
+|:-------|:---------------------------------|
+| Email or report | Tone, accuracy of facts and promises, missing details, length |
+| Code | Bugs, unhandled edge cases, readability |
+| Structured data (deeply nested JSON, HTML tables) | Malformed structure, missing fields, wrong types |
+| Step-by-step instructions | Missing or out-of-order steps, ambiguity |
+| Names, taglines, or brand copy | Hard to pronounce, unintended meanings in the target markets' languages |
+| SQL query | Wrong joins, wrong filters, missing date ranges |
+
+### Same model or a different one?
+
+The critic can be the same model with a different prompt, or a different
+model. Different models have different strengths. A common configuration
+drafts with a fast, cheap model and critiques with a **reasoning model**,
+because models that think before answering tend to be better at spotting bugs
+and logical gaps. Treat the choice of generator and critic as a configuration
+to test, not a fixed rule.
+
+**Background.** Critique-and-revise also appears at training time.
+Constitutional AI [@bai2022constitutional] has a model critique and revise its
+own responses against written principles, then trains on the revisions
+(Section \@ref(scaling-feedback-constitutional-ai-and-rlaif)). Reflection as
+discussed here happens at **inference time** and changes no weights.
+
+> **In short.**
+>
+> - Reflection is generate, critique, revise. The critique can also filter a
+>   set of candidates instead of rewriting one.
+> - The critic can be the same model or a different one; test which works.
+> - It happens at inference time; Constitutional AI uses the same idea at
+>   training time.
+
+## What the evidence says
+
+Reflection is not magic. Its effect ranges from large to zero to negative,
+depending on the task and on whether the critic has new information.
+
+**Where self-feedback helps.** Self-Refine [@madaan2023selfrefine] used one
+model to generate, give feedback on, and refine its own output, with no extra
+training and no external tools. Across seven tasks (including dialogue
+responses, code optimization, code readability, and constrained generation),
+humans and automatic metrics preferred the refined outputs. Task performance
+rose by about 20 percentage points on average.
+
+**Where it does not.** In the same paper, math reasoning barely moved: GPT-4
+went from 92.9% to 93.1% on GSM8K, and GPT-3.5 did not improve at all. The
+authors traced this to the critic. A reasoning chain that *looks* consistent
+convinces the model that everything is fine. ChatGPT's feedback was
+essentially "everything looks good" for 94% of the math problems. When an
+external signal told the model that its answer was wrong, the gains exceeded
+5 points.
+
+@huang2024selfcorrect tested **intrinsic self-correction**, where the model
+reviews its own answer with no external feedback, on reasoning benchmarks.
+Performance did not improve and sometimes fell. For GPT-3.5 on GSM8K,
+accuracy went from 75.9% to 75.1% after one round of self-correction and to
+74.7% after two, because the model changed some correct answers to wrong ones.
+They also showed that some earlier reports of self-correction gains had used
+ground-truth labels to decide when to stop, which a deployed system does not
+have.
+
+**Where external feedback makes the difference.** Reflexion
+[@shinn2023reflexion] has an agent reflect in words on task feedback, such as
+the results of unit tests, and store the reflections in memory for its next
+attempt. It reached 91% pass@1 on HumanEval, against 80% for GPT-4 used
+directly. CRITIC [@gou2024critic] has the model check its output with tools
+(search for facts, a code interpreter for programs) before revising. It
+improved question answering, mathematical program synthesis, and toxicity
+reduction, and its authors stress that the external feedback is what matters.
+
+**Why the pattern looks like this.** A critic that sees only the draft has
+the same knowledge and blind spots as the model that wrote it. It catches
+problems that are easier to *recognize* than to *avoid*, such as a missing
+sign-off, a wrong format, a forgotten requirement, or awkward phrasing. It
+tends to miss subtle reasoning errors, and it may "fix" correct answers to
+please the reviewer prompt. Models trained on human preferences are prone to
+this kind of agreeable over-correction [@sharma2024sycophancy]. New
+information breaks the symmetry: the critic now knows something the generator
+did not.
+
+The studies side by side:
+
+| Study | Feedback the critic gets | Result |
+|:------|:------------------------|:-------|
+| Self-Refine [@madaan2023selfrefine] | None (self-feedback) | About +20 points on average across seven tasks; almost nothing on math |
+| Huang et al. [@huang2024selfcorrect] | None (intrinsic self-correction) | No gain on reasoning; GPT-3.5 on GSM8K fell slightly |
+| Reflexion [@shinn2023reflexion] | Unit-test results, kept in memory | 91% pass@1 on HumanEval vs. 80% for GPT-4 alone |
+| CRITIC [@gou2024critic] | Search results, code interpreter | Gains on QA, math programs, and toxicity reduction |
+
+The pattern: the more outside information the critic has, the more reliable
+the gain.
+
+> **In short.**
+>
+> - Self-critique helps on writing, code style, and format, where problems
+>   are easy to recognize.
+> - It fails on reasoning, and can turn right answers wrong, when the critic
+>   has nothing new to go on.
+> - External feedback is what makes the gains consistent.
+
+## Reflection with external feedback
+
+External feedback means information from **outside the model** that is added
+to the critique step. It is the single most effective way to make reflection
+work. Typical sources:
+
+| Source | What it reveals | Example |
+|:-------|:----------------|:--------|
+| **Code execution** | Errors, stack traces, wrong outputs | Run the generated script; pass the traceback to the critic |
+| **Unit tests** | Which behaviors fail | Return failing test names and their assertion messages |
+| **Validators** | Schema or format violations | A JSON-schema validator reports missing fields |
+| **Rule checks in code** | Policy violations | A regular expression finds competitor names in a draft reply |
+| **Counters** | Length limits | Count the words and report "212 words, limit is 150" |
+| **Search or retrieval** | Facts the draft got wrong | Retrieve a source and pass the relevant passage to the critic |
+| **Database execution** | Empty, huge, or failed results | Run the SQL query and report the row count or error |
+| **A human** | Anything a person notices | A reviewer marks a paragraph as off-brand |
+
+Two of these deserve a comment.
+
+- **Length.** LLMs are poor at hitting exact word counts, because they see
+  tokens, not words. A few lines of code that count the words and report the
+  overshoot fix this more reliably than any amount of prompt tuning.
+- **Fact checking.** Suppose a draft states that BLEU and ROUGE were both
+  introduced in 2002. A retrieval step finds that BLEU dates from 2002
+  [@papineni2002bleu] and ROUGE from 2004 [@lin2004rouge]. Passing those
+  passages to the critic turns a plausible error into a specific, fixable
+  one.
+
+**Example: the external-feedback loop in code.** The loop below writes a SQL
+query, runs it, and feeds any error or suspicious result back to the model.
+It stops when the checks pass or after three rounds. The helper names are
+illustrative.
+
+```python
+def answer_with_sql(question, schema, max_rounds=3):
+    query = llm(f"Schema:\n{schema}\n\nWrite one SQL query to answer: {question}")
+    for _ in range(max_rounds):
+        result = run_sql(query)                 # tool: the outside world
+        problems = check(result)                # code, not the model's opinion
+        if not problems:
+            return query, result                # stop: objective checks pass
+        query = llm(
+            f"Question: {question}\nQuery:\n{query}\n"
+            f"Problems found when running it: {problems}\n"
+            "Return a corrected query only."
+        )
+    return query, None                          # stop: round limit, flag for review
+
+def check(result):
+    if result.error:
+        return f"Database error: {result.error}"
+    if result.row_count == 0:
+        return "The query returned no rows. Check filters and date ranges."
+    return None
+```
+
+Three things make this work. The feedback is specific (the actual error
+message). The stop condition is checked by code, not by asking the model if
+it is done. And the loop has a hard limit, with a failure path that a human
+can pick up.
+
+> **In short.**
+>
+> - External feedback is information from outside the model: execution
+>   results, tests, validators, counters, retrieval, or a human.
+> - It is the most effective way to make reflection work.
+> - When prompt tuning plateaus, ask what new information the system could
+>   get about its own output.
+
+### A practitioner's view of the improvement curve
+
+A pattern many practitioners report, and a useful mental model rather than a
+measured law:
+
+- Tuning a single prompt improves quality quickly at first, then plateaus.
+- Adding a reflection step and tuning its prompt often lifts the plateau
+  somewhat.
+- Adding external feedback to the reflection step often lifts it further, and
+  keeps improving as the feedback becomes more informative.
+
+So when prompt tuning is showing diminishing returns, ask: **what new
+information could the system obtain about its own output?** That question
+usually points to the next improvement.
+
+## Multimodal reflection: charts and images
+
+Reflection is not limited to text. A charting workflow can:
+
+1. ask a model to write plotting code for a request such as "compare weekly
+   spend and conversions by channel for Q1";
+2. run the code to render the chart as an image;
+3. give the code, the image, and the original request to a **multimodal
+   model** and ask it to critique the chart for readability, clarity, and
+   whether it answers the question; and
+4. ask for revised code and render again.
+
+The rendered image is a form of external feedback. The critic sees what the
+reader will see: overlapping labels, a stacked bar chart that makes
+comparisons hard, a missing axis title, or a legend that hides the data. A
+first draft might produce stacked bars that bury the comparison. A good
+critique recommends grouped bars or a two-panel line chart, and the revision
+implements it.
+
+Rendering also catches errors that reading the code would not, such as an
+empty plot caused by a wrong column name.
+
+> **In short.**
+>
+> - A multimodal critic can review a rendered chart, not just the code.
+> - The image is external feedback: the critic sees what the reader will see.
+
+## Writing reflection prompts
+
+A reflection prompt is an ordinary prompt (Chapter \@ref(prompt-anatomy)) with
+a specific job. What makes it work:
+
+- **Say explicitly that the input is a draft to review**, and what it was
+  supposed to achieve. Include the original request.
+- **Give concrete criteria.** "Check the tone, verify every date and figure
+  against the provided facts, and confirm the call to action is present" works
+  better than "improve this".
+- **Supply the reference material** the draft should be consistent with: the
+  facts, the data, the style guide, the tool outputs.
+- **Separate critique from revision** when you want to inspect or evaluate the
+  critique, or when a different model should do each part.
+- **Allow "no changes needed".** A critic forced to find problems will invent
+  them.
+- **Ask for structured critique** (a list of issues, each with location and
+  fix) when code will act on it, for example to decide whether to run another
+  round.
+
+An illustrative critique prompt:
+
+```text
+You are reviewing a draft client email written by a junior analyst.
+
+<request>{original_request}</request>
+<facts>{campaign_metrics_and_dates}</facts>
+<draft>{draft_email}</draft>
+
+Check the draft against these criteria:
+1. Every number and date matches <facts>.
+2. No promise is made that <facts> does not support.
+3. The tone is professional and concise (under 150 words).
+4. It ends with a clear next step.
+
+List each problem with the sentence it occurs in and a suggested fix.
+If there are no problems, reply exactly: NO_ISSUES.
+```
+
+A practical way to learn to write better prompts, reflection prompts
+included, is to read prompts from well-regarded open-source agent projects.
+
+> **In short.**
+>
+> - Say it is a draft, include the original request, and give concrete
+>   criteria and reference material.
+> - Allow "no changes needed", or the critic will invent problems.
+> - Ask for structured critique when code will act on it.
+
+## Design choices and costs
+
+| Choice | Options | Guidance |
+|:-------|:--------|:---------|
+| Critic model | Same model; a stronger model; a reasoning model | Test combinations on your eval set |
+| Rounds | One; a fixed maximum; until a stop condition | One or two rounds capture most of the gain; always cap the loop |
+| Stop condition | Critic says no issues; all checks pass; max rounds | Prefer objective checks (tests pass, schema valid) over the critic's opinion |
+| Feedback | None; tool results; human | Add external feedback wherever it is cheap to get |
+| Scope | Whole output; only the parts that failed a check | Targeted revision reduces drift and cost |
+
+Reflection adds at least one model call per round, so it increases latency
+and cost. It can also make things worse: a revision can drift away from
+constraints the first draft satisfied, or change a correct answer. Both are
+reasons to measure it rather than assume it helps.
+
+> **In short.**
+>
+> - One or two rounds capture most of the gain; always cap the loop.
+> - Stop on objective checks where possible, not on the critic's opinion.
+> - Reflection costs latency and money and can make outputs worse, so
+>   measure it.
+
+## Measuring whether reflection helps
+
+Before keeping a reflection step, compare the workflow **with** and
+**without** it on the same inputs. Chapter \@ref(evaluating-agentic-systems)
+develops these ideas fully; here is the version specific to reflection.
+
+**Objective tasks: compare against ground truth.** Suppose a model writes SQL
+to answer questions about a retail database, and a reflection step reviews
+each query before it runs. Collect a set of questions with known answers,
+such as "How many units were sold in May?" or "Which product color has the
+highest revenue?". Run both versions and count how often each returns the
+correct answer.
+
+Two cautions from basic statistics:
+
+- **Small sets are noisy.** With 15 questions, one question is 6.7
+  percentage points. A jump from 13/15 to 14/15 correct is one question and
+  could easily be chance. Grow the set as the system matures.
+- **Compare paired outcomes.** Both versions answer the same questions, so
+  look at the questions where they *disagree*. If reflection fixes five
+  answers and breaks one, that is more informative than the two accuracy
+  figures alone. McNemar's test formalizes this comparison.
+
+For example, with 40 questions:
+
+|  | Reflection correct | Reflection wrong |
+|:--|--:|--:|
+| **No reflection correct** | 30 | 1 |
+| **No reflection wrong** | 5 | 4 |
+
+Accuracy goes from 31/40 to 35/40. The informative cells are the
+disagreements: reflection fixed 5 answers and broke 1. Read those six cases.
+They show what the reflection step catches, and what it damages.
+
+The same eval set then lets you compare alternative generation and
+reflection prompts quickly, instead of guessing.
+
+**Subjective tasks: use a rubric, not a pairwise vote.** For charts or prose
+there is no single right answer, so an **LLM-as-a-judge** is common. The
+obvious design, showing the judge both outputs and asking which is better,
+has known problems. Judges are sensitive to prompt wording, may disagree with
+human experts, and show **position bias**. In @zheng2023judge, Claude-v1
+favored whichever answer came first in 75% of swapped pairs under the default
+prompt, and GPT-3.5 in 50%. GPT-4 was the most consistent judge but still
+favored the first answer in 30% of pairs. The direction is not fixed: with a
+reworded prompt, Claude-v1 leaned toward the *second* answer instead. If you
+must compare pairs, run each comparison in both orders and count only
+consistent verdicts.
+
+A more stable design grades **each output separately against a rubric** of
+specific yes/no criteria. For a chart:
+
+- Does it have a clear, descriptive title?
+- Are both axes labeled, with units?
+- Is the chart type appropriate for the comparison requested?
+- Are the axis ranges sensible (no truncated axis exaggerating a change)?
+- Can every series be distinguished without relying on color alone?
+- Does it answer the question that was asked?
+
+Sum the passes to get a score. In code, the judge returns one 0 or 1 per
+criterion as JSON, so the scores can be added up and compared:
+
+```python
+RUBRIC = ["clear_title", "axes_labeled_with_units", "appropriate_chart_type",
+          "sensible_axis_ranges", "series_distinguishable", "answers_question"]
+
+JUDGE_PROMPT = """Grade this chart against each criterion. Score 1 if it fully
+meets the criterion, otherwise 0.
+Request: {request}
+Criteria: {criteria}
+Return JSON only, for example {{"clear_title": 1, "axes_labeled_with_units": 0, ...}}"""
+
+def rubric_score(request, chart_image):
+    raw = judge_llm(JUDGE_PROMPT.format(request=request, criteria=RUBRIC),
+                    image=chart_image)
+    scores = json.loads(raw)
+    return sum(scores[c] for c in RUBRIC)          # 0 to 6
+
+with_refl = [rubric_score(r, make_chart(r, reflect=True))  for r in requests]
+without   = [rubric_score(r, make_chart(r, reflect=False)) for r in requests]
+print(mean(with_refl), mean(without))
+```
+
+Each chart is graded on its own, so position bias does not arise. The
+per-criterion scores also show *which* criterion reflection improves. Practitioners widely report that several
+binary criteria give more consistent judgments than asking for a single 1–5
+rating, which models tend to calibrate poorly. Treat this as practitioner
+guidance; it is consistent with the evidence on judge instability, but it is
+not a settled research result. Check the judge against a sample of human
+ratings before trusting it.
+
+**Rule of thumb.** When a criterion is objective, check it with code. Use an
+LLM judge only for what code cannot check, and expect to spend time tuning
+the rubric.
+
+> **In short.**
+>
+> - Compare with and without reflection on the same inputs, and read the
+>   cases where they disagree.
+> - Objective tasks: score against ground truth. Subjective tasks: grade each
+>   output against binary rubric items, not pairwise.
+> - Small eval sets are noisy; one question out of 15 is almost 7 points.
+
+## Key takeaways
+
+The section summaries above hold the details. The chapter in five lines:
+
+- **What:** generate, critique, revise (or filter), at inference time.
+- **When it works:** when problems are easy to recognize, and above all when
+  the critic gets external feedback such as test results or retrieved facts.
+- **When it fails:** self-critique on reasoning with nothing new to go on.
+- **How to build it:** concrete criteria, reference material, "no changes"
+  allowed, objective stop conditions, a hard round limit.
+- **How to keep it honest:** measure with and without it on the same inputs,
+  and judge subjective output with binary rubrics.
+
+## Interview checkpoints
+
+- **What is the reflection pattern?** Generate a draft, critique it against
+  criteria, and revise. Same or different model, one or more rounds.
+- **Does self-reflection always improve output?** No. Self-Refine reported
+  large average gains, but almost none on math reasoning. Huang et al. found
+  that intrinsic self-correction did not improve, and sometimes hurt,
+  reasoning accuracy.
+- **Why does external feedback help so much?** A critic with only the draft
+  shares the generator's knowledge and blind spots. Test results, error
+  messages, or retrieved facts give it information the generator lacked.
+- **Give three cheap sources of external feedback.** Running the code, a
+  schema validator, a regular-expression check, a word counter, a database
+  query's row count or error, a retrieval-based fact check.
+- **Your prompt tuning has plateaued. What do you try next?** Add a reflection
+  step, and better still, find external feedback the system can gather about
+  its own output.
+- **Why might you use a different model for the critique?** Models differ in
+  strengths. Reasoning models are often better at finding bugs and logical
+  gaps than at fast drafting.
+- **How do you decide whether to keep a reflection step?** Run the workflow
+  with and without it on the same labeled inputs. Compare accuracy, look at
+  which examples changed, and weigh the gain against the extra latency and
+  cost.
+- **Why is "which of these two outputs is better?" a weak LLM-judge design?**
+  Position bias and prompt sensitivity. Grade each output against a rubric of
+  binary criteria instead, or at least evaluate both orders.
+- **How do you stop a reflection loop?** When objective checks pass, when the
+  critic reports no issues, or at a maximum number of rounds, whichever comes
+  first.
+- **How does Constitutional AI relate to reflection?** It uses the same
+  critique-and-revise idea, but at training time to produce training data.
+  Reflection in a workflow happens at inference time and changes no weights.

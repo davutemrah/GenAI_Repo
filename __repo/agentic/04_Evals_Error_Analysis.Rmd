@@ -1,0 +1,605 @@
+# Evaluating and Improving Agentic Systems {#evaluating-agentic-systems}
+
+An agentic system has many parts: prompts, models, retrievers, tools, and the
+code that connects them. When it does not work well enough, which is most of
+the time during development, almost any part could be to blame. Teams that
+improve quickly differ from teams that stall mainly in how they decide **what
+to work on next**. In Andrew Ng's experience, a disciplined process of
+evaluation and error analysis is one of the strongest predictors of how
+effective a team will be.
+
+This chapter covers that process:
+
+1. build a quick prototype and look at its outputs;
+2. turn recurring problems into **end-to-end evals**;
+3. read **traces** and run **error analysis** to find the component
+   responsible;
+4. build **component-level evals** to improve that component efficiently; and
+5. once quality is good enough, optimize **cost and latency**.
+
+The reflection chapter (Section \@ref(measuring-whether-reflection-helps))
+used a small version of this process to decide whether a reflection step was
+worth keeping. Here it becomes a general method.
+
+## Build first, then look
+
+It is hard to predict where an agentic system will fail. Weeks of up-front
+design often guess wrong. The more productive approach is to **build a quick,
+safe prototype**, one that does not leak data or take irreversible actions,
+and then **read its outputs**.
+
+Take 10 to 20 realistic inputs, run them, and note what is wrong with each
+output in a spreadsheet. Patterns appear quickly:
+
+- An **invoice-processing** workflow keeps extracting the *issue* date when the
+  task needs the *due* date.
+- An **ad-copy** assistant writes good headlines, but many exceed the
+  30-character headline limit of Google search ads.
+- A **campaign-insights** agent writes fluent summaries but sometimes misses
+  the point a senior analyst would lead with, such as a budget overspend.
+
+Each observation leads to one of two actions. If the fix is obvious, such as a
+missing instruction, **just fix it**. If improving it will take sustained
+iteration, **build an eval** for that problem so you can measure progress.
+
+Looking at outputs also tells you *what* to evaluate. You cannot write a good
+rubric before seeing how the system fails. @shankar2024validators call this
+**criteria drift**: people need criteria to grade outputs, but grading outputs
+is how they discover their criteria. Expect your evals to change as you learn.
+
+> **In short.**
+>
+> - You cannot predict the failures; build a safe prototype and read 10–20
+>   outputs.
+> - Fix obvious problems directly; build an eval for anything that needs
+>   sustained work.
+> - Criteria come from reading outputs, so expect them to change.
+
+## End-to-end evals
+
+An **end-to-end eval** measures the final output for a given input, treating
+the whole system as one unit. End-to-end evals differ along two axes:
+
+- **Who grades:** code (objective checks) or an LLM judge (subjective
+  judgments).
+- **What the output is compared with:** a **per-example reference** (each
+  input has its own correct answer or key points) or a **shared criterion**
+  (the same rule applies to every example).
+
+| | **Per-example reference** | **Shared criterion** |
+|:--|:--|:--|
+| **Code grades** | Invoice due date matches the labeled date | Headline is at most 30 characters; output is valid JSON; no competitor names |
+| **LLM judge grades** | Report mentions the 3–5 key points an expert listed for this question | Chart passes a rubric (title, axis labels, chart type); reply has a professional tone |
+
+### Code-graded evals
+
+Prefer code whenever the criterion is objective. It is cheap, fast, and
+deterministic. Make outputs easy to check: if the prompt tells the model to
+write dates as `YYYY-MM-DD`, a few lines of code can grade them.
+
+```python
+import re
+
+def due_date_correct(output: str, label: str) -> bool:
+    """Compare the first ISO date in the model output with the labeled due date."""
+    match = re.search(r"\d{4}-\d{2}-\d{2}", output)
+    return bool(match) and match.group() == label
+
+accuracy = sum(due_date_correct(o, y) for o, y in zip(outputs, labels)) / len(labels)
+```
+
+For the ad-copy example there is no per-example label; the check is simply
+`len(headline) <= 30` for every output.
+
+### LLM-judged evals
+
+When the criterion needs reading comprehension, use an LLM judge. Suppose
+that for each question in the campaign-insights eval set, an analyst has
+written the three to five points a good answer must cover. Key points can be
+phrased in many ways, so string matching fails, but a judge can count them:
+
+```text
+You are grading a campaign-performance summary.
+
+<question>{question}</question>
+<key_points>{expert_key_points}</key_points>
+<summary>{agent_output}</summary>
+
+For each key point, decide whether the summary states it clearly
+(paraphrase is fine). Return JSON:
+{"explanation": "<one line per key point>", "points_covered": <integer>}
+```
+
+Asking for the explanation **before** the score makes the judge commit to its
+reasoning first, and the explanation is what you read when the score looks
+wrong.
+
+### Making LLM judges trustworthy
+
+LLM judges have known biases, including position bias, a preference for longer
+answers, and a preference for their own outputs [@zheng2023judge]. The
+fine-tuning chapter introduced them (Section \@ref(beyond-overlap-metrics)),
+and the reflection
+chapter showed how position bias can reverse direction. Practical defenses:
+
+- **Grade one output at a time against a rubric** of specific yes/no
+  criteria, instead of asking which of two outputs is better.
+- **Give the judge references** (key points, a correct answer, the source
+  document) whenever you have them.
+- **If you must compare pairs, evaluate both orders** and count only
+  consistent verdicts.
+- **Use a different model family as judge** from the one that generated the
+  outputs, to reduce self-preference.
+- **Validate the judge against human labels.** Have a person grade 50 to 100
+  examples and measure agreement with the judge. Raw agreement can look high
+  when most outputs pass, so also report **Cohen's kappa**, which corrects for
+  agreement expected by chance [@cohen1960kappa]. Re-check whenever the judge
+  prompt or model changes.
+
+**Example: why raw agreement misleads.** A person and a judge each grade 100
+replies. Each passes 90 of them, and they agree on 90 (85 both pass, 5 both
+fail). Raw agreement is 90%, which sounds excellent. But two graders who pass
+90% of replies at random would agree $0.9 \times 0.9 + 0.1 \times 0.1 = 82\%$
+of the time. Kappa measures agreement beyond that baseline:
+
+$$
+\kappa = \frac{p_o - p_e}{1 - p_e} = \frac{0.90 - 0.82}{1 - 0.82} \approx 0.44
+$$
+
+That is only moderate agreement. The judge agrees with the person mostly
+because almost everything passes. It catches only half of the 10 failures
+the person found, and those failures are what the eval exists to find.
+
+### Start small, then grow the set
+
+Teams sometimes delay evals because they imagine a multi-week project. A
+first eval with 10 to 20 examples and a simple metric is far better than
+none. Use it **alongside** reading outputs, not instead of it. As the eval
+grows and proves reliable, you can trust the metric more and read fewer
+outputs after each change.
+
+Improve the eval as you go:
+
+- **When the metric disagrees with your judgment**, such as when you are sure
+  a change helped but the score did not move, treat that as a bug in the eval.
+  Add examples or change how outputs are graded.
+- **Add examples from real failures**, edge cases, and inputs where the system
+  falls short of an expert. For tasks that people already do, places where the
+  system is worse than a skilled human are the best guide to what to improve.
+- **Keep a held-out set.** If you tune prompts against the same 20 examples
+  for weeks, you will overfit to them, just as with training data in machine
+  learning. Check the final configuration on examples you did not tune on.
+
+### How much should you trust a score?
+
+An eval score is an estimate from a sample, so it has sampling error. For an
+accuracy $\hat p$ measured on $n$ independent examples, the standard error is
+$\sqrt{\hat p (1 - \hat p) / n}$. At $\hat p = 0.8$:
+
+| Examples ($n$) | Standard error | Approximate 95% interval |
+|---:|---:|:--|
+| 20 | 8.9 points | 80% ± 17.5 points |
+| 100 | 4.0 points | 80% ± 7.8 points |
+| 400 | 2.0 points | 80% ± 3.9 points |
+
+A 20-example eval is good for catching large regressions and for guiding early
+work. It cannot distinguish 80% from 85%. @miller2024errorbars sets out a
+statistical approach to model evals that applies directly here:
+
+- **Report standard errors** with every score.
+- **Use clustered standard errors** when examples come in related groups,
+  such as several questions about the same campaign.
+- **Analyze paired differences** when comparing two systems on the same
+  examples. The question-level comparison is far more precise than comparing
+  two overall accuracies (McNemar's test is the binary case).
+- **Reduce variance by resampling.** Run each example several times when
+  outputs are non-deterministic and average the results. For agents that users
+  run repeatedly, also report how often *all* of $k$ runs succeed (pass^k,
+  Section \@ref(evaluation-is-a-harness-too)).
+- **Do a power analysis** before concluding that a change made no difference.
+  The eval may simply be too small to detect it.
+
+> **In short.**
+>
+> - End-to-end evals have two axes: code or LLM judge, per-example reference
+>   or shared criterion. Use code whenever the criterion is objective.
+> - Trust a judge only after checking it against human labels, with kappa,
+>   not just raw agreement.
+> - Start with 10–20 examples, grow from real failures, keep a held-out set,
+>   and report error bars.
+
+## Traces and spans
+
+End-to-end evals tell you *that* something is wrong, not *where*. For that,
+you need the **trace**: the record of everything the system did for one
+input. The terms come from software observability. In OpenTelemetry, a
+**trace** is the path of one request through an application, and a **span**
+is one unit of work within it, with its own timing and attributes
+[@otel2024traces]. In an agentic system, each LLM call, tool call, or
+retrieval step is a span.
+
+For each span, log at least:
+
+- its inputs and outputs (the full prompt and completion for LLM calls);
+- the model, prompt version, and parameters;
+- tool names, arguments, results, and errors;
+- tokens, latency, and cost.
+
+A trace for one run of the campaign-insights agent might look like this
+(simplified):
+
+```text
+trace  q-0117  "Why did CPA rise on Search last week?"        total 27.4 s  $0.07
+├─ span interpret_question  llm  2.1 s   in 1,200 tok  out 150 tok
+│    output: {"channel": "Search", "metric": "CPA", "period": "2026-10-12..18"}
+├─ span write_sql           llm  3.8 s   in 2,900 tok  out 240 tok
+│    output: SELECT ... WHERE order_date BETWEEN '2026-10-12' AND '2026-10-18'
+├─ span run_query           tool 9.3 s   rows 14
+└─ span write_narrative     llm 12.2 s   in 6,400 tok  out 610 tok
+     output: "CPA on Search rose 18%, driven by ..."
+```
+
+Reading it, an analyst would spot that the SQL filters on `order_date` when
+the metric needs the conversion date. Nothing in the final narrative reveals
+that; only the trace does.
+
+The habit that matters most is simple: **read traces regularly**, not only
+when something breaks. Many tools exist to collect and browse traces. On
+Databricks, for example, MLflow Tracing records agent runs and connects to
+MLflow's evaluation tooling (Chapter \@ref(context-harness-engineering)).
+
+> **In short.**
+>
+> - A trace is the record of one run; a span is one step in it.
+> - Log inputs, outputs, versions, tool calls, tokens, latency, and cost for
+>   every span.
+> - Read traces regularly; they show failures the final output hides.
+
+## Error analysis {#agentic-error-analysis}
+
+**Error analysis** is the systematic reading of traces for examples where the
+system failed, in order to find which component is responsible.
+
+Consider a campaign-insights agent with four steps: **interpret** the
+question, **write SQL**, **run the query** on the warehouse, and **write the
+narrative**. The end-to-end eval shows that summaries often miss key points.
+Any step could be the cause. The question might be misread, the SQL might
+filter the wrong dates, the warehouse might hold stale data, or the writer
+might ignore a number it was given. Picking a component by gut feeling
+sometimes works. It also sometimes leads to months of work on a part that was
+never the problem.
+
+### The procedure
+
+1. **Collect failures.** Set aside the examples the system got right. Gather
+   10 to 100 examples where the final output was unsatisfactory.
+2. **Walk each trace step by step.** For each component, ask: *given the
+   input this component received*, is its output clearly worse than what a
+   skilled person would produce?
+3. **Blame a component only for its own work.** If the query returned stale
+   data, the writer cannot be faulted for reporting it. The writer did as well
+   as anyone could with what it was given.
+4. **Record the judgment in a spreadsheet**, one row per failed example and
+   one column per component, with a short note.
+5. **Count.** For each component, compute the share of failed examples in
+   which it erred.
+
+An illustrative result for 20 failed examples:
+
+| Example | Interpret question | Write SQL | Warehouse data | Write narrative | Note |
+|:--|:--:|:--:|:--:|:--:|:--|
+| 1 | | ✗ | | | Filtered on order date instead of conversion date |
+| 2 | | ✗ | | ✗ | Wrong join; summary also buried the main result |
+| 3 | | | ✗ | | Yesterday's spend not loaded |
+| … | | | | | |
+| **Share of failures** | **10%** | **60%** | **10%** | **35%** | |
+
+The shares add up to more than 100% because one example can have errors in
+several components.
+
+### From counts to priorities
+
+The counts are evidence, not a decision. Prioritize a component when:
+
+- it causes a **large share** of failures;
+- you have **concrete ideas** for improving it; and
+- those ideas are **affordable** in time and cost.
+
+Here, SQL generation is the clear first target, and the narrative step comes
+second. Remember that the shares are fractions of *failures*. If 30% of
+outputs fail overall and SQL errors appear in 60% of those, eliminating SQL
+errors entirely would cut the failure rate by at most 18 percentage points.
+That is an upper bound, because some of those examples also have other
+errors. A related check from classic machine learning practice is **ceiling
+analysis**: substitute a correct output for one component (for example,
+hand-written SQL) and measure how much the end-to-end score rises. That tells
+you how much fixing the component could ever be worth.
+
+The same procedure applies to simpler workflows. For the invoice workflow,
+the question is whether the PDF-to-text step garbled the dates (so that even
+a person could not read them from its output) or whether the LLM picked the
+wrong date from clean text. If the LLM step accounts for most errors, weeks
+spent tuning the PDF converter would be wasted. In a research agent, the
+usual culprit is search: when the sources are poor, the writing step cannot
+recover, and a component eval on search (Section
+\@ref(component-level-evals)) is the right next step.
+
+**Starting the categories.** If you do not yet know which failure types to
+count, write a free-text note for each failed example first. Then group the
+notes into categories and count those. The categories usually map onto
+components or onto specific behaviors, such as "ignored date filter" or
+"invented a metric", that can each become an eval.
+
+> **In short.**
+>
+> - Read the traces of failed examples and blame each component only for its
+>   own output, given its input.
+> - Count the share of failures per component; the shares can sum past 100%.
+> - Prioritize components that cause many failures and that you know how to
+>   improve. Ceiling analysis bounds the gain.
+
+## Component-level evals
+
+Once error analysis has pointed to a component, improving it by rerunning the
+full system after every change is slow and expensive. It is also noisy:
+randomness in the other components can hide a small real improvement. A
+**component-level eval** measures that one component directly.
+
+**Example: retrieval or web search.** For a set of queries, have an expert
+list the sources a good search should find. Then score each configuration on
+how well its results match:
+
+- **Precision**: the fraction of returned results that are relevant.
+- **Recall**: the fraction of relevant results that were returned.
+- **F1**: the harmonic mean of the two, $2PR/(P+R)$.
+
+For one query, suppose the expert lists 5 sources and the search returns 8
+results, 3 of which are on the expert's list. Precision is $3/8 = 0.375$,
+recall is $3/5 = 0.6$, and F1 is $2 \times 0.375 \times 0.6 / 0.975 \approx
+0.46$. Average these over the query set to score a configuration.
+
+Ranked variants such as precision@k and recall@k are standard in information
+retrieval [@manning2008ir]. With this eval you can quickly compare search
+providers, the number of results, date ranges, or chunking strategies.
+
+**Example: SQL generation.** Compare the *result* of the generated query with
+the result of a reference query, not the SQL text. Many different queries are
+correct.
+
+**Example: tool use.** Measure tool-selection and argument accuracy on
+labeled requests (Section \@ref(evaluating-tool-use)).
+
+Component evals also let a team own one clear metric without running the
+whole system. They have one danger: a component metric can improve while the
+end-to-end result does not, because the metric does not capture what
+downstream steps need. **Always confirm with the end-to-end eval** before
+declaring a component improvement done.
+
+> **In short.**
+>
+> - A component eval measures one step directly: faster, cheaper, and less
+>   noisy than rerunning the whole system.
+> - Retrieval: precision, recall, F1 against expert-chosen sources. SQL:
+>   compare query results, not query text.
+> - Confirm every component gain end to end.
+
+## Improving a component
+
+**Non-LLM components** (search engines, retrievers, OCR, classifiers) usually
+have settings to tune or alternatives to swap:
+
+- web search: the provider, number of results, date range, domain filters;
+- retrieval (Section \@ref(retrieval-augmented-generation-rag)): chunk size,
+  embedding model, similarity threshold, number of chunks;
+- a detector or classifier: the decision threshold, which trades false
+  positives against false negatives.
+
+**LLM components** have a standard ladder of options, roughly from cheapest to
+most expensive:
+
+1. **Improve the prompt.** Add explicit instructions, context, and a few
+   input–output examples (Chapter \@ref(prompt-anatomy)).
+2. **Try a different model.** Use your evals to choose. A multi-provider
+   interface makes this cheap to test.
+3. **Decompose the step.** A prompt with many instructions may be too much for
+   one call. Split it into two or three simpler calls (Chapter
+   \@ref(agentic-workflows)), or add a reflection step (Chapter
+   \@ref(reflection)).
+4. **Fine-tune.** Fine-tuning can add the last few points on a mature system
+   with enough labeled data, but it costs the most development time
+   (Chapter \@ref(instruction-fine-tuning-and-evaluation)). Try the cheaper
+   options first.
+
+### Building intuition about models
+
+Choosing models well is faster when you have a feel for what each one is
+good at. Models differ: some are stronger at coding, some at following long
+instructions, some at particular domains, and they differ in price and speed.
+Smaller models often answer simple factual questions well but follow complex,
+multi-part instructions less reliably. Benchmarks of **verifiable
+instructions**, such as IFEval's "write more than 400 words" or "mention a
+keyword at least three times", measure this ability with code
+[@zhou2023ifeval].
+
+Consider redacting personal information from customer-call summaries before
+analysis. A capable model removes every name, address, and account number,
+and returns exactly the requested format. A weaker model may miss a name,
+redact an address only partly, or add a list nobody asked for. You can catch
+this with a component eval: label the personal-information spans in 50
+summaries and check, in code, that none survive.
+
+Ways to build this intuition:
+
+- **Try new models when they are released**, on a small personal set of
+  prompts that you reuse across models.
+- **Read other people's prompts**, including those in respected open-source
+  projects, to learn what instructions models follow well.
+- **Swap models within your own workflows** and compare them with traces and
+  evals, noting quality, price, and speed.
+
+> **In short.**
+>
+> - Non-LLM components: tune settings or swap providers.
+> - LLM components, cheapest first: better prompt, different model,
+>   decompose or add reflection, fine-tune last.
+> - Build model intuition by testing new models on your own small prompt set.
+
+## Cost and latency {#agentic-cost-latency}
+
+Get output quality right first. It is usually the hardest part, and a fast,
+cheap system that gives wrong answers has no value. Once quality is
+acceptable, and especially once usage grows, cost and latency start to matter.
+
+The method mirrors error analysis: **measure each step**, then optimize the
+steps that dominate. Steps are billed in different ways:
+
+- **LLM calls** are billed **per token**, input and output priced separately.
+- **External APIs** (search, data providers, PDF conversion) are usually
+  billed **per call** or per page.
+- **Compute** (a warehouse query, a code sandbox, a self-hosted model) is
+  billed by **capacity used**, such as seconds of compute or server hours.
+
+An illustrative breakdown for one run of the campaign-insights agent, with
+one extra step that pulls competitor benchmarks from a paid data API. The
+dollar figures are made up for the example, not real prices:
+
+| Step | Billing basis | Latency | Cost per run |
+|:--|:--|--:|--:|
+| Interpret question (small LLM) | Per token | 2 s | \$0.001 |
+| Write SQL (mid-size LLM, schema in prompt) | Per token | 4 s | \$0.010 |
+| Run query (warehouse) | Compute time | 9 s | \$0.015 |
+| Pull competitor benchmarks (paid data API) | Per call | 3 s | \$0.080 |
+| Write narrative (strong LLM, long context) | Per token | 12 s | \$0.060 |
+| **Total** | | **30 s** | **\$0.166** |
+
+Two lessons. For **latency**, speeding up the interpretation step barely
+matters; the narrative and the query are the targets. As Amdahl's law says,
+the overall speed-up is limited by the share of time spent in the part you
+improve. For **cost**, the single API call costs more than all three LLM
+steps together (\$0.071). Switching to a cheaper model would barely help;
+caching benchmark results, or calling the API only when the question needs
+it, would. Only measuring each step shows this.
+
+Levers for **latency**:
+
+- run independent steps **in parallel**, such as several searches or fetches;
+- use a **smaller or faster model** for a step, if its eval still passes;
+- try a **faster serving provider** for the same model;
+- **stream** the final output so users see progress; and
+- **trim context**, because long prompts take longer to process.
+
+Levers for **cost**:
+
+- a **cheaper model** for steps that do not need the strongest one;
+- **prompt caching** for long, repeated prefixes such as instructions and tool
+  definitions;
+- **batch APIs** for work that does not need an immediate answer;
+- **fewer tokens**: shorter prompts, concise tool results, capped loops; and
+- **cheaper tools or plans** where per-call API fees dominate.
+
+Measuring often shows that some steps are not worth optimizing at all.
+
+> **In short.**
+>
+> - Quality first; then measure latency and cost per step and work on the
+>   steps that dominate.
+> - LLMs bill per token, APIs per call, compute by capacity. A non-LLM step
+>   can be the most expensive one.
+> - Latency: parallelize, smaller models, faster providers, trimmed context,
+>   streaming. Cost: cheaper models, caching, batching, fewer tokens.
+
+## The build–analyze loop
+
+Developing an agentic system alternates between two activities: **building**
+(writing code, prompts, and tools) and **analyzing** (reading outputs and
+traces, running evals and error analysis). Analysis can feel like it is not
+progress, but it is what makes the building effective. Less experienced teams
+tend to spend too much time building and too little analyzing.
+
+The analysis becomes more rigorous as the system matures:
+
+| Stage | Analysis |
+|:--|:--|
+| Prototype | Read final outputs and a few traces; fix obvious problems |
+| Early | Small end-to-end evals (10–20 examples) on the problems you found |
+| Maturing | Systematic error analysis: count which components cause failures |
+| Mature | Component-level evals for the parts you are actively improving; larger, held-out end-to-end evals with error bars |
+
+The process is not linear. You will move back and forth between tuning the
+whole system, analyzing errors, and improving single components.
+
+> **Current practice (October 2026).** Many platforms record traces, run
+> evals, and track cost: open-source and commercial LLM observability tools,
+> MLflow on Databricks, and the providers' own consoles. They save
+> engineering time. However, most agentic workflows are custom, so the most
+> useful evals are usually the ones you write for the specific failures you
+> found in your own error analysis.
+
+> **In short.**
+>
+> - Development alternates between building and analyzing; most teams
+>   under-invest in analysis.
+> - The analysis grows with the system: read outputs, small evals, error
+>   analysis, then component evals and larger held-out sets.
+
+## Key takeaways
+
+The section summaries above hold the details. The chapter in five lines:
+
+- **Look first:** build a safe prototype and read outputs; failures tell you
+  what to evaluate.
+- **Measure the whole:** end-to-end evals graded by code where possible, by
+  validated LLM judges otherwise, with error bars.
+- **Find the cause:** read traces of failures and count which component is
+  to blame.
+- **Fix the part:** component evals to iterate fast, the cheapest fix first,
+  then confirm end to end.
+- **Then optimize:** cost and latency per step, after quality is good.
+
+## Interview checkpoints
+
+- **You built an agent and it is not good enough. What do you do first?** Run
+  it on realistic inputs, read the outputs and traces, and note the recurring
+  failures. Fix the obvious ones; build evals for the rest.
+- **Describe the two axes of end-to-end evals, with an example in each
+  quadrant.** Code vs. LLM judge, and per-example reference vs. shared
+  criterion. Examples: extracted date vs. label (code, reference); length limit
+  (code, shared); key points covered (judge, reference); chart rubric (judge,
+  shared).
+- **When would you use an LLM judge instead of code?** When the criterion
+  requires understanding language, such as whether a point was made in
+  different words, or tone. Use code for anything objective.
+- **How do you know an LLM judge is reliable?** Compare it with human labels on
+  a sample. Report agreement and Cohen's kappa, and re-check after changing the
+  judge prompt or model.
+- **What is a trace? What is a span?** A trace is the full record of one run
+  through the system. A span is one step within it, such as an LLM call or a
+  tool call, with its inputs, outputs, and timing.
+- **Walk through error analysis.** Collect failed examples, step through each
+  trace, mark the components whose output was clearly worse than an expert's
+  given the same input, and count the share of failures per component.
+- **Why don't the error-analysis percentages sum to 100%?** One failed example
+  can have errors in more than one component.
+- **The search step returned poor sources, and the selection step picked the
+  best of them. Is selection at fault?** No. It did as well as possible with
+  its input. The fault lies with search.
+- **What is a component-level eval, and why use one?** It measures one
+  component directly, for example retrieval precision and recall against
+  expert-chosen sources. It is faster, cheaper, and less noisy than rerunning
+  the whole system. Confirm the gains end to end.
+- **Your eval has 20 examples, and a change moved accuracy from 80% to 85%.
+  Did it help?** You cannot tell. The 95% interval at $n = 20$ is about ±17
+  points. Look at paired differences on the same examples, add examples, and
+  run repeated trials if outputs vary.
+- **Your metric says no improvement, but you are sure the new version is
+  better. What now?** Treat it as a problem with the eval. Inspect the
+  examples, add cases that capture the difference, or change the grading.
+- **What options do you have to improve an LLM component?** Better prompts and
+  examples, a different model, decomposition or reflection, and fine-tuning as
+  the last resort.
+- **How do you reduce latency in an agentic workflow?** Time each step, then
+  parallelize independent steps, use smaller or faster models where evals
+  allow, choose faster providers, trim context, and stream the output.
+- **When should you optimize cost?** After quality is acceptable. Measure the
+  cost of each step and target the dominant ones with cheaper models, caching,
+  batching, and fewer tokens.

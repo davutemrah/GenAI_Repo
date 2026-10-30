@@ -321,7 +321,9 @@ outcomes
 
 For a statistician, this is familiar ground: define the estimand (task
 success), use repeated trials to estimate variance, and avoid grading on the
-training set (tasks the harness was tuned on).
+training set (tasks the harness was tuned on). Chapter
+\@ref(evaluating-agentic-systems) covers the vendor-neutral method:
+end-to-end and component evals, error analysis, and error bars.
 
 ## Applying both to Databricks analytics apps
 

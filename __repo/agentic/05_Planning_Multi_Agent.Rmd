@@ -1,0 +1,534 @@
+# Planning and Multi-Agent Systems {#planning-multi-agent}
+
+In the workflows so far, the developer decided the sequence of steps. Even
+with tools, the model chose only *which* tool to call next, inside a loop the
+developer wrote. This chapter covers two patterns that hand more of the
+design to the model:
+
+- **Planning**: the model decides the sequence of steps for each request,
+  then the system carries it out.
+- **Multi-agent collaboration**: several role-specialized agents work on
+  parts of a task and communicate with each other.
+
+Both extend what a system can do without the developer anticipating every
+case. Both also make it harder to predict and control what the system will
+do. That trade-off runs through the whole chapter.
+
+## Planning
+
+### Why let the model plan?
+
+Consider a customer-service agent for a sporting-goods store with these
+tools:
+
+| Tool | Purpose |
+|:-----|:--------|
+| `search_products(description)` | Find products matching a description |
+| `check_inventory(sku, size)` | Stock level for one product and size |
+| `get_price(sku)` | Current price |
+| `get_order_history(customer_id)` | Past purchases |
+| `process_return(order_id, sku)` | Start a return |
+| `process_sale(sku, size, customer_id)` | Place an order |
+
+"Do you have waterproof trail-running shoes in size 10 under $120?" needs
+three tools in a particular order: search for waterproof trail shoes, check
+which are in stock in size 10, then check prices. "I want to return the blue
+jacket from my last order, but keep the gloves" needs a different sequence:
+order history, product details to identify the blue jacket, then a return.
+
+Hard-coding a workflow for every kind of request is impossible. With
+planning, the model writes the sequence for each request at run time.
+
+### Plan, then execute
+
+The simplest planning design has two phases:
+
+1. **Plan.** Give the model the tools' descriptions and the user's request.
+   Ask it to return a step-by-step plan.
+2. **Execute.** Carry out the plan one step at a time. For each step, call the
+   model with the step's instructions, the original request, the tools, and
+   the outputs of earlier steps. The model makes the tool call for that step.
+3. **Answer.** After the last step, the model writes the response from the
+   accumulated results.
+
+```text
+request ──► planner LLM ──► [step 1, step 2, step 3]
+                                │
+          step 1 + context ──► LLM ──► tool ──► result 1
+ step 2 + context + result 1 ──► LLM ──► tool ──► result 2
+ step 3 + context + results ──► LLM ──► tool ──► result 3
+                                │
+                 all results ──► LLM ──► final answer
+```
+
+For reasoning without tools, **Plan-and-Solve** prompting
+[@wang2023planandsolve] showed the same idea in a single prompt: asking the
+model to first devise a plan and then carry it out reduced missed steps
+compared with plain "think step by step" prompting. HuggingGPT
+[@shen2023hugginggpt] applied planning to tool selection, having an LLM plan
+which specialist models to call for a multi-part request (Chapter
+\@ref(agentic-workflows)).
+
+### Plan up front or step by step?
+
+ReAct (Section \@ref(react-reasoning-plus-acting)) interleaves the two
+phases: think, act, observe, and decide the next step only after seeing the
+last result. The choice matters. In the shoe example, an up-front plan
+assumes step 1 finds candidates. If no waterproof trail shoe is in stock in
+size 10, the remaining steps are pointless; an interleaved agent would notice
+and suggest the nearest alternative, and a replanning agent would rewrite the
+rest of the plan.
+
+| Approach | How it works | Strengths | Weaknesses |
+|:--|:--|:--|:--|
+| **Plan up front** | Write the whole plan, then execute it | The plan can be inspected, validated, or approved before anything runs; independent steps can run in parallel; fewer planning calls | Breaks when an early result changes what is needed |
+| **Interleaved (ReAct-style)** | Decide each step after seeing the previous result | Adapts naturally to surprises | Harder to review in advance; the trajectory can wander |
+| **Plan with replanning** | Plan up front, but revise the plan when a step fails or returns something unexpected | Combines inspectability with adaptation | More logic to build and test; needs a limit on replans |
+
+Plan-up-front designs also help against prompt injection. If the plan is
+fixed **before** the agent reads any untrusted content, such as emails or
+web pages, text in that content cannot add new actions. Beurer-Kellner et
+al. list plan-then-execute among their design patterns for securing agents
+[@beurerkellner2025patterns]. They note its limit: injected text can still
+change the *arguments* of planned steps, for example the recipient of an
+email.
+
+### Structured plans: JSON or XML
+
+A plan written as free text ("first, look up the shoes...") is hard for code
+to execute reliably. A common practice is to ask for the plan in **JSON**
+(or with XML tags) according to a described format:
+
+```json
+{
+  "plan": [
+    {"step": 1, "description": "Find waterproof trail-running shoes",
+     "tool": "search_products",
+     "args": {"description": "waterproof trail running shoes"}},
+    {"step": 2, "description": "Keep products in stock in size 10",
+     "tool": "check_inventory",
+     "args": {"sku": "<each sku from step 1>", "size": "10"},
+     "depends_on": [1]},
+    {"step": 3, "description": "Keep products under $120",
+     "tool": "get_price",
+     "args": {"sku": "<each sku from step 2>"},
+     "depends_on": [2]}
+  ]
+}
+```
+
+The placeholders such as `"<each sku from step 1>"` tell the executor to fill
+an argument from an earlier step's result. Many teams make this explicit with
+a reference syntax, for example `"sku": "$step1.results[*].sku"`, so that code,
+not the model, does the substitution.
+
+A structured plan lets code:
+
+- **validate** it before execution: every tool exists, the arguments match
+  the tool's schema, and dependencies refer to earlier steps;
+- **show it to a person** for approval when the actions matter;
+- **run independent steps in parallel**, because the dependencies form a
+  graph; and
+- **log it** for error analysis (Chapter \@ref(evaluating-agentic-systems)),
+  so that "bad plan" and "good plan, bad execution" can be told apart.
+
+Practitioners generally find JSON or XML plans more reliable to parse than
+Markdown lists, and Markdown lists more reliable than prose.
+
+Validation is a few lines of code, run before any step executes:
+
+```python
+def validate_plan(plan, tools):
+    errors, seen = [], set()
+    for step in plan["plan"]:
+        if step["tool"] not in tools:
+            errors.append(f"Step {step['step']}: unknown tool {step['tool']}")
+        else:
+            missing = set(tools[step["tool"]].required) - set(step["args"])
+            if missing:
+                errors.append(f"Step {step['step']}: missing args {missing}")
+        for dep in step.get("depends_on", []):
+            if dep not in seen:
+                errors.append(f"Step {step['step']}: depends on later step {dep}")
+        seen.add(step["step"])
+    return errors      # empty list = safe to execute; otherwise send back to the planner
+```
+
+Returning the errors to the planner and asking for a corrected plan is
+reflection with external feedback, applied to plans.
+
+### Code as the plan {#code-as-plan}
+
+For many tasks there is a more expressive plan format: **code**.
+
+Suppose an analyst wants an assistant that answers questions about a
+campaign-performance table. One approach provides tools such as
+`get_column_max`, `get_column_mean`, `filter_rows`, and `sum_rows`. Then the
+questions start arriving:
+
+- "Which week had the highest cost per conversion for paid social?" This
+  needs filtering, grouping by week, a ratio, and a maximum. The tools can do
+  it, but only through a long, error-prone chain of calls.
+- "How many distinct customers converted in the last seven days?" There is
+  no tool for distinct counts, so someone writes `count_unique`.
+- "Show the last five conversions." Another new tool.
+
+Teams that follow this path end up adding tools indefinitely and still
+missing cases. The alternative is to let the model write code against a data
+library and run it in a sandbox:
+
+```python
+import pandas as pd
+
+df = pd.read_csv("campaign_daily.csv", parse_dates=["date"])
+
+# Step 1: keep paid social only
+social = df[df["channel"] == "paid_social"]
+
+# Step 2: aggregate spend and conversions by week
+weekly = social.resample("W", on="date")[["spend", "conversions"]].sum()
+
+# Step 3: compute cost per conversion, ignoring weeks with no conversions
+weekly = weekly[weekly["conversions"] > 0]
+weekly["cpa"] = weekly["spend"] / weekly["conversions"]
+
+# Step 4: report the worst week
+print(weekly["cpa"].idxmax().date(), round(weekly["cpa"].max(), 2))
+```
+
+The comments *are* the plan, and the code executes it. This works because a
+library such as pandas offers hundreds of functions that the model has seen
+used many times in its training data. It can compose them with variables,
+loops, and conditions, which no fixed set of tools can match.
+
+**CodeAct** [@wang2024codeact] studied this systematically, using executable
+Python as the agent's action format instead of JSON or text tool calls.
+Across 17 LLMs on API-Bank and a new multi-turn benchmark, code actions
+achieved up to 20% higher success rates than the alternatives. On API-Bank
+the advantage was larger for open models than for closed ones. The authors'
+explanation is that open models had seen far more code in training than any
+special tool-call format, while closed models had been fine-tuned for JSON
+calls. On the harder multi-turn benchmark, open models of that time did
+poorly in every format. The models tested (2023 releases) are now outdated,
+so read this as evidence for the direction, not for the size of today's gap.
+Code execution as a single general tool appeared in the tool-use chapter (Section
+\@ref(code-execution-the-general-purpose-tool)), and PAL's program-based
+reasoning in Section \@ref(program-aided-language-models-pal). CodeAct
+extends the same idea from single calculations to whole multi-step plans.
+
+Two caveats:
+
+- **Run generated code in a sandbox** (Section
+  \@ref(running-generated-code-safely)).
+- **Code is not right for every action.** When actions must pass through
+  governed interfaces, such as payments, emails, or writes to production
+  tables, keep them as narrowly scoped tools with permissions and audit logs.
+  Some platforms let generated code call such tools as functions, which
+  combines the flexibility of code with the control of tools.
+
+### Where planning works today
+
+Planning is most mature in **agentic coding**. Asked to build a feature, a
+coding agent writes a plan, often an explicit checklist ("add the schema,
+write the endpoint, add tests, update the docs"), then works through it,
+running tests along the way. Execution feedback at every step keeps the plan
+honest.
+
+In most other domains, planning is still maturing. The reason is control:
+the developer does not know at design time what plan the model will produce,
+which makes testing and guarantees harder. Practical safeguards:
+
+- **Restrict the tool set** to what the application needs.
+- **Validate every plan** in code before execution.
+- **Require approval** for steps with consequences.
+- **Cap steps, replans, and spending.**
+- **Evaluate the planner separately**: is the plan valid, does it use the
+  right tools in a sensible order, and does it lead to a correct final answer?
+
+> **In short.**
+>
+> - Planning lets the model write the sequence of steps for each request.
+> - Plan up front (inspectable, parallel, resists injection), step by step
+>   (adaptive), or up front with replanning.
+> - Ask for JSON or XML plans and validate them in code; code itself is
+>   often the most expressive plan, run in a sandbox.
+> - Planning is mature in coding, where tests give feedback; elsewhere,
+>   restrict tools, validate, cap, and gate.
+
+## Multi-agent systems
+
+### Why use several agents when it is the same model?
+
+A multi-agent system often uses one underlying LLM, prompted differently for
+each role. So why call it several agents? The value is mostly in
+**decomposition**, not in separate "minds":
+
+- **A design tool.** A programmer splits work on one CPU into processes and
+  threads because the structure makes the program easier to write and reason
+  about. Asking "what team of people, with which roles, would I hire for
+  this?" is a similar way to split a complex task into pieces you can build
+  and test one at a time.
+- **Focused context.** Each agent sees only what its role needs. This is the
+  *isolate* technique of context engineering (Section
+  \@ref(four-families-of-technique-write-select-compress-isolate)).
+- **Role-specific tools and permissions.** A researcher gets web search; a
+  writer gets no tools; only one agent may write to the database.
+- **Parallelism.** Independent agents can work at the same time.
+- **Reuse and ownership.** A well-built designer agent can serve several
+  applications, and different team members can own different agents.
+
+Each agent is an LLM call (or loop) with a **role prompt**, a **tool set**,
+and possibly its own model choice.
+
+### Example: a campaign-launch team
+
+Producing launch materials for a new product might involve three roles:
+
+| Agent | Task | Tools |
+|:------|:-----|:------|
+| **Researcher** | Summarize category trends and competitors' offers | Web search, page fetch |
+| **Designer** | Produce charts and visual concepts | Image generation, code execution for charts |
+| **Copywriter** | Write the brochure and ad copy from the research and visuals | None beyond the LLM |
+
+A role prompt might read: "You are a market researcher. Research current
+trends in trail-running footwear and summarize what the three largest
+competitors are offering this season. Cite every source."
+
+The simplest arrangement is a **pipeline**: the brief goes to the researcher,
+the research report goes to the designer, and both outputs go to the
+copywriter, who produces the brochure.
+
+Alternatively, a **manager** agent receives the brief along with
+descriptions of the team members, exactly as a planner receives tool
+descriptions. It plans ("research, then visuals, then copy, then I review"),
+delegates each step, collects the results, and reviews the final draft. The
+team members are now the manager's tools. Anthropic describes the same idea
+as the *orchestrator–workers* workflow [@anthropic2024effective].
+
+In code, each worker is wrapped as a tool the manager can call, with its own
+prompt and tool set. An illustrative sketch:
+
+```python
+def make_agent(role_prompt, tools, model):
+    def run(task: str) -> str:
+        return agent_loop(model=model, system=role_prompt, tools=tools, user=task)
+    return run
+
+researcher = make_agent(RESEARCHER_PROMPT, [web_search, fetch_page], model="mid")
+designer   = make_agent(DESIGNER_PROMPT,   [run_python, generate_image], model="mid")
+copywriter = make_agent(COPYWRITER_PROMPT, [],                          model="strong")
+
+TEAM = {
+    "researcher": tool(researcher, "Research trends and competitors. Returns a cited report."),
+    "designer":   tool(designer,   "Create charts and visual concepts from a report."),
+    "copywriter": tool(copywriter, "Write brochure and ad copy from research and visuals."),
+}
+
+brochure = agent_loop(model="strong", system=MANAGER_PROMPT, tools=TEAM, user=brief)
+```
+
+The manager's loop is the ordinary tool loop from Chapter \@ref(tool-use).
+Only the tools have changed: they are agents.
+
+### Communication patterns
+
+How agents talk to each other is a central design decision, much like
+designing an organization chart.
+
+| Pattern | How it works | Predictability | Typical use |
+|:--|:--|:--|:--|
+| **Linear (pipeline)** | Each agent passes its output to the next | High | Repeatable processes with a known order |
+| **Hierarchical** | A manager delegates to workers; workers report back to the manager | Medium–high | Tasks that need routing and synthesis; the most common dynamic design |
+| **Deep hierarchy** | Some workers are managers of their own sub-agents (a researcher with a web searcher and a fact-checker) | Medium | Large tasks with distinct sub-teams |
+| **All-to-all** | Any agent can message any other; a message is added to the recipient's context; the run ends when the agents declare they are done | Low | Experimental and creative tasks where variation is acceptable |
+
+The four shapes, drawn for the campaign-launch team (R = researcher,
+D = designer, C = copywriter, M = manager):
+
+```text
+Linear            Hierarchical         Deep hierarchy             All-to-all
+
+R ──► D ──► C          M                    M                     R ◄──► D
+                    ┌──┼──┐              ┌──┼──┐                  ▲ ╲  ╱ ▲
+                    R  D  C              R  D  C                  │  ╳   │
+                                        ┌┴┐                       ▼ ╱  ╲ ▼
+                                    search fact-check             C ◄──► M
+```
+
+In the hierarchical shapes, results flow back up to the manager along the
+same lines.
+
+Linear and single-level hierarchical patterns account for most systems in
+practice. In a hierarchy, it is usually simpler for workers to report back to
+the manager than to pass results directly to each other. All-to-all systems
+are hard to predict. They suit applications where a bad run can simply be
+repeated.
+
+A structured relative of all-to-all is **multi-agent debate**
+[@du2024debate]. Several instances of a model each propose an answer, read
+each other's answers, and revise over several rounds until they converge.
+This improved factual accuracy and reasoning in the original study, at a cost
+that grows with the number of agents and rounds.
+
+### When multi-agent systems help, and when they hurt
+
+The evidence is mixed, and the reasons are instructive.
+
+**A case where it helped.** Anthropic built a research system in which a
+lead agent plans and launches several subagents that search in parallel,
+each in its own context window [@anthropic2025multiagent]. On the company's
+internal research evaluation, the multi-agent system outperformed a
+single-agent system by 90.2%. It also used about 15 times as many tokens as
+a chat interaction. On the BrowseComp benchmark, token usage alone explained
+80% of the variance in performance. Much of the gain, in other words, comes
+from spending more computation in parallel across separate contexts. The
+authors judged the design a good fit for broad, parallelizable research. It
+is a poor fit for tasks in which all agents need the same context or depend
+heavily on each other, which includes most coding. These are vendor-reported
+results on an internal evaluation.
+
+**A counterargument from practice.** Cognition, which builds a coding agent,
+argued against multi-agent designs for most work [@yan2025dontbuild]. Its two
+principles: agents should share full context, not just messages, and every
+action embeds implicit decisions. Parallel subagents that cannot see each
+other's work make conflicting assumptions, and the combined result is
+fragile.
+
+**Systematic failure analysis.** @cemri2025multiagent annotated over 1,600
+traces from seven popular multi-agent frameworks. They identified 14 failure
+modes in three categories:
+
+- **system design issues**, such as poor role definitions or ignoring
+  termination conditions;
+- **inter-agent misalignment**, such as withholding information, ignoring
+  another agent's input, or drifting from the task; and
+- **task verification**, such as stopping too early or failing to check the
+  result.
+
+They also found that multi-agent systems often show minimal gains over
+simpler baselines on popular benchmarks.
+
+**Reading the evidence together.** Multi-agent systems help when a task
+splits into **independent, context-heavy subtasks** that benefit from
+parallel work, such as reading many sources. They hurt when the task needs
+**one coherent understanding**, when subtasks depend tightly on each other,
+or when cost and latency matter. Start with one well-scoped agent. Add agents
+only when evaluation shows that a single agent's context or sequential speed
+is the bottleneck. Chapter \@ref(supervisor-agents) applies the same rule to
+supervisor agents on Databricks.
+
+> **In short.**
+>
+> - Multi-agent systems are mainly a decomposition tool: focused context,
+>   role-specific tools, parallelism, reuse.
+> - Linear and hierarchical patterns are the most common and predictable;
+>   all-to-all is experimental.
+> - They help on independent, context-heavy, parallel work such as broad
+>   research, largely by spending more tokens.
+> - They hurt when the task needs one shared understanding; start with one
+>   agent.
+
+### Designing and evaluating a multi-agent system
+
+- **Write role and handoff descriptions carefully.** A worker needs the
+  objective, the boundaries of its task, the expected output format, and
+  which tools to use. Vague delegation causes duplicated or missing work.
+- **Use structured handoffs.** Agree on the format each agent returns, such
+  as a JSON report with sources, so the next agent can rely on it.
+- **Define termination.** Who decides the task is done, and what is the
+  maximum number of rounds or messages?
+- **Add verification.** Task verification is one of the three main failure
+  categories, so make checking the result someone's explicit job, ideally
+  with external feedback (Chapter \@ref(reflection)).
+- **Trace every message.** Error analysis works as in Section
+  \@ref(agentic-error-analysis), with agents in place of components. Evaluate the whole system end to end,
+  then each agent's output given its input.
+- **Compare with a single-agent baseline** at the same budget. A multi-agent
+  design must beat it to justify the extra cost and complexity.
+
+> **Current practice (October 2026).** Many frameworks support multi-agent
+> systems, including AutoGen [@wu2023autogen], LangGraph, CrewAI, and the
+> agent SDKs from model providers. They make it easy to implement the
+> patterns above. Agentic coding tools commonly use a lead agent with
+> subagents for parallel exploration, each subagent returning a condensed
+> summary so the lead's context stays small. Managed platforms offer
+> supervisor agents over governed data (Chapter \@ref(supervisor-agents)).
+
+## Choosing the level of autonomy
+
+This part has described a ladder of designs, each giving the model more
+control:
+
+| Design | Who decides the steps | Choose it when |
+|:--|:--|:--|
+| Single prompt | Nobody; one pass | The prompt has everything and one pass is good enough |
+| Fixed workflow | The developer | The steps are known in advance |
+| + Reflection | The developer, with a check-and-revise loop | Outputs can be checked, ideally with external feedback |
+| + Tool use | The model chooses tools within developer-written steps | The task needs information or actions outside the model |
+| Planning | The model writes the sequence | Requests vary too much to hard-code the steps |
+| Multi-agent | Several models divide the work | Independent, context-heavy subtasks; parallel work pays off |
+
+Climb only as far as your evaluations show you need to. Each step up adds
+flexibility, and with it cost, latency, and unpredictability.
+
+> **In short.**
+>
+> - The designs form a ladder: single prompt, fixed workflow, reflection,
+>   tool use, planning, multi-agent.
+> - Climb only as far as your evaluations require.
+
+## Key takeaways
+
+The section summaries above hold the details. The chapter in five lines:
+
+- **Planning:** the model writes the steps; structured plans let code
+  validate, approve, parallelize, and log them.
+- **Code as plan:** often the most expressive format, sandboxed, with
+  consequential actions kept behind governed tools.
+- **Multi-agent:** a decomposition tool; agents become the manager's tools.
+- **When it pays:** independent, parallel, context-heavy work; not tasks
+  that need one shared understanding.
+- **Discipline:** validate, cap, gate, trace, and beat a single-agent
+  baseline before adding autonomy.
+
+## Interview checkpoints
+
+- **What is the planning pattern?** The model produces a sequence of steps or
+  tool calls for a request, and the system executes them. The developer does
+  not fix the sequence in advance.
+- **Plan up front vs. ReAct?** Up-front plans can be inspected, approved, and
+  parallelized but break when early results change the task. ReAct adapts
+  step by step but is harder to review in advance. Replanning combines the
+  two.
+- **Why ask for a plan in JSON?** So code can parse it unambiguously, validate
+  tools and arguments, run independent steps in parallel, and log it for
+  error analysis.
+- **Why can code be a better plan format than JSON tool calls?** Code composes
+  a huge library of functions the model already knows, with variables, loops,
+  and conditions. CodeAct reported up to 20% higher success rates than JSON or
+  text actions.
+- **When should you not let the agent act through code?** When actions need
+  permissions, audit trails, or strict validation, such as payments, emails,
+  and production writes. Expose those as narrow tools.
+- **How does plan-then-execute help against prompt injection?** The actions
+  are fixed before untrusted content is read, so injected text cannot add
+  actions. It can still alter the arguments of planned actions.
+- **Why build several agents from the same LLM?** Decomposition: each agent
+  has a focused context, its own tools and permissions, can run in parallel,
+  and can be built, tested, and reused independently.
+- **Name four multi-agent communication patterns.** Linear, hierarchical
+  (manager–workers), deep hierarchy, and all-to-all.
+- **When does a multi-agent system beat a single agent?** When the task splits
+  into independent, context-heavy subtasks that can run in parallel, such as
+  broad research. Much of the gain comes from spending more tokens across
+  separate contexts.
+- **Why might a multi-agent system fail?** Poor role and termination design,
+  agents ignoring or withholding information from each other, conflicting
+  implicit decisions, and missing verification. Cemri et al. group 14 failure
+  modes into system design, inter-agent misalignment, and task verification.
+- **How would you evaluate a multi-agent system?** End to end against a
+  single-agent baseline at the same budget, then trace-based error analysis
+  per agent, as for components.
+- **Which level of autonomy should you choose?** The lowest that meets your
+  quality bar on evaluations. Each step up adds cost, latency, and
+  unpredictability.

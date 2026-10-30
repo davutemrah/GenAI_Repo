@@ -1,0 +1,443 @@
+# (PART) Agentic AI {-}
+
+# Agentic Workflows {#agentic-workflows}
+
+The earlier parts of this book treat an LLM call as a single step: a prompt
+goes in, a completion comes out. This part is about systems that call models
+**many times**. They decide what to do next, use tools, check their own work,
+and iterate until a task is done.
+
+| Chapter | Question it answers |
+|:--------|:--------------------|
+| This chapter | What is an agentic workflow, when is it worth building, and how do you break a task into steps? |
+| Reflection (Chapter \@ref(reflection)) | How can a model critique and improve its own output, and when does that actually help? |
+| Tool use (Chapter \@ref(tool-use)) | How do models call functions, run code, and connect to external systems? |
+| Evaluation and error analysis (Chapter \@ref(evaluating-agentic-systems)) | How do you measure an agentic system and decide what to improve next? |
+| Planning and multi-agent systems (Chapter \@ref(planning-multi-agent)) | How can a model choose its own steps, and when should several agents work together? |
+
+These chapters began as study notes from the DeepLearning.AI course *Agentic
+AI* (Andrew Ng). They have been rewritten as a reference and checked against
+primary sources.
+
+## From direct generation to agentic workflows
+
+The usual way to use an LLM is **direct generation**: a single prompt, such
+as "write an essay on topic X", answered in one pass. That is like asking a
+person to write an essay from the first word to the last without stopping to
+think, look anything up, or revise. Models do surprisingly well under that
+constraint, but it is not how good work gets done.
+
+An **agentic workflow** is a process in which an LLM-based application
+carries out **multiple steps** to complete a task. For the essay, it might:
+
+1. write an outline;
+2. decide what to search for, and call a web search API;
+3. fetch and read the most relevant pages;
+4. write a first draft;
+5. critique the draft and identify gaps or weak sections;
+6. optionally ask a human to check key facts; and
+7. revise the draft.
+
+Each step is either an LLM call (with its own prompt) or ordinary software,
+such as a search API, a database query, or a script. The workflow takes longer
+and costs more than one call, but for many tasks it produces much better work.
+
+**Classic background.** In AI, an *agent* is anything that perceives its
+environment and acts on it to achieve goals [@russell2021aima]. An LLM
+agent's "perception" is its context (prompts, documents, tool results), and
+its "actions" are generated text and tool calls.
+
+> **In short.**
+>
+> - Direct generation is one prompt and one pass. An agentic workflow is
+>   several steps, each an LLM call or ordinary software.
+> - The extra steps cost time and money, and buy quality on tasks that need
+>   research, checking, or revision.
+
+## Degrees of autonomy
+
+There has been a lot of debate about which systems deserve to be called
+"agents". A more useful view treats **agentic** as an adjective. Systems can be
+agentic to *different degrees*, depending on how many decisions the model
+makes rather than the developer.
+
+| Level | Steps | Tools | Typical example | Control and predictability |
+|:------|:------|:------|:----------------|:---------------------------|
+| **Less autonomous** | All predetermined by the developer | Every tool call is hard-coded; the model's autonomy is only in the text it generates | Generate search queries → *always* run web search → fetch pages → write essay | High |
+| **Semi-autonomous** | The model makes some decisions | The developer predefines the tools; the model chooses which to use and when | The model decides whether to search the web, search news, or search papers, and how many pages to fetch | Medium |
+| **Highly autonomous** | The model decides the sequence itself | The model can write code or create new tools on the fly | The model drafts a plan, executes it, reflects, and loops back for more research as needed | Low |
+
+@anthropic2024effective draw a similar line between **workflows**, where LLMs
+and tools are orchestrated through predefined code paths, and **agents**,
+where the LLM dynamically directs its own process and tool use. Their advice
+matches long experience: use the simplest design that works, and add
+autonomy only when the task needs flexibility that fixed steps cannot provide.
+
+Many valuable business applications sit at the **less autonomous** end. They
+are easier to test, debug, and trust. Highly autonomous systems handle a wider
+range of requests but are harder to control and predict.
+
+**Example: a weekly campaign report at two levels.** The difference shows up
+clearly in code. In a fixed workflow, the developer writes the sequence. In an
+agent, the model picks the next step inside a loop. Both sketches below are
+illustrative, not a specific library.
+
+```python
+# Workflow: the developer fixes every step.
+def weekly_report(week):
+    spend = query_db("SELECT channel, spend, conversions FROM ads WHERE week = ?", week)
+    notes = llm("Summarize what changed versus last week:\n" + spend)
+    return llm("Write a one-page report for the CMO:\n" + notes)
+
+# Agent: the model decides which tool to call next, and when to stop.
+def weekly_report_agent(week, tools, max_steps=10):
+    history = [f"Write the weekly campaign report for {week}."]
+    for _ in range(max_steps):
+        action = llm_choose_action(history, tools)   # e.g. query_db, web_search, finish
+        if action.name == "finish":
+            return action.text
+        history.append(tools[action.name](**action.args))
+    return "Stopped: step limit reached."
+```
+
+The workflow always runs the same three steps, so it is easy to test. The
+agent can look up a competitor's promotion when conversions drop, but you
+cannot know in advance which steps it will take. Note the step limit: an
+agent loop always needs a stopping rule.
+
+> **In short.**
+>
+> - "Agentic" is a spectrum: the more decisions the model makes, the more
+>   flexible and the less predictable the system.
+> - Workflows fix the code paths; agents choose them at run time.
+> - Start with the least autonomy that solves the task.
+
+## Why agentic workflows help
+
+**1. Better output quality.** Breaking a task into steps, and letting the
+model check and revise its work, often gains more than switching to a
+stronger model. On the HumanEval coding benchmark [@chen2021humaneval],
+zero-shot pass@1 rose from 48.1% for GPT-3.5 to 67.0% for GPT-4
+[@openai2023gpt4]. @ng2024agentic reported that wrapping GPT-3.5 in an
+iterative agentic loop (generate, test, reflect, revise) reached up to 95.1%.
+In other words, the workflow improvement exceeded a full model generation.
+That figure comes from a newsletter summarizing published agentic coding
+methods, not from a peer-reviewed comparison, so treat it as indicative.
+The direction is well supported, though: later chapters cite controlled
+studies for reflection and tool use.
+
+**2. Parallelism.** Independent steps can run at the same time. A research
+agent can run several searches and fetch nine web pages simultaneously, where
+a person would read them one after another. The overall workflow is slower
+than one LLM call, but it can be much faster than a human doing the same task.
+
+**3. Modularity.** Each step is a component with a defined input and output,
+so it can be **swapped without changing the rest of the workflow**. For
+example, you can replace one web search engine with another, swap a general
+search for a news search, change the retrieval system, or use a different
+LLM for a single step. Modularity is what makes systematic improvement
+possible: you change one component, measure, and keep the change only if it
+helps (Chapter \@ref(evaluating-agentic-systems)).
+
+> **In short.**
+>
+> - Quality: iterating with feedback can gain more than a model upgrade.
+> - Parallelism: independent steps run at once.
+> - Modularity: swap one component, measure, keep it only if it helps.
+
+## Which applications are easy or hard
+
+| Easier to build reliably | Harder to build reliably |
+|:-------------------------|:-------------------------|
+| A clear, known sequence of steps, ideally an existing standard operating procedure | Steps not known in advance; the agent must plan as it goes |
+| Text-only inputs (emails, documents, records) | Rich multimodal inputs (images, audio, video) |
+| Narrow, well-defined outputs (fields, labels, a drafted reply) | Open-ended goals with many acceptable outcomes |
+| Actions are reversible or reviewed by a human | Actions with real consequences taken without review |
+
+Some examples along that spectrum:
+
+- **Invoice processing (easy).** Convert the PDF to text, check that the
+  document is an invoice, extract the biller, address, amount due, and due
+  date, then write them to a database. The steps are fixed.
+- **Order-status replies (moderate).** Extract the order details from a
+  customer email, query the order database, and draft a reply. A human
+  reviews the reply before it is sent.
+- **General customer service (hard).** "Do you have black or blue jeans?"
+  needs two inventory queries. "I want to return the beach towel" needs a
+  purchase check, a policy check, a return slip, and a database update. The
+  agent must work out the sequence for each request.
+- **Computer use (among the hardest).** The agent operates a web browser,
+  reading pages, clicking, and typing to complete a task such as checking
+  flight availability. Slow pages, unusual layouts, and dynamic content often
+  derail it. It has improved quickly, but it is still slower and less
+  reliable than calling an API, so prefer an API whenever one exists.
+
+### When you do not need an agentic workflow
+
+Not every LLM task benefits from multiple steps. If the model already has
+everything it needs in the prompt, and one pass produces acceptable output,
+a single well-written prompt is simpler, cheaper, and faster. Writing a
+product description from a supplied list of specifications is an example:
+nothing needs to be looked up, checked against a policy, or acted on.
+
+Signals that a workflow *is* worth it:
+
+- the task needs **information the model does not have**, such as current
+  market data, a customer's order, or internal documents;
+- it needs **actions**, such as updating a database, sending an email, or
+  running code;
+- it has **verifiable intermediate results**, such as tests, policies, or
+  word limits, that a check-and-revise loop can exploit; or
+- one-pass output is **measurably not good enough**.
+
+When one of these holds, ask which steps need a tool. In a competitor
+analysis, for example, *collecting* current competitor and market information
+needs web search. *Comparing* offers, writing a SWOT, and recommending a
+positioning can work from the collected material with the LLM alone.
+
+> **In short.**
+>
+> - Easiest: known steps, text inputs, narrow outputs, reversible or reviewed
+>   actions. Hardest: steps planned on the fly, rich media, open goals.
+> - Skip the workflow when one well-written prompt already does the job.
+> - Use one when the task needs outside information, actions, checkable
+>   intermediate results, or better quality than one pass gives.
+
+## Task decomposition
+
+The central design skill is turning a task into steps that each component
+can do well. A practical procedure:
+
+1. **Ask how a skilled person would do the task.** List the steps they would
+   take.
+2. **For each step, ask: can an LLM, a short piece of code, or an available
+   tool do this reliably?**
+3. **If not, decompose that step further** until each piece passes the test
+   in step 2.
+4. **Build it, look at the outputs, and refine the decomposition** where the
+   results fall short.
+
+**Worked example: the essay.**
+
+- *Version 1, direct generation:* one step. The result is shallow and covers
+  only obvious points.
+- *Version 2, three steps:* outline → web search → write the essay. The
+  result is deeper but reads as disjointed; the start, middle, and end do not
+  quite fit together.
+- *Version 3, five steps:* outline → web search → **first draft → critique
+  the draft → revise**. The writing step is itself decomposed, the way a
+  person would draft and then edit.
+
+Each refinement came from looking at the output and asking what a person
+would do differently. Decomposition is iterative, not designed once.
+
+**Other examples:**
+
+- *Customer email:* extract the key fields (LLM) → query the order database
+  (LLM writes the query; a tool runs it) → draft and send the reply (LLM plus
+  an email tool).
+- *Invoice:* extract the fields (LLM) → validate them and update the database
+  (LLM plus a database tool).
+
+**Worked example: a paid-media anomaly alert.** Task: every morning, flag
+campaigns whose cost per acquisition (CPA) jumped and suggest a likely cause.
+Applying the procedure gives:
+
+| Step | Done by | Why that component |
+|:-----|:--------|:-------------------|
+| Pull yesterday's spend and conversions per campaign | Code (SQL query) | Exact and repeatable; no LLM needed |
+| Compute CPA and flag rises above a threshold | Code | Arithmetic and rules are more reliable in code |
+| Gather context for flagged campaigns (budget changes, creative swaps, competitor news) | Tools: change log, web search | Facts the model does not have |
+| Explain the likely cause in two sentences | LLM | Reasoning over the gathered context |
+| Send the alert to the channel owner | Action tool (email or chat) | Changes the outside world; easy to review |
+
+Only one of the five steps needs an LLM. That is typical: good decomposition
+gives deterministic work to code and keeps the model for judgment and
+language.
+
+> **In short.**
+>
+> - Ask how an expert would do the task, then check that each step can be
+>   done reliably by an LLM, code, or a tool. Split any step that cannot.
+> - Decomposition is iterative: refine it after reading real outputs.
+> - Give exact work to code and keep the LLM for judgment and language.
+
+## Building blocks
+
+| Block | Examples | Good for |
+|:------|:---------|:---------|
+| **LLMs and multimodal models** | General chat models, reasoning models, vision-language models | Generating text, deciding what to do, extracting information, critiquing |
+| **Specialized AI models** | PDF-to-text, speech-to-text, text-to-speech, image analysis | Converting inputs the LLM cannot handle directly |
+| **Information tools** | Web search, retrieval over documents (RAG, Section \@ref(retrieval-augmented-generation-rag)), database queries | Bringing in facts the model does not have |
+| **Action tools** | Email, calendar, ticketing, payment, or file APIs | Changing the state of the world |
+| **Code execution** | A sandboxed Python interpreter | Exact computation and flexible data processing |
+| **Humans** | A review queue or an approval step | Checking high-stakes outputs before they take effect |
+
+Knowing what blocks are available, and what each does well, is what lets you
+see how a business process could become an agentic workflow.
+
+> **In short.**
+>
+> - Six kinds of blocks: LLMs, specialized models, information tools, action
+>   tools, code execution, and humans.
+> - Designing a workflow means matching each step to the block that does it
+>   best.
+
+## Evaluate from the start
+
+What goes wrong in an agentic system is hard to predict in advance. The
+recommended practice is to **build a quick, safe first version, then look at
+its outputs**. Suppose a support agent turns out to mention competitors by
+name ("unlike RivalCo, we make returns easy"). That is a problem nobody
+anticipated, and it is easy to track once found.
+
+- **Objective criteria** can be checked with code. For example, scan replies
+  for a list of competitor names and report the error rate (see the sketch
+  below).
+- **Subjective criteria**, such as essay quality, need human judgment or an
+  **LLM-as-a-judge** with a clear rubric.
+- **End-to-end evals** measure the final output. **Component-level evals**
+  measure one step.
+- **Traces** (the intermediate outputs of every step) show *where* things go
+  wrong. Systematically reading them is **error analysis**.
+
+A code-based check for the competitor problem takes a few lines:
+
+```python
+COMPETITORS = ["rivalco", "shopmart", "dealzone"]
+
+def mentions_competitor(reply: str) -> bool:
+    text = reply.lower()
+    return any(name in text for name in COMPETITORS)
+
+replies = [run_agent(email) for email in test_emails]   # 20-50 real emails
+error_rate = sum(mentions_competitor(r) for r in replies) / len(replies)
+print(f"Replies naming a competitor: {error_rate:.0%}")
+```
+
+Run it after every change to the prompt or model. If the rate goes up, the
+change made things worse, whatever else improved.
+
+Chapter \@ref(evaluating-agentic-systems) develops all of this. It is the
+most important practical skill for building agentic systems.
+
+> **In short.**
+>
+> - Build a quick, safe prototype and read its outputs; the real problems are
+>   rarely the ones you predicted.
+> - Check objective criteria with code and subjective ones with humans or an
+>   LLM judge.
+> - Traces show where a failure happens; reading them is error analysis.
+
+## The four design patterns
+
+Most agentic systems combine four recurring patterns [@ng2024agentic]:
+
+| Pattern | Idea | Example | Trade-off |
+|:--------|:-----|:--------|:----------|
+| **Reflection** | The model (or a second "critic" model) reviews an output and revises it, ideally using external feedback such as test results | Write code → run it → feed the errors back → fix | Cheap to add; gains vary by task |
+| **Tool use** | The model requests function calls to fetch information or take actions | Web search, database query, code execution, calendar | Greatly extends capability; needs safe tool design |
+| **Planning** | The model decides the sequence of steps or tool calls itself | HuggingGPT chains vision, image-generation, and speech models to fulfil a multi-part request [@shen2023hugginggpt] | Flexible, but harder to control and predict |
+| **Multi-agent collaboration** | Several role-specialized agents work together | ChatDev simulates a software company with CEO, programmer, and tester agents [@qian2024chatdev] | Helps decompose complex work; adds coordination cost and unpredictability |
+
+Reflection and tool use are mature and widely used. Planning and multi-agent
+systems are powerful but less predictable. As of 2026, agentic coding tools
+are their clearest success story.
+
+> **In short.**
+>
+> - Four patterns: reflection, tool use, planning, and multi-agent
+>   collaboration.
+> - The first two are mature and predictable; the last two are more
+>   flexible and harder to control.
+
+## Costs and risks
+
+Agentic workflows trade cost and latency for quality, and they add failure
+modes of their own:
+
+- **Latency and cost.** Every step is another model call or API call.
+  Optimize them once the outputs are good (Section
+  \@ref(agentic-cost-latency)).
+- **Compounding errors.** If failures are independent, step reliabilities
+  multiply. A ten-step workflow whose steps each succeed 95% of the time
+  succeeds end to end only about $0.95^{10} \approx 60\%$ of the time.
+  Shorter workflows, validation between steps, and recovery logic matter
+  (see the table below).
+- **Control.** The more the model decides, the less predictable the system,
+  and the harder it is to test.
+- **Security.** Agents read untrusted content and can take actions, which
+  exposes them to prompt injection (Section
+  \@ref(responsible-generative-ai)). Use least-privilege tools, sandboxed code
+  execution, and human approval for consequential actions.
+
+End-to-end success rate, $p^n$, for $n$ steps that each succeed with
+probability $p$ (independent failures assumed):
+
+| Per-step success $p$ | 3 steps | 5 steps | 10 steps | 20 steps |
+|:--------------------|--------:|--------:|---------:|---------:|
+| 99% | 97% | 95% | 90% | 82% |
+| 95% | 86% | 77% | 60% | 36% |
+| 90% | 73% | 59% | 35% | 12% |
+
+Real failures are often correlated (one bad search result spoils several
+later steps), so treat the table as a rough guide. The lesson holds either
+way: long chains need checks between steps, not only at the end.
+
+> **In short.**
+>
+> - Every step adds cost and latency; optimize only after the output is good.
+> - Errors compound across steps, so validate between steps and keep chains
+>   short.
+> - Agents read untrusted content and take actions: use least privilege,
+>   sandboxes, and human approval.
+
+## Key takeaways
+
+The section summaries above hold the details. The chapter in five lines:
+
+- **Why:** multi-step workflows trade cost and latency for quality, and often
+  beat a model upgrade.
+- **How much autonomy:** as little as the task allows; fixed workflows are
+  easier to test and trust than agents.
+- **How to design:** decompose like an expert would, give exact work to code
+  and tools, and keep the LLM for judgment.
+- **What to build with:** six building blocks combined through four
+  patterns (reflection, tool use, planning, multi-agent).
+- **How to stay in control:** evaluate from the first prototype, check
+  between steps, and guard actions that matter.
+
+## Interview checkpoints
+
+- **What makes a workflow "agentic"?** It takes multiple steps (model calls,
+  tools, iteration) rather than a single prompt-and-response.
+- **Workflow vs. agent?** In a workflow, the developer fixes the code paths.
+  In an agent, the model decides its next steps and tool calls at run time.
+- **Why can GPT-3.5 in an agentic loop beat GPT-4 used directly on coding
+  tasks?** Iteration with feedback (tests, error messages, critique) corrects
+  mistakes that one pass cannot, and that gain can exceed a model-generation
+  upgrade.
+- **What does modularity buy you?** The ability to replace one component,
+  such as a search engine, retriever, or model, without changing the rest,
+  then measure the effect.
+- **What makes an agentic application hard?** Unknown steps that need
+  dynamic planning, multimodal inputs, irreversible actions, and open-ended
+  goals.
+- **How do you decompose a task?** Mirror how an expert works. Check that
+  each step can be done by an LLM, code, or a tool. Split any step that
+  cannot.
+- **If each of 8 steps is 90% reliable, what is end-to-end reliability?**
+  About $0.9^8 \approx 43\%$, assuming independent errors. That is why
+  validation and shorter chains matter.
+- **Name the four agentic design patterns.** Reflection, tool use, planning,
+  and multi-agent collaboration.
+- **Generate code → run it → feed the error messages back → fix, repeated
+  until it runs. Which pattern is this?** Primarily **reflection**, with
+  external feedback. Running the code is a tool, but the defining loop is
+  examine-and-revise.
+- **When is an agentic workflow unnecessary?** When the prompt already holds
+  everything needed and one pass is good enough. For example, writing a
+  product description from given specifications.
+- **In a multi-step task, which steps need tools?** Those that need
+  information the model lacks (current data, private records) or actions in
+  other systems. Reasoning over material already gathered usually does not.

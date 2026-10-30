@@ -12,6 +12,10 @@ Published book: <https://davutemrah.github.io/GenAI_Repo/>
 - `__repo/*.Rmd` — LLM foundations, pre-training, fine-tuning, and evaluation.
 - `__repo/prompting/*.Rmd` — the Prompt Engineering part; see
   `PROMPT_ENGINEERING_PLAN.md` for the chapter plan and status.
+- `__repo/agentic/*.Rmd` — the Agentic AI part (workflows, reflection, tool
+  use, evaluation and error analysis, planning and multi-agent systems); see
+  `AGENTIC_AI_INTEGRATION_PLAN.md`. The course source material in
+  `__repo/Agentic AI coursera/` is git-ignored and must stay local.
 - `__repo/claude/*.Rmd` — Claude, coding-agent, verification, notebook, MCP,
   context- and harness-engineering, AI-in-marketing-analytics, and
   classification/lookalike-modeling, and supervisor-agent chapters.

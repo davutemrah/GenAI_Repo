@@ -30,8 +30,12 @@ carries more information than a single correct label. It shows which wrong
 answers are *nearly* right. A temperature $T > 1$ in the softmax,
 $p_i = \exp(z_i / T) / \sum_j \exp(z_j / T)$, flattens both distributions so
 that this information is visible (Section
-\@ref(configuring-generative-ai-models) explains temperature). The student
-minimizes a weighted sum of two losses:
+\@ref(configuring-generative-ai-models) explains temperature). For example,
+teacher logits $(4, 2, 1)$ for "cat", "dog", "car" give probabilities of
+about $(0.84, 0.11, 0.04)$ at $T = 1$: nearly a hard label. At $T = 4$ they
+become about $(0.48, 0.29, 0.23)$, and the student can now see that "dog" is
+a more plausible mistake than "car". The student minimizes a weighted sum of
+two losses:
 
 $$
 \mathcal{L} = \alpha \, T^2 \, D_{\text{KL}}\!\big(p^{\,T}_{\text{teacher}} \,\big\|\, p^{\,T}_{\text{student}}\big)
@@ -84,6 +88,11 @@ The result is a smaller memory footprint and often faster inference, usually
 with a small, measurable drop in quality. Measure that drop on your own
 evaluation set before deploying.
 
+For scale, the weights of a 7B-parameter model take about 14 GB in 16-bit
+precision (2 bytes per parameter), about 7 GB in 8-bit, and about 3.5 GB in
+4-bit, plus a little for quantization constants. That is often the
+difference between needing a data-centre GPU and fitting on a laptop.
+
 ### Pruning
 
 **Pruning** removes weights that contribute little. The simplest criterion is
@@ -109,7 +118,12 @@ These leave the weights unchanged and optimize *how* tokens are generated:
 
 - **KV caching** stores the attention keys and values of earlier tokens, so
   each new token is not recomputed from scratch. Memory for the cache, not
-  compute, often limits how many requests fit on a GPU.
+  compute, often limits how many requests fit on a GPU. Per token, the cache
+  holds 2 (keys and values) × layers × KV heads × head dimension × bytes.
+  For a 7B-class configuration (32 layers, 32 heads of dimension 128,
+  16-bit), that is about 0.5 MB per token, so one 4,096-token request needs
+  about 2 GB of cache. Grouped-query attention, which shares keys and values
+  across heads, cuts this several-fold.
 - **Batching and paged KV memory.** Serving systems such as vLLM manage the
   cache in pages to pack many concurrent requests efficiently
   [@kwon2023vllm].
@@ -130,6 +144,13 @@ These leave the weights unchanged and optimize *how* tokens are generated:
 
 Most applications start from an existing model and spend their effort on the
 bottom four rows.
+
+> **In short.**
+>
+> - Shrink the model: distillation (a smaller student), quantization (fewer
+>   bits), pruning (fewer weights, fast only with structured sparsity).
+> - Serve it better: KV caching, paged batching, speculative decoding.
+> - Measure the quality cost of every optimization on your own eval set.
 
 ## Problems that training alone does not solve
 
@@ -152,6 +173,26 @@ The fix is to augment the model at inference time. An **orchestration
 layer** (application code or a framework) passes user input to the model,
 calls external data sources and tools based on the model's output, and returns
 results to the model and the user.
+
+**What orchestration frameworks are for.** Every LLM application needs the
+same plumbing: prompt templates, calls to one or more models, retrieval,
+tool calls, conversation memory, and parsing of the model's output.
+Frameworks such as LangChain and LlamaIndex package these pieces as reusable
+components and let you chain them into a pipeline or an agent loop, so you
+do not rewrite them for every project. They also make it easy to swap a
+model or a vector store. The trade-off is an extra layer of abstraction
+between you and the model call, which can make debugging harder. Many teams
+now write the orchestration directly against the provider's API or use a
+vendor agent SDK, especially since native tool calling made the hardest
+part, parsing actions out of text, unnecessary (see the Current practice
+note under ReAct below).
+
+> **In short.**
+>
+> - Training cannot fix knowledge cut-offs, exact computation,
+>   hallucination, or access to private and live systems.
+> - An orchestration layer connects the model to data and tools at
+>   inference time; frameworks package that plumbing.
 
 ## Retrieval-augmented generation (RAG)
 
@@ -195,6 +236,26 @@ embedding models, a vector index, and a general LLM.
    instruction to answer only from them and to cite them.
 8. **Generate** the answer, with citations back to the chunk sources.
 
+The augmented prompt in step 7 might look like this (illustrative):
+
+```text
+Answer the question using only the sources below. Cite each claim as [n].
+If the sources do not contain the answer, say "I don't know."
+
+<source id="1" doc="returns_policy_2026.pdf" updated="2026-09-01">
+Unworn items can be returned within 30 days with a receipt ...
+</source>
+<source id="2" doc="faq_shipping.html" updated="2026-07-14">
+Return shipping is free for loyalty members ...
+</source>
+
+Question: Can I return shoes I bought 5 weeks ago?
+```
+
+The instruction to say "I don't know" matters: without it, the model tends
+to fill gaps from memory. The dates let the model, and the reader, see how
+current each source is.
+
 Retrieval is not limited to vectors. The "retriever" can be a keyword search
 engine, a SQL query against a database, or a web search API.
 
@@ -226,6 +287,16 @@ engine, a SQL query against a database, or a web search API.
 > control still favour sending only relevant material. Chapter
 > \@ref(context-harness-engineering) treats context selection as an
 > engineering discipline.
+
+> **In short.**
+>
+> - RAG retrieves relevant, permitted text at inference time and grounds the
+>   answer in it, with citations.
+> - Pipeline: chunk, embed, store; then embed the query, retrieve top-$k$,
+>   augment the prompt, generate.
+> - Retrieval quality caps answer quality; evaluate retrieval and
+>   faithfulness separately. RAG reduces hallucination but does not remove
+>   it.
 
 ## Helping models reason
 
@@ -294,7 +365,7 @@ result. The model decides *what* to compute; the interpreter guarantees the
 *computation*. PAL outperformed CoT on several mathematical and symbolic
 reasoning benchmarks in the original paper. Today the same idea is offered as a
 built-in **code-execution tool** by model providers. Run generated code only
-in a sandbox.
+in a sandbox (Section \@ref(running-generated-code-safely)).
 
 ### ReAct: reasoning plus acting
 
@@ -329,13 +400,23 @@ For an LLM to drive actions reliably, its output must:
 > **Current practice (October 2026).** ReAct's text-parsing loop has largely
 > been replaced by **native tool calling**. The application declares tools
 > with JSON schemas, the model emits structured tool calls, and the
-> application executes them and returns results. The Model Context Protocol
+> application executes them and returns results (Chapter \@ref(tool-use)).
+> The Model Context Protocol
 > standardizes how tools and data sources connect to models (Chapter
 > \@ref(model-context-protocol)). Orchestration frameworks (LangChain was the
 > early example, offering prompt templates, memory, tools, chains, and
 > agents) are joined by vendor agent SDKs. The Thought → Action → Observation
 > loop remains the core mental model for agents. Chapter
-> \@ref(supervisor-agents) extends it to multi-agent systems.
+> \@ref(planning-multi-agent) extends it to planning and multi-agent
+> systems, and Chapter \@ref(supervisor-agents) applies it on Databricks.
+
+> **In short.**
+>
+> - CoT: worked steps improve multi-step reasoning in large models, but the
+>   chain is not a faithful explanation.
+> - PAL: the model writes code and an interpreter computes.
+> - ReAct: Thought → Action → Observation over a fixed action set; today
+>   implemented with native tool calling (Chapter \@ref(tool-use)).
 
 ## The application stack
 
@@ -354,6 +435,13 @@ them:
 Logged prompts, completions, and feedback are a valuable asset. They become
 the evaluation sets and training data for the next iteration, provided users
 have consented and private data is handled correctly.
+
+> **In short.**
+>
+> - The model is one of six layers: infrastructure, models, data,
+>   orchestration, output handling, and interface.
+> - Logged prompts, outputs, and feedback become the next round's evals and
+>   training data.
 
 ## Responsible generative AI
 
@@ -383,26 +471,27 @@ references for organizing this work. Regulatory obligations (for example the
 EU AI Act) depend on jurisdiction and use case; check current requirements
 for a real deployment.
 
+> **In short.**
+>
+> - Four generative risks: toxicity and bias, hallucination, IP and privacy,
+>   prompt injection.
+> - Process: narrow use case, risk assessment, evaluation against explicit
+>   criteria, monitoring after launch.
+
 ## Key takeaways
 
-- Distillation trains a smaller student on a teacher's soft outputs or
-  generated text. PTQ lowers precision after training. Pruning removes
-  low-value weights and only speeds things up with structured or
-  hardware-supported sparsity. Measure the quality cost of each.
-- Serving efficiency also comes from KV caching, batching, and speculative
-  decoding, which leave the weights unchanged.
-- Training cannot fix knowledge cut-offs, exact computation, or access to
-  private systems. Augment the model at inference instead.
-- RAG retrieves relevant, permitted text and grounds the answer in it.
-  Evaluate retrieval and faithfulness separately. RAG reduces hallucination
-  but does not eliminate it.
-- CoT improves multi-step reasoning in large models but is not a faithful
-  explanation. PAL moves computation to an interpreter. ReAct's
-  Thought → Action → Observation loop over a fixed action set is the basis of
-  modern tool-calling agents.
-- The model is one layer of the application. Responsible deployment means
-  narrow use cases, explicit risk assessment, evaluation, monitoring, and
-  defences against prompt injection.
+The section summaries above hold the details. The chapter in five lines:
+
+- **Make it affordable:** distil, quantize, prune, and optimize serving;
+  measure the quality cost each time.
+- **Fill the gaps training leaves:** an orchestration layer adds data and
+  tools at inference time.
+- **Ground it:** RAG supplies current, permitted, citable text; evaluate
+  retrieval and faithfulness separately.
+- **Help it reason and act:** CoT, PAL, and ReAct, the ancestors of today's
+  reasoning models and tool-calling agents.
+- **Deploy it responsibly:** the model is one layer; narrow the use case,
+  assess risks, evaluate, and monitor.
 
 ## Interview checkpoints
 
@@ -428,3 +517,8 @@ for a real deployment.
 - **What is indirect prompt injection?** Malicious instructions placed in
   content the model reads (documents, web pages, tool outputs) rather than
   typed by the user.
+- **What is LangChain for?** It is an orchestration framework: reusable
+  components for prompts, model calls, retrieval, tools, memory, and output
+  parsing, chained into pipelines or agents. The trade-off is an extra
+  abstraction layer; many teams now use provider SDKs and native tool
+  calling directly.

@@ -46,6 +46,13 @@ You interact with an LLM in natural language, not in a formal programming
 language. You can use it as is, or adapt it (Chapter
 \@ref(instruction-fine-tuning-and-evaluation)) without training a new model.
 
+> **In short.**
+>
+> - An LLM is a neural network trained on huge text corpora to predict the
+>   next token; chatbots and assistants are applications built on that.
+> - Parameters store statistical patterns, not a fact database.
+> - The context window caps everything the model can see at once.
+
 ## What LLMs are used for
 
 Many tasks reduce to next-token prediction under the right prompt:
@@ -63,6 +70,14 @@ Many tasks reduce to next-token prediction under the right prompt:
 Larger models generally handle more tasks without examples. Smaller or
 specialized models can still be the better choice on cost, latency, privacy,
 or a narrow task. Choose by evaluating on your own use case.
+
+> **In short.**
+>
+> - Generation, summarization, translation, and extraction are all
+>   next-token prediction under the right prompt.
+> - Answering from documents or calling APIs needs an application around the
+>   model.
+> - Pick the model size by evaluation, not by default.
 
 ## Before transformers: recurrent networks
 
@@ -89,6 +104,12 @@ decoder learned to look back at all encoder states and weight the most
 relevant ones [@bahdanau2015attention]. The transformer took the next step and
 dropped recurrence entirely.
 
+> **In short.**
+>
+> - RNNs read one token at a time: weak on long-range context, impossible to
+>   parallelize across positions, and limited by one state vector.
+> - Attention lets the model look back at all earlier states directly.
+
 ## The transformer
 
 "Attention Is All You Need" [@vaswani2017attention] introduced the
@@ -106,7 +127,10 @@ layers, with no recurrence. Two properties explain its success:
    Tokens are usually subword units learned by algorithms such as byte-pair
    encoding [@sennrich2016bpe], so rare words split into pieces. Each token
    maps to an integer ID. A model must always be used with the tokenizer it
-   was trained with.
+   was trained with. For example, a tokenizer might split "unbelievably" into
+   `un` + `believ` + `ably`, while "the" is a single token (the exact split
+   depends on the tokenizer). For English, a common rule of thumb is about
+   0.75 words per token, so 1,000 tokens is roughly 750 words.
 2. **Embedding.** Each token ID is mapped to a learned vector of dimension
    $d_{\text{model}}$ (512 in the original transformer). Tokens with related
    meanings end up close together in this space.
@@ -143,7 +167,20 @@ $$
   topic. Which relation a head learns is not chosen in advance.
 - **Cost.** The score matrix is $n \times n$ for a sequence of $n$ tokens, so
   attention compute and memory grow **quadratically** with context length.
-  That is why long contexts are expensive.
+  That is why long contexts are expensive. At 4,096 tokens the matrix has
+  about 16.8 million entries per head and layer; at 131,072 tokens (32 times
+  longer) it has about 17.2 billion, 1,024 times more. Optimized kernels
+  such as FlashAttention avoid storing the full matrix, but the compute
+  still grows quadratically.
+
+**Example: one attention step.** In "The campaign missed its target because
+it launched late", the token "it" should attend mostly to "campaign".
+Suppose its scaled scores against "campaign", "target", and "late" are 2.0,
+0.0, and 1.0. The softmax turns them into weights of about 0.67, 0.09, and
+0.24. The output for "it" is then $0.67\,v_{\text{campaign}} +
+0.09\,v_{\text{target}} + 0.24\,v_{\text{late}}$: a vector that now carries
+mostly the meaning of "campaign". (Real models attend over every token, and
+each head produces its own weights.)
 
 ### The rest of a transformer block
 
@@ -211,6 +248,15 @@ configuration (Section \@ref(configuring-generative-ai-models)).
 Model families move quickly. Use this table for the historical milestones, and
 check current model cards for anything newer.
 
+> **In short.**
+>
+> - Tokens become embeddings plus position information.
+> - Self-attention, $\text{softmax}(QK^\top/\sqrt{d_k})V$, lets every token
+>   take a weighted average of every other token's values; multi-head runs
+>   several in parallel; cost is quadratic in length.
+> - Encoder (bidirectional), decoder (causal), encoder–decoder
+>   (cross-attention); generation is autoregressive, one token at a time.
+
 ## Prompting and in-context learning {#prompt-engineering}
 
 **Prompt engineering** is designing the input so the model produces the
@@ -223,6 +269,24 @@ in the prompt, with no weight updates [@brown2020gpt3].
 - **One-shot:** one solved example before the real input.
 - **Few-shot:** several solved examples, ideally covering the label space (for
   example, both a positive and a negative review).
+
+A few-shot prompt for tagging customer comments:
+
+```text
+Tag each comment as PRICE, DELIVERY, or PRODUCT.
+
+Comment: "Arrived three days late and the box was crushed."
+Tag: DELIVERY
+
+Comment: "Great jacket, but $40 more than at the outlet."
+Tag: PRICE
+
+Comment: "The zipper broke after one week."
+Tag:
+```
+
+The model continues with "PRODUCT". The examples teach both the labels and
+the output format, without any training.
 
 What to know:
 
@@ -237,6 +301,14 @@ What to know:
 The Prompt Engineering part of this book (starting with Chapter
 \@ref(prompt-anatomy)) covers prompt structure, techniques, and evaluation in
 depth.
+
+> **In short.**
+>
+> - In-context learning: the model picks up a task from examples in the
+>   prompt, with no weight updates.
+> - Zero-, one-, and few-shot differ only in the number of solved examples.
+> - It depends on scale and costs context; if a few examples do not work,
+>   fine-tune.
 
 ## Configuring generation {#configuring-generative-ai-models}
 
@@ -288,6 +360,14 @@ classification, and code. Use moderate temperature with top-p for open-ended
 writing. Hosted APIs may expose only some of these settings, and reasoning
 models may fix them.
 
+> **In short.**
+>
+> - Generation settings choose the next token from the model's distribution.
+> - Greedy is deterministic; sampling adds variety; top-k and top-p cut off
+>   unlikely tokens; temperature sharpens ($T<1$) or flattens ($T>1$).
+> - Low temperature for extraction and code, moderate with top-p for
+>   writing.
+
 ## The generative AI project lifecycle {#generative-ai-project-lifecycle}
 
 An LLM project moves through four stages, and later results often send you
@@ -309,30 +389,56 @@ The inner loop is **adapt → evaluate → adapt**. Start with prompt engineerin
 and in-context learning. Measure against a held-out evaluation set. Fine-tune
 only if prompting falls short. Then return to prompting with the tuned model.
 
+### What each lever costs
+
+The levers differ sharply in what they change, how long they take, and the
+skill they demand. That is why the usual order is cheapest first:
+
+| | Pre-training | Prompting | Fine-tuning / PEFT | Alignment (RLHF, DPO) | Compression |
+|:--|:--|:--|:--|:--|:--|
+| **What changes** | All weights, plus the architecture, tokenizer, and context length | Nothing in the model; only the input | All weights, or small adapter weights (Section \@ref(peft)) | Weights or adapters, steered by preference data | Model size or precision: pruning, quantization, distillation |
+| **Data needed** | A very large general or domain corpus | None, or a few examples in the prompt | Hundreds to many thousands of labeled task examples | Preference comparisons from humans or AI, often with a reward model | Little: a calibration set, or teacher outputs for distillation |
+| **Training time** | Weeks to months on large clusters | None | Minutes to days | Similar to fine-tuning or longer | None to hours; distillation is a full training run |
+| **Objective** | Next-token prediction on broad text | Better task performance | Better task performance on a specific task or domain | Match human preferences (helpful, honest, harmless) | Cheaper, faster inference |
+| **Expertise** | High | Low | Medium | Medium to high | Medium |
+
+Read the table across, not down. Moving right from prompting adds data
+requirements, training cost, and the risk of degrading general abilities
+(catastrophic forgetting). A lever is worth its cost only when the cheaper
+ones have been measured and fall short.
+
+> **Current practice (October 2026).** The time ranges are rough orders of
+> magnitude; they depend on model size, data size, and hardware. Few teams
+> pre-train their own LLM: they start from an open-weight or API model. Most
+> alignment beyond the vendor's own now uses DPO or similar offline methods
+> (Chapter \@ref(alignment-human-feedback)) rather than a full RLHF loop, which
+> moves its expertise closer to that of fine-tuning.
+
 Even a well-adapted model invents information when unsure and is unreliable
 at exact computation. It also knows nothing after its training cut-off.
 Production systems therefore add retrieval, tools, and verification around the
 model; see Chapter \@ref(llm-applications).
 
+> **In short.**
+>
+> - Scope, select, adapt and align, integrate, with evaluation throughout.
+> - A narrow scope makes every later step easier.
+> - Use the levers cheapest first: prompting, then fine-tuning, then
+>   alignment; pre-train only in rare cases.
+
 ## Key takeaways
 
-- An LLM is a next-token predictor trained on huge text corpora. Many tasks,
-  from summarization to translation to extraction, are next-token prediction
-  under the right prompt.
-- RNNs struggled with long-range context and could not parallelize.
-  Transformers replaced recurrence with attention, which made large-scale
-  training practical.
-- Scaled dot-product attention, $\text{softmax}(QK^\top/\sqrt{d_k})V$, lets
-  every token weight every other token. Multi-head attention learns several
-  relations at once. The cost is quadratic in sequence length.
-- Encoder (bidirectional), decoder (causal, autoregressive), and
-  encoder–decoder (cross-attention) models suit different tasks.
-- In-context learning (zero-, one-, few-shot) adapts behaviour without
-  training but is limited by scale and context.
-- Greedy, top-k, top-p, and temperature control the trade-off between
-  determinism and diversity at inference.
-- The lifecycle is scope → select → adapt and align → integrate, with
-  evaluation throughout.
+The section summaries above hold the details. The chapter in five lines:
+
+- **What:** an LLM predicts the next token; most text tasks reduce to that.
+- **How:** transformers replaced recurrence with attention, which is
+  parallel, direct, and quadratic in length.
+- **Shapes:** encoder, decoder, and encoder–decoder models suit different
+  tasks.
+- **Steering:** prompts and in-context examples shape what it does;
+  generation settings shape how it samples.
+- **Process:** scope narrowly, start from an existing model, adapt cheapest
+  first, and evaluate throughout.
 
 ## Interview checkpoints
 

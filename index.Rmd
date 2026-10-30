@@ -27,15 +27,19 @@ safe, reproducible practice for data science and software work.
 
 </div>
 
-The book has three parts:
+The book has four parts:
 
 1. **LLM foundations** — transformers and attention, pre-training and scaling
    laws, fine-tuning and PEFT, evaluation, alignment (RLHF, DPO), and building
    LLM applications (inference optimization, RAG, tools, responsible AI).
 2. **Prompt engineering** — prompt anatomy, techniques, use-case strategies,
    evaluation, and safety (in progress).
-3. **Applied agent workflows** — prompting, code review, verification loops,
-   Claude Code hooks and skills, and reproducible notebooks.
+3. **Agentic AI** — vendor-neutral design of agentic workflows: reflection,
+   tool use and code execution, evaluation and error analysis, planning, and
+   multi-agent systems.
+4. **Applied agent workflows** — prompting, code review, verification loops,
+   Claude Code hooks and skills, reproducible notebooks, MCP, and supervisor
+   agents on Databricks.
 
 An appendix summarizes the hands-on labs that accompanied the LLM foundations
 material.
@@ -47,7 +51,8 @@ documentation and should be checked against the installed product version.
 ## How to use this book {-}
 
 - Read the LLM chapters in sequence when learning the underlying concepts.
-- Use the Claude chapters as practical references for agent-assisted work.
+- Read the Agentic AI part before building agents; the Claude chapters then
+  serve as practical, tool-specific references.
 - Run and inspect generated code; do not treat model output as validated merely
   because it is fluent.
 - Protect secrets and private data, use least-privilege tool permissions, and
