@@ -385,3 +385,136 @@ def preferred_share(text: str, domains: set[str]) -> float | None:
   recall against sources an expert chose.
 - **Confirm the gain end to end.** A better search score should lead to better
   reports. Check that it does before moving on.
+
+## Planning and multi-agent labs {#agentic-labs-planning}
+
+These labs go with Chapter \@ref(planning-multi-agent).
+
+### Lab: customer service agent that plans in code
+
+**Goal.** Let the model write one Python program that *is* the plan: it
+filters, computes, and updates in a single pass, instead of emitting a JSON
+plan for many small tools (Section \@ref(code-as-plan)).
+
+**Setup.** A sunglasses store in TinyDB, a small JSON-backed document
+database. One table holds the inventory (ID, name, description, stock,
+price); the other is a transaction log that starts with an opening balance.
+The code that runs the plan can see the two tables and two helpers (the
+current balance, the next transaction ID).
+
+**Steps:**
+
+1. **Describe the data.** Build a schema block from the live tables: fields,
+   types, and sample rows.
+2. **Prompt for code.** The prompt asks for commented Python inside
+   `<execute_python>` tags and sets the business rules: derive every filter
+   from the request, treat unclear intent as read-only, write one
+   transaction per item, change nothing if any item is short of stock,
+   always set a customer-facing `answer_text` and a `STATUS` code.
+3. **Execute** the extracted code with only the tables and helpers in its
+   namespace, capturing printed logs and errors, and show the tables before
+   and after.
+4. **Wrap it as one agent** and try reads, returns, and purchases, including
+   a request for two different items.
+
+**Runs**, as described in the lab:
+
+| Request | Kind | Outcome |
+|:--------|:-----|:--------|
+| Any round sunglasses in stock under $100? | Read | One match, the Classic at $60; nothing changed |
+| Return 2 Aviator sunglasses I bought last week | Write | A return transaction is added; Aviator stock goes from 23 to 25 |
+
+The prompt asks the model to avoid partial writes, but nothing in the
+executor enforces it. Running the plan on a copy makes "all or nothing" a
+property of the code, and gives a natural place for approval:
+
+```python
+import copy
+
+def run_plan(code: str, store: dict, approve) -> dict:
+    """Run a generated plan on a copy; return the store to keep."""
+    trial = copy.deepcopy(store)                  # the plan only touches a copy
+    scope = {"store": trial}
+    try:
+        exec(code, scope)                         # still not isolated: see the lessons
+    except Exception as err:
+        print("plan failed, nothing written:", err)
+        return store
+    changed = [k for k in store if store[k] != trial[k]]
+    if changed and not approve(changed, scope.get("answer_text")):
+        return store                              # declined: nothing written
+    return trial
+```
+
+**Lessons:**
+
+- **One program replaces a chain of tool calls.** Filtering by shape and
+  price, checking stock, and writing a transaction are a few lines of code,
+  and the model already knows the library.
+- **A restricted namespace is not a sandbox.** Python adds its built-ins to
+  any globals dictionary passed to `exec()`, so the generated code can still
+  `import os`. Isolation needs a separate process or container
+  (Section \@ref(running-generated-code-safely)).
+- **Rules in the prompt are requests; rules in the executor are
+  guarantees.** "No partial writes" and "read-only when unsure" matter
+  enough to enforce in code, as above.
+- **Check the business logic, not only the code.** The return went through
+  although the transaction log held no sale to return: the plan checked the
+  product, not the purchase history. This is the kind of error that error
+  analysis (Section \@ref(agentic-error-analysis)) finds and a schema note or
+  rule fixes.
+
+### Lab: a market research team
+
+**Goal.** Chain four role-specific agents into a pipeline that turns live
+fashion trends and a product catalog into a short campaign report. It is the
+campaign-launch team of Section \@ref(example-a-campaign-launch-team), built
+in its simplest, linear form.
+
+| Agent | Input | Model and tools | Output |
+|:------|:------|:----------------|:-------|
+| Market researcher | The brief, with today's date | Reasoning model; web search and catalog tools, in a hand-written tool loop | 2–3 trends, matching products, reasons |
+| Graphic designer | Trend summary | Text model writes an image prompt and caption as JSON; an image model draws the picture | Image file, prompt, caption |
+| Copywriter | Image and trend summary | Vision model | Quote of at most 12 words, with a justification, as JSON |
+| Packager | All of the above | Text model rewrites the summary for executives | Markdown report |
+
+**Outcome.** Two full runs are saved with the lab. Given the same brief, the
+first chose the Wayfarer and Sport as lead products and the second chose the
+Mystique, Round, and Aviator.
+
+**Lessons:**
+
+- **A fixed order is a design choice.** The developer, not a model, decided
+  the sequence. That makes this the *linear* pattern of Section
+  \@ref(communication-patterns): predictable, and enough for a process
+  whose steps are known.
+- **The same brief gives different answers.** Live search results and
+  sampling both vary. Before acting on a recommendation, run the pipeline
+  several times, or save the search results and reuse them so the runs can be
+  compared.
+- **Agents optimise what the prompt asks for.** The catalog lists stock, but
+  the prompt never mentions it, so both runs recommended the Mystique, which
+  has 3 units left. A lead product for a campaign needs inventory behind it.
+- **Every rewrite can add claims.** In the second run the executive rewrite
+  added points about premium pricing, add-on sales, and staying ahead of
+  competitors that no earlier step had produced. Either let the last step
+  format without rewriting, or check the final report against the earlier
+  outputs.
+- **Keep the tool loop tidy.** The researcher's loop has no turn limit, and
+  it appends the model's message once per tool call instead of once per
+  turn. If the model asks for two tools at once, the conversation history
+  becomes invalid. The loop in Section \@ref(native-tool-calling) avoids
+  both problems.
+
+### Graded assignment: a planned research workflow
+
+The final graded lab completes the research agent built across the course.
+A planner agent turns a topic into a list of short steps. An executor goes
+through the steps in order. For each one it picks the agent to do it
+(researcher, writer, or editor), passes along the outputs of earlier steps,
+and records the result. By default it runs only the first few steps to keep
+run time down. The researcher uses the search tools from Module 3, and the
+editor plays the reflection role from Module 2. The lab practises plan, then
+execute (Section \@ref(plan-then-execute)) and the hierarchical pattern,
+where a coordinator routes work to specialists
+(Section \@ref(communication-patterns)).

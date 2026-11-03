@@ -864,6 +864,12 @@ div.csl-indent {
 <ul>
 <li class="chapter" data-level="B.4.1" data-path="agentic-labs.html"><a href="agentic-labs.html#lab-a-component-level-eval-for-web-search"><i class="fa fa-check"></i><b>B.4.1</b> Lab: a component-level eval for web search</a></li>
 </ul></li>
+<li class="chapter" data-level="B.5" data-path="agentic-labs.html"><a href="agentic-labs.html#agentic-labs-planning"><i class="fa fa-check"></i><b>B.5</b> Planning and multi-agent labs</a>
+<ul>
+<li class="chapter" data-level="B.5.1" data-path="agentic-labs.html"><a href="agentic-labs.html#lab-customer-service-agent-that-plans-in-code"><i class="fa fa-check"></i><b>B.5.1</b> Lab: customer service agent that plans in code</a></li>
+<li class="chapter" data-level="B.5.2" data-path="agentic-labs.html"><a href="agentic-labs.html#lab-a-market-research-team"><i class="fa fa-check"></i><b>B.5.2</b> Lab: a market research team</a></li>
+<li class="chapter" data-level="B.5.3" data-path="agentic-labs.html"><a href="agentic-labs.html#graded-assignment-a-planned-research-workflow"><i class="fa fa-check"></i><b>B.5.3</b> Graded assignment: a planned research workflow</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="bibliography.html"><a href="bibliography.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
@@ -1343,6 +1349,188 @@ recall against sources an expert chose.</li>
 <li><strong>Confirm the gain end to end.</strong> A better search score should lead to better
 reports. Check that it does before moving on.</li>
 </ul>
+</div>
+</div>
+<div id="agentic-labs-planning" class="section level2 hasAnchor" number="27.5">
+<h2><span class="header-section-number">B.5</span> Planning and multi-agent labs<a href="agentic-labs.html#agentic-labs-planning" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>These labs go with Chapter <a href="planning-multi-agent.html#planning-multi-agent">11</a>.</p>
+<div id="lab-customer-service-agent-that-plans-in-code" class="section level3 hasAnchor" number="27.5.1">
+<h3><span class="header-section-number">B.5.1</span> Lab: customer service agent that plans in code<a href="agentic-labs.html#lab-customer-service-agent-that-plans-in-code" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><strong>Goal.</strong> Let the model write one Python program that <em>is</em> the plan: it
+filters, computes, and updates in a single pass, instead of emitting a JSON
+plan for many small tools (Section <a href="planning-multi-agent.html#code-as-plan">11.1.5</a>).</p>
+<p><strong>Setup.</strong> A sunglasses store in TinyDB, a small JSON-backed document
+database. One table holds the inventory (ID, name, description, stock,
+price); the other is a transaction log that starts with an opening balance.
+The code that runs the plan can see the two tables and two helpers (the
+current balance, the next transaction ID).</p>
+<p><strong>Steps:</strong></p>
+<ol style="list-style-type: decimal">
+<li><strong>Describe the data.</strong> Build a schema block from the live tables: fields,
+types, and sample rows.</li>
+<li><strong>Prompt for code.</strong> The prompt asks for commented Python inside
+<code>&lt;execute_python&gt;</code> tags and sets the business rules: derive every filter
+from the request, treat unclear intent as read-only, write one
+transaction per item, change nothing if any item is short of stock,
+always set a customer-facing <code>answer_text</code> and a <code>STATUS</code> code.</li>
+<li><strong>Execute</strong> the extracted code with only the tables and helpers in its
+namespace, capturing printed logs and errors, and show the tables before
+and after.</li>
+<li><strong>Wrap it as one agent</strong> and try reads, returns, and purchases, including
+a request for two different items.</li>
+</ol>
+<p><strong>Runs</strong>, as described in the lab:</p>
+<table>
+<colgroup>
+<col width="37%" />
+<col width="25%" />
+<col width="37%" />
+</colgroup>
+<thead>
+<tr>
+<th align="left">Request</th>
+<th align="left">Kind</th>
+<th align="left">Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">Any round sunglasses in stock under $100?</td>
+<td align="left">Read</td>
+<td align="left">One match, the Classic at $60; nothing changed</td>
+</tr>
+<tr>
+<td align="left">Return 2 Aviator sunglasses I bought last week</td>
+<td align="left">Write</td>
+<td align="left">A return transaction is added; Aviator stock goes from 23 to 25</td>
+</tr>
+</tbody>
+</table>
+<p>The prompt asks the model to avoid partial writes, but nothing in the
+executor enforces it. Running the plan on a copy makes “all or nothing” a
+property of the code, and gives a natural place for approval:</p>
+<div class="sourceCode" id="cb136"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb136-1"><a href="agentic-labs.html#cb136-1" tabindex="-1"></a><span class="im">import</span> copy</span>
+<span id="cb136-2"><a href="agentic-labs.html#cb136-2" tabindex="-1"></a></span>
+<span id="cb136-3"><a href="agentic-labs.html#cb136-3" tabindex="-1"></a><span class="kw">def</span> run_plan(code: <span class="bu">str</span>, store: <span class="bu">dict</span>, approve) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="cb136-4"><a href="agentic-labs.html#cb136-4" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Run a generated plan on a copy; return the store to keep.&quot;&quot;&quot;</span></span>
+<span id="cb136-5"><a href="agentic-labs.html#cb136-5" tabindex="-1"></a>    trial <span class="op">=</span> copy.deepcopy(store)                  <span class="co"># the plan only touches a copy</span></span>
+<span id="cb136-6"><a href="agentic-labs.html#cb136-6" tabindex="-1"></a>    scope <span class="op">=</span> {<span class="st">&quot;store&quot;</span>: trial}</span>
+<span id="cb136-7"><a href="agentic-labs.html#cb136-7" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb136-8"><a href="agentic-labs.html#cb136-8" tabindex="-1"></a>        <span class="bu">exec</span>(code, scope)                         <span class="co"># still not isolated: see the lessons</span></span>
+<span id="cb136-9"><a href="agentic-labs.html#cb136-9" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> err:</span>
+<span id="cb136-10"><a href="agentic-labs.html#cb136-10" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">&quot;plan failed, nothing written:&quot;</span>, err)</span>
+<span id="cb136-11"><a href="agentic-labs.html#cb136-11" tabindex="-1"></a>        <span class="cf">return</span> store</span>
+<span id="cb136-12"><a href="agentic-labs.html#cb136-12" tabindex="-1"></a>    changed <span class="op">=</span> [k <span class="cf">for</span> k <span class="kw">in</span> store <span class="cf">if</span> store[k] <span class="op">!=</span> trial[k]]</span>
+<span id="cb136-13"><a href="agentic-labs.html#cb136-13" tabindex="-1"></a>    <span class="cf">if</span> changed <span class="kw">and</span> <span class="kw">not</span> approve(changed, scope.get(<span class="st">&quot;answer_text&quot;</span>)):</span>
+<span id="cb136-14"><a href="agentic-labs.html#cb136-14" tabindex="-1"></a>        <span class="cf">return</span> store                              <span class="co"># declined: nothing written</span></span>
+<span id="cb136-15"><a href="agentic-labs.html#cb136-15" tabindex="-1"></a>    <span class="cf">return</span> trial</span></code></pre></div>
+<p><strong>Lessons:</strong></p>
+<ul>
+<li><strong>One program replaces a chain of tool calls.</strong> Filtering by shape and
+price, checking stock, and writing a transaction are a few lines of code,
+and the model already knows the library.</li>
+<li><strong>A restricted namespace is not a sandbox.</strong> Python adds its built-ins to
+any globals dictionary passed to <code>exec()</code>, so the generated code can still
+<code>import os</code>. Isolation needs a separate process or container
+(Section <a href="tool-use.html#running-generated-code-safely">9.4.1</a>).</li>
+<li><strong>Rules in the prompt are requests; rules in the executor are
+guarantees.</strong> “No partial writes” and “read-only when unsure” matter
+enough to enforce in code, as above.</li>
+<li><strong>Check the business logic, not only the code.</strong> The return went through
+although the transaction log held no sale to return: the plan checked the
+product, not the purchase history. This is the kind of error that error
+analysis (Section <a href="evaluating-agentic-systems.html#agentic-error-analysis">10.4</a>) finds and a schema note or
+rule fixes.</li>
+</ul>
+</div>
+<div id="lab-a-market-research-team" class="section level3 hasAnchor" number="27.5.2">
+<h3><span class="header-section-number">B.5.2</span> Lab: a market research team<a href="agentic-labs.html#lab-a-market-research-team" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><strong>Goal.</strong> Chain four role-specific agents into a pipeline that turns live
+fashion trends and a product catalog into a short campaign report. It is the
+campaign-launch team of Section <a href="planning-multi-agent.html#example-a-campaign-launch-team">11.2.2</a>, built
+in its simplest, linear form.</p>
+<table>
+<colgroup>
+<col width="17%" />
+<col width="17%" />
+<col width="43%" />
+<col width="20%" />
+</colgroup>
+<thead>
+<tr>
+<th align="left">Agent</th>
+<th align="left">Input</th>
+<th align="left">Model and tools</th>
+<th align="left">Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">Market researcher</td>
+<td align="left">The brief, with today’s date</td>
+<td align="left">Reasoning model; web search and catalog tools, in a hand-written tool loop</td>
+<td align="left">2–3 trends, matching products, reasons</td>
+</tr>
+<tr>
+<td align="left">Graphic designer</td>
+<td align="left">Trend summary</td>
+<td align="left">Text model writes an image prompt and caption as JSON; an image model draws the picture</td>
+<td align="left">Image file, prompt, caption</td>
+</tr>
+<tr>
+<td align="left">Copywriter</td>
+<td align="left">Image and trend summary</td>
+<td align="left">Vision model</td>
+<td align="left">Quote of at most 12 words, with a justification, as JSON</td>
+</tr>
+<tr>
+<td align="left">Packager</td>
+<td align="left">All of the above</td>
+<td align="left">Text model rewrites the summary for executives</td>
+<td align="left">Markdown report</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Outcome.</strong> Two full runs are saved with the lab. Given the same brief, the
+first chose the Wayfarer and Sport as lead products and the second chose the
+Mystique, Round, and Aviator.</p>
+<p><strong>Lessons:</strong></p>
+<ul>
+<li><strong>A fixed order is a design choice.</strong> The developer, not a model, decided
+the sequence. That makes this the <em>linear</em> pattern of Section
+<a href="planning-multi-agent.html#communication-patterns">11.2.3</a>: predictable, and enough for a process
+whose steps are known.</li>
+<li><strong>The same brief gives different answers.</strong> Live search results and
+sampling both vary. Before acting on a recommendation, run the pipeline
+several times, or save the search results and reuse them so the runs can be
+compared.</li>
+<li><strong>Agents optimise what the prompt asks for.</strong> The catalog lists stock, but
+the prompt never mentions it, so both runs recommended the Mystique, which
+has 3 units left. A lead product for a campaign needs inventory behind it.</li>
+<li><strong>Every rewrite can add claims.</strong> In the second run the executive rewrite
+added points about premium pricing, add-on sales, and staying ahead of
+competitors that no earlier step had produced. Either let the last step
+format without rewriting, or check the final report against the earlier
+outputs.</li>
+<li><strong>Keep the tool loop tidy.</strong> The researcher’s loop has no turn limit, and
+it appends the model’s message once per tool call instead of once per
+turn. If the model asks for two tools at once, the conversation history
+becomes invalid. The loop in Section <a href="tool-use.html#native-tool-calling">9.2.2</a> avoids
+both problems.</li>
+</ul>
+</div>
+<div id="graded-assignment-a-planned-research-workflow" class="section level3 hasAnchor" number="27.5.3">
+<h3><span class="header-section-number">B.5.3</span> Graded assignment: a planned research workflow<a href="agentic-labs.html#graded-assignment-a-planned-research-workflow" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The final graded lab completes the research agent built across the course.
+A planner agent turns a topic into a list of short steps. An executor goes
+through the steps in order. For each one it picks the agent to do it
+(researcher, writer, or editor), passes along the outputs of earlier steps,
+and records the result. By default it runs only the first few steps to keep
+run time down. The researcher uses the search tools from Module 3, and the
+editor plays the reflection role from Module 2. The lab practises plan, then
+execute (Section <a href="planning-multi-agent.html#plan-then-execute">11.1.2</a>) and the hierarchical pattern,
+where a coordinator routes work to specialists
+(Section <a href="planning-multi-agent.html#communication-patterns">11.2.3</a>).</p>
 
 </div>
 </div>

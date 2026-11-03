@@ -507,3 +507,7 @@ lab-email-assistant-with-tools
 graded-assignment-research-report-with-tools
 agentic-labs-evaluation
 lab-a-component-level-eval-for-web-search
+agentic-labs-planning
+lab-customer-service-agent-that-plans-in-code
+lab-a-market-research-team
+graded-assignment-a-planned-research-workflow

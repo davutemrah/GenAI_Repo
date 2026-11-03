@@ -83,7 +83,16 @@ updated.
   the model wrote. "Hands-on" link added to A4; removed a sentence in
   "Component-level evals" that repeated the team-benefit point.
 
-Next: A5 labs.
+- A5 labs (2026-11-02): done, approved and pushed. Code-as-plan
+  customer service lab (runs table; `run_plan` copy-then-commit sketch,
+  tested; `exec()` globals do not block imports, tested; return accepted
+  with no prior sale). Market research team (agent table; the two saved
+  runs picked different products; low-stock Mystique recommended; the
+  packaging rewrite added unsupported claims; loop has no cap and
+  appends the assistant message per tool call). C1M5 concept paragraph;
+  solutions file not opened. "Hands-on" link added to A5.
+
+Lab breakdowns complete (A2-A5, Appendix B).
 
 ## Phase 6: step-by-step chapter review (planned 2026-10-25)
 

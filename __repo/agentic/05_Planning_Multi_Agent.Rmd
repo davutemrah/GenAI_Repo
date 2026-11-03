@@ -477,6 +477,10 @@ flexibility, and with it cost, latency, and unpredictability.
 >   tool use, planning, multi-agent.
 > - Climb only as far as your evaluations require.
 
+**Hands-on.** Appendix \@ref(agentic-labs) walks through the course labs for
+this chapter: a customer service agent that plans in code, and a
+four-agent market research pipeline.
+
 ## Key takeaways
 
 The section summaries above hold the details. The chapter in five lines:
