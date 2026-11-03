@@ -422,6 +422,10 @@ the rubric.
 >   output against binary rubric items, not pairwise.
 > - Small eval sets are noisy; one question out of 15 is almost 7 points.
 
+**Hands-on.** Appendix \@ref(agentic-labs) walks through the course labs for
+this chapter: chart generation with multimodal reflection, and SQL
+generation where only the execution result exposes the error.
+
 ## Key takeaways
 
 The section summaries above hold the details. The chapter in five lines:

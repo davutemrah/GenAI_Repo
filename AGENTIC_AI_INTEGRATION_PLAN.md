@@ -41,7 +41,35 @@ Gap 4 (2026-10-29): done, awaiting Davut's review. New section
 paid-media reporting assistant), one key takeaway, Anthropic context
 engineering reference, link from `claude/11`. Full render clean.
 
-Next: the lab breakdowns.
+Lab breakdowns (decided 2026-10-29): new appendix `B_Agentic_Labs.Rmd`
+`{#agentic-labs}`, one section per chapter, done one chapter at a time.
+Ungraded labs get explained sketches (own code, not course code); graded
+assignments get a concept paragraph only, no solutions (public repo, honor
+code). Corrected lab list (the earlier one was incomplete; the notebook in
+`module 1/` is the M2 chart lab):
+
+| Chapter | Ungraded labs | Graded |
+|---|---|---|
+| A2 Reflection | M2 UGL1 chart generation, M2 UGL2 SQL | C1M2 reflective essay |
+| A3 Tool use | M3 UGL1 functions to tools, M3 UGL2 email assistant | C1M3 research report with tools |
+| A4 Evaluation | M4 UGL1 component-level eval | - |
+| A5 Planning / multi-agent | M5 UGL1 customer service (code as plan), M5 UGL2 market research team (`.md`) | C1M5 planner/research/writer/editor |
+
+- A2 labs (2026-10-29): done, awaiting Davut's review. Chart lab, SQL lab
+  (text-only vs. result-grounded critique table; noted that an `ABS()`-only
+  fix would count insert events as sales), C1M2 concept paragraph.
+  "Hands-on" link added to A2. Full render clean.
+
+Loose screenshots (2026-10-29): 12 moved, logged in
+`reports/slide_manifest/move_log_2026-10-29.tsv` (undo script beside it).
+Five root Agentic images were module 4 component-eval slides (to
+`module 4/module 4 sc/`); already covered by A4 except the team benefit,
+now one sentence in "Component-level evals". Three Udemy slides moved to
+`Gen AI -LLM coursera/udemy (off-course)/` (context-engineering Venn and
+tool-call loop already covered by `claude/11` and A3). Manifest paths
+updated.
+
+Next: A3 labs.
 
 ## Phase 6: step-by-step chapter review (planned 2026-10-25)
 

@@ -1,0 +1,177 @@
+# Agentic AI Labs: Walkthroughs {#agentic-labs}
+
+The course *Agentic AI* (DeepLearning.AI, Andrew Ng) pairs each design
+pattern with hands-on labs. This appendix records what each lab built and
+what it teaches, chapter by chapter. It is written in my own words. The
+course notebooks are not reproduced: the code blocks below are short
+sketches of the idea a lab teaches, not runnable copies of the lab.
+
+The graded assignments are described by the concept they practise only. No
+solutions or exercise answers appear here.
+
+> **About the results.** Outcomes below are **as described in the course
+> labs, not reproduced** here. The labs call hosted models, so each run can
+> give a different answer, and the model names they use (GPT-4o, GPT-4.1,
+> o4-mini, 2025) will date quickly. Read the outcomes as illustrations of a
+> pattern, not as benchmarks.
+
+## Common setup {#agentic-labs-setup}
+
+| Item | Choice |
+|:-----|:-------|
+| Model access | `aisuite`, a thin wrapper that calls models from several providers through one OpenAI-style chat interface |
+| Models | OpenAI models of 2025: a fast model for drafting, a stronger reasoning model for critique |
+| Data | Small local datasets: a coffee-sales CSV, a SQLite table of product events |
+| Code execution | Generated Python is run with `exec()` inside the notebook. Fine for a lab, not for production (Section \@ref(running-generated-code-safely)) |
+| Output | Charts saved as PNG files; tables shown as data frames |
+
+## Reflection labs {#agentic-labs-reflection}
+
+These labs go with Chapter \@ref(reflection).
+
+### Lab: chart generation with multimodal reflection
+
+**Goal.** Turn a plain-English request into a chart, then improve the chart
+by letting a multimodal model look at the rendered image
+(Section \@ref(multimodal-reflection-charts-and-images)).
+
+**Steps:**
+
+1. **Generate code (V1).** Ask a model for matplotlib code that answers a
+   request such as "compare first-quarter sales in two years". The prompt
+   lists the data frame's columns *with their types* and asks for the code
+   inside `<execute_python>` tags, saving the chart to a fixed file name.
+2. **Run it.** Extract the tagged code and execute it with only the data
+   frame in scope. The result is a PNG.
+3. **Reflect on the image.** Send the PNG, the V1 code, and the original
+   request to a vision-capable model. It returns a one-line JSON critique,
+   then revised code in the same tags.
+4. **Run V2** and compare the two charts.
+5. **Wrap it as one workflow** with separate model choices for generation
+   and reflection.
+
+The extraction and execution step is a few lines:
+
+```python
+import re
+
+CODE = re.compile(r"<execute_python>(.*?)</execute_python>", re.DOTALL)
+
+def run_tagged_code(llm_output: str, df) -> None:
+    match = CODE.search(llm_output)
+    if match is None:
+        raise ValueError("no tagged code in the model's reply")
+    exec(match.group(1), {"df": df})   # lab only: no isolation, no time limit
+```
+
+The critic's instructions, paraphrased:
+
+```text
+You are reviewing a chart made for this request: {request}
+The chart image is attached; the code that produced it is below.
+Line 1: JSON {"feedback": "<what to fix and why>"}.
+Then: revised code inside <execute_python> tags that saves to {path_v2}.
+```
+
+**Lessons:**
+
+- **The image is the external feedback.** The critic sees what a reader would
+  see (overlapping labels, a misleading chart type) rather than guessing from
+  the code.
+- **Split the models by job.** A cheap, fast model drafts; a stronger
+  reasoning model critiques. The critique step is where judgement pays.
+- **The critic may change the chart type**, for example from bars to lines.
+  That is a judgement call, not a bug, which is why chart quality should be
+  scored with a rubric across many requests
+  (Section \@ref(measuring-whether-reflection-helps)), not by looking at one
+  example.
+- **Watch the prompt for patches.** The lab's prompts carry several
+  emphatic "CRITICAL" rules about date types, each fixing a crash seen in
+  earlier runs. Stating the schema clearly up front is the durable fix;
+  a growing list of emphatic rules is the too-specific end of Section
+  \@ref(system-prompt-altitude).
+- **Parse defensively.** The lab's code tries to read the JSON line, then
+  falls back to searching for any JSON object in the reply. Models do not
+  always follow output formats exactly.
+
+### Lab: SQL generation with reflection
+
+**Goal.** Show that reviewing a query's *text* is not enough. The critic also
+needs to see what the query *returned*
+(Section \@ref(reflection-with-external-feedback)).
+
+**Data.** One SQLite table of product **events**, not product states. Each row
+is an insert, restock, sale, or price update. The quantity change is
+positive when stock comes in and **negative for a sale**. Total sales must be
+derived from the sale events.
+
+**Steps and outcome**, for the question "Which product colour has the highest
+total sales?":
+
+| Version | What the critic sees | Outcome described in the lab |
+|:--------|:---------------------|:-----------------------------|
+| V1: generate only | No critic | Valid SQL that sums quantity × price over the events; the "total sales" comes out negative |
+| V2a: reflect on the text | Question, schema, V1 SQL | The query looks reasonable on paper; the total is still negative |
+| V2b: reflect on the result | The same, plus V1's output table | The critic notices the negative total and fixes the sign; the answer becomes positive |
+
+A typical V1 and a robust version:
+
+```sql
+-- V1: runs, but sale rows carry negative quantities
+SELECT color, SUM(qty_delta * unit_price) AS total_sales
+FROM transactions
+GROUP BY color
+ORDER BY total_sales DESC
+LIMIT 1;
+
+-- Robust: keep only sale events, then flip the sign
+SELECT color, SUM(-qty_delta * unit_price) AS total_sales
+FROM transactions
+WHERE action = 'sale'
+GROUP BY color
+ORDER BY total_sales DESC
+LIMIT 1;
+```
+
+A fix that only wraps the quantity in `ABS()` would still be wrong: insert
+events also have positive quantities and a price, so they would be counted as
+sales. Filtering on the event type is what makes the query mean "sales".
+
+The difference between V2a and V2b is a single input to the critic:
+
+```python
+def critique_sql(question, schema, sql, result=None):
+    prompt = f"Question: {question}\nSchema:\n{schema}\nSQL:\n{sql}\n"
+    if result is not None:                        # external feedback
+        prompt += (f"It returned {len(result)} rows. First rows:\n"
+                   f"{result.head(20).to_markdown()}\n")
+    prompt += ('Does the result answer the question? Return JSON '
+               '{"feedback": "...", "sql": "<final query>"}')
+    return llm(prompt)
+```
+
+**Lessons:**
+
+- **Semantic errors hide in valid SQL.** A sign convention is invisible in the
+  query text; a negative "total sales" is obvious in the result.
+- **Execution output is cheap external feedback.** One query run gives the
+  critic evidence that no amount of re-reading provides.
+- **Pass a sample of the result, not all of it.** The lab passes the whole
+  output table, which is fine for a small aggregate. For large results, pass
+  the row count and the first rows to keep the context small.
+- **Fail safe.** If the critic's reply cannot be parsed, the lab keeps the
+  original query rather than running something half-read.
+- **Better context prevents the error.** A schema note such as "`qty_delta`
+  is negative for sales" would let V1 get it right. Reflection catches what
+  the context failed to say, but fixing the context is cheaper.
+
+### Graded assignment: reflective essay writing
+
+The graded lab builds a three-call writing workflow: **draft** an essay on a
+topic, **critique** the draft (optionally with a different, reasoning model)
+for structure, clarity, argument, and style, then **revise** the draft using
+that critique. It practises keeping the three roles in separate calls with
+explicit inputs, which is the basic pattern of Section \@ref(the-basic-pattern).
+There is no external feedback, so the gains are the modest ones reported for
+self-critique alone (Section \@ref(what-the-evidence-says)). It is also the
+first building block of the research agent that later graded labs extend.

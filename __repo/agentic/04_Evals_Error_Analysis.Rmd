@@ -343,7 +343,10 @@ components or onto specific behaviors, such as "ignored date filter" or
 Once error analysis has pointed to a component, improving it by rerunning the
 full system after every change is slow and expensive. It is also noisy:
 randomness in the other components can hide a small real improvement. A
-**component-level eval** measures that one component directly.
+**component-level eval** measures that one component directly. It also lets
+work split cleanly: the team that owns search can iterate against its own
+metric without waiting for, or being confused by, changes elsewhere in the
+pipeline.
 
 **Example: retrieval or web search.** For a set of queries, have an expert
 list the sources a good search should find. Then score each configuration on

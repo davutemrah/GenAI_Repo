@@ -495,3 +495,9 @@ lab-1-summarization-with-prompting-and-generation-settings
 lab-2-full-fine-tuning-vs.-lora
 lab-3-detoxifying-with-rlhf-ppo
 what-the-three-labs-show-together
+agentic-labs
+agentic-labs-setup
+agentic-labs-reflection
+lab-chart-generation-with-multimodal-reflection
+lab-sql-generation-with-reflection
+graded-assignment-reflective-essay-writing
