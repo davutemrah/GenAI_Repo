@@ -21,7 +21,7 @@ solutions or exercise answers appear here.
 |:-----|:-------|
 | Model access | `aisuite`, a thin wrapper that calls models from several providers through one OpenAI-style chat interface |
 | Models | OpenAI models of 2025: a fast model for drafting, a stronger reasoning model for critique |
-| Data | Small local datasets: a coffee-sales CSV, a SQLite table of product events |
+| Data and services | Small local datasets (a coffee-sales CSV, a SQLite table of product events), a mock email server, and free public APIs for location and weather |
 | Code execution | Generated Python is run with `exec()` inside the notebook. Fine for a lab, not for production (Section \@ref(running-generated-code-safely)) |
 | Output | Charts saved as PNG files; tables shown as data frames |
 
@@ -175,3 +175,141 @@ explicit inputs, which is the basic pattern of Section \@ref(the-basic-pattern).
 There is no external feedback, so the gains are the modest ones reported for
 self-critique alone (Section \@ref(what-the-evidence-says)). It is also the
 first building block of the research agent that later graded labs extend.
+
+## Tool-use labs {#agentic-labs-tool-use}
+
+These labs go with Chapter \@ref(tool-use).
+
+### Lab: turning functions into tools
+
+**Goal.** Give a model access to ordinary Python functions, first letting the
+library run the tool loop, then running it by hand
+(Section \@ref(how-tool-calling-works)).
+
+**Steps:**
+
+1. **One function, automatic mode.** Define a function that returns the
+   current time, with a one-line docstring. Pass the function itself in the
+   tool list with a turn limit. `aisuite` builds the schema from the
+   signature and docstring, runs the function when the model asks, and sends
+   the result back.
+2. **Read the trace.** The response holds the whole exchange: the model's
+   tool request, the local result, and the final answer that uses it.
+3. **Manual mode.** Write the schema by hand (name, description,
+   parameters) and drop the turn limit. Now your code must check for a tool
+   request, run the function, append both the model's request and a `tool`
+   message carrying the matching call ID, and call the model again.
+4. **Several tools.** Add three more: current weather (IP location, then a
+   weather API), write a text file, and make a QR code with an embedded logo.
+   For each request the model picks the one tool that fits.
+5. **A multi-step request.** "Make a QR code for this site, and write me a
+   note with the current weather." The model must fetch the weather *before*
+   writing the note, whatever order the request names them in.
+
+The two modes differ in who owns the loop:
+
+| | Automatic | Manual |
+|:--|:----------|:-------|
+| You pass | Python functions | JSON schemas |
+| Who runs the tool | The library, up to the turn limit | Your code |
+| Good for | Prototypes and demos | Logging, validation, approval steps, custom error handling |
+
+A tool written for a model has to expect sloppy arguments. The lab's QR tool
+strips quotes and backticks from file names and falls back to a plain code if
+the logo is missing. The same habits in a note-writing tool:
+
+```python
+from pathlib import Path
+
+NOTES_DIR = Path("notes").resolve()
+
+def write_note(name: str, content: str) -> str:
+    """Save a short text note in the notes folder. Overwrites a note with the same name."""
+    name = name.strip().strip("`'\"")             # models sometimes quote names
+    path = (NOTES_DIR / name).with_suffix(".txt").resolve()
+    if NOTES_DIR not in path.parents:             # refuse paths outside the folder
+        return "Error: give a plain note name, not a path."
+    NOTES_DIR.mkdir(exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+    return f"Saved {path.name}"
+```
+
+**Lessons:**
+
+- **The docstring is the prompt.** It is all the model sees when choosing a
+  tool and filling its arguments
+  (Section \@ref(designing-tools-a-model-can-use-well)).
+- **Automatic mode hides the loop.** Fine for a demo. In production you want
+  the manual loop, because that is where logging, argument checks, and
+  approval steps go.
+- **Return errors as text the model can act on.** A clear message such as
+  "give a plain note name" lets the model retry; an exception just ends the
+  run.
+- **Limit what a tool can touch.** The lab's file tool writes to any path it
+  is given. Fixing the folder, as above, is least privilege applied to one
+  tool (Section \@ref(security-and-governance)).
+- **The model orders calls by data dependency**, not by the wording of the
+  request. Read the trace to confirm it did.
+
+### Lab: email assistant with tools
+
+**Goal.** Run an agent against a simulated inbox and see that the tool list
+sets what the agent can and cannot do.
+
+**Setup.** A local mock email service (a small REST API over SQLite, loaded
+with a handful of messages) and ten thin Python wrappers, one per endpoint:
+list all, list unread, search, filter, get one, mark read, mark unread,
+send, delete, and unread-from-sender. Each request is wrapped in a short
+preamble: you manage email, use the tools, my address is ..., and *never ask
+for confirmation*. The lab tests every wrapper by hand before any model is
+involved.
+
+**Runs**, as described in the lab:
+
+| Request | Tools given | Outcome |
+|:--------|:------------|:--------|
+| Check unread mail from my boss, mark it read, send a polite follow-up | Six tools, no delete | Unread-from-sender → mark read → send, then a short summary |
+| Delete Alice's email | The same six | Cannot complete the action; no tool can delete |
+| Delete Alice's email | Plus `delete_email` | Finds the message, then deletes it |
+| Delete the Happy Hour email | All seven | Searches by subject to get the ID, then deletes |
+
+The lab runs with no human check. A production version would put one in
+front of every send and delete:
+
+```python
+NEEDS_APPROVAL = {"send_email", "delete_email"}
+
+def run_tool(name, args, tools, approve):
+    if name in NEEDS_APPROVAL and not approve(name, args):
+        return {"status": "declined", "reason": "the user did not approve this action"}
+    return tools[name](**args)
+```
+
+**Lessons:**
+
+- **The tool list is the capability boundary.** An action with no tool cannot
+  happen. Leaving a tool out is the cheapest safety control there is.
+- **Thin wrappers, one job each.** Each tool maps to one endpoint and returns
+  compact JSON the model can chain. This is the pattern MCP standardises
+  (Section \@ref(connecting-to-many-tools-mcp)).
+- **"Never ask for confirmation" belongs only in a sandbox.** This agent reads
+  private mail, reads mail anyone can write, and can send: all three legs of
+  the lethal trifecta in Section \@ref(security-and-governance).
+- **Describe, then resolve, then act.** "The Happy Hour email" must become an
+  ID before anything is deleted. If the search returns more than one match,
+  that is the moment to stop and ask.
+- **Test the tools before the agent.** Checking each wrapper by hand first is
+  a component-level check (Section \@ref(component-level-evals)). A failure
+  later is then about the model, not the plumbing.
+
+### Graded assignment: research report with tools
+
+The graded lab extends the essay workflow of Module 2 into a small research
+pipeline. A tool-using call writes a report with access to two search tools,
+one for arXiv papers and one for the web. The tool loop is written by hand:
+a dictionary maps tool names to functions, and the loop stops at a turn limit
+(Section \@ref(native-tool-calling)). A second call reflects on the report,
+returns a structured critique and a revised report as JSON, and a third call
+formats the result as HTML. It practises the manual tool protocol, reflection
+on a draft, and parsing structured output. The Module 5 graded lab turns these
+steps into a planned multi-agent pipeline.

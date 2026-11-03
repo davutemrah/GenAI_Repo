@@ -55,7 +55,7 @@ code). Corrected lab list (the earlier one was incomplete; the notebook in
 | A4 Evaluation | M4 UGL1 component-level eval | - |
 | A5 Planning / multi-agent | M5 UGL1 customer service (code as plan), M5 UGL2 market research team (`.md`) | C1M5 planner/research/writer/editor |
 
-- A2 labs (2026-10-29): done, awaiting Davut's review. Chart lab, SQL lab
+- A2 labs (2026-10-29): done, approved and committed `0310c25` (2026-11-02). Chart lab, SQL lab
   (text-only vs. result-grounded critique table; noted that an `ABS()`-only
   fix would count insert events as sales), C1M2 concept paragraph.
   "Hands-on" link added to A2. Full render clean.
@@ -69,7 +69,13 @@ now one sentence in "Component-level evals". Three Udemy slides moved to
 tool-call loop already covered by `claude/11` and A3). Manifest paths
 updated.
 
-Next: A3 labs.
+- A3 labs (2026-11-02): done, approved and pushed with A2. Functions-to-tools
+  lab (automatic vs manual loop table; `write_note` sketch with path
+  restriction, tested), email assistant lab (runs table with and without
+  `delete_email`; approval-gate sketch; lethal-trifecta link), C1M3 concept
+  paragraph. "Hands-on" link added to A3.
+
+Next: A4 labs.
 
 ## Phase 6: step-by-step chapter review (planned 2026-10-25)
 

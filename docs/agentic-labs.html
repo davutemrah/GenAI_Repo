@@ -23,7 +23,7 @@
 <meta name="author" content="Davut Ayan" />
 
 
-<meta name="date" content="2026-10-29" />
+<meta name="date" content="2026-11-02" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -854,6 +854,12 @@ div.csl-indent {
 <li class="chapter" data-level="B.2.2" data-path="agentic-labs.html"><a href="agentic-labs.html#lab-sql-generation-with-reflection"><i class="fa fa-check"></i><b>B.2.2</b> Lab: SQL generation with reflection</a></li>
 <li class="chapter" data-level="B.2.3" data-path="agentic-labs.html"><a href="agentic-labs.html#graded-assignment-reflective-essay-writing"><i class="fa fa-check"></i><b>B.2.3</b> Graded assignment: reflective essay writing</a></li>
 </ul></li>
+<li class="chapter" data-level="B.3" data-path="agentic-labs.html"><a href="agentic-labs.html#agentic-labs-tool-use"><i class="fa fa-check"></i><b>B.3</b> Tool-use labs</a>
+<ul>
+<li class="chapter" data-level="B.3.1" data-path="agentic-labs.html"><a href="agentic-labs.html#lab-turning-functions-into-tools"><i class="fa fa-check"></i><b>B.3.1</b> Lab: turning functions into tools</a></li>
+<li class="chapter" data-level="B.3.2" data-path="agentic-labs.html"><a href="agentic-labs.html#lab-email-assistant-with-tools"><i class="fa fa-check"></i><b>B.3.2</b> Lab: email assistant with tools</a></li>
+<li class="chapter" data-level="B.3.3" data-path="agentic-labs.html"><a href="agentic-labs.html#graded-assignment-research-report-with-tools"><i class="fa fa-check"></i><b>B.3.3</b> Graded assignment: research report with tools</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="bibliography.html"><a href="bibliography.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
@@ -916,8 +922,8 @@ pattern, not as benchmarks.</p>
 <td align="left">OpenAI models of 2025: a fast model for drafting, a stronger reasoning model for critique</td>
 </tr>
 <tr>
-<td align="left">Data</td>
-<td align="left">Small local datasets: a coffee-sales CSV, a SQLite table of product events</td>
+<td align="left">Data and services</td>
+<td align="left">Small local datasets (a coffee-sales CSV, a SQLite table of product events), a mock email server, and free public APIs for location and weather</td>
 </tr>
 <tr>
 <td align="left">Code execution</td>
@@ -1085,6 +1091,187 @@ explicit inputs, which is the basic pattern of Section <a href="reflection.html#
 There is no external feedback, so the gains are the modest ones reported for
 self-critique alone (Section <a href="reflection.html#what-the-evidence-says">8.2</a>). It is also the
 first building block of the research agent that later graded labs extend.</p>
+</div>
+</div>
+<div id="agentic-labs-tool-use" class="section level2 hasAnchor" number="27.3">
+<h2><span class="header-section-number">B.3</span> Tool-use labs<a href="agentic-labs.html#agentic-labs-tool-use" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>These labs go with Chapter <a href="tool-use.html#tool-use">9</a>.</p>
+<div id="lab-turning-functions-into-tools" class="section level3 hasAnchor" number="27.3.1">
+<h3><span class="header-section-number">B.3.1</span> Lab: turning functions into tools<a href="agentic-labs.html#lab-turning-functions-into-tools" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><strong>Goal.</strong> Give a model access to ordinary Python functions, first letting the
+library run the tool loop, then running it by hand
+(Section <a href="tool-use.html#how-tool-calling-works">9.2</a>).</p>
+<p><strong>Steps:</strong></p>
+<ol style="list-style-type: decimal">
+<li><strong>One function, automatic mode.</strong> Define a function that returns the
+current time, with a one-line docstring. Pass the function itself in the
+tool list with a turn limit. <code>aisuite</code> builds the schema from the
+signature and docstring, runs the function when the model asks, and sends
+the result back.</li>
+<li><strong>Read the trace.</strong> The response holds the whole exchange: the model’s
+tool request, the local result, and the final answer that uses it.</li>
+<li><strong>Manual mode.</strong> Write the schema by hand (name, description,
+parameters) and drop the turn limit. Now your code must check for a tool
+request, run the function, append both the model’s request and a <code>tool</code>
+message carrying the matching call ID, and call the model again.</li>
+<li><strong>Several tools.</strong> Add three more: current weather (IP location, then a
+weather API), write a text file, and make a QR code with an embedded logo.
+For each request the model picks the one tool that fits.</li>
+<li><strong>A multi-step request.</strong> “Make a QR code for this site, and write me a
+note with the current weather.” The model must fetch the weather <em>before</em>
+writing the note, whatever order the request names them in.</li>
+</ol>
+<p>The two modes differ in who owns the loop:</p>
+<table>
+<colgroup>
+<col width="13%" />
+<col width="50%" />
+<col width="36%" />
+</colgroup>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="left">Automatic</th>
+<th align="left">Manual</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">You pass</td>
+<td align="left">Python functions</td>
+<td align="left">JSON schemas</td>
+</tr>
+<tr>
+<td align="left">Who runs the tool</td>
+<td align="left">The library, up to the turn limit</td>
+<td align="left">Your code</td>
+</tr>
+<tr>
+<td align="left">Good for</td>
+<td align="left">Prototypes and demos</td>
+<td align="left">Logging, validation, approval steps, custom error handling</td>
+</tr>
+</tbody>
+</table>
+<p>A tool written for a model has to expect sloppy arguments. The lab’s QR tool
+strips quotes and backticks from file names and falls back to a plain code if
+the logo is missing. The same habits in a note-writing tool:</p>
+<div class="sourceCode" id="cb133"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb133-1"><a href="agentic-labs.html#cb133-1" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb133-2"><a href="agentic-labs.html#cb133-2" tabindex="-1"></a></span>
+<span id="cb133-3"><a href="agentic-labs.html#cb133-3" tabindex="-1"></a>NOTES_DIR <span class="op">=</span> Path(<span class="st">&quot;notes&quot;</span>).resolve()</span>
+<span id="cb133-4"><a href="agentic-labs.html#cb133-4" tabindex="-1"></a></span>
+<span id="cb133-5"><a href="agentic-labs.html#cb133-5" tabindex="-1"></a><span class="kw">def</span> write_note(name: <span class="bu">str</span>, content: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb133-6"><a href="agentic-labs.html#cb133-6" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Save a short text note in the notes folder. Overwrites a note with the same name.&quot;&quot;&quot;</span></span>
+<span id="cb133-7"><a href="agentic-labs.html#cb133-7" tabindex="-1"></a>    name <span class="op">=</span> name.strip().strip(<span class="st">&quot;`&#39;</span><span class="ch">\&quot;</span><span class="st">&quot;</span>)             <span class="co"># models sometimes quote names</span></span>
+<span id="cb133-8"><a href="agentic-labs.html#cb133-8" tabindex="-1"></a>    path <span class="op">=</span> (NOTES_DIR <span class="op">/</span> name).with_suffix(<span class="st">&quot;.txt&quot;</span>).resolve()</span>
+<span id="cb133-9"><a href="agentic-labs.html#cb133-9" tabindex="-1"></a>    <span class="cf">if</span> NOTES_DIR <span class="kw">not</span> <span class="kw">in</span> path.parents:             <span class="co"># refuse paths outside the folder</span></span>
+<span id="cb133-10"><a href="agentic-labs.html#cb133-10" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">&quot;Error: give a plain note name, not a path.&quot;</span></span>
+<span id="cb133-11"><a href="agentic-labs.html#cb133-11" tabindex="-1"></a>    NOTES_DIR.mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb133-12"><a href="agentic-labs.html#cb133-12" tabindex="-1"></a>    path.write_text(content, encoding<span class="op">=</span><span class="st">&quot;utf-8&quot;</span>)</span>
+<span id="cb133-13"><a href="agentic-labs.html#cb133-13" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f&quot;Saved </span><span class="sc">{</span>path<span class="sc">.</span>name<span class="sc">}</span><span class="ss">&quot;</span></span></code></pre></div>
+<p><strong>Lessons:</strong></p>
+<ul>
+<li><strong>The docstring is the prompt.</strong> It is all the model sees when choosing a
+tool and filling its arguments
+(Section <a href="tool-use.html#designing-tools-a-model-can-use-well">9.3</a>).</li>
+<li><strong>Automatic mode hides the loop.</strong> Fine for a demo. In production you want
+the manual loop, because that is where logging, argument checks, and
+approval steps go.</li>
+<li><strong>Return errors as text the model can act on.</strong> A clear message such as
+“give a plain note name” lets the model retry; an exception just ends the
+run.</li>
+<li><strong>Limit what a tool can touch.</strong> The lab’s file tool writes to any path it
+is given. Fixing the folder, as above, is least privilege applied to one
+tool (Section <a href="tool-use.html#security-and-governance">9.6</a>).</li>
+<li><strong>The model orders calls by data dependency</strong>, not by the wording of the
+request. Read the trace to confirm it did.</li>
+</ul>
+</div>
+<div id="lab-email-assistant-with-tools" class="section level3 hasAnchor" number="27.3.2">
+<h3><span class="header-section-number">B.3.2</span> Lab: email assistant with tools<a href="agentic-labs.html#lab-email-assistant-with-tools" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><strong>Goal.</strong> Run an agent against a simulated inbox and see that the tool list
+sets what the agent can and cannot do.</p>
+<p><strong>Setup.</strong> A local mock email service (a small REST API over SQLite, loaded
+with a handful of messages) and ten thin Python wrappers, one per endpoint:
+list all, list unread, search, filter, get one, mark read, mark unread,
+send, delete, and unread-from-sender. Each request is wrapped in a short
+preamble: you manage email, use the tools, my address is …, and <em>never ask
+for confirmation</em>. The lab tests every wrapper by hand before any model is
+involved.</p>
+<p><strong>Runs</strong>, as described in the lab:</p>
+<table>
+<colgroup>
+<col width="29%" />
+<col width="41%" />
+<col width="29%" />
+</colgroup>
+<thead>
+<tr>
+<th align="left">Request</th>
+<th align="left">Tools given</th>
+<th align="left">Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">Check unread mail from my boss, mark it read, send a polite follow-up</td>
+<td align="left">Six tools, no delete</td>
+<td align="left">Unread-from-sender → mark read → send, then a short summary</td>
+</tr>
+<tr>
+<td align="left">Delete Alice’s email</td>
+<td align="left">The same six</td>
+<td align="left">Cannot complete the action; no tool can delete</td>
+</tr>
+<tr>
+<td align="left">Delete Alice’s email</td>
+<td align="left">Plus <code>delete_email</code></td>
+<td align="left">Finds the message, then deletes it</td>
+</tr>
+<tr>
+<td align="left">Delete the Happy Hour email</td>
+<td align="left">All seven</td>
+<td align="left">Searches by subject to get the ID, then deletes</td>
+</tr>
+</tbody>
+</table>
+<p>The lab runs with no human check. A production version would put one in
+front of every send and delete:</p>
+<div class="sourceCode" id="cb134"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb134-1"><a href="agentic-labs.html#cb134-1" tabindex="-1"></a>NEEDS_APPROVAL <span class="op">=</span> {<span class="st">&quot;send_email&quot;</span>, <span class="st">&quot;delete_email&quot;</span>}</span>
+<span id="cb134-2"><a href="agentic-labs.html#cb134-2" tabindex="-1"></a></span>
+<span id="cb134-3"><a href="agentic-labs.html#cb134-3" tabindex="-1"></a><span class="kw">def</span> run_tool(name, args, tools, approve):</span>
+<span id="cb134-4"><a href="agentic-labs.html#cb134-4" tabindex="-1"></a>    <span class="cf">if</span> name <span class="kw">in</span> NEEDS_APPROVAL <span class="kw">and</span> <span class="kw">not</span> approve(name, args):</span>
+<span id="cb134-5"><a href="agentic-labs.html#cb134-5" tabindex="-1"></a>        <span class="cf">return</span> {<span class="st">&quot;status&quot;</span>: <span class="st">&quot;declined&quot;</span>, <span class="st">&quot;reason&quot;</span>: <span class="st">&quot;the user did not approve this action&quot;</span>}</span>
+<span id="cb134-6"><a href="agentic-labs.html#cb134-6" tabindex="-1"></a>    <span class="cf">return</span> tools[name](<span class="op">**</span>args)</span></code></pre></div>
+<p><strong>Lessons:</strong></p>
+<ul>
+<li><strong>The tool list is the capability boundary.</strong> An action with no tool cannot
+happen. Leaving a tool out is the cheapest safety control there is.</li>
+<li><strong>Thin wrappers, one job each.</strong> Each tool maps to one endpoint and returns
+compact JSON the model can chain. This is the pattern MCP standardises
+(Section <a href="tool-use.html#connecting-to-many-tools-mcp">9.5</a>).</li>
+<li><strong>“Never ask for confirmation” belongs only in a sandbox.</strong> This agent reads
+private mail, reads mail anyone can write, and can send: all three legs of
+the lethal trifecta in Section <a href="tool-use.html#security-and-governance">9.6</a>.</li>
+<li><strong>Describe, then resolve, then act.</strong> “The Happy Hour email” must become an
+ID before anything is deleted. If the search returns more than one match,
+that is the moment to stop and ask.</li>
+<li><strong>Test the tools before the agent.</strong> Checking each wrapper by hand first is
+a component-level check (Section <a href="evaluating-agentic-systems.html#component-level-evals">10.5</a>). A failure
+later is then about the model, not the plumbing.</li>
+</ul>
+</div>
+<div id="graded-assignment-research-report-with-tools" class="section level3 hasAnchor" number="27.3.3">
+<h3><span class="header-section-number">B.3.3</span> Graded assignment: research report with tools<a href="agentic-labs.html#graded-assignment-research-report-with-tools" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The graded lab extends the essay workflow of Module 2 into a small research
+pipeline. A tool-using call writes a report with access to two search tools,
+one for arXiv papers and one for the web. The tool loop is written by hand:
+a dictionary maps tool names to functions, and the loop stops at a turn limit
+(Section <a href="tool-use.html#native-tool-calling">9.2.2</a>). A second call reflects on the report,
+returns a structured critique and a revised report as JSON, and a third call
+formats the result as HTML. It practises the manual tool protocol, reflection
+on a draft, and parsing structured output. The Module 5 graded lab turns these
+steps into a planned multi-agent pipeline.</p>
 
 </div>
 </div>

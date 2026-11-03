@@ -502,6 +502,10 @@ component-level checks like these.
 > - Measure each on labeled requests from your own users; public
 >   leaderboards are only a starting point.
 
+**Hands-on.** Appendix \@ref(agentic-labs) walks through the course labs for
+this chapter: turning Python functions into tools, and an email assistant
+whose tool list decides what it can do.
+
 ## Key takeaways
 
 The section summaries above hold the details. The chapter in five lines:
