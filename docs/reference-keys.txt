@@ -372,6 +372,7 @@ core-architecture
 two-layers
 the-primitives
 what-a-tool-definition-looks-like
+mcp-2026-changes
 mcp-compared-with-related-ideas
 common-examples
 mcp-in-a-databricks-marketing-analytics-stack

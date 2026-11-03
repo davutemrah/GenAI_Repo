@@ -15,7 +15,8 @@ version-specific details. Check the
 [MCP documentation](https://modelcontextprotocol.io/docs/learn/architecture)
 and the [specification](https://modelcontextprotocol.io/specification/latest)
 before relying on any wire-level behavior. When this chapter was reviewed
-(October 2026), the latest protocol version was `2026-07-28`.
+(November 2026), the latest protocol version was `2026-07-28`, which changed
+several features that older tutorials teach (Section \@ref(mcp-2026-changes)).
 
 ## The problem MCP solves
 
@@ -81,10 +82,11 @@ Each primitive has list and get or call methods (for example `tools/list` and
 `tools/call`), so a client can discover capabilities at run time instead of
 having them hard-coded.
 
-Clients can also offer capabilities to servers. The main one is
+Clients can also offer capabilities to servers. The one in active use is
 **elicitation**: a server can ask the user for missing input or confirmation
-through the host. Sampling (a server requesting an LLM completion from the
-client) is deprecated as of protocol version `2026-07-28`.
+through the host. The other two client features, **sampling** and **roots**,
+are deprecated as of protocol version `2026-07-28`
+(Section \@ref(mcp-2026-changes)).
 
 ### What a tool definition looks like
 
@@ -109,6 +111,70 @@ Simplified:
 The description is effectively a prompt. The model chooses tools based on it,
 so a clear statement of *what* the tool does and *when* to use it matters as
 much as the code.
+
+## How the protocol changed in 2026 {#mcp-2026-changes}
+
+Protocol version `2026-07-28` was the largest revision since MCP launched.
+Many tutorials and courses, including Anthropic's *MCP: Advanced Topics*
+course, were recorded against the 2025 versions and teach features that are
+now deprecated or gone. Deprecated features keep working for at least twelve
+months, but new servers should not adopt them.
+
+| Feature | What it did | Status in `2026-07-28` | Use instead |
+|:--|:--|:--|:--|
+| **Sampling** | The server asks the client to run an LLM call for it, so the server needs no API key | Deprecated | Call the model provider's API from the server |
+| **Roots** | The client tells the server which folders are in scope | Deprecated | Pass folders as tool parameters, resource URIs, or server configuration |
+| **Logging** | The server streams log lines to the client | Deprecated | Log to stderr (stdio servers) or use OpenTelemetry |
+| **Progress notifications** | The server reports how far a slow request has got | Still current | Use them for any tool that takes more than a few seconds |
+| **Handshake and sessions** | An `initialize` exchange, then an `Mcp-Session-Id` header on every HTTP request | Removed | Each request carries its protocol version and client capabilities; a server that needs state hands out its own ID as an ordinary tool argument |
+| **Server-to-client requests** | The server sends a request to the client mid-call over a long-lived stream | Replaced | The server replies "input required"; the client retries the original request with the answers |
+| **Long-running work** | Experimental tasks in the core protocol | Moved to an optional extension | Return a job handle, then poll |
+
+**Why sessions went away.** A session lived in one server process. Behind a
+load balancer, every request from a client then had to reach the same
+instance, and a server that wanted to send requests to the client needed a
+stream held open for the whole session. Both fight the usual way of scaling
+an HTTP service: many identical instances, any of which can answer any
+request. The Python SDK offered switches for a stateless mode and for plain
+JSON replies, but turning them on gave up progress updates, log messages,
+and any request from server to client, such as sampling. The 2026 revision
+makes statelessness the default instead. Every request stands alone, and a server
+that needs more input says so in its reply.
+
+**Interview framing:** MCP's 2026 changes trade convenience features
+(sampling, roots, protocol-level logging) for a protocol that scales like any
+other HTTP API.
+
+**Roots were never access control.** The specification says so directly: a
+root was guidance about where to look, and nothing stopped a server from
+reading outside it. That remains true of a folder passed as a parameter. The
+server must check every path itself, and must resolve the path *before*
+checking. A check that compares the raw text of `Desktop/../Documents/x.mp4`
+with `Desktop` lets it through.
+
+```python
+from pathlib import Path
+
+ALLOWED = [Path("~/Videos").expanduser().resolve()]   # from server configuration
+
+def check_path(raw: str) -> Path:
+    path = Path(raw).expanduser().resolve()           # resolve "..", "~", and links first
+    if not any(path.is_relative_to(root) for root in ALLOWED):
+        raise ValueError(f"{raw} is outside the allowed folders")
+    return path
+```
+
+SDKs and hosts adopt a new protocol version on their own schedule. Before
+relying on stateless behaviour, check which version your SDK and host
+actually speak.
+
+> **In short.**
+>
+> - `2026-07-28` deprecated sampling, roots, and logging, and removed
+>   sessions and the `initialize` handshake.
+> - Every request is now self-contained, so any server instance can answer
+>   it; servers ask for missing input by replying, not by calling the client.
+> - Enforce file and folder limits in the server, on resolved paths.
 
 ## MCP compared with related ideas
 
@@ -305,6 +371,11 @@ Design choices worth noting:
   costs money.
 - Outputs include **validation evidence** recorded by the job, so the assistant
   reports holdout metrics instead of guessing quality.
+- The `run_id` **handle** is the pattern the `2026-07-28` specification
+  recommends for state that spans calls, and the optional tasks extension
+  standardizes the same submit-then-poll idea. If a single call does take a
+  while, send progress notifications so the host can show that it is still
+  working.
 
 ### Pattern 3: An AI-assisted Streamlit app as an MCP host
 
@@ -402,6 +473,9 @@ Unity Catalog permissions, Apps permissions, host approval settings, and hooks.
   tools, resources, and prompts.
 - Use stdio for local, personal servers and Streamable HTTP for shared, remote,
   governed servers.
+- Since `2026-07-28`, MCP is stateless, and sampling, roots, and protocol
+  logging are deprecated. Check a tutorial's date against the specification
+  changelog before following it.
 - On Databricks, start with managed servers and Unity Catalog functions for
   reusable logic, and add a custom server on Databricks Apps for job-shaped
   workflows such as lookalike modeling.
@@ -414,6 +488,7 @@ Unity Catalog permissions, Apps permissions, host approval settings, and hooks.
 
 - [MCP architecture overview](https://modelcontextprotocol.io/docs/learn/architecture)
 - [MCP specification](https://modelcontextprotocol.io/specification/latest)
+- [MCP `2026-07-28` changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog)
 - [Build an MCP server (official quickstart)](https://modelcontextprotocol.io/docs/develop/build-server)
 - [Claude Code: connect tools via MCP](https://code.claude.com/docs/en/mcp)
 - [Databricks: MCP on Databricks](https://docs.databricks.com/aws/en/agents/mcp-tools/)

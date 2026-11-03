@@ -94,6 +94,9 @@ updated.
 
 Lab breakdowns complete (A2-A5, Appendix B).
 
+Course folders (2026-11-02): Davut decided to keep them in place under
+`__repo/` (git-ignored, local only); no archive move.
+
 ## Phase 6: step-by-step chapter review (planned 2026-10-25)
 
 Goal: turn each chapter into a reference Davut can learn from and revise
