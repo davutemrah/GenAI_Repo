@@ -75,7 +75,15 @@ updated.
   `delete_email`; approval-gate sketch; lethal-trifecta link), C1M3 concept
   paragraph. "Hands-on" link added to A3.
 
-Next: A4 labs.
+- A4 labs (2026-11-02): done, approved and pushed. Component-level
+  search eval (code-graded, per-example reference; precision-like, no
+  recall). Flagged two scoring bugs in the lab (substring domain match
+  counts `summit.edu` as `mit.edu`; repeated URLs counted twice) with a
+  tested fix; lesson to score tool results from the trace, not the URLs
+  the model wrote. "Hands-on" link added to A4; removed a sentence in
+  "Component-level evals" that repeated the team-benefit point.
+
+Next: A5 labs.
 
 ## Phase 6: step-by-step chapter review (planned 2026-10-25)
 

@@ -372,8 +372,7 @@ correct.
 **Example: tool use.** Measure tool-selection and argument accuracy on
 labeled requests (Section \@ref(evaluating-tool-use)).
 
-Component evals also let a team own one clear metric without running the
-whole system. They have one danger: a component metric can improve while the
+Component evals have one danger: a component metric can improve while the
 end-to-end result does not, because the metric does not capture what
 downstream steps need. **Always confirm with the end-to-end eval** before
 declaring a component improvement done.
@@ -544,6 +543,10 @@ whole system, analyzing errors, and improving single components.
 >   under-invest in analysis.
 > - The analysis grows with the system: read outputs, small evals, error
 >   analysis, then component evals and larger held-out sets.
+
+**Hands-on.** Appendix \@ref(agentic-labs) walks through the course lab for
+this chapter: a component-level eval that scores the search step of a
+research agent by the domains of its sources.
 
 ## Key takeaways
 

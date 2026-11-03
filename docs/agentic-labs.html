@@ -860,6 +860,10 @@ div.csl-indent {
 <li class="chapter" data-level="B.3.2" data-path="agentic-labs.html"><a href="agentic-labs.html#lab-email-assistant-with-tools"><i class="fa fa-check"></i><b>B.3.2</b> Lab: email assistant with tools</a></li>
 <li class="chapter" data-level="B.3.3" data-path="agentic-labs.html"><a href="agentic-labs.html#graded-assignment-research-report-with-tools"><i class="fa fa-check"></i><b>B.3.3</b> Graded assignment: research report with tools</a></li>
 </ul></li>
+<li class="chapter" data-level="B.4" data-path="agentic-labs.html"><a href="agentic-labs.html#agentic-labs-evaluation"><i class="fa fa-check"></i><b>B.4</b> Evaluation lab</a>
+<ul>
+<li class="chapter" data-level="B.4.1" data-path="agentic-labs.html"><a href="agentic-labs.html#lab-a-component-level-eval-for-web-search"><i class="fa fa-check"></i><b>B.4.1</b> Lab: a component-level eval for web search</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="bibliography.html"><a href="bibliography.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
@@ -1272,6 +1276,73 @@ returns a structured critique and a revised report as JSON, and a third call
 formats the result as HTML. It practises the manual tool protocol, reflection
 on a draft, and parsing structured output. The Module 5 graded lab turns these
 steps into a planned multi-agent pipeline.</p>
+</div>
+</div>
+<div id="agentic-labs-evaluation" class="section level2 hasAnchor" number="27.4">
+<h2><span class="header-section-number">B.4</span> Evaluation lab<a href="agentic-labs.html#agentic-labs-evaluation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>This lab goes with Chapter <a href="evaluating-agentic-systems.html#evaluating-agentic-systems">10</a>.</p>
+<div id="lab-a-component-level-eval-for-web-search" class="section level3 hasAnchor" number="27.4.1">
+<h3><span class="header-section-number">B.4.1</span> Lab: a component-level eval for web search<a href="agentic-labs.html#lab-a-component-level-eval-for-web-search" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><strong>Goal.</strong> Score one step of the Module 3 research agent, the search step, on
+its own instead of rerunning search, drafting, and reflection every time
+(Section <a href="evaluating-agentic-systems.html#component-level-evals">10.5</a>).</p>
+<p><strong>Steps:</strong></p>
+<ol style="list-style-type: decimal">
+<li><strong>Split out the research step.</strong> A single function gives the model three
+search tools (arXiv, web search, Wikipedia), lets the library run the
+tool loop, and returns the model’s list of sources. The prompt includes
+today’s date, which matters for requests such as “recent developments”.</li>
+<li><strong>Define the reference.</strong> A hand-made set of preferred domains: journals,
+universities, agencies, and AI venues.</li>
+<li><strong>Score.</strong> Pull every URL out of the output, mark each as preferred or
+not, and compute the share that is preferred. Pass if the share is at
+least 40%. Return the flag and a short Markdown report listing each URL.</li>
+<li><strong>Try it yourself.</strong> Change the topic, the domain list, or the threshold
+and rerun.</li>
+</ol>
+<p>In the terms of Section <a href="evaluating-agentic-systems.html#end-to-end-evals">10.2</a>, this is a <strong>code-graded eval
+with a per-example reference</strong>: the right domain list depends on the topic.
+It measures something close to <em>precision</em> (how much of what came back is
+trustworthy) and says nothing about <em>recall</em> (whether the important sources
+were found).</p>
+<p>Two details in the lab’s scoring are worth fixing. It matches a domain if the
+domain’s text appears anywhere in the host name, so <code>summit.edu</code> counts as
+<code>mit.edu</code>. It also counts a URL each time the output repeats it. A tighter
+version:</p>
+<div class="sourceCode" id="cb135"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb135-1"><a href="agentic-labs.html#cb135-1" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb135-2"><a href="agentic-labs.html#cb135-2" tabindex="-1"></a><span class="im">from</span> urllib.parse <span class="im">import</span> urlparse</span>
+<span id="cb135-3"><a href="agentic-labs.html#cb135-3" tabindex="-1"></a></span>
+<span id="cb135-4"><a href="agentic-labs.html#cb135-4" tabindex="-1"></a>URL <span class="op">=</span> re.<span class="bu">compile</span>(<span class="vs">r&quot;https</span><span class="op">?</span><span class="vs">://</span><span class="pp">[^</span><span class="dv">\s</span><span class="pp">)</span><span class="ch">\]</span><span class="pp">&gt;}</span><span class="ch">\&quot;</span><span class="pp">&#39;]</span><span class="op">+</span><span class="vs">&quot;</span>)</span>
+<span id="cb135-5"><a href="agentic-labs.html#cb135-5" tabindex="-1"></a></span>
+<span id="cb135-6"><a href="agentic-labs.html#cb135-6" tabindex="-1"></a><span class="kw">def</span> on_list(host: <span class="bu">str</span>, domains: <span class="bu">set</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="bu">bool</span>:</span>
+<span id="cb135-7"><a href="agentic-labs.html#cb135-7" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">any</span>(host <span class="op">==</span> d <span class="kw">or</span> host.endswith(<span class="st">&quot;.&quot;</span> <span class="op">+</span> d) <span class="cf">for</span> d <span class="kw">in</span> domains)</span>
+<span id="cb135-8"><a href="agentic-labs.html#cb135-8" tabindex="-1"></a></span>
+<span id="cb135-9"><a href="agentic-labs.html#cb135-9" tabindex="-1"></a><span class="kw">def</span> preferred_share(text: <span class="bu">str</span>, domains: <span class="bu">set</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="bu">float</span> <span class="op">|</span> <span class="va">None</span>:</span>
+<span id="cb135-10"><a href="agentic-labs.html#cb135-10" tabindex="-1"></a>    urls <span class="op">=</span> <span class="bu">set</span>(URL.findall(text))                  <span class="co"># count each URL once</span></span>
+<span id="cb135-11"><a href="agentic-labs.html#cb135-11" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> urls:</span>
+<span id="cb135-12"><a href="agentic-labs.html#cb135-12" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span>                                <span class="co"># no sources: report it, don&#39;t score it</span></span>
+<span id="cb135-13"><a href="agentic-labs.html#cb135-13" tabindex="-1"></a>    hits <span class="op">=</span> <span class="bu">sum</span>(on_list(urlparse(u).hostname <span class="kw">or</span> <span class="st">&quot;&quot;</span>, domains) <span class="cf">for</span> u <span class="kw">in</span> urls)</span>
+<span id="cb135-14"><a href="agentic-labs.html#cb135-14" tabindex="-1"></a>    <span class="cf">return</span> hits <span class="op">/</span> <span class="bu">len</span>(urls)</span></code></pre></div>
+<p><strong>Lessons:</strong></p>
+<ul>
+<li><strong>Evaluate the step you are changing.</strong> Search quality can be compared
+across providers, result counts, or prompts in seconds, without the noise of
+the drafting and reflection steps.</li>
+<li><strong>Decide what the component’s output is.</strong> The lab scores the URLs the model
+<em>wrote</em>, not the results the search tool <em>returned</em>. These can differ: the
+model may drop good results or cite a URL it never retrieved. The tool
+results in the trace (Section <a href="evaluating-agentic-systems.html#traces-and-spans">10.3</a>) are the cleaner
+input, and checking that every cited URL appears in them is a second,
+cheap eval.</li>
+<li><strong>One topic and one run is an anecdote.</strong> Build ten or more topics, each
+with its own domain list, and average the score. Search results and model
+choices vary between runs.</li>
+<li><strong>A trusted domain is a proxy, not relevance.</strong> An off-topic page on a
+university site still passes. Pair the domain check with precision and
+recall against sources an expert chose.</li>
+<li><strong>Confirm the gain end to end.</strong> A better search score should lead to better
+reports. Check that it does before moving on.</li>
+</ul>
 
 </div>
 </div>

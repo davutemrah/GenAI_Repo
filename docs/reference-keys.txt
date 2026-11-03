@@ -505,3 +505,5 @@ agentic-labs-tool-use
 lab-turning-functions-into-tools
 lab-email-assistant-with-tools
 graded-assignment-research-report-with-tools
+agentic-labs-evaluation
+lab-a-component-level-eval-for-web-search

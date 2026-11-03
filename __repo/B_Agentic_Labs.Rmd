@@ -313,3 +313,75 @@ returns a structured critique and a revised report as JSON, and a third call
 formats the result as HTML. It practises the manual tool protocol, reflection
 on a draft, and parsing structured output. The Module 5 graded lab turns these
 steps into a planned multi-agent pipeline.
+
+## Evaluation lab {#agentic-labs-evaluation}
+
+This lab goes with Chapter \@ref(evaluating-agentic-systems).
+
+### Lab: a component-level eval for web search
+
+**Goal.** Score one step of the Module 3 research agent, the search step, on
+its own instead of rerunning search, drafting, and reflection every time
+(Section \@ref(component-level-evals)).
+
+**Steps:**
+
+1. **Split out the research step.** A single function gives the model three
+   search tools (arXiv, web search, Wikipedia), lets the library run the
+   tool loop, and returns the model's list of sources. The prompt includes
+   today's date, which matters for requests such as "recent developments".
+2. **Define the reference.** A hand-made set of preferred domains: journals,
+   universities, agencies, and AI venues.
+3. **Score.** Pull every URL out of the output, mark each as preferred or
+   not, and compute the share that is preferred. Pass if the share is at
+   least 40%. Return the flag and a short Markdown report listing each URL.
+4. **Try it yourself.** Change the topic, the domain list, or the threshold
+   and rerun.
+
+In the terms of Section \@ref(end-to-end-evals), this is a **code-graded eval
+with a per-example reference**: the right domain list depends on the topic.
+It measures something close to *precision* (how much of what came back is
+trustworthy) and says nothing about *recall* (whether the important sources
+were found).
+
+Two details in the lab's scoring are worth fixing. It matches a domain if the
+domain's text appears anywhere in the host name, so `summit.edu` counts as
+`mit.edu`. It also counts a URL each time the output repeats it. A tighter
+version:
+
+```python
+import re
+from urllib.parse import urlparse
+
+URL = re.compile(r"https?://[^\s)\]>}\"']+")
+
+def on_list(host: str, domains: set[str]) -> bool:
+    return any(host == d or host.endswith("." + d) for d in domains)
+
+def preferred_share(text: str, domains: set[str]) -> float | None:
+    urls = set(URL.findall(text))                  # count each URL once
+    if not urls:
+        return None                                # no sources: report it, don't score it
+    hits = sum(on_list(urlparse(u).hostname or "", domains) for u in urls)
+    return hits / len(urls)
+```
+
+**Lessons:**
+
+- **Evaluate the step you are changing.** Search quality can be compared
+  across providers, result counts, or prompts in seconds, without the noise of
+  the drafting and reflection steps.
+- **Decide what the component's output is.** The lab scores the URLs the model
+  *wrote*, not the results the search tool *returned*. These can differ: the
+  model may drop good results or cite a URL it never retrieved. The tool
+  results in the trace (Section \@ref(traces-and-spans)) are the cleaner
+  input, and checking that every cited URL appears in them is a second,
+  cheap eval.
+- **One topic and one run is an anecdote.** Build ten or more topics, each
+  with its own domain list, and average the score. Search results and model
+  choices vary between runs.
+- **A trusted domain is a proxy, not relevance.** An off-topic page on a
+  university site still passes. Pair the domain check with precision and
+  recall against sources an expert chose.
+- **Confirm the gain end to end.** A better search score should lead to better
+  reports. Check that it does before moving on.
