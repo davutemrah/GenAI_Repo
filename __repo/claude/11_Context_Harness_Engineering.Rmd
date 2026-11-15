@@ -52,7 +52,7 @@ phrasing.
   model to a CPU and the context window to its RAM (June 2025, quoted by
   [Simon Willison](https://simonwillison.net/2025/Jun/27/context-engineering/)).
 - Drew Breunig named common ways long contexts fail
-  ([How contexts fail](https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html);
+  ([How long contexts fail](https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html);
   [How to fix your context](https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html)).
 - Manus published lessons from running a production agent
   ([Manus, July 2025](https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus)).
@@ -241,8 +241,10 @@ need different fixes.
 
 ### Four ways context fails {#four-failures}
 
-Breunig's taxonomy pairs each failure with a fix. The examples he cites are
-secondhand and were not checked against the original papers for this chapter.
+Breunig's taxonomy pairs each failure with a fix
+([How long contexts fail](https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html)).
+The examples he cites are secondhand and were not checked against the
+original papers for this chapter.
 
 | Failure | What happens | Typical fix |
 |---|---|---|

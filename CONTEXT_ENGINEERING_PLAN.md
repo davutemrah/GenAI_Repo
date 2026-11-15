@@ -25,8 +25,8 @@ metadata (research assistant); M4 right time: just-in-time retrieval and
 memory (multi-agent email/personal assistant). A Drew Breunig interview
 excerpt closes each module.
 
-Status: Phase 1 (Module 1) done 2026-11-14, awaiting Davut's review. Not
-committed.
+Status: Phase 1 (Module 1, chapter + labs appendix) done, committed and
+pushed as `2f9a1d8` (2026-11-14); GitHub Pages deploy verified live.
 
 Phase 1 changes in `claude/11`:
 - Course attribution paragraph and definition bullet.
