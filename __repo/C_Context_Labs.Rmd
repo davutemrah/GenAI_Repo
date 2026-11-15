@@ -7,11 +7,15 @@ notebooks are not reproduced: the code blocks below are short sketches of the
 idea a lab teaches, not runnable copies of the lab.
 
 > **About the results.** Outcomes below are **as described in the course
-> labs, not reproduced** here. Lab 1 runs a small local model and labs 2 and 3
-> call a hosted model, so each run can give a different answer. Read the
-> outcomes as illustrations of a pattern, not as benchmarks.
+> labs, not reproduced** here. The first Module 1 lab runs a small local
+> model and the other labs call a hosted model, so each run can give a
+> different answer. Read the outcomes as illustrations of a pattern, not as
+> benchmarks.
 
 ## Common setup {#context-labs-setup}
+
+This table describes the Module 1 labs. Later modules reuse the same harness
+and note their differences in their own section.
 
 | Item | Choice |
 |:-----|:-------|
@@ -276,3 +280,206 @@ the end result.
   example to catch a request that has already been answered. The same idea
   extends to summarizing, compacting, and storing context, which the later
   modules cover.
+
+## Module 2 labs: agentic search {#context-labs-m2}
+
+These labs go with Section \@ref(agentic-search).
+
+| Item | Module 2 choice |
+|:-----|:----------------|
+| Model | A hosted OpenAI model with native tool calling |
+| Data | A small customer-feedback web app from a public course repository: Python source, Markdown docs, a plain-text run log, and a SQLite database of tickets |
+| Index | One Chroma collection. Python files are split along the syntax tree (functions and classes stay whole); Markdown is split at H1 to H3 headings. Each chunk stores its path, symbol name, chunk type, and line numbers. Embeddings come from a small open model run locally; a BM25 sparse index sits on the same collection |
+| Harness | The same `Agent` loop as Module 1, with a 10-iteration cap and a token tracker on every run |
+
+### Lab: an agentic code search system
+
+**Goal.** Give a coding agent several search tools over three sources and
+watch it choose among them, broad first and then narrow.
+
+**Setup.** Seven tools share one interface. Five search the code index, one
+reads the log file, and one queries the database:
+
+| Tool | Source | Mechanism | Use it for |
+|:-----|:-------|:----------|:-----------|
+| `semantic_search` | Code and docs | Embedding similarity | "How does X work?" when the names are unknown |
+| `symbol_lexical_search` | Code | Metadata filter on the symbol name | The definition of a known function or class |
+| `pattern_lexical_search` | Code | Regex over chunk text, optional file filter | Naming conventions, decorators, imports |
+| `ranked_lexical_search` | Code and docs | BM25 | Chunks naming an exact identifier or literal |
+| `hybrid_search` | Code and docs | Semantic and BM25 rankings fused with RRF | A concept *plus* an exact term |
+| `log_search` | Run log | Regex, newest lines first | What actually happened at run time |
+| `database_query` | SQLite | Read-only SQL | Live records, counts, statuses |
+
+**Steps:**
+
+1. **Inspect the chunks.** Count them by type and compare one class chunk
+   with one Markdown section, to see where the boundaries fell.
+2. **Test each tool alone**, with the same JSON arguments the agent would
+   send, before giving any of them to the agent.
+3. **Study the hybrid tool.** It takes two query fields, a sentence for the
+   semantic leg and an identifier for the BM25 leg, and two weights that
+   default to 1:1. The lab explains why a lopsided weight silences one leg;
+   Section \@ref(search-methods) reproduces that with a small sketch.
+4. **Run the agent on four questions:**
+    - *Which database stores the tickets, and which tables exist?* Watch
+      whether it answers from code alone or also queries the database.
+    - *How does escalation work, and which rule decides it?* The agent
+      usually starts with `hybrid_search`. Sometimes a cheaper tool already
+      answers the question and the agent stops there.
+    - *Write an incident note for the escalation that never got a
+      notification.* A multi-hop question: the database shows *which*
+      escalation, the log shows *why*. The agent may first read the schema,
+      and it may run both tools in the same turn.
+    - *Can a ticket be deleted, or only created and updated?* The answer
+      spans a Markdown architecture doc and the code.
+5. **Read the token tracker.** All seven tool schemas are sent on every call,
+   whether used or not.
+
+**Outcome**, as described in the lab: the agent tends to open with a broad
+search and then narrow to symbol or regex lookups, and it combines the
+database and the log to answer the incident question.
+
+The database tool shows a harness habit worth copying: it is read-only
+**by construction**, not by instruction. A sketch with a marketing table:
+
+```python
+import sqlite3
+from contextlib import closing
+
+
+def run_readonly_sql(db_path: str, sql: str, max_rows: int = 50) -> list[tuple]:
+    """SQL tool for an agent: the connection itself refuses writes."""
+    uri = f"file:{db_path}?mode=ro"
+    with closing(sqlite3.connect(uri, uri=True)) as conn:
+        return conn.execute(sql).fetchmany(max_rows)  # one statement only
+
+
+# run_readonly_sql("ads.db", "SELECT campaign, usd FROM spend ORDER BY usd DESC")
+# -> [('Q3-BRAND-07', 1200.0), ('Q3-PERF-02', 800.0)]
+# run_readonly_sql("ads.db", "DELETE FROM spend")
+# -> sqlite3.OperationalError: attempt to write a readonly database
+```
+
+`execute` also refuses a second statement appended after a semicolon, and
+`max_rows` keeps a careless `SELECT *` from flooding the context.
+
+**Lessons:**
+
+- **The description is the whole interface.** The model sees the name, the
+  description, and the field descriptions, never the code. The lab's
+  descriptions follow the pattern in Section \@ref(agentic-search): the source
+  and the method, when to use the tool, and a limit. For example, the
+  semantic search description warns that it returns relevant matches rather
+  than every occurrence, so it cannot prove that something is absent.
+- **Field descriptions can teach the index's quirks.** The BM25 index treats
+  `snake_case` identifiers as single tokens, so the field description says to
+  write the full identifier rather than a fragment of it.
+- **Code search cannot answer run-time questions.** The log is deliberately
+  kept out of the vector store and searched directly, and the database
+  answers questions about live records. Each source keeps the tool that
+  suits it.
+- **Choice has a price.** The agent may skip the tool you expected, every
+  schema is resent on every call, and broad questions take several
+  iterations. The iteration cap is the harness's backstop.
+
+### Lab: searching for the right tool with a registry
+
+**Goal.** Measure what it costs to send every tool definition on every call,
+then send only the definitions a task needs (Section \@ref(tool-registries)).
+
+**Steps:**
+
+1. **Register the seven tools** in a registry: a dictionary keyed by tool
+   name that can export all the schemas at once.
+2. **Baseline.** Send all seven schemas with the task "look up the exact
+   definition of the `SafetyHazardRule` class", ask the model to pick the
+   tools it needs, and record the prompt tokens. The expected pick is
+   `symbol_lexical_search`.
+3. **Index the tools.** Embed each tool's name and description into a
+   separate Chroma collection, apart from the code index.
+4. **Search, then send.** Embed the task, retrieve the top $K = 3$ tools,
+   and send only their schemas. Compare tokens and the model's pick with the
+   baseline.
+5. **Vary the task and $K$.** Try database, hybrid, regex, and log tasks,
+   and $K$ of 1 or 2.
+
+**Outcome**, as described in the lab: with only seven tools the baseline
+picks correctly, so the point is the token overhead; the course video reports
+a reduction of more than 40% with the registry. In this lab the search runs
+*before* the model call. The module's graded assignment moves it inside the
+agent loop, so the agent searches for tools while it works. The assignment's
+solution is not reproduced here.
+
+The lab's own guidance on when a registry pays off, paraphrased:
+
+| Signal | Favors a registry | Favors sending all tools |
+|:-------|:------------------|:-------------------------|
+| Number of tools | More than about ten | Fewer than about ten |
+| Usage | Most tools rarely used | Nearly every tool used in every session |
+| Size of definitions | 10,000 tokens or more | Compact |
+
+These are rough heuristics. Ten long, overlapping tools can cause more wrong
+picks than twenty short, distinct ones.
+
+The risk that the token count hides is a tool that is never retrieved. Treat
+the registry as a retrieval system and measure its hit rate on reference
+tasks. In this sketch, word overlap stands in for embeddings:
+
+```python
+import re
+
+# name -> description (a real registry stores the full JSON schema too)
+TOOLS = {
+    "metric_docs_search": "Search metric definitions and methodology docs by meaning.",
+    "campaign_sql": "Run read-only SQL on campaign delivery and spend tables.",
+    "pipeline_log_search": "Regex search over pipeline run logs for failures and warnings.",
+    "symbol_lookup": "Find the definition of an exact function or class name in the code.",
+    "report_pdf": "Render a finished report as a PDF file.",
+    "slack_post": "Post a message to a team channel.",
+}
+
+
+def words(text: str) -> set[str]:
+    return set(re.findall(r"[a-z]+", text.lower()))
+
+
+def search_tools(task: str, k: int = 2) -> list[str]:
+    """Rank tools by word overlap with the task; embeddings do this better."""
+    task_words = words(task)
+    ranked = sorted(TOOLS, key=lambda name: len(task_words & words(TOOLS[name])),
+                    reverse=True)
+    return ranked[:k]
+
+
+# Reference tasks with the tool a careful human would pick
+cases = [
+    ("Which campaigns had spend above budget last week?", "campaign_sql"),
+    ("Why did last night's pipeline run fail?", "pipeline_log_search"),
+    ("How is incremental reach defined in our methodology?", "metric_docs_search"),
+    ("Show the definition of the dedupe_households function", "symbol_lookup"),
+    ("Did the overnight job throw errors?", "pipeline_log_search"),  # no shared words
+]
+for k in (1, 2, 3):
+    hits = sum(expected in search_tools(task, k) for task, expected in cases)
+    print(f"k={k}: right tool retrieved for {hits} of {len(cases)} tasks")
+# k=1: right tool retrieved for 4 of 5 tasks
+# k=2: right tool retrieved for 4 of 5 tasks
+# k=3: right tool retrieved for 4 of 5 tasks
+```
+
+The last task shares no words with the log tool's description ("errors"
+against "failures"), so it misses at every $K$ tried. Raising $K$ cannot fix
+a vocabulary gap; semantic matching or a better description can.
+
+**Lessons:**
+
+- **Saving tokens is easy to see; a missed tool is not.** Measure the
+  registry's hit rate on reference tasks, as you would for any retriever.
+- **$K$ is a precision–recall trade-off for tools.** A small $K$ saves the
+  most tokens and risks dropping the right tool.
+- **Descriptions now do two jobs.** They instruct the model *and* they are
+  the documents the registry searches. A vague description hurts twice.
+- **Small toolsets do not need this.** With seven compact tools the registry
+  is mostly overhead. The case grows with MCP servers that expose dozens of
+  tools. Test real tasks with and without it: did the agent still find the
+  right tool, form valid arguments, and use less context?

@@ -717,8 +717,9 @@ div.csl-indent {
 <li class="chapter" data-level="22.4.3" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-is-a-finite-attention-budget"><i class="fa fa-check"></i><b>22.4.3</b> Context is a finite attention budget</a></li>
 <li class="chapter" data-level="22.4.4" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#four-failures"><i class="fa fa-check"></i><b>22.4.4</b> Four ways context fails</a></li>
 <li class="chapter" data-level="22.4.5" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#four-families"><i class="fa fa-check"></i><b>22.4.5</b> Four families of technique: write, select, compress, isolate</a></li>
-<li class="chapter" data-level="22.4.6" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-cost"><i class="fa fa-check"></i><b>22.4.6</b> Cost: the overlooked dimension</a></li>
-<li class="chapter" data-level="22.4.7" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-features-are-becoming-platform-features"><i class="fa fa-check"></i><b>22.4.7</b> Context features are becoming platform features</a></li>
+<li class="chapter" data-level="22.4.6" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#agentic-search"><i class="fa fa-check"></i><b>22.4.6</b> Right information: agentic search</a></li>
+<li class="chapter" data-level="22.4.7" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-cost"><i class="fa fa-check"></i><b>22.4.7</b> Cost: the overlooked dimension</a></li>
+<li class="chapter" data-level="22.4.8" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-features-are-becoming-platform-features"><i class="fa fa-check"></i><b>22.4.8</b> Context features are becoming platform features</a></li>
 </ul></li>
 <li class="chapter" data-level="22.5" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#harness-engineering"><i class="fa fa-check"></i><b>22.5</b> Harness engineering</a>
 <ul>
@@ -886,6 +887,11 @@ div.csl-indent {
 <li class="chapter" data-level="C.2.2" data-path="context-labs.html"><a href="context-labs.html#lab-inside-a-customer-support-agent"><i class="fa fa-check"></i><b>C.2.2</b> Lab: inside a customer support agent</a></li>
 <li class="chapter" data-level="C.2.3" data-path="context-labs.html"><a href="context-labs.html#lab-shaping-the-agents-context-with-a-hook"><i class="fa fa-check"></i><b>C.2.3</b> Lab: shaping the agent’s context with a hook</a></li>
 </ul></li>
+<li class="chapter" data-level="C.3" data-path="context-labs.html"><a href="context-labs.html#context-labs-m2"><i class="fa fa-check"></i><b>C.3</b> Module 2 labs: agentic search</a>
+<ul>
+<li class="chapter" data-level="C.3.1" data-path="context-labs.html"><a href="context-labs.html#lab-an-agentic-code-search-system"><i class="fa fa-check"></i><b>C.3.1</b> Lab: an agentic code search system</a></li>
+<li class="chapter" data-level="C.3.2" data-path="context-labs.html"><a href="context-labs.html#lab-searching-for-the-right-tool-with-a-registry"><i class="fa fa-check"></i><b>C.3.2</b> Lab: searching for the right tool with a registry</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="bibliography.html"><a href="bibliography.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
@@ -937,8 +943,9 @@ mirror, summary, or aggregator.</li>
 <p>Product names, API identifiers, and preview status are as of October 2026.</p>
 <p>Parts of this chapter began as study notes from the DeepLearning.AI course
 <em>Context Engineering</em>, built with Chroma and taught by Chroma’s CEO, Jeff
-Huber. The course follows one customer-service agent through its examples,
-and this chapter borrows that scenario. Chroma sells retrieval infrastructure,
+Huber. Its first module follows a customer-service agent, and its second a
+coding agent investigating a customer-feedback app; this chapter borrows both
+scenarios. Chroma sells retrieval infrastructure,
 so its research claims carry the <strong>[Vendor]</strong> label like any other.</p>
 </div>
 <div id="where-the-terms-came-from" class="section level2 hasAnchor" number="22.2">
@@ -1107,7 +1114,9 @@ it consolidates information so that the important details stand out.</p>
 <p>The three axes and the four families of technique (Section
 <a href="context-harness-engineering.html#four-families">22.4.5</a>) describe the same work from two angles. Use the axes to
 diagnose a problem: <em>is the issue what was found, how it was presented, or
-when it arrived?</em> Then pick a technique from the families to fix it.</p>
+when it arrived?</em> Then pick a technique from the families to fix it.
+Section <a href="context-harness-engineering.html#agentic-search">22.4.6</a> covers the first axis, right information, in
+depth.</p>
 </div>
 <div id="context-components" class="section level3 hasAnchor" number="22.4.2">
 <h3><span class="header-section-number">22.4.2</span> What is in the context window<a href="context-harness-engineering.html#context-components" class="anchor-section" aria-label="Anchor link to header"></a></h3>
@@ -1119,7 +1128,7 @@ more:</p>
 <li><strong>System prompt.</strong> The standing instructions. It sits at the front of every
 call, so it should be short and stable. Anything that changes per request
 belongs elsewhere. A stable prefix also keeps the prompt cache warm (Section
-<a href="context-harness-engineering.html#context-cost">22.4.6</a>).</li>
+<a href="context-harness-engineering.html#context-cost">22.4.7</a>).</li>
 <li><strong>User input.</strong> The request, plus any later turns in the conversation.</li>
 <li><strong>Memory.</strong> Stored information that is reloaded when relevant, such as user
 preferences or task instructions.</li>
@@ -1339,8 +1348,414 @@ behavior, but heuristic rather than a brittle list of rules (Section
 another. Return compact tool outputs, not raw dumps.</li>
 </ul>
 </div>
-<div id="context-cost" class="section level3 hasAnchor" number="22.4.6">
-<h3><span class="header-section-number">22.4.6</span> Cost: the overlooked dimension<a href="context-harness-engineering.html#context-cost" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="agentic-search" class="section level3 hasAnchor" number="22.4.6">
+<h3><span class="header-section-number">22.4.6</span> Right information: agentic search<a href="context-harness-engineering.html#agentic-search" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Select is the family that decides <em>what</em> reaches the window. The course’s
+second module treats it through <strong>agentic search</strong>: the agent, not the
+developer, decides what to look for, where, and how, and it can search again
+after reading the first results.</p>
+<p>The contrast is with a fixed retrieval pipeline. Classic RAG (Section
+<a href="llm-applications.html#retrieval-augmented-generation-rag">5.3</a>) runs the same steps on every
+request:</p>
+<table>
+<colgroup>
+<col width="18%" />
+<col width="51%" />
+<col width="29%" />
+</colgroup>
+<thead>
+<tr>
+<th align="left">Decision</th>
+<th align="left">Fixed pipeline (basic RAG)</th>
+<th align="left">Agentic search</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">What to look for</td>
+<td align="left">The user’s query, perhaps rewritten once</td>
+<td align="left">The agent breaks the task into its own sub-queries</td>
+</tr>
+<tr>
+<td align="left">Where to look</td>
+<td align="left">One index, chosen by the developer</td>
+<td align="left">Any source it has a tool for: documents, code, logs, a database</td>
+</tr>
+<tr>
+<td align="left">How to match</td>
+<td align="left">One retriever, usually vector search</td>
+<td align="left">The search method that suits each sub-query</td>
+</tr>
+<tr>
+<td align="left">When to stop</td>
+<td align="left">After one retrieval step</td>
+<td align="left">When the evidence is enough, or an iteration limit is hit</td>
+</tr>
+<tr>
+<td align="left">Recovery from a bad first result</td>
+<td align="left">Only if the developer built a fallback</td>
+<td align="left">The agent refines the query and searches again</td>
+</tr>
+</tbody>
+</table>
+<p>The course’s example: support staff notice that similar tickets are not
+escalated consistently, and an engineer asks a coding agent to investigate. The
+agent searches the code for the escalation logic, finds several factors
+(category, an order ID, internal rules), searches further for each, and then
+writes SQL to find two tickets with the same category and urgency but
+different escalation outcomes. The pair shows the cause: tickets without an
+order ID were never escalated. No single search would have found it.</p>
+<p>A marketing analog: “why does the brand-lift dashboard disagree with the
+vendor’s study?” may need the metric definition (documents), the transformation
+code (code search), last night’s pipeline warnings (logs), and the exposed and
+control counts (SQL).</p>
+<p>Agentic search has three costs:</p>
+<ul>
+<li><strong>Less predictable.</strong> The same request can take different paths on
+different runs, which makes testing harder.</li>
+<li><strong>Slower and more expensive.</strong> Each search is another model call, and the
+whole context is resent each time (Section <a href="context-harness-engineering.html#context-components">22.4.2</a>).</li>
+<li><strong>More context.</strong> Every tool result is appended, so a thorough search fills
+the window fast. Compress and isolate are the counterweights.</li>
+</ul>
+<div id="search-methods" class="section level4 hasAnchor" number="22.4.6.1">
+<h4><span class="header-section-number">22.4.6.1</span> Which search method fits the question<a href="context-harness-engineering.html#search-methods" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>The course frames the choice the way a person would: <em>what am I looking for,
+where does it live, and how should I match it?</em></p>
+<table>
+<colgroup>
+<col width="49%" />
+<col width="15%" />
+<col width="35%" />
+</colgroup>
+<thead>
+<tr>
+<th align="left">What you are looking for</th>
+<th align="left">Method</th>
+<th align="left">Marketing example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">An exact name, ID, or error code</td>
+<td align="left">Exact lexical match, or a regex for a pattern</td>
+<td align="left"><code>campaign_id = 'Q3-BRAND-07'</code>; every <code>_dedupe_</code> helper</td>
+</tr>
+<tr>
+<td align="left">Several terms, some more important than others</td>
+<td align="left">Ranked lexical search (BM25: rare terms and frequent matches score higher)</td>
+<td align="left">“frequency cap weekly CTV”</td>
+</tr>
+<tr>
+<td align="left">An idea that may be worded differently</td>
+<td align="left">Semantic search over embeddings</td>
+<td align="left">“how do we avoid counting a household twice?”</td>
+</tr>
+<tr>
+<td align="left">An idea <em>and</em> an exact term</td>
+<td align="left">Hybrid search: run both, then fuse the rankings</td>
+<td align="left">“how is frequency capped, and where is <code>MAX_FREQ_PER_WEEK</code> set?”</td>
+</tr>
+<tr>
+<td align="left">Current records, counts, statuses</td>
+<td align="left">A read-only SQL tool (retrieval, not search)</td>
+<td align="left">spend by campaign last week</td>
+</tr>
+<tr>
+<td align="left">What actually happened at run time</td>
+<td align="left">Regex over log files</td>
+<td align="left">warnings in last night’s pipeline run</td>
+</tr>
+</tbody>
+</table>
+<p>Two details matter in practice:</p>
+<ul>
+<li><strong>Tokenization decides what lexical search can find.</strong> If an identifier
+such as <code>MAX_FREQ_PER_WEEK</code> is indexed as one token, a search for
+<code>frequency</code> will not match it. Code often needs preprocessing before
+lexical search works well.</li>
+<li><strong>Semantic search is weak on exact strings.</strong> Embeddings capture meaning,
+so an error code, ticket ID, or file name may rank below a chunk that
+merely talks about the same topic.</li>
+</ul>
+<p><strong>Hybrid search and reciprocal rank fusion.</strong> Semantic and BM25 scores live on
+different scales, so adding them is meaningless. Reciprocal rank fusion (RRF)
+combines <strong>ranks</strong> instead <span class="citation">(<a href="#ref-cormack2009rrf">Cormack et al. 2009</a>)</span>:</p>
+<p><span class="math display">\[\text{RRF}(d) = \sum_{r \in R} \frac{w_r}{k + \text{rank}_r(d)}\]</span></p>
+<p>Each ranked list <span class="math inline">\(r\)</span> contributes more for documents near its top. A document
+found by both methods collects two contributions and rises. The constant
+<span class="math inline">\(k = 60\)</span> comes from the original paper and flattens the curve, so the top
+rank of one list does not dominate. The weights <span class="math inline">\(w_r\)</span> are a common extension.
+The original formula has none.</p>
+<div class="sourceCode" id="cb124"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb124-1"><a href="context-harness-engineering.html#cb124-1" tabindex="-1"></a><span class="kw">def</span> weighted_rrf(rankings: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">list</span>[<span class="bu">str</span>]], weights: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">float</span>],</span>
+<span id="cb124-2"><a href="context-harness-engineering.html#cb124-2" tabindex="-1"></a>                 k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">60</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">float</span>]]:</span>
+<span id="cb124-3"><a href="context-harness-engineering.html#cb124-3" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Fuse ranked lists by rank, not score. Ranks start at 1.&quot;&quot;&quot;</span></span>
+<span id="cb124-4"><a href="context-harness-engineering.html#cb124-4" tabindex="-1"></a>    scores: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">float</span>] <span class="op">=</span> {}</span>
+<span id="cb124-5"><a href="context-harness-engineering.html#cb124-5" tabindex="-1"></a>    <span class="cf">for</span> method, ranked_docs <span class="kw">in</span> rankings.items():</span>
+<span id="cb124-6"><a href="context-harness-engineering.html#cb124-6" tabindex="-1"></a>        <span class="cf">for</span> rank, doc <span class="kw">in</span> <span class="bu">enumerate</span>(ranked_docs, start<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb124-7"><a href="context-harness-engineering.html#cb124-7" tabindex="-1"></a>            scores[doc] <span class="op">=</span> scores.get(doc, <span class="fl">0.0</span>) <span class="op">+</span> weights[method] <span class="op">/</span> (k <span class="op">+</span> rank)</span>
+<span id="cb124-8"><a href="context-harness-engineering.html#cb124-8" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sorted</span>(scores.items(), key<span class="op">=</span><span class="kw">lambda</span> item: item[<span class="dv">1</span>], reverse<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb124-9"><a href="context-harness-engineering.html#cb124-9" tabindex="-1"></a></span>
+<span id="cb124-10"><a href="context-harness-engineering.html#cb124-10" tabindex="-1"></a></span>
+<span id="cb124-11"><a href="context-harness-engineering.html#cb124-11" tabindex="-1"></a><span class="co"># &quot;How is frequency capped, and where is MAX_FREQ_PER_WEEK set?&quot;</span></span>
+<span id="cb124-12"><a href="context-harness-engineering.html#cb124-12" tabindex="-1"></a>semantic <span class="op">=</span> [<span class="st">&quot;reach_guide.md&quot;</span>, <span class="st">&quot;pacing.md&quot;</span>, <span class="st">&quot;budget_faq.md&quot;</span>, <span class="st">&quot;glossary.md&quot;</span>,</span>
+<span id="cb124-13"><a href="context-harness-engineering.html#cb124-13" tabindex="-1"></a>            <span class="st">&quot;dsp_notes.md&quot;</span>, <span class="st">&quot;audience.md&quot;</span>, <span class="st">&quot;brand_lift.md&quot;</span>, <span class="st">&quot;frequency.py&quot;</span>]</span>
+<span id="cb124-14"><a href="context-harness-engineering.html#cb124-14" tabindex="-1"></a>lexical <span class="op">=</span> [<span class="st">&quot;frequency.py&quot;</span>, <span class="st">&quot;config.yaml&quot;</span>]</span>
+<span id="cb124-15"><a href="context-harness-engineering.html#cb124-15" tabindex="-1"></a></span>
+<span id="cb124-16"><a href="context-harness-engineering.html#cb124-16" tabindex="-1"></a><span class="cf">for</span> w_sem <span class="kw">in</span> (<span class="fl">1.0</span>, <span class="fl">3.0</span>):</span>
+<span id="cb124-17"><a href="context-harness-engineering.html#cb124-17" tabindex="-1"></a>    fused <span class="op">=</span> weighted_rrf({<span class="st">&quot;semantic&quot;</span>: semantic, <span class="st">&quot;lexical&quot;</span>: lexical},</span>
+<span id="cb124-18"><a href="context-harness-engineering.html#cb124-18" tabindex="-1"></a>                         {<span class="st">&quot;semantic&quot;</span>: w_sem, <span class="st">&quot;lexical&quot;</span>: <span class="fl">1.0</span>})</span>
+<span id="cb124-19"><a href="context-harness-engineering.html#cb124-19" tabindex="-1"></a>    order <span class="op">=</span> [doc <span class="cf">for</span> doc, _ <span class="kw">in</span> fused]</span>
+<span id="cb124-20"><a href="context-harness-engineering.html#cb124-20" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;weights </span><span class="sc">{</span>w_sem<span class="sc">:.0f}</span><span class="ss">:1 -&gt; top: </span><span class="sc">{</span>order[<span class="dv">0</span>]<span class="sc">}</span><span class="ss">, &quot;</span></span>
+<span id="cb124-21"><a href="context-harness-engineering.html#cb124-21" tabindex="-1"></a>          <span class="ss">f&quot;config.yaml at position </span><span class="sc">{</span>order<span class="sc">.</span>index(<span class="st">&#39;config.yaml&#39;</span>) <span class="op">+</span> <span class="dv">1</span><span class="sc">}</span><span class="ss"> of </span><span class="sc">{</span><span class="bu">len</span>(order)<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb124-22"><a href="context-harness-engineering.html#cb124-22" tabindex="-1"></a><span class="co"># weights 1:1 -&gt; top: frequency.py, config.yaml at position 4 of 9</span></span>
+<span id="cb124-23"><a href="context-harness-engineering.html#cb124-23" tabindex="-1"></a><span class="co"># weights 3:1 -&gt; top: frequency.py, config.yaml at position 9 of 9</span></span></code></pre></div>
+<p><code>frequency.py</code> ranks only eighth semantically but first lexically, so fusion
+puts it on top. The second line shows a trap the course lab points out. With
+<span class="math inline">\(k = 60\)</span>, rank 1 scores only about 30% more than rank 20 (<span class="math inline">\(1/61\)</span> against
+<span class="math inline">\(1/80\)</span>), so a 3:1 weight outweighs any rank difference. <code>config.yaml</code>, found
+only by the keyword search, drops to last: <strong>a lopsided weight does not reduce
+a method’s influence, it removes it.</strong> Start with equal weights.</p>
+</div>
+<div id="tool-descriptions-decide-which-search-runs" class="section level4 hasAnchor" number="22.4.6.2">
+<h4><span class="header-section-number">22.4.6.2</span> Tool descriptions decide which search runs<a href="context-harness-engineering.html#tool-descriptions-decide-which-search-runs" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>The agent never sees how a tool works. It sees the name, the description, and
+the input schema (Section <a href="tool-use.html#designing-tools-a-model-can-use-well">9.3</a>). For
+search tools, the course suggests a description should answer three questions
+for the model:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Should I call this tool?</strong> Name the data source and the matching method:
+“metric definitions and methodology docs, matched by meaning.”</li>
+<li><strong>How should I call it?</strong> Say what a good input looks like: “a natural-
+language description of the concept, not a list of keywords” for semantic
+search; “the exact identifier, spelled in full” for lexical search.</li>
+<li><strong>What will I get back?</strong> Describe the result: “up to <code>n</code> chunks of about
+1,000 characters, each with file path and line number.”</li>
+</ol>
+<p>Two more parts settle close calls. <strong>When not to use it</strong>, and <strong>its
+limits</strong>: a semantic tool returns relevant matches, not all matches, so it
+cannot prove that something is absent. Where tools overlap, <strong>name the
+alternative</strong>: “for an exact column name, use <code>symbol_lookup</code> instead.”</p>
+<p>The danger phrase is “best for general exploration.” It describes almost any
+request, so the model may choose that tool for everything.</p>
+</div>
+<div id="tool-registries" class="section level4 hasAnchor" number="22.4.6.3">
+<h4><span class="header-section-number">22.4.6.3</span> Tool registries: load definitions on demand<a href="context-harness-engineering.html#tool-registries" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>Detailed descriptions have a price. Tool definitions behave like part of the
+system prompt: they are sent on every call, whether or not the tool is used.
+In a diagram by Drew Breunig shown in the course, OpenAI’s Codex coding
+agent already holds about 5,500 tokens before the user types anything, and
+roughly a quarter of that is tool definitions (as shown in the course, not
+independently checked). A log-search step does not need the definition of a
+PDF-export tool.</p>
+<p>A <strong>tool registry</strong> keeps most definitions out of the window:</p>
+<ol style="list-style-type: decimal">
+<li>Store every tool’s name and description in a searchable index, usually a
+vector store.</li>
+<li>Give the agent one always-loaded tool: <code>search_tools(query)</code>.</li>
+<li>When the agent needs a capability, it searches, and the matching
+definitions are added to the context. Only then can it call those tools.</li>
+</ol>
+<p>The course reports that the lab’s registry cut token use by more than 40%
+(as described in the course, not reproduced here). It can also reduce context
+confusion, because fewer look-alike tools compete for each choice.</p>
+<p>The costs are real:</p>
+<ul>
+<li><strong>One more component.</strong> An embedding model, an index, and a search step,
+all of which can fail.</li>
+<li><strong>A missed tool is invisible.</strong> If the right tool is not in the top <span class="math inline">\(k\)</span>
+results, the agent never knows it existed. Measure how often the right tool
+is retrieved, as Appendix <a href="context-labs.html#context-labs-m2">C.3</a> does.</li>
+<li><strong>Interaction with caching (author’s judgment).</strong> Definitions appended
+after the cached prefix keep the cache warm. Rewriting the tool list at the
+top of the request invalidates it (Section <a href="context-harness-engineering.html#context-cost">22.4.7</a>). Check how
+your framework inserts loaded tools.</li>
+</ul>
+<p>The course lab’s rule of thumb: consider a registry with more than about ten
+tools, when most tools are rarely used, or when definitions reach 10,000
+tokens or more. With a handful of tools that are used on most tasks, load them
+all. Anthropic now ships this as a platform feature, the
+<a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool">tool search tool</a>:
+tools marked <code>defer_loading</code> stay out of the context until a regex or BM25
+search finds them. Its documentation gives similar thresholds <strong>[Vendor]</strong>.</p>
+</div>
+<div id="search-failures" class="section level4 hasAnchor" number="22.4.6.4">
+<h4><span class="header-section-number">22.4.6.4</span> Where agentic search fails<a href="context-harness-engineering.html#search-failures" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>Start where Section <a href="context-harness-engineering.html#look-at-traces">22.5.7</a> left off: read traces and find
+answers that a knowledgeable colleague would have got right. Then locate the
+failure. The course’s two examples cover both ends: an agent that answered
+from code when a policy document stated the rule directly, and an agent that
+insisted a database field did not exist because the class definition had been
+split across two chunks.</p>
+<table>
+<colgroup>
+<col width="34%" />
+<col width="44%" />
+<col width="22%" />
+</colgroup>
+<thead>
+<tr>
+<th align="left">Where it failed</th>
+<th align="left">What the trace shows</th>
+<th align="left">Usual fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">Wrong tool</td>
+<td align="left">A lexical search where meaning mattered, or the reverse</td>
+<td align="left">Expand descriptions; disambiguate overlapping tools; add a usage example</td>
+</tr>
+<tr>
+<td align="left">Right tool, wrong source</td>
+<td align="left">The search ran over code when the answer was in the docs</td>
+<td align="left">State each tool’s data source plainly</td>
+</tr>
+<tr>
+<td align="left">Right tool, bad arguments</td>
+<td align="left">Missing parameters, keywords where a sentence was expected</td>
+<td align="left">Describe the input format; give an example call</td>
+</tr>
+<tr>
+<td align="left">Right call, wrong data</td>
+<td align="left">The relevant chunk was missing, split, or ranked too low</td>
+<td align="left">Data preparation: chunking, metadata, more results, better ranking</td>
+</tr>
+</tbody>
+</table>
+<p>Before fixing anything, turn the failures into a small eval:</p>
+<ul>
+<li><strong>Collect reference searches.</strong> Include the failures you found <em>and</em>
+searches that already work, so you can catch regressions.</li>
+<li><strong>Change one thing at a time.</strong> Then you know what caused the change in
+the score.</li>
+<li><strong>Grade at the right level.</strong> Grade the tool input when one call is
+clearly correct. Grade the tool output or the final answer when several
+paths are equally good.</li>
+</ul>
+<p>Chapter <a href="evaluating-agentic-systems.html#evaluating-agentic-systems">10</a> covers component-level evals in
+general. Here, tool-selection accuracy is the component metric.</p>
+</div>
+<div id="data-preparation" class="section level4 hasAnchor" number="22.4.6.5">
+<h4><span class="header-section-number">22.4.6.5</span> Data preparation is context engineering<a href="context-harness-engineering.html#data-preparation" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>When the right tool runs with the right query and still returns the wrong
+chunks, the problem is in how the data was prepared. This looks like data
+engineering, but it decides what can ever reach the window.</p>
+<ul>
+<li><strong>Chunk size and overlap.</strong> Embedding models accept limited input, so long
+text is split. A little overlap between neighboring chunks keeps a sentence
+cut at a boundary readable. Too much overlap fills the top results with
+repeats.</li>
+<li><strong>Split on structure, not on character count.</strong> Recursive splitting tries
+paragraph breaks first, then lines, then sentences, then words. Markdown
+can be split at its headings, keeping each section whole.</li>
+<li><strong>Parse code.</strong> A parser turns code into an abstract syntax tree (AST), so
+chunks follow functions and classes instead of cutting a class in half. A
+class split across two chunks caused the course’s “missing field” error.</li>
+<li><strong>Attach metadata.</strong> Store the file path, line numbers, symbol name, and
+document date with each chunk. Metadata lets the agent find a chunk’s
+neighbors. It also allows <strong>filtering before ranking</strong>, such as “only
+current methodology docs” or “only this client”, which shrinks the
+candidate set. Section <a href="context-harness-engineering.html#metadata-context">22.6.1</a> makes the same argument for
+analytics tables.</li>
+<li><strong>Enrich small chunks.</strong> Prepend a short summary of the surrounding
+section or file so the chunk carries its context with it.</li>
+</ul>
+<p>Measure each change with <strong><a href="mailto:precision@k" class="email">precision@k</a></strong> (of the <span class="math inline">\(k\)</span> chunks retrieved, the
+share that is relevant) and <strong><a href="mailto:recall@k" class="email">recall@k</a></strong> (of the relevant chunks, the share
+retrieved). This requires a small ground-truth set: for each representative
+question, the chunks a correct answer needs.</p>
+<div class="sourceCode" id="cb125"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb125-1"><a href="context-harness-engineering.html#cb125-1" tabindex="-1"></a><span class="kw">def</span> precision_recall_at_k(retrieved: <span class="bu">list</span>[<span class="bu">str</span>], relevant: <span class="bu">set</span>[<span class="bu">str</span>], k: <span class="bu">int</span>):</span>
+<span id="cb125-2"><a href="context-harness-engineering.html#cb125-2" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Precision@k and recall@k for one query.&quot;&quot;&quot;</span></span>
+<span id="cb125-3"><a href="context-harness-engineering.html#cb125-3" tabindex="-1"></a>    hits <span class="op">=</span> <span class="bu">len</span>(<span class="bu">set</span>(retrieved[:k]) <span class="op">&amp;</span> relevant)</span>
+<span id="cb125-4"><a href="context-harness-engineering.html#cb125-4" tabindex="-1"></a>    <span class="cf">return</span> hits <span class="op">/</span> k, hits <span class="op">/</span> <span class="bu">len</span>(relevant)</span>
+<span id="cb125-5"><a href="context-harness-engineering.html#cb125-5" tabindex="-1"></a></span>
+<span id="cb125-6"><a href="context-harness-engineering.html#cb125-6" tabindex="-1"></a></span>
+<span id="cb125-7"><a href="context-harness-engineering.html#cb125-7" tabindex="-1"></a><span class="co"># Ground truth for &quot;how do we compute incremental reach?&quot;: 4 chunks</span></span>
+<span id="cb125-8"><a href="context-harness-engineering.html#cb125-8" tabindex="-1"></a>relevant <span class="op">=</span> {<span class="st">&quot;reach.md#2&quot;</span>, <span class="st">&quot;reach.md#3&quot;</span>, <span class="st">&quot;dedup.sql#1&quot;</span>, <span class="st">&quot;glossary.md#7&quot;</span>}</span>
+<span id="cb125-9"><a href="context-harness-engineering.html#cb125-9" tabindex="-1"></a>retrieved <span class="op">=</span> [<span class="st">&quot;reach.md#2&quot;</span>, <span class="st">&quot;faq.md#1&quot;</span>, <span class="st">&quot;reach.md#3&quot;</span>, <span class="st">&quot;pacing.md#4&quot;</span>,</span>
+<span id="cb125-10"><a href="context-harness-engineering.html#cb125-10" tabindex="-1"></a>             <span class="st">&quot;glossary.md#7&quot;</span>, <span class="st">&quot;reach.md#1&quot;</span>, <span class="st">&quot;budget.md#2&quot;</span>, <span class="st">&quot;faq.md#3&quot;</span>]</span>
+<span id="cb125-11"><a href="context-harness-engineering.html#cb125-11" tabindex="-1"></a>p, r <span class="op">=</span> precision_recall_at_k(retrieved, relevant, k<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb125-12"><a href="context-harness-engineering.html#cb125-12" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;precision@8 = </span><span class="sc">{</span>p<span class="sc">:.2f}</span><span class="ss">, recall@8 = </span><span class="sc">{</span>r<span class="sc">:.2f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb125-13"><a href="context-harness-engineering.html#cb125-13" tabindex="-1"></a><span class="co"># precision@8 = 0.38, recall@8 = 0.75</span></span></code></pre></div>
+<p>The missing chunk is <code>dedup.sql#1</code>, the code that actually removes duplicate
+households. A metadata filter to methodology docs and SQL, or a lexical leg
+for “dedup”, is the kind of fix to try next.</p>
+<p>The levers pull against each other:</p>
+<table>
+<colgroup>
+<col width="25%" />
+<col width="34%" />
+<col width="25%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr>
+<th align="left">Change</th>
+<th align="left">Precision</th>
+<th align="left">Recall</th>
+<th align="left">Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">Smaller chunks</td>
+<td align="left">Usually up</td>
+<td align="left">Can fall</td>
+<td align="left">Less irrelevant text per chunk, but neighbors lose their context</td>
+</tr>
+<tr>
+<td align="left">More overlap</td>
+<td align="left">Can fall</td>
+<td align="left">Can fall</td>
+<td align="left">Repeated text crowds distinct chunks out of the top <span class="math inline">\(k\)</span></td>
+</tr>
+<tr>
+<td align="left">Metadata filter</td>
+<td align="left">Up</td>
+<td align="left">Same or up</td>
+<td align="left">Irrelevant candidates are removed before ranking</td>
+</tr>
+<tr>
+<td align="left">Larger <span class="math inline">\(k\)</span></td>
+<td align="left">Down</td>
+<td align="left">Up</td>
+<td align="left">More chunks, and more noise in the window</td>
+</tr>
+</tbody>
+</table>
+<p>The course’s advice: keep overlap small and let metadata place each chunk in
+its context. Chapter <a href="evaluating-agentic-systems.html#evaluating-agentic-systems">10</a> has a fuller precision
+and recall example.</p>
+</div>
+<div id="recursive-lms" class="section level4 hasAnchor" number="22.4.6.6">
+<h4><span class="header-section-number">22.4.6.6</span> Very large inputs: recursive language models<a href="context-harness-engineering.html#recursive-lms" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>Some inputs will never fit: a year of ad-server logs, or 800 MB of agent
+traces. In the course’s second interview, Drew Breunig describes
+<strong>recursive language models (RLMs)</strong>, a test-time strategy from
+<a href="https://alexzhang13.github.io/blog/2025/rlm/">Zhang and Khattab (2025)</a>:</p>
+<ul>
+<li>The large input is <strong>not</strong> put in the context. It is loaded as a variable
+in a code environment (a REPL, such as a Python notebook).</li>
+<li>The model writes code to inspect it: look at the first few hundred
+characters, detect that it is JSON lines, count, filter, and sample.</li>
+<li>It can <strong>call a sub-model on a slice</strong>, which gets a fresh context window
+and the same code environment. That recursion gives the method its name.</li>
+<li>Only what the model pulls out of the variable enters its context.</li>
+</ul>
+<p>Breunig’s argument: models are strong at coding and reasoning but weak with
+very long contexts, so turn the long-context problem into a coding problem.
+In this chapter’s terms, an RLM combines select (the model pulls only what it
+needs) with isolate (sub-calls get clean windows), using code execution as the
+tool (Chapter <a href="tool-use.html#tool-use">9</a>).</p>
+<p>This is early research. The authors report gains on long-context benchmarks
+<strong>[Vendor]</strong> (the authors’ own results), and Breunig’s enthusiasm is his
+opinion. For an analyst, the familiar version is already common practice: do
+not paste the 2 GB file into the chat; let the agent query it with code.</p>
+</div>
+</div>
+<div id="context-cost" class="section level3 hasAnchor" number="22.4.7">
+<h3><span class="header-section-number">22.4.7</span> Cost: the overlooked dimension<a href="context-harness-engineering.html#context-cost" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>Agents read far more tokens than they write. Manus reports a ratio of roughly
 100 input tokens per output token and calls the KV-cache hit rate the most
 important production metric <strong>[Vendor]</strong>. Cached input tokens are much cheaper
@@ -1359,13 +1774,15 @@ repeating them, which seems to contradict “poisoning.” One reasonable
 reconciliation (the author’s judgment): <em>observed</em> error messages are useful
 feedback, while <em>unverified claims stored as facts</em> are harmful.</p>
 </div>
-<div id="context-features-are-becoming-platform-features" class="section level3 hasAnchor" number="22.4.7">
-<h3><span class="header-section-number">22.4.7</span> Context features are becoming platform features<a href="context-harness-engineering.html#context-features-are-becoming-platform-features" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="context-features-are-becoming-platform-features" class="section level3 hasAnchor" number="22.4.8">
+<h3><span class="header-section-number">22.4.8</span> Context features are becoming platform features<a href="context-harness-engineering.html#context-features-are-becoming-platform-features" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>Vendors now ship these techniques as features, for example Anthropic’s
 <a href="https://platform.claude.com/docs/en/build-with-claude/context-editing">context editing</a>,
 <a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/memory-tool">memory tool</a>,
 <a href="https://platform.claude.com/docs/en/build-with-claude/compaction">server-side compaction</a>,
-and the progressive disclosure built into Agent Skills
+<a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool">tool search</a>
+(Section <a href="context-harness-engineering.html#tool-registries">22.4.6.3</a>), and the progressive disclosure built into
+Agent Skills
 (Chapter <a href="claude-code-skills.html#claude-code-skills">18</a>). Learn the four families. The API names
 will change, but the families will still apply.</p>
 </div>
@@ -1459,33 +1876,33 @@ marketing metric definitions. It assumes every document carries an effective
 date. That metadata is the precondition, and it is data-governance work
 (Section <a href="context-harness-engineering.html#metadata-context">22.6.1</a>). Without it, no hook can tell old from
 current.</p>
-<div class="sourceCode" id="cb124"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb124-1"><a href="context-harness-engineering.html#cb124-1" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> date</span>
-<span id="cb124-2"><a href="context-harness-engineering.html#cb124-2" tabindex="-1"></a></span>
-<span id="cb124-3"><a href="context-harness-engineering.html#cb124-3" tabindex="-1"></a></span>
-<span id="cb124-4"><a href="context-harness-engineering.html#cb124-4" tabindex="-1"></a><span class="kw">def</span> keep_current_versions(docs: <span class="bu">list</span>[<span class="bu">dict</span>], today: date) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
-<span id="cb124-5"><a href="context-harness-engineering.html#cb124-5" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Post-tool hook: keep only the version of each document in effect today.&quot;&quot;&quot;</span></span>
-<span id="cb124-6"><a href="context-harness-engineering.html#cb124-6" tabindex="-1"></a>    current: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">dict</span>] <span class="op">=</span> {}</span>
-<span id="cb124-7"><a href="context-harness-engineering.html#cb124-7" tabindex="-1"></a>    <span class="cf">for</span> doc <span class="kw">in</span> docs:</span>
-<span id="cb124-8"><a href="context-harness-engineering.html#cb124-8" tabindex="-1"></a>        <span class="cf">if</span> doc[<span class="st">&quot;effective&quot;</span>] <span class="op">&gt;</span> today:  <span class="co"># drafts and future versions are not in effect yet</span></span>
-<span id="cb124-9"><a href="context-harness-engineering.html#cb124-9" tabindex="-1"></a>            <span class="cf">continue</span></span>
-<span id="cb124-10"><a href="context-harness-engineering.html#cb124-10" tabindex="-1"></a>        best <span class="op">=</span> current.get(doc[<span class="st">&quot;name&quot;</span>])</span>
-<span id="cb124-11"><a href="context-harness-engineering.html#cb124-11" tabindex="-1"></a>        <span class="cf">if</span> best <span class="kw">is</span> <span class="va">None</span> <span class="kw">or</span> doc[<span class="st">&quot;effective&quot;</span>] <span class="op">&gt;</span> best[<span class="st">&quot;effective&quot;</span>]:</span>
-<span id="cb124-12"><a href="context-harness-engineering.html#cb124-12" tabindex="-1"></a>            current[doc[<span class="st">&quot;name&quot;</span>]] <span class="op">=</span> doc</span>
-<span id="cb124-13"><a href="context-harness-engineering.html#cb124-13" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">list</span>(current.values())</span>
-<span id="cb124-14"><a href="context-harness-engineering.html#cb124-14" tabindex="-1"></a></span>
-<span id="cb124-15"><a href="context-harness-engineering.html#cb124-15" tabindex="-1"></a></span>
-<span id="cb124-16"><a href="context-harness-engineering.html#cb124-16" tabindex="-1"></a><span class="co"># What a search tool might return for &quot;how do we define reach and lift?&quot;</span></span>
-<span id="cb124-17"><a href="context-harness-engineering.html#cb124-17" tabindex="-1"></a>retrieved <span class="op">=</span> [</span>
-<span id="cb124-18"><a href="context-harness-engineering.html#cb124-18" tabindex="-1"></a>    {<span class="st">&quot;name&quot;</span>: <span class="st">&quot;reach.md&quot;</span>, <span class="st">&quot;effective&quot;</span>: date(<span class="dv">2024</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="st">&quot;text&quot;</span>: <span class="st">&quot;Reach = unique households exposed&quot;</span>},</span>
-<span id="cb124-19"><a href="context-harness-engineering.html#cb124-19" tabindex="-1"></a>    {<span class="st">&quot;name&quot;</span>: <span class="st">&quot;reach.md&quot;</span>, <span class="st">&quot;effective&quot;</span>: date(<span class="dv">2026</span>, <span class="dv">3</span>, <span class="dv">1</span>), <span class="st">&quot;text&quot;</span>: <span class="st">&quot;Reach = unique persons exposed&quot;</span>},</span>
-<span id="cb124-20"><a href="context-harness-engineering.html#cb124-20" tabindex="-1"></a>    {<span class="st">&quot;name&quot;</span>: <span class="st">&quot;lift.md&quot;</span>, <span class="st">&quot;effective&quot;</span>: date(<span class="dv">2025</span>, <span class="dv">6</span>, <span class="dv">1</span>), <span class="st">&quot;text&quot;</span>: <span class="st">&quot;Lift = test rate / control rate - 1&quot;</span>},</span>
-<span id="cb124-21"><a href="context-harness-engineering.html#cb124-21" tabindex="-1"></a>    {<span class="st">&quot;name&quot;</span>: <span class="st">&quot;lift.md&quot;</span>, <span class="st">&quot;effective&quot;</span>: date(<span class="dv">2027</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="st">&quot;text&quot;</span>: <span class="st">&quot;Lift (draft) = incremental conversions&quot;</span>},</span>
-<span id="cb124-22"><a href="context-harness-engineering.html#cb124-22" tabindex="-1"></a>]</span>
-<span id="cb124-23"><a href="context-harness-engineering.html#cb124-23" tabindex="-1"></a></span>
-<span id="cb124-24"><a href="context-harness-engineering.html#cb124-24" tabindex="-1"></a><span class="cf">for</span> doc <span class="kw">in</span> keep_current_versions(retrieved, today<span class="op">=</span>date(<span class="dv">2026</span>, <span class="dv">11</span>, <span class="dv">14</span>)):</span>
-<span id="cb124-25"><a href="context-harness-engineering.html#cb124-25" tabindex="-1"></a>    <span class="bu">print</span>(doc[<span class="st">&quot;name&quot;</span>], doc[<span class="st">&quot;effective&quot;</span>], <span class="st">&quot;|&quot;</span>, doc[<span class="st">&quot;text&quot;</span>])</span>
-<span id="cb124-26"><a href="context-harness-engineering.html#cb124-26" tabindex="-1"></a><span class="co"># reach.md 2026-03-01 | Reach = unique persons exposed</span></span>
-<span id="cb124-27"><a href="context-harness-engineering.html#cb124-27" tabindex="-1"></a><span class="co"># lift.md 2025-06-01 | Lift = test rate / control rate - 1</span></span></code></pre></div>
+<div class="sourceCode" id="cb126"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb126-1"><a href="context-harness-engineering.html#cb126-1" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> date</span>
+<span id="cb126-2"><a href="context-harness-engineering.html#cb126-2" tabindex="-1"></a></span>
+<span id="cb126-3"><a href="context-harness-engineering.html#cb126-3" tabindex="-1"></a></span>
+<span id="cb126-4"><a href="context-harness-engineering.html#cb126-4" tabindex="-1"></a><span class="kw">def</span> keep_current_versions(docs: <span class="bu">list</span>[<span class="bu">dict</span>], today: date) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">dict</span>]:</span>
+<span id="cb126-5"><a href="context-harness-engineering.html#cb126-5" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Post-tool hook: keep only the version of each document in effect today.&quot;&quot;&quot;</span></span>
+<span id="cb126-6"><a href="context-harness-engineering.html#cb126-6" tabindex="-1"></a>    current: <span class="bu">dict</span>[<span class="bu">str</span>, <span class="bu">dict</span>] <span class="op">=</span> {}</span>
+<span id="cb126-7"><a href="context-harness-engineering.html#cb126-7" tabindex="-1"></a>    <span class="cf">for</span> doc <span class="kw">in</span> docs:</span>
+<span id="cb126-8"><a href="context-harness-engineering.html#cb126-8" tabindex="-1"></a>        <span class="cf">if</span> doc[<span class="st">&quot;effective&quot;</span>] <span class="op">&gt;</span> today:  <span class="co"># drafts and future versions are not in effect yet</span></span>
+<span id="cb126-9"><a href="context-harness-engineering.html#cb126-9" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb126-10"><a href="context-harness-engineering.html#cb126-10" tabindex="-1"></a>        best <span class="op">=</span> current.get(doc[<span class="st">&quot;name&quot;</span>])</span>
+<span id="cb126-11"><a href="context-harness-engineering.html#cb126-11" tabindex="-1"></a>        <span class="cf">if</span> best <span class="kw">is</span> <span class="va">None</span> <span class="kw">or</span> doc[<span class="st">&quot;effective&quot;</span>] <span class="op">&gt;</span> best[<span class="st">&quot;effective&quot;</span>]:</span>
+<span id="cb126-12"><a href="context-harness-engineering.html#cb126-12" tabindex="-1"></a>            current[doc[<span class="st">&quot;name&quot;</span>]] <span class="op">=</span> doc</span>
+<span id="cb126-13"><a href="context-harness-engineering.html#cb126-13" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">list</span>(current.values())</span>
+<span id="cb126-14"><a href="context-harness-engineering.html#cb126-14" tabindex="-1"></a></span>
+<span id="cb126-15"><a href="context-harness-engineering.html#cb126-15" tabindex="-1"></a></span>
+<span id="cb126-16"><a href="context-harness-engineering.html#cb126-16" tabindex="-1"></a><span class="co"># What a search tool might return for &quot;how do we define reach and lift?&quot;</span></span>
+<span id="cb126-17"><a href="context-harness-engineering.html#cb126-17" tabindex="-1"></a>retrieved <span class="op">=</span> [</span>
+<span id="cb126-18"><a href="context-harness-engineering.html#cb126-18" tabindex="-1"></a>    {<span class="st">&quot;name&quot;</span>: <span class="st">&quot;reach.md&quot;</span>, <span class="st">&quot;effective&quot;</span>: date(<span class="dv">2024</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="st">&quot;text&quot;</span>: <span class="st">&quot;Reach = unique households exposed&quot;</span>},</span>
+<span id="cb126-19"><a href="context-harness-engineering.html#cb126-19" tabindex="-1"></a>    {<span class="st">&quot;name&quot;</span>: <span class="st">&quot;reach.md&quot;</span>, <span class="st">&quot;effective&quot;</span>: date(<span class="dv">2026</span>, <span class="dv">3</span>, <span class="dv">1</span>), <span class="st">&quot;text&quot;</span>: <span class="st">&quot;Reach = unique persons exposed&quot;</span>},</span>
+<span id="cb126-20"><a href="context-harness-engineering.html#cb126-20" tabindex="-1"></a>    {<span class="st">&quot;name&quot;</span>: <span class="st">&quot;lift.md&quot;</span>, <span class="st">&quot;effective&quot;</span>: date(<span class="dv">2025</span>, <span class="dv">6</span>, <span class="dv">1</span>), <span class="st">&quot;text&quot;</span>: <span class="st">&quot;Lift = test rate / control rate - 1&quot;</span>},</span>
+<span id="cb126-21"><a href="context-harness-engineering.html#cb126-21" tabindex="-1"></a>    {<span class="st">&quot;name&quot;</span>: <span class="st">&quot;lift.md&quot;</span>, <span class="st">&quot;effective&quot;</span>: date(<span class="dv">2027</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="st">&quot;text&quot;</span>: <span class="st">&quot;Lift (draft) = incremental conversions&quot;</span>},</span>
+<span id="cb126-22"><a href="context-harness-engineering.html#cb126-22" tabindex="-1"></a>]</span>
+<span id="cb126-23"><a href="context-harness-engineering.html#cb126-23" tabindex="-1"></a></span>
+<span id="cb126-24"><a href="context-harness-engineering.html#cb126-24" tabindex="-1"></a><span class="cf">for</span> doc <span class="kw">in</span> keep_current_versions(retrieved, today<span class="op">=</span>date(<span class="dv">2026</span>, <span class="dv">11</span>, <span class="dv">14</span>)):</span>
+<span id="cb126-25"><a href="context-harness-engineering.html#cb126-25" tabindex="-1"></a>    <span class="bu">print</span>(doc[<span class="st">&quot;name&quot;</span>], doc[<span class="st">&quot;effective&quot;</span>], <span class="st">&quot;|&quot;</span>, doc[<span class="st">&quot;text&quot;</span>])</span>
+<span id="cb126-26"><a href="context-harness-engineering.html#cb126-26" tabindex="-1"></a><span class="co"># reach.md 2026-03-01 | Reach = unique persons exposed</span></span>
+<span id="cb126-27"><a href="context-harness-engineering.html#cb126-27" tabindex="-1"></a><span class="co"># lift.md 2025-06-01 | Lift = test rate / control rate - 1</span></span></code></pre></div>
 <p>One short function prevents two failures. The retired version cannot poison
 the answer, and with only one version in context there is nothing to clash
 with. It also saves tokens on every later call, because the dropped documents
@@ -1685,25 +2102,25 @@ those blocks.</li>
 objective, why it picked this tool, and why it chose these arguments, and
 the reason is logged with the call.</li>
 </ul>
-<div class="sourceCode" id="cb125"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb125-1"><a href="context-harness-engineering.html#cb125-1" tabindex="-1"></a><span class="co"># A tool definition with a reason field; the exact wrapper format varies by vendor.</span></span>
-<span id="cb125-2"><a href="context-harness-engineering.html#cb125-2" tabindex="-1"></a>search_metrics_tool <span class="op">=</span> {</span>
-<span id="cb125-3"><a href="context-harness-engineering.html#cb125-3" tabindex="-1"></a>    <span class="st">&quot;name&quot;</span>: <span class="st">&quot;search_metric_definitions&quot;</span>,</span>
-<span id="cb125-4"><a href="context-harness-engineering.html#cb125-4" tabindex="-1"></a>    <span class="st">&quot;description&quot;</span>: <span class="st">&quot;Return the governed definition of one or more marketing metrics.&quot;</span>,</span>
-<span id="cb125-5"><a href="context-harness-engineering.html#cb125-5" tabindex="-1"></a>    <span class="st">&quot;parameters&quot;</span>: {</span>
-<span id="cb125-6"><a href="context-harness-engineering.html#cb125-6" tabindex="-1"></a>        <span class="st">&quot;type&quot;</span>: <span class="st">&quot;object&quot;</span>,</span>
-<span id="cb125-7"><a href="context-harness-engineering.html#cb125-7" tabindex="-1"></a>        <span class="st">&quot;properties&quot;</span>: {</span>
-<span id="cb125-8"><a href="context-harness-engineering.html#cb125-8" tabindex="-1"></a>            <span class="st">&quot;metric_names&quot;</span>: {<span class="st">&quot;type&quot;</span>: <span class="st">&quot;array&quot;</span>, <span class="st">&quot;items&quot;</span>: {<span class="st">&quot;type&quot;</span>: <span class="st">&quot;string&quot;</span>}},</span>
-<span id="cb125-9"><a href="context-harness-engineering.html#cb125-9" tabindex="-1"></a>            <span class="st">&quot;reason&quot;</span>: {</span>
-<span id="cb125-10"><a href="context-harness-engineering.html#cb125-10" tabindex="-1"></a>                <span class="st">&quot;type&quot;</span>: <span class="st">&quot;string&quot;</span>,</span>
-<span id="cb125-11"><a href="context-harness-engineering.html#cb125-11" tabindex="-1"></a>                <span class="st">&quot;description&quot;</span>: (</span>
-<span id="cb125-12"><a href="context-harness-engineering.html#cb125-12" tabindex="-1"></a>                    <span class="st">&quot;Your current objective, why this tool helps, &quot;</span></span>
-<span id="cb125-13"><a href="context-harness-engineering.html#cb125-13" tabindex="-1"></a>                    <span class="st">&quot;and why you chose these metric names.&quot;</span></span>
-<span id="cb125-14"><a href="context-harness-engineering.html#cb125-14" tabindex="-1"></a>                ),</span>
-<span id="cb125-15"><a href="context-harness-engineering.html#cb125-15" tabindex="-1"></a>            },</span>
-<span id="cb125-16"><a href="context-harness-engineering.html#cb125-16" tabindex="-1"></a>        },</span>
-<span id="cb125-17"><a href="context-harness-engineering.html#cb125-17" tabindex="-1"></a>        <span class="st">&quot;required&quot;</span>: [<span class="st">&quot;metric_names&quot;</span>, <span class="st">&quot;reason&quot;</span>],</span>
-<span id="cb125-18"><a href="context-harness-engineering.html#cb125-18" tabindex="-1"></a>    },</span>
-<span id="cb125-19"><a href="context-harness-engineering.html#cb125-19" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb127"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb127-1"><a href="context-harness-engineering.html#cb127-1" tabindex="-1"></a><span class="co"># A tool definition with a reason field; the exact wrapper format varies by vendor.</span></span>
+<span id="cb127-2"><a href="context-harness-engineering.html#cb127-2" tabindex="-1"></a>search_metrics_tool <span class="op">=</span> {</span>
+<span id="cb127-3"><a href="context-harness-engineering.html#cb127-3" tabindex="-1"></a>    <span class="st">&quot;name&quot;</span>: <span class="st">&quot;search_metric_definitions&quot;</span>,</span>
+<span id="cb127-4"><a href="context-harness-engineering.html#cb127-4" tabindex="-1"></a>    <span class="st">&quot;description&quot;</span>: <span class="st">&quot;Return the governed definition of one or more marketing metrics.&quot;</span>,</span>
+<span id="cb127-5"><a href="context-harness-engineering.html#cb127-5" tabindex="-1"></a>    <span class="st">&quot;parameters&quot;</span>: {</span>
+<span id="cb127-6"><a href="context-harness-engineering.html#cb127-6" tabindex="-1"></a>        <span class="st">&quot;type&quot;</span>: <span class="st">&quot;object&quot;</span>,</span>
+<span id="cb127-7"><a href="context-harness-engineering.html#cb127-7" tabindex="-1"></a>        <span class="st">&quot;properties&quot;</span>: {</span>
+<span id="cb127-8"><a href="context-harness-engineering.html#cb127-8" tabindex="-1"></a>            <span class="st">&quot;metric_names&quot;</span>: {<span class="st">&quot;type&quot;</span>: <span class="st">&quot;array&quot;</span>, <span class="st">&quot;items&quot;</span>: {<span class="st">&quot;type&quot;</span>: <span class="st">&quot;string&quot;</span>}},</span>
+<span id="cb127-9"><a href="context-harness-engineering.html#cb127-9" tabindex="-1"></a>            <span class="st">&quot;reason&quot;</span>: {</span>
+<span id="cb127-10"><a href="context-harness-engineering.html#cb127-10" tabindex="-1"></a>                <span class="st">&quot;type&quot;</span>: <span class="st">&quot;string&quot;</span>,</span>
+<span id="cb127-11"><a href="context-harness-engineering.html#cb127-11" tabindex="-1"></a>                <span class="st">&quot;description&quot;</span>: (</span>
+<span id="cb127-12"><a href="context-harness-engineering.html#cb127-12" tabindex="-1"></a>                    <span class="st">&quot;Your current objective, why this tool helps, &quot;</span></span>
+<span id="cb127-13"><a href="context-harness-engineering.html#cb127-13" tabindex="-1"></a>                    <span class="st">&quot;and why you chose these metric names.&quot;</span></span>
+<span id="cb127-14"><a href="context-harness-engineering.html#cb127-14" tabindex="-1"></a>                ),</span>
+<span id="cb127-15"><a href="context-harness-engineering.html#cb127-15" tabindex="-1"></a>            },</span>
+<span id="cb127-16"><a href="context-harness-engineering.html#cb127-16" tabindex="-1"></a>        },</span>
+<span id="cb127-17"><a href="context-harness-engineering.html#cb127-17" tabindex="-1"></a>        <span class="st">&quot;required&quot;</span>: [<span class="st">&quot;metric_names&quot;</span>, <span class="st">&quot;reason&quot;</span>],</span>
+<span id="cb127-18"><a href="context-harness-engineering.html#cb127-18" tabindex="-1"></a>    },</span>
+<span id="cb127-19"><a href="context-harness-engineering.html#cb127-19" tabindex="-1"></a>}</span></code></pre></div>
 <p>Two cautions, both the author’s judgment:</p>
 <ul>
 <li><strong>The reason field costs tokens on every call.</strong> Its description is part of
@@ -1847,34 +2264,35 @@ whether its lift or overlap summary is correct.</li>
 <p>This illustrative check implements the third caution. It is an instructional
 example, not tested production code, and the regular expression handles only
 simple number formats.</p>
-<div class="sourceCode" id="cb126"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb126-1"><a href="context-harness-engineering.html#cb126-1" tabindex="-1"></a><span class="im">import</span> re</span>
-<span id="cb126-2"><a href="context-harness-engineering.html#cb126-2" tabindex="-1"></a></span>
-<span id="cb126-3"><a href="context-harness-engineering.html#cb126-3" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb126-4"><a href="context-harness-engineering.html#cb126-4" tabindex="-1"></a></span>
-<span id="cb126-5"><a href="context-harness-engineering.html#cb126-5" tabindex="-1"></a></span>
-<span id="cb126-6"><a href="context-harness-engineering.html#cb126-6" tabindex="-1"></a><span class="kw">def</span> numbers_in_text(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">set</span>[<span class="bu">float</span>]:</span>
-<span id="cb126-7"><a href="context-harness-engineering.html#cb126-7" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Extract plain numbers such as 12, 3.5, 1,200 or 45% from narrative text.&quot;&quot;&quot;</span></span>
-<span id="cb126-8"><a href="context-harness-engineering.html#cb126-8" tabindex="-1"></a>    tokens <span class="op">=</span> re.findall(<span class="vs">r&quot;-</span><span class="op">?</span><span class="dv">\d</span><span class="pp">[</span><span class="dv">\d</span><span class="pp">,]</span><span class="op">*</span><span class="ch">\.</span><span class="op">?</span><span class="dv">\d</span><span class="op">*</span><span class="vs">&quot;</span>, text)</span>
-<span id="cb126-9"><a href="context-harness-engineering.html#cb126-9" tabindex="-1"></a>    <span class="cf">return</span> {<span class="bu">round</span>(<span class="bu">float</span>(t.replace(<span class="st">&quot;,&quot;</span>, <span class="st">&quot;&quot;</span>)), <span class="dv">2</span>) <span class="cf">for</span> t <span class="kw">in</span> tokens}</span>
-<span id="cb126-10"><a href="context-harness-engineering.html#cb126-10" tabindex="-1"></a></span>
-<span id="cb126-11"><a href="context-harness-engineering.html#cb126-11" tabindex="-1"></a></span>
-<span id="cb126-12"><a href="context-harness-engineering.html#cb126-12" tabindex="-1"></a><span class="kw">def</span> unsupported_numbers(narrative: <span class="bu">str</span>, result: pd.DataFrame) <span class="op">-&gt;</span> <span class="bu">set</span>[<span class="bu">float</span>]:</span>
-<span id="cb126-13"><a href="context-harness-engineering.html#cb126-13" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Return numbers in the narrative that do not appear in the result table.&quot;&quot;&quot;</span></span>
-<span id="cb126-14"><a href="context-harness-engineering.html#cb126-14" tabindex="-1"></a>    numeric <span class="op">=</span> result.select_dtypes(<span class="st">&quot;number&quot;</span>).to_numpy().ravel()</span>
-<span id="cb126-15"><a href="context-harness-engineering.html#cb126-15" tabindex="-1"></a>    allowed <span class="op">=</span> {<span class="bu">round</span>(<span class="bu">float</span>(x), <span class="dv">2</span>) <span class="cf">for</span> x <span class="kw">in</span> numeric}</span>
-<span id="cb126-16"><a href="context-harness-engineering.html#cb126-16" tabindex="-1"></a>    allowed <span class="op">|=</span> {<span class="bu">round</span>(<span class="bu">float</span>(x) <span class="op">*</span> <span class="dv">100</span>, <span class="dv">2</span>) <span class="cf">for</span> x <span class="kw">in</span> numeric}  <span class="co"># shares shown as %</span></span>
-<span id="cb126-17"><a href="context-harness-engineering.html#cb126-17" tabindex="-1"></a>    <span class="cf">return</span> numbers_in_text(narrative) <span class="op">-</span> allowed</span>
-<span id="cb126-18"><a href="context-harness-engineering.html#cb126-18" tabindex="-1"></a></span>
-<span id="cb126-19"><a href="context-harness-engineering.html#cb126-19" tabindex="-1"></a></span>
-<span id="cb126-20"><a href="context-harness-engineering.html#cb126-20" tabindex="-1"></a>result <span class="op">=</span> pd.DataFrame({<span class="st">&quot;segment&quot;</span>: [<span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>], <span class="st">&quot;overlap_rate&quot;</span>: [<span class="fl">0.18</span>, <span class="fl">0.07</span>]})</span>
-<span id="cb126-21"><a href="context-harness-engineering.html#cb126-21" tabindex="-1"></a>narrative <span class="op">=</span> <span class="st">&quot;Segment A overlaps 18% with the seed audience, versus 9</span><span class="sc">% f</span><span class="st">or B.&quot;</span></span>
-<span id="cb126-22"><a href="context-harness-engineering.html#cb126-22" tabindex="-1"></a><span class="bu">print</span>(unsupported_numbers(narrative, result))  <span class="co"># {9.0} -&gt; flag for review</span></span></code></pre></div>
+<div class="sourceCode" id="cb128"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb128-1"><a href="context-harness-engineering.html#cb128-1" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb128-2"><a href="context-harness-engineering.html#cb128-2" tabindex="-1"></a></span>
+<span id="cb128-3"><a href="context-harness-engineering.html#cb128-3" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb128-4"><a href="context-harness-engineering.html#cb128-4" tabindex="-1"></a></span>
+<span id="cb128-5"><a href="context-harness-engineering.html#cb128-5" tabindex="-1"></a></span>
+<span id="cb128-6"><a href="context-harness-engineering.html#cb128-6" tabindex="-1"></a><span class="kw">def</span> numbers_in_text(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">set</span>[<span class="bu">float</span>]:</span>
+<span id="cb128-7"><a href="context-harness-engineering.html#cb128-7" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Extract plain numbers such as 12, 3.5, 1,200 or 45% from narrative text.&quot;&quot;&quot;</span></span>
+<span id="cb128-8"><a href="context-harness-engineering.html#cb128-8" tabindex="-1"></a>    tokens <span class="op">=</span> re.findall(<span class="vs">r&quot;-</span><span class="op">?</span><span class="dv">\d</span><span class="pp">[</span><span class="dv">\d</span><span class="pp">,]</span><span class="op">*</span><span class="ch">\.</span><span class="op">?</span><span class="dv">\d</span><span class="op">*</span><span class="vs">&quot;</span>, text)</span>
+<span id="cb128-9"><a href="context-harness-engineering.html#cb128-9" tabindex="-1"></a>    <span class="cf">return</span> {<span class="bu">round</span>(<span class="bu">float</span>(t.replace(<span class="st">&quot;,&quot;</span>, <span class="st">&quot;&quot;</span>)), <span class="dv">2</span>) <span class="cf">for</span> t <span class="kw">in</span> tokens}</span>
+<span id="cb128-10"><a href="context-harness-engineering.html#cb128-10" tabindex="-1"></a></span>
+<span id="cb128-11"><a href="context-harness-engineering.html#cb128-11" tabindex="-1"></a></span>
+<span id="cb128-12"><a href="context-harness-engineering.html#cb128-12" tabindex="-1"></a><span class="kw">def</span> unsupported_numbers(narrative: <span class="bu">str</span>, result: pd.DataFrame) <span class="op">-&gt;</span> <span class="bu">set</span>[<span class="bu">float</span>]:</span>
+<span id="cb128-13"><a href="context-harness-engineering.html#cb128-13" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Return numbers in the narrative that do not appear in the result table.&quot;&quot;&quot;</span></span>
+<span id="cb128-14"><a href="context-harness-engineering.html#cb128-14" tabindex="-1"></a>    numeric <span class="op">=</span> result.select_dtypes(<span class="st">&quot;number&quot;</span>).to_numpy().ravel()</span>
+<span id="cb128-15"><a href="context-harness-engineering.html#cb128-15" tabindex="-1"></a>    allowed <span class="op">=</span> {<span class="bu">round</span>(<span class="bu">float</span>(x), <span class="dv">2</span>) <span class="cf">for</span> x <span class="kw">in</span> numeric}</span>
+<span id="cb128-16"><a href="context-harness-engineering.html#cb128-16" tabindex="-1"></a>    allowed <span class="op">|=</span> {<span class="bu">round</span>(<span class="bu">float</span>(x) <span class="op">*</span> <span class="dv">100</span>, <span class="dv">2</span>) <span class="cf">for</span> x <span class="kw">in</span> numeric}  <span class="co"># shares shown as %</span></span>
+<span id="cb128-17"><a href="context-harness-engineering.html#cb128-17" tabindex="-1"></a>    <span class="cf">return</span> numbers_in_text(narrative) <span class="op">-</span> allowed</span>
+<span id="cb128-18"><a href="context-harness-engineering.html#cb128-18" tabindex="-1"></a></span>
+<span id="cb128-19"><a href="context-harness-engineering.html#cb128-19" tabindex="-1"></a></span>
+<span id="cb128-20"><a href="context-harness-engineering.html#cb128-20" tabindex="-1"></a>result <span class="op">=</span> pd.DataFrame({<span class="st">&quot;segment&quot;</span>: [<span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>], <span class="st">&quot;overlap_rate&quot;</span>: [<span class="fl">0.18</span>, <span class="fl">0.07</span>]})</span>
+<span id="cb128-21"><a href="context-harness-engineering.html#cb128-21" tabindex="-1"></a>narrative <span class="op">=</span> <span class="st">&quot;Segment A overlaps 18% with the seed audience, versus 9</span><span class="sc">% f</span><span class="st">or B.&quot;</span></span>
+<span id="cb128-22"><a href="context-harness-engineering.html#cb128-22" tabindex="-1"></a><span class="bu">print</span>(unsupported_numbers(narrative, result))  <span class="co"># {9.0} -&gt; flag for review</span></span></code></pre></div>
 <p>In a harness, this check runs after the model writes its summary. If it finds
 unsupported numbers, the app either asks the model to revise using only the
 table or shows the table without the narrative.</p>
 <p><strong>Hands-on.</strong> Appendix <a href="context-labs.html#context-labs">C</a> walks through the course labs for
 this chapter: triggering the four failure modes, measuring how an agent’s
-context grows, and filtering stale policies with a post-tool hook.</p>
+context grows, filtering stale policies with a post-tool hook, giving a coding
+agent seven search tools, and loading tool definitions from a registry.</p>
 </div>
 <div id="exercise-audit-one-ai-assisted-app" class="section level2 hasAnchor" number="22.8">
 <h2><span class="header-section-number">22.8</span> Exercise: audit one AI-assisted app<a href="context-harness-engineering.html#exercise-audit-one-ai-assisted-app" class="anchor-section" aria-label="Anchor link to header"></a></h2>
@@ -1894,6 +2312,11 @@ check, or test).</li>
 <li><strong>Measure.</strong> Build 20 to 30 representative questions with known answers. Run
 each several times and report pass^k before and after your change, holding
 the model constant.</li>
+<li><strong>Search audit.</strong> For five real questions, write down where a careful
+colleague would look and how they would match: an exact ID, keywords, a
+concept, SQL, or logs (Section <a href="context-harness-engineering.html#search-methods">22.4.6.1</a>). Compare that with the
+tools the agent called in its traces. For one question, list the ground-truth
+chunks and compute <a href="mailto:precision@k" class="email">precision@k</a> and <a href="mailto:recall@k" class="email">recall@k</a>.</li>
 </ol>
 </div>
 <div id="key-takeaways-21" class="section level2 hasAnchor" number="22.9">
@@ -1913,6 +2336,18 @@ with caching.</li>
 <li>Context rot is a size problem; poisoning, clash, confusion, and distraction
 are quality problems. Effective context length is shorter than the
 advertised length, and the whole context is resent on every call.</li>
+<li>Agentic search lets the agent choose what to search, where, and how, and
+search again. It finds better context at the cost of predictability, time,
+and context size. Match the method to the question: exact match for IDs,
+BM25 for keywords, embeddings for concepts, RRF to fuse both, SQL for
+records.</li>
+<li>When search fails, locate the failure before fixing it: wrong tool, wrong
+source, bad arguments, or the right call returning the wrong chunks. The
+last one is a data-preparation problem; measure it with <a href="mailto:precision@k" class="email">precision@k</a> and
+<a href="mailto:recall@k" class="email">recall@k</a>.</li>
+<li>Tool definitions are resent on every call. With many rarely used tools, a
+tool registry loads definitions on demand, at the risk of never retrieving
+the right one.</li>
 <li>The model chooses tools, while the harness runs hooks. When a rule can be
 written as code, enforce it with a hook rather than more prompt text, which
 builds prompt debt.</li>
@@ -1943,7 +2378,10 @@ concerns is the durable lesson.</li>
 <li><a href="https://www.trychroma.com/research/context-rot">Chroma: Context rot (Jul 2025)</a></li>
 <li><a href="https://arxiv.org/abs/2307.03172">Liu et al.: Lost in the middle (2023)</a></li>
 <li><a href="https://arxiv.org/abs/2410.10813">Wu et al.: LongMemEval: Benchmarking chat assistants on long-term interactive memory (ICLR 2025)</a></li>
-<li>DeepLearning.AI and Chroma: <em>Context Engineering</em> (course; Module 1 lectures and labs, including a conversation with Drew Breunig)</li>
+<li><a href="http://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf">Cormack, Clarke, and Büttcher: Reciprocal rank fusion outperforms Condorcet and individual rank learning methods (SIGIR 2009)</a></li>
+<li><a href="https://alexzhang13.github.io/blog/2025/rlm/">Zhang and Khattab: Recursive language models (Oct 2025)</a></li>
+<li><a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool">Anthropic: Tool search tool (documentation)</a></li>
+<li>DeepLearning.AI and Chroma: <em>Context Engineering</em> (course; Modules 1 and 2 lectures and labs, including two conversations with Drew Breunig)</li>
 </ul>
 <p><strong>Harness engineering</strong></p>
 <ul>
@@ -1969,6 +2407,12 @@ concerns is the durable lesson.</li>
 <li><a href="https://arxiv.org/abs/2505.19988">arXiv 2505.19988: automatic metadata for text-to-SQL</a></li>
 </ul>
 
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-cormack2009rrf" class="csl-entry">
+Cormack, Gordon V., Charles L. A. Clarke, and Stefan Büttcher. 2009. <span>“Reciprocal Rank Fusion Outperforms <span>Condorcet</span> and Individual Rank Learning Methods.”</span> <em>Proceedings of the 32nd International ACM SIGIR Conference on Research and Development in Information Retrieval</em>. <a href="http://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf">http://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf</a>.
 </div>
 </div>
             </section>

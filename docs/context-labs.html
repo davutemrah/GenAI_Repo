@@ -717,8 +717,9 @@ div.csl-indent {
 <li class="chapter" data-level="22.4.3" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-is-a-finite-attention-budget"><i class="fa fa-check"></i><b>22.4.3</b> Context is a finite attention budget</a></li>
 <li class="chapter" data-level="22.4.4" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#four-failures"><i class="fa fa-check"></i><b>22.4.4</b> Four ways context fails</a></li>
 <li class="chapter" data-level="22.4.5" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#four-families"><i class="fa fa-check"></i><b>22.4.5</b> Four families of technique: write, select, compress, isolate</a></li>
-<li class="chapter" data-level="22.4.6" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-cost"><i class="fa fa-check"></i><b>22.4.6</b> Cost: the overlooked dimension</a></li>
-<li class="chapter" data-level="22.4.7" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-features-are-becoming-platform-features"><i class="fa fa-check"></i><b>22.4.7</b> Context features are becoming platform features</a></li>
+<li class="chapter" data-level="22.4.6" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#agentic-search"><i class="fa fa-check"></i><b>22.4.6</b> Right information: agentic search</a></li>
+<li class="chapter" data-level="22.4.7" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-cost"><i class="fa fa-check"></i><b>22.4.7</b> Cost: the overlooked dimension</a></li>
+<li class="chapter" data-level="22.4.8" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-features-are-becoming-platform-features"><i class="fa fa-check"></i><b>22.4.8</b> Context features are becoming platform features</a></li>
 </ul></li>
 <li class="chapter" data-level="22.5" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#harness-engineering"><i class="fa fa-check"></i><b>22.5</b> Harness engineering</a>
 <ul>
@@ -886,6 +887,11 @@ div.csl-indent {
 <li class="chapter" data-level="C.2.2" data-path="context-labs.html"><a href="context-labs.html#lab-inside-a-customer-support-agent"><i class="fa fa-check"></i><b>C.2.2</b> Lab: inside a customer support agent</a></li>
 <li class="chapter" data-level="C.2.3" data-path="context-labs.html"><a href="context-labs.html#lab-shaping-the-agents-context-with-a-hook"><i class="fa fa-check"></i><b>C.2.3</b> Lab: shaping the agent’s context with a hook</a></li>
 </ul></li>
+<li class="chapter" data-level="C.3" data-path="context-labs.html"><a href="context-labs.html#context-labs-m2"><i class="fa fa-check"></i><b>C.3</b> Module 2 labs: agentic search</a>
+<ul>
+<li class="chapter" data-level="C.3.1" data-path="context-labs.html"><a href="context-labs.html#lab-an-agentic-code-search-system"><i class="fa fa-check"></i><b>C.3.1</b> Lab: an agentic code search system</a></li>
+<li class="chapter" data-level="C.3.2" data-path="context-labs.html"><a href="context-labs.html#lab-searching-for-the-right-tool-with-a-registry"><i class="fa fa-check"></i><b>C.3.2</b> Lab: searching for the right tool with a registry</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="bibliography.html"><a href="bibliography.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
@@ -918,12 +924,15 @@ notebooks are not reproduced: the code blocks below are short sketches of the
 idea a lab teaches, not runnable copies of the lab.</p>
 <blockquote>
 <p><strong>About the results.</strong> Outcomes below are <strong>as described in the course
-labs, not reproduced</strong> here. Lab 1 runs a small local model and labs 2 and 3
-call a hosted model, so each run can give a different answer. Read the
-outcomes as illustrations of a pattern, not as benchmarks.</p>
+labs, not reproduced</strong> here. The first Module 1 lab runs a small local
+model and the other labs call a hosted model, so each run can give a
+different answer. Read the outcomes as illustrations of a pattern, not as
+benchmarks.</p>
 </blockquote>
 <div id="context-labs-setup" class="section level2 hasAnchor" number="28.1">
 <h2><span class="header-section-number">C.1</span> Common setup<a href="context-labs.html#context-labs-setup" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>This table describes the Module 1 labs. Later modules reuse the same harness
+and note their differences in their own section.</p>
 <table>
 <colgroup>
 <col width="42%" />
@@ -1031,20 +1040,20 @@ strategy.</p>
 </table>
 <p>A small test suite in the same spirit. Each case probes one failure, and
 repeated runs give a pass rate instead of a single anecdote:</p>
-<div class="sourceCode" id="cb140"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb140-1"><a href="context-labs.html#cb140-1" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass</span>
-<span id="cb140-2"><a href="context-labs.html#cb140-2" tabindex="-1"></a></span>
-<span id="cb140-3"><a href="context-labs.html#cb140-3" tabindex="-1"></a></span>
-<span id="cb140-4"><a href="context-labs.html#cb140-4" tabindex="-1"></a><span class="at">@dataclass</span></span>
-<span id="cb140-5"><a href="context-labs.html#cb140-5" tabindex="-1"></a><span class="kw">class</span> Case:</span>
-<span id="cb140-6"><a href="context-labs.html#cb140-6" tabindex="-1"></a>    failure: <span class="bu">str</span>       <span class="co"># poisoning, clash, confusion, distraction, or baseline</span></span>
-<span id="cb140-7"><a href="context-labs.html#cb140-7" tabindex="-1"></a>    question: <span class="bu">str</span></span>
-<span id="cb140-8"><a href="context-labs.html#cb140-8" tabindex="-1"></a>    must_state: <span class="bu">str</span>    <span class="co"># a fact the correct answer has to contain</span></span>
-<span id="cb140-9"><a href="context-labs.html#cb140-9" tabindex="-1"></a></span>
-<span id="cb140-10"><a href="context-labs.html#cb140-10" tabindex="-1"></a></span>
-<span id="cb140-11"><a href="context-labs.html#cb140-11" tabindex="-1"></a><span class="kw">def</span> pass_rate(agent, case: Case, k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">5</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb140-12"><a href="context-labs.html#cb140-12" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Share of k runs whose answer states the required fact.&quot;&quot;&quot;</span></span>
-<span id="cb140-13"><a href="context-labs.html#cb140-13" tabindex="-1"></a>    hits <span class="op">=</span> <span class="bu">sum</span>(case.must_state.lower() <span class="kw">in</span> agent(case.question).lower() <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(k))</span>
-<span id="cb140-14"><a href="context-labs.html#cb140-14" tabindex="-1"></a>    <span class="cf">return</span> hits <span class="op">/</span> k</span></code></pre></div>
+<div class="sourceCode" id="cb142"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb142-1"><a href="context-labs.html#cb142-1" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass</span>
+<span id="cb142-2"><a href="context-labs.html#cb142-2" tabindex="-1"></a></span>
+<span id="cb142-3"><a href="context-labs.html#cb142-3" tabindex="-1"></a></span>
+<span id="cb142-4"><a href="context-labs.html#cb142-4" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb142-5"><a href="context-labs.html#cb142-5" tabindex="-1"></a><span class="kw">class</span> Case:</span>
+<span id="cb142-6"><a href="context-labs.html#cb142-6" tabindex="-1"></a>    failure: <span class="bu">str</span>       <span class="co"># poisoning, clash, confusion, distraction, or baseline</span></span>
+<span id="cb142-7"><a href="context-labs.html#cb142-7" tabindex="-1"></a>    question: <span class="bu">str</span></span>
+<span id="cb142-8"><a href="context-labs.html#cb142-8" tabindex="-1"></a>    must_state: <span class="bu">str</span>    <span class="co"># a fact the correct answer has to contain</span></span>
+<span id="cb142-9"><a href="context-labs.html#cb142-9" tabindex="-1"></a></span>
+<span id="cb142-10"><a href="context-labs.html#cb142-10" tabindex="-1"></a></span>
+<span id="cb142-11"><a href="context-labs.html#cb142-11" tabindex="-1"></a><span class="kw">def</span> pass_rate(agent, case: Case, k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">5</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb142-12"><a href="context-labs.html#cb142-12" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Share of k runs whose answer states the required fact.&quot;&quot;&quot;</span></span>
+<span id="cb142-13"><a href="context-labs.html#cb142-13" tabindex="-1"></a>    hits <span class="op">=</span> <span class="bu">sum</span>(case.must_state.lower() <span class="kw">in</span> agent(case.question).lower() <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(k))</span>
+<span id="cb142-14"><a href="context-labs.html#cb142-14" tabindex="-1"></a>    <span class="cf">return</span> hits <span class="op">/</span> k</span></code></pre></div>
 <p>A substring check is enough for a price or a status. For clash and confusion,
 where the right answer may be a clarifying question, use a rubric or an LLM
 judge (Section <a href="evaluating-agentic-systems.html#evaluating-agentic-systems">10</a>).</p>
@@ -1137,27 +1146,27 @@ system prompt, the tool definitions, and the tool outputs (the policy text).
 All three are resent on every call. The customer’s message, the tool
 arguments, and the final answer were barely visible.</p>
 <p>The arithmetic behind that result, with assumed sizes for one refund request:</p>
-<div class="sourceCode" id="cb141"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb141-1"><a href="context-labs.html#cb141-1" tabindex="-1"></a><span class="co"># Illustrative token sizes for one refund request (assumed, not measured).</span></span>
-<span id="cb141-2"><a href="context-labs.html#cb141-2" tabindex="-1"></a>fixed <span class="op">=</span> {<span class="st">&quot;system_prompt&quot;</span>: <span class="dv">400</span>, <span class="st">&quot;tool_definitions&quot;</span>: <span class="dv">600</span>, <span class="st">&quot;user_message&quot;</span>: <span class="dv">20</span>}</span>
-<span id="cb141-3"><a href="context-labs.html#cb141-3" tabindex="-1"></a>steps <span class="op">=</span> [  <span class="co"># what each tool call appends: (tool input, tool output)</span></span>
-<span id="cb141-4"><a href="context-labs.html#cb141-4" tabindex="-1"></a>    (<span class="st">&quot;search_policies&quot;</span>, <span class="dv">30</span>, <span class="dv">900</span>),</span>
-<span id="cb141-5"><a href="context-labs.html#cb141-5" tabindex="-1"></a>    (<span class="st">&quot;order_lookup&quot;</span>, <span class="dv">20</span>, <span class="dv">150</span>),</span>
-<span id="cb141-6"><a href="context-labs.html#cb141-6" tabindex="-1"></a>    (<span class="st">&quot;refund_order&quot;</span>, <span class="dv">15</span>, <span class="dv">150</span>),</span>
-<span id="cb141-7"><a href="context-labs.html#cb141-7" tabindex="-1"></a>]</span>
-<span id="cb141-8"><a href="context-labs.html#cb141-8" tabindex="-1"></a></span>
-<span id="cb141-9"><a href="context-labs.html#cb141-9" tabindex="-1"></a>context <span class="op">=</span> <span class="bu">sum</span>(fixed.values())</span>
-<span id="cb141-10"><a href="context-labs.html#cb141-10" tabindex="-1"></a>sent <span class="op">=</span> [context]  <span class="co"># call 1: system prompt, tool definitions, user message</span></span>
-<span id="cb141-11"><a href="context-labs.html#cb141-11" tabindex="-1"></a><span class="cf">for</span> _name, tool_in, tool_out <span class="kw">in</span> steps:</span>
-<span id="cb141-12"><a href="context-labs.html#cb141-12" tabindex="-1"></a>    context <span class="op">+=</span> tool_in <span class="op">+</span> tool_out</span>
-<span id="cb141-13"><a href="context-labs.html#cb141-13" tabindex="-1"></a>    sent.append(context)  <span class="co"># the next call resends everything so far</span></span>
-<span id="cb141-14"><a href="context-labs.html#cb141-14" tabindex="-1"></a></span>
-<span id="cb141-15"><a href="context-labs.html#cb141-15" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;tokens sent per call:&quot;</span>, sent)</span>
-<span id="cb141-16"><a href="context-labs.html#cb141-16" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;total tokens read by the model:&quot;</span>, <span class="bu">sum</span>(sent))</span>
-<span id="cb141-17"><a href="context-labs.html#cb141-17" tabindex="-1"></a>fixed_share <span class="op">=</span> (fixed[<span class="st">&quot;system_prompt&quot;</span>] <span class="op">+</span> fixed[<span class="st">&quot;tool_definitions&quot;</span>]) <span class="op">*</span> <span class="bu">len</span>(sent) <span class="op">/</span> <span class="bu">sum</span>(sent)</span>
-<span id="cb141-18"><a href="context-labs.html#cb141-18" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;share spent on system prompt + tool definitions: </span><span class="sc">{</span>fixed_share<span class="sc">:.0%}</span><span class="ss">&quot;</span>)</span>
-<span id="cb141-19"><a href="context-labs.html#cb141-19" tabindex="-1"></a><span class="co"># tokens sent per call: [1020, 1950, 2120, 2285]</span></span>
-<span id="cb141-20"><a href="context-labs.html#cb141-20" tabindex="-1"></a><span class="co"># total tokens read by the model: 7375</span></span>
-<span id="cb141-21"><a href="context-labs.html#cb141-21" tabindex="-1"></a><span class="co"># share spent on system prompt + tool definitions: 54%</span></span></code></pre></div>
+<div class="sourceCode" id="cb143"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb143-1"><a href="context-labs.html#cb143-1" tabindex="-1"></a><span class="co"># Illustrative token sizes for one refund request (assumed, not measured).</span></span>
+<span id="cb143-2"><a href="context-labs.html#cb143-2" tabindex="-1"></a>fixed <span class="op">=</span> {<span class="st">&quot;system_prompt&quot;</span>: <span class="dv">400</span>, <span class="st">&quot;tool_definitions&quot;</span>: <span class="dv">600</span>, <span class="st">&quot;user_message&quot;</span>: <span class="dv">20</span>}</span>
+<span id="cb143-3"><a href="context-labs.html#cb143-3" tabindex="-1"></a>steps <span class="op">=</span> [  <span class="co"># what each tool call appends: (tool input, tool output)</span></span>
+<span id="cb143-4"><a href="context-labs.html#cb143-4" tabindex="-1"></a>    (<span class="st">&quot;search_policies&quot;</span>, <span class="dv">30</span>, <span class="dv">900</span>),</span>
+<span id="cb143-5"><a href="context-labs.html#cb143-5" tabindex="-1"></a>    (<span class="st">&quot;order_lookup&quot;</span>, <span class="dv">20</span>, <span class="dv">150</span>),</span>
+<span id="cb143-6"><a href="context-labs.html#cb143-6" tabindex="-1"></a>    (<span class="st">&quot;refund_order&quot;</span>, <span class="dv">15</span>, <span class="dv">150</span>),</span>
+<span id="cb143-7"><a href="context-labs.html#cb143-7" tabindex="-1"></a>]</span>
+<span id="cb143-8"><a href="context-labs.html#cb143-8" tabindex="-1"></a></span>
+<span id="cb143-9"><a href="context-labs.html#cb143-9" tabindex="-1"></a>context <span class="op">=</span> <span class="bu">sum</span>(fixed.values())</span>
+<span id="cb143-10"><a href="context-labs.html#cb143-10" tabindex="-1"></a>sent <span class="op">=</span> [context]  <span class="co"># call 1: system prompt, tool definitions, user message</span></span>
+<span id="cb143-11"><a href="context-labs.html#cb143-11" tabindex="-1"></a><span class="cf">for</span> _name, tool_in, tool_out <span class="kw">in</span> steps:</span>
+<span id="cb143-12"><a href="context-labs.html#cb143-12" tabindex="-1"></a>    context <span class="op">+=</span> tool_in <span class="op">+</span> tool_out</span>
+<span id="cb143-13"><a href="context-labs.html#cb143-13" tabindex="-1"></a>    sent.append(context)  <span class="co"># the next call resends everything so far</span></span>
+<span id="cb143-14"><a href="context-labs.html#cb143-14" tabindex="-1"></a></span>
+<span id="cb143-15"><a href="context-labs.html#cb143-15" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;tokens sent per call:&quot;</span>, sent)</span>
+<span id="cb143-16"><a href="context-labs.html#cb143-16" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;total tokens read by the model:&quot;</span>, <span class="bu">sum</span>(sent))</span>
+<span id="cb143-17"><a href="context-labs.html#cb143-17" tabindex="-1"></a>fixed_share <span class="op">=</span> (fixed[<span class="st">&quot;system_prompt&quot;</span>] <span class="op">+</span> fixed[<span class="st">&quot;tool_definitions&quot;</span>]) <span class="op">*</span> <span class="bu">len</span>(sent) <span class="op">/</span> <span class="bu">sum</span>(sent)</span>
+<span id="cb143-18"><a href="context-labs.html#cb143-18" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;share spent on system prompt + tool definitions: </span><span class="sc">{</span>fixed_share<span class="sc">:.0%}</span><span class="ss">&quot;</span>)</span>
+<span id="cb143-19"><a href="context-labs.html#cb143-19" tabindex="-1"></a><span class="co"># tokens sent per call: [1020, 1950, 2120, 2285]</span></span>
+<span id="cb143-20"><a href="context-labs.html#cb143-20" tabindex="-1"></a><span class="co"># total tokens read by the model: 7375</span></span>
+<span id="cb143-21"><a href="context-labs.html#cb143-21" tabindex="-1"></a><span class="co"># share spent on system prompt + tool definitions: 54%</span></span></code></pre></div>
 <p>The final context is about 2,300 tokens, but the model read more than three
 times that over the run. More than half went on content that never changed.</p>
 <p><strong>Lessons:</strong></p>
@@ -1177,7 +1186,7 @@ result invites a guess.</li>
 behaviour without touching Python. But it also means the model, not the
 code, applies the rule.</li>
 <li><strong>Resending is how the API works, not a display choice.</strong> Prompt caching
-lowers the price of a repeated prefix (Section <a href="context-harness-engineering.html#context-cost">22.4.6</a>). The
+lowers the price of a repeated prefix (Section <a href="context-harness-engineering.html#context-cost">22.4.7</a>). The
 cached tokens still fill the context window, though.</li>
 <li><strong>The data doubles as a test set.</strong> The order IDs fall into bands by design:
 refundable, bought too long ago, event too close or past, already refunded,
@@ -1266,14 +1275,14 @@ call.</li>
 </ol>
 <p>The <code>post_hooks</code> list works as a pipeline. Each hook receives the previous
 hook’s output:</p>
-<div class="sourceCode" id="cb142"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb142-1"><a href="context-labs.html#cb142-1" tabindex="-1"></a><span class="kw">def</span> with_post_hooks(tool, hooks):</span>
-<span id="cb142-2"><a href="context-labs.html#cb142-2" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Wrap a tool so each hook reshapes its output before the model sees it.&quot;&quot;&quot;</span></span>
-<span id="cb142-3"><a href="context-labs.html#cb142-3" tabindex="-1"></a>    <span class="kw">def</span> wrapped(<span class="op">**</span>args):</span>
-<span id="cb142-4"><a href="context-labs.html#cb142-4" tabindex="-1"></a>        output <span class="op">=</span> tool(<span class="op">**</span>args)</span>
-<span id="cb142-5"><a href="context-labs.html#cb142-5" tabindex="-1"></a>        <span class="cf">for</span> hook <span class="kw">in</span> hooks:  <span class="co"># run in order; each receives the previous result</span></span>
-<span id="cb142-6"><a href="context-labs.html#cb142-6" tabindex="-1"></a>            output <span class="op">=</span> hook(args, output)</span>
-<span id="cb142-7"><a href="context-labs.html#cb142-7" tabindex="-1"></a>        <span class="cf">return</span> output</span>
-<span id="cb142-8"><a href="context-labs.html#cb142-8" tabindex="-1"></a>    <span class="cf">return</span> wrapped</span></code></pre></div>
+<div class="sourceCode" id="cb144"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb144-1"><a href="context-labs.html#cb144-1" tabindex="-1"></a><span class="kw">def</span> with_post_hooks(tool, hooks):</span>
+<span id="cb144-2"><a href="context-labs.html#cb144-2" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Wrap a tool so each hook reshapes its output before the model sees it.&quot;&quot;&quot;</span></span>
+<span id="cb144-3"><a href="context-labs.html#cb144-3" tabindex="-1"></a>    <span class="kw">def</span> wrapped(<span class="op">**</span>args):</span>
+<span id="cb144-4"><a href="context-labs.html#cb144-4" tabindex="-1"></a>        output <span class="op">=</span> tool(<span class="op">**</span>args)</span>
+<span id="cb144-5"><a href="context-labs.html#cb144-5" tabindex="-1"></a>        <span class="cf">for</span> hook <span class="kw">in</span> hooks:  <span class="co"># run in order; each receives the previous result</span></span>
+<span id="cb144-6"><a href="context-labs.html#cb144-6" tabindex="-1"></a>            output <span class="op">=</span> hook(args, output)</span>
+<span id="cb144-7"><a href="context-labs.html#cb144-7" tabindex="-1"></a>        <span class="cf">return</span> output</span>
+<span id="cb144-8"><a href="context-labs.html#cb144-8" tabindex="-1"></a>    <span class="cf">return</span> wrapped</span></code></pre></div>
 <p>For example, <code>with_post_hooks(search_policies, [keep_current, dedupe, log_kept])</code> filters first, then deduplicates, then logs. The model sees only
 the end result.</p>
 <p><strong>Lessons:</strong></p>
@@ -1298,6 +1307,294 @@ purpose to review afterwards. Treat that purpose as the model’s self-report.</
 example to catch a request that has already been answered. The same idea
 extends to summarizing, compacting, and storing context, which the later
 modules cover.</li>
+</ul>
+</div>
+</div>
+<div id="context-labs-m2" class="section level2 hasAnchor" number="28.3">
+<h2><span class="header-section-number">C.3</span> Module 2 labs: agentic search<a href="context-labs.html#context-labs-m2" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>These labs go with Section <a href="context-harness-engineering.html#agentic-search">22.4.6</a>.</p>
+<table>
+<colgroup>
+<col width="26%" />
+<col width="73%" />
+</colgroup>
+<thead>
+<tr>
+<th align="left">Item</th>
+<th align="left">Module 2 choice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">Model</td>
+<td align="left">A hosted OpenAI model with native tool calling</td>
+</tr>
+<tr>
+<td align="left">Data</td>
+<td align="left">A small customer-feedback web app from a public course repository: Python source, Markdown docs, a plain-text run log, and a SQLite database of tickets</td>
+</tr>
+<tr>
+<td align="left">Index</td>
+<td align="left">One Chroma collection. Python files are split along the syntax tree (functions and classes stay whole); Markdown is split at H1 to H3 headings. Each chunk stores its path, symbol name, chunk type, and line numbers. Embeddings come from a small open model run locally; a BM25 sparse index sits on the same collection</td>
+</tr>
+<tr>
+<td align="left">Harness</td>
+<td align="left">The same <code>Agent</code> loop as Module 1, with a 10-iteration cap and a token tracker on every run</td>
+</tr>
+</tbody>
+</table>
+<div id="lab-an-agentic-code-search-system" class="section level3 hasAnchor" number="28.3.1">
+<h3><span class="header-section-number">C.3.1</span> Lab: an agentic code search system<a href="context-labs.html#lab-an-agentic-code-search-system" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><strong>Goal.</strong> Give a coding agent several search tools over three sources and
+watch it choose among them, broad first and then narrow.</p>
+<p><strong>Setup.</strong> Seven tools share one interface. Five search the code index, one
+reads the log file, and one queries the database:</p>
+<table>
+<colgroup>
+<col width="16%" />
+<col width="21%" />
+<col width="29%" />
+<col width="32%" />
+</colgroup>
+<thead>
+<tr>
+<th align="left">Tool</th>
+<th align="left">Source</th>
+<th align="left">Mechanism</th>
+<th align="left">Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>semantic_search</code></td>
+<td align="left">Code and docs</td>
+<td align="left">Embedding similarity</td>
+<td align="left">“How does X work?” when the names are unknown</td>
+</tr>
+<tr>
+<td align="left"><code>symbol_lexical_search</code></td>
+<td align="left">Code</td>
+<td align="left">Metadata filter on the symbol name</td>
+<td align="left">The definition of a known function or class</td>
+</tr>
+<tr>
+<td align="left"><code>pattern_lexical_search</code></td>
+<td align="left">Code</td>
+<td align="left">Regex over chunk text, optional file filter</td>
+<td align="left">Naming conventions, decorators, imports</td>
+</tr>
+<tr>
+<td align="left"><code>ranked_lexical_search</code></td>
+<td align="left">Code and docs</td>
+<td align="left">BM25</td>
+<td align="left">Chunks naming an exact identifier or literal</td>
+</tr>
+<tr>
+<td align="left"><code>hybrid_search</code></td>
+<td align="left">Code and docs</td>
+<td align="left">Semantic and BM25 rankings fused with RRF</td>
+<td align="left">A concept <em>plus</em> an exact term</td>
+</tr>
+<tr>
+<td align="left"><code>log_search</code></td>
+<td align="left">Run log</td>
+<td align="left">Regex, newest lines first</td>
+<td align="left">What actually happened at run time</td>
+</tr>
+<tr>
+<td align="left"><code>database_query</code></td>
+<td align="left">SQLite</td>
+<td align="left">Read-only SQL</td>
+<td align="left">Live records, counts, statuses</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Steps:</strong></p>
+<ol style="list-style-type: decimal">
+<li><strong>Inspect the chunks.</strong> Count them by type and compare one class chunk
+with one Markdown section, to see where the boundaries fell.</li>
+<li><strong>Test each tool alone</strong>, with the same JSON arguments the agent would
+send, before giving any of them to the agent.</li>
+<li><strong>Study the hybrid tool.</strong> It takes two query fields, a sentence for the
+semantic leg and an identifier for the BM25 leg, and two weights that
+default to 1:1. The lab explains why a lopsided weight silences one leg;
+Section <a href="context-harness-engineering.html#search-methods">22.4.6.1</a> reproduces that with a small sketch.</li>
+<li><strong>Run the agent on four questions:</strong>
+<ul>
+<li><em>Which database stores the tickets, and which tables exist?</em> Watch
+whether it answers from code alone or also queries the database.</li>
+<li><em>How does escalation work, and which rule decides it?</em> The agent
+usually starts with <code>hybrid_search</code>. Sometimes a cheaper tool already
+answers the question and the agent stops there.</li>
+<li><em>Write an incident note for the escalation that never got a
+notification.</em> A multi-hop question: the database shows <em>which</em>
+escalation, the log shows <em>why</em>. The agent may first read the schema,
+and it may run both tools in the same turn.</li>
+<li><em>Can a ticket be deleted, or only created and updated?</em> The answer
+spans a Markdown architecture doc and the code.</li>
+</ul></li>
+<li><strong>Read the token tracker.</strong> All seven tool schemas are sent on every call,
+whether used or not.</li>
+</ol>
+<p><strong>Outcome</strong>, as described in the lab: the agent tends to open with a broad
+search and then narrow to symbol or regex lookups, and it combines the
+database and the log to answer the incident question.</p>
+<p>The database tool shows a harness habit worth copying: it is read-only
+<strong>by construction</strong>, not by instruction. A sketch with a marketing table:</p>
+<div class="sourceCode" id="cb145"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb145-1"><a href="context-labs.html#cb145-1" tabindex="-1"></a><span class="im">import</span> sqlite3</span>
+<span id="cb145-2"><a href="context-labs.html#cb145-2" tabindex="-1"></a><span class="im">from</span> contextlib <span class="im">import</span> closing</span>
+<span id="cb145-3"><a href="context-labs.html#cb145-3" tabindex="-1"></a></span>
+<span id="cb145-4"><a href="context-labs.html#cb145-4" tabindex="-1"></a></span>
+<span id="cb145-5"><a href="context-labs.html#cb145-5" tabindex="-1"></a><span class="kw">def</span> run_readonly_sql(db_path: <span class="bu">str</span>, sql: <span class="bu">str</span>, max_rows: <span class="bu">int</span> <span class="op">=</span> <span class="dv">50</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">tuple</span>]:</span>
+<span id="cb145-6"><a href="context-labs.html#cb145-6" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;SQL tool for an agent: the connection itself refuses writes.&quot;&quot;&quot;</span></span>
+<span id="cb145-7"><a href="context-labs.html#cb145-7" tabindex="-1"></a>    uri <span class="op">=</span> <span class="ss">f&quot;file:</span><span class="sc">{</span>db_path<span class="sc">}</span><span class="ss">?mode=ro&quot;</span></span>
+<span id="cb145-8"><a href="context-labs.html#cb145-8" tabindex="-1"></a>    <span class="cf">with</span> closing(sqlite3.<span class="ex">connect</span>(uri, uri<span class="op">=</span><span class="va">True</span>)) <span class="im">as</span> conn:</span>
+<span id="cb145-9"><a href="context-labs.html#cb145-9" tabindex="-1"></a>        <span class="cf">return</span> conn.execute(sql).fetchmany(max_rows)  <span class="co"># one statement only</span></span>
+<span id="cb145-10"><a href="context-labs.html#cb145-10" tabindex="-1"></a></span>
+<span id="cb145-11"><a href="context-labs.html#cb145-11" tabindex="-1"></a></span>
+<span id="cb145-12"><a href="context-labs.html#cb145-12" tabindex="-1"></a><span class="co"># run_readonly_sql(&quot;ads.db&quot;, &quot;SELECT campaign, usd FROM spend ORDER BY usd DESC&quot;)</span></span>
+<span id="cb145-13"><a href="context-labs.html#cb145-13" tabindex="-1"></a><span class="co"># -&gt; [(&#39;Q3-BRAND-07&#39;, 1200.0), (&#39;Q3-PERF-02&#39;, 800.0)]</span></span>
+<span id="cb145-14"><a href="context-labs.html#cb145-14" tabindex="-1"></a><span class="co"># run_readonly_sql(&quot;ads.db&quot;, &quot;DELETE FROM spend&quot;)</span></span>
+<span id="cb145-15"><a href="context-labs.html#cb145-15" tabindex="-1"></a><span class="co"># -&gt; sqlite3.OperationalError: attempt to write a readonly database</span></span></code></pre></div>
+<p><code>execute</code> also refuses a second statement appended after a semicolon, and
+<code>max_rows</code> keeps a careless <code>SELECT *</code> from flooding the context.</p>
+<p><strong>Lessons:</strong></p>
+<ul>
+<li><strong>The description is the whole interface.</strong> The model sees the name, the
+description, and the field descriptions, never the code. The lab’s
+descriptions follow the pattern in Section <a href="context-harness-engineering.html#agentic-search">22.4.6</a>: the source
+and the method, when to use the tool, and a limit. For example, the
+semantic search description warns that it returns relevant matches rather
+than every occurrence, so it cannot prove that something is absent.</li>
+<li><strong>Field descriptions can teach the index’s quirks.</strong> The BM25 index treats
+<code>snake_case</code> identifiers as single tokens, so the field description says to
+write the full identifier rather than a fragment of it.</li>
+<li><strong>Code search cannot answer run-time questions.</strong> The log is deliberately
+kept out of the vector store and searched directly, and the database
+answers questions about live records. Each source keeps the tool that
+suits it.</li>
+<li><strong>Choice has a price.</strong> The agent may skip the tool you expected, every
+schema is resent on every call, and broad questions take several
+iterations. The iteration cap is the harness’s backstop.</li>
+</ul>
+</div>
+<div id="lab-searching-for-the-right-tool-with-a-registry" class="section level3 hasAnchor" number="28.3.2">
+<h3><span class="header-section-number">C.3.2</span> Lab: searching for the right tool with a registry<a href="context-labs.html#lab-searching-for-the-right-tool-with-a-registry" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p><strong>Goal.</strong> Measure what it costs to send every tool definition on every call,
+then send only the definitions a task needs (Section <a href="context-harness-engineering.html#tool-registries">22.4.6.3</a>).</p>
+<p><strong>Steps:</strong></p>
+<ol style="list-style-type: decimal">
+<li><strong>Register the seven tools</strong> in a registry: a dictionary keyed by tool
+name that can export all the schemas at once.</li>
+<li><strong>Baseline.</strong> Send all seven schemas with the task “look up the exact
+definition of the <code>SafetyHazardRule</code> class”, ask the model to pick the
+tools it needs, and record the prompt tokens. The expected pick is
+<code>symbol_lexical_search</code>.</li>
+<li><strong>Index the tools.</strong> Embed each tool’s name and description into a
+separate Chroma collection, apart from the code index.</li>
+<li><strong>Search, then send.</strong> Embed the task, retrieve the top <span class="math inline">\(K = 3\)</span> tools,
+and send only their schemas. Compare tokens and the model’s pick with the
+baseline.</li>
+<li><strong>Vary the task and <span class="math inline">\(K\)</span>.</strong> Try database, hybrid, regex, and log tasks,
+and <span class="math inline">\(K\)</span> of 1 or 2.</li>
+</ol>
+<p><strong>Outcome</strong>, as described in the lab: with only seven tools the baseline
+picks correctly, so the point is the token overhead; the course video reports
+a reduction of more than 40% with the registry. In this lab the search runs
+<em>before</em> the model call. The module’s graded assignment moves it inside the
+agent loop, so the agent searches for tools while it works. The assignment’s
+solution is not reproduced here.</p>
+<p>The lab’s own guidance on when a registry pays off, paraphrased:</p>
+<table>
+<colgroup>
+<col width="15%" />
+<col width="35%" />
+<col width="49%" />
+</colgroup>
+<thead>
+<tr>
+<th align="left">Signal</th>
+<th align="left">Favors a registry</th>
+<th align="left">Favors sending all tools</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">Number of tools</td>
+<td align="left">More than about ten</td>
+<td align="left">Fewer than about ten</td>
+</tr>
+<tr>
+<td align="left">Usage</td>
+<td align="left">Most tools rarely used</td>
+<td align="left">Nearly every tool used in every session</td>
+</tr>
+<tr>
+<td align="left">Size of definitions</td>
+<td align="left">10,000 tokens or more</td>
+<td align="left">Compact</td>
+</tr>
+</tbody>
+</table>
+<p>These are rough heuristics. Ten long, overlapping tools can cause more wrong
+picks than twenty short, distinct ones.</p>
+<p>The risk that the token count hides is a tool that is never retrieved. Treat
+the registry as a retrieval system and measure its hit rate on reference
+tasks. In this sketch, word overlap stands in for embeddings:</p>
+<div class="sourceCode" id="cb146"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb146-1"><a href="context-labs.html#cb146-1" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb146-2"><a href="context-labs.html#cb146-2" tabindex="-1"></a></span>
+<span id="cb146-3"><a href="context-labs.html#cb146-3" tabindex="-1"></a><span class="co"># name -&gt; description (a real registry stores the full JSON schema too)</span></span>
+<span id="cb146-4"><a href="context-labs.html#cb146-4" tabindex="-1"></a>TOOLS <span class="op">=</span> {</span>
+<span id="cb146-5"><a href="context-labs.html#cb146-5" tabindex="-1"></a>    <span class="st">&quot;metric_docs_search&quot;</span>: <span class="st">&quot;Search metric definitions and methodology docs by meaning.&quot;</span>,</span>
+<span id="cb146-6"><a href="context-labs.html#cb146-6" tabindex="-1"></a>    <span class="st">&quot;campaign_sql&quot;</span>: <span class="st">&quot;Run read-only SQL on campaign delivery and spend tables.&quot;</span>,</span>
+<span id="cb146-7"><a href="context-labs.html#cb146-7" tabindex="-1"></a>    <span class="st">&quot;pipeline_log_search&quot;</span>: <span class="st">&quot;Regex search over pipeline run logs for failures and warnings.&quot;</span>,</span>
+<span id="cb146-8"><a href="context-labs.html#cb146-8" tabindex="-1"></a>    <span class="st">&quot;symbol_lookup&quot;</span>: <span class="st">&quot;Find the definition of an exact function or class name in the code.&quot;</span>,</span>
+<span id="cb146-9"><a href="context-labs.html#cb146-9" tabindex="-1"></a>    <span class="st">&quot;report_pdf&quot;</span>: <span class="st">&quot;Render a finished report as a PDF file.&quot;</span>,</span>
+<span id="cb146-10"><a href="context-labs.html#cb146-10" tabindex="-1"></a>    <span class="st">&quot;slack_post&quot;</span>: <span class="st">&quot;Post a message to a team channel.&quot;</span>,</span>
+<span id="cb146-11"><a href="context-labs.html#cb146-11" tabindex="-1"></a>}</span>
+<span id="cb146-12"><a href="context-labs.html#cb146-12" tabindex="-1"></a></span>
+<span id="cb146-13"><a href="context-labs.html#cb146-13" tabindex="-1"></a></span>
+<span id="cb146-14"><a href="context-labs.html#cb146-14" tabindex="-1"></a><span class="kw">def</span> words(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">set</span>[<span class="bu">str</span>]:</span>
+<span id="cb146-15"><a href="context-labs.html#cb146-15" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">set</span>(re.findall(<span class="vs">r&quot;</span><span class="pp">[a-z]</span><span class="op">+</span><span class="vs">&quot;</span>, text.lower()))</span>
+<span id="cb146-16"><a href="context-labs.html#cb146-16" tabindex="-1"></a></span>
+<span id="cb146-17"><a href="context-labs.html#cb146-17" tabindex="-1"></a></span>
+<span id="cb146-18"><a href="context-labs.html#cb146-18" tabindex="-1"></a><span class="kw">def</span> search_tools(task: <span class="bu">str</span>, k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">2</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]:</span>
+<span id="cb146-19"><a href="context-labs.html#cb146-19" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Rank tools by word overlap with the task; embeddings do this better.&quot;&quot;&quot;</span></span>
+<span id="cb146-20"><a href="context-labs.html#cb146-20" tabindex="-1"></a>    task_words <span class="op">=</span> words(task)</span>
+<span id="cb146-21"><a href="context-labs.html#cb146-21" tabindex="-1"></a>    ranked <span class="op">=</span> <span class="bu">sorted</span>(TOOLS, key<span class="op">=</span><span class="kw">lambda</span> name: <span class="bu">len</span>(task_words <span class="op">&amp;</span> words(TOOLS[name])),</span>
+<span id="cb146-22"><a href="context-labs.html#cb146-22" tabindex="-1"></a>                    reverse<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb146-23"><a href="context-labs.html#cb146-23" tabindex="-1"></a>    <span class="cf">return</span> ranked[:k]</span>
+<span id="cb146-24"><a href="context-labs.html#cb146-24" tabindex="-1"></a></span>
+<span id="cb146-25"><a href="context-labs.html#cb146-25" tabindex="-1"></a></span>
+<span id="cb146-26"><a href="context-labs.html#cb146-26" tabindex="-1"></a><span class="co"># Reference tasks with the tool a careful human would pick</span></span>
+<span id="cb146-27"><a href="context-labs.html#cb146-27" tabindex="-1"></a>cases <span class="op">=</span> [</span>
+<span id="cb146-28"><a href="context-labs.html#cb146-28" tabindex="-1"></a>    (<span class="st">&quot;Which campaigns had spend above budget last week?&quot;</span>, <span class="st">&quot;campaign_sql&quot;</span>),</span>
+<span id="cb146-29"><a href="context-labs.html#cb146-29" tabindex="-1"></a>    (<span class="st">&quot;Why did last night&#39;s pipeline run fail?&quot;</span>, <span class="st">&quot;pipeline_log_search&quot;</span>),</span>
+<span id="cb146-30"><a href="context-labs.html#cb146-30" tabindex="-1"></a>    (<span class="st">&quot;How is incremental reach defined in our methodology?&quot;</span>, <span class="st">&quot;metric_docs_search&quot;</span>),</span>
+<span id="cb146-31"><a href="context-labs.html#cb146-31" tabindex="-1"></a>    (<span class="st">&quot;Show the definition of the dedupe_households function&quot;</span>, <span class="st">&quot;symbol_lookup&quot;</span>),</span>
+<span id="cb146-32"><a href="context-labs.html#cb146-32" tabindex="-1"></a>    (<span class="st">&quot;Did the overnight job throw errors?&quot;</span>, <span class="st">&quot;pipeline_log_search&quot;</span>),  <span class="co"># no shared words</span></span>
+<span id="cb146-33"><a href="context-labs.html#cb146-33" tabindex="-1"></a>]</span>
+<span id="cb146-34"><a href="context-labs.html#cb146-34" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> (<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>):</span>
+<span id="cb146-35"><a href="context-labs.html#cb146-35" tabindex="-1"></a>    hits <span class="op">=</span> <span class="bu">sum</span>(expected <span class="kw">in</span> search_tools(task, k) <span class="cf">for</span> task, expected <span class="kw">in</span> cases)</span>
+<span id="cb146-36"><a href="context-labs.html#cb146-36" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;k=</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">: right tool retrieved for </span><span class="sc">{</span>hits<span class="sc">}</span><span class="ss"> of </span><span class="sc">{</span><span class="bu">len</span>(cases)<span class="sc">}</span><span class="ss"> tasks&quot;</span>)</span>
+<span id="cb146-37"><a href="context-labs.html#cb146-37" tabindex="-1"></a><span class="co"># k=1: right tool retrieved for 4 of 5 tasks</span></span>
+<span id="cb146-38"><a href="context-labs.html#cb146-38" tabindex="-1"></a><span class="co"># k=2: right tool retrieved for 4 of 5 tasks</span></span>
+<span id="cb146-39"><a href="context-labs.html#cb146-39" tabindex="-1"></a><span class="co"># k=3: right tool retrieved for 4 of 5 tasks</span></span></code></pre></div>
+<p>The last task shares no words with the log tool’s description (“errors”
+against “failures”), so it misses at every <span class="math inline">\(K\)</span> tried. Raising <span class="math inline">\(K\)</span> cannot fix
+a vocabulary gap; semantic matching or a better description can.</p>
+<p><strong>Lessons:</strong></p>
+<ul>
+<li><strong>Saving tokens is easy to see; a missed tool is not.</strong> Measure the
+registry’s hit rate on reference tasks, as you would for any retriever.</li>
+<li><strong><span class="math inline">\(K\)</span> is a precision–recall trade-off for tools.</strong> A small <span class="math inline">\(K\)</span> saves the
+most tokens and risks dropping the right tool.</li>
+<li><strong>Descriptions now do two jobs.</strong> They instruct the model <em>and</em> they are
+the documents the registry searches. A vague description hurts twice.</li>
+<li><strong>Small toolsets do not need this.</strong> With seven compact tools the registry
+is mostly overhead. The case grows with MCP servers that expose dozens of
+tools. Test real tasks with and without it: did the agent still find the
+right tool, form valid arguments, and use less context?</li>
 </ul>
 
 </div>

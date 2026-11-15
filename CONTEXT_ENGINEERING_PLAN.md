@@ -61,9 +61,34 @@ token-resend arithmetic sketch, tested), lab 3 hook (policy version table,
 before the exercise; `index.Rmd` appendix sentence updated to name all three
 lab appendices; `{#four-failures}` ID added. Full render clean.
 
-Next: Davut reviews Phase 1. Then Module 2 (right information) when its
-materials are in; likely extends Select / just-in-time retrieval with an
-agentic search section.
+Phase 2 (Module 2, agentic search) done 2026-11-15, not yet committed:
+- `claude/11` (Chapter 22): new `{#agentic-search}` section after the four
+  families, with subsections `{#search-methods}` (method table, RRF formula,
+  own weighted-RRF sketch showing a 3:1 weight silences the keyword leg,
+  tested), tool descriptions (three questions), `{#tool-registries}` (course
+  >40% claim and Codex ~5,500-token diagram labeled as course claims;
+  cache interaction as author's judgment; Anthropic tool search tool,
+  verified, [Vendor]), `{#search-failures}` (failure ladder table, eval
+  habits), `{#data-preparation}` (chunking, AST, metadata, own
+  precision/recall@k sketch, tested; lever trade-off table), and
+  `{#recursive-lms}` (Breunig interview + Zhang & Khattab blog, verified).
+  Also: attribution names both scenarios, pointer from the three-axes
+  section, tool search added to platform features, exercise item 5, three
+  takeaways, three references; course reference now says Modules 1 and 2.
+- Cross-refs use existing auto IDs `retrieval-augmented-generation-rag` and
+  `designing-tools-a-model-can-use-well` (no renames elsewhere).
+- `book.bib`: `cormack2009rrf` (title, authors, k = 60 verified from the PDF).
+- Appendix C: `{#context-labs-m2}` with setup table; lab 1 agentic code
+  search (seven-tool table, four questions, own read-only SQL sketch, tested);
+  lab 2 tool registry (steps, decision table paraphrased, own registry
+  hit-rate sketch showing a vocabulary-gap miss, tested); graded assignment
+  mentioned only, no solution. Intro and setup wording generalized beyond
+  Module 1.
+- Full render clean; no unresolved refs; citation resolves.
+
+Next: Davut reviews Phase 2, then commit/push. Module 3 (right format:
+pruning, compaction, scratchpads, dedup) when its materials are in; it will
+likely extend the Compress family and `{#context-cost}`.
 
 ## Inventory (as of 2026-11-14)
 
@@ -92,8 +117,37 @@ against the course sidebar.
 Leftover empty files in `module 1/` (`vid11`, `vid13`-`vid16`) are unused
 placeholders, not missing videos.
 
-The topic descriptions above come from each transcript's opening and closing
-lines only; confirm them during the full inventory.
+Module 2 "Agentic Search" (coding agent over a customer-feedback web app:
+vector store of code/docs, text log files, SQLite feedback tickets). Checked
+2026-11-15 via each transcript's opening/closing handoffs and the sidebar
+durations visible for the last four videos. Ten videos, matching the course
+sidebar count of 10 (confirmed by Davut 2026-11-15). Two duplicate partial
+copies of the tool-registry transcript were deleted and the rest renumbered
+vid1-vid10 in course order (2026-11-15).
+
+| File | Content | Check |
+|---|---|---|
+| `vid1` | Module intro: right information; hard-coded retrieval vs agent choosing | ok |
+| `vid2` | Agentic search concept (iterative, agent picks tools); ends on context filling up | ok |
+| `vid3` | Worked example: why some tickets are escalated; agent searches DB, vector store, logs | ok |
+| `vid4` | How humans search; lexical vs semantic search, embeddings, limits | ok (re-copied 2026-11-15; complete to 8:16, hands off to vid5) |
+| `vid5` | Implementing the search tools; writing tool descriptions (provider guidance) | ok |
+| `vid6` | Tool registries: tool descriptions as system-prompt cost; search for tools; when a registry is not worth it | ok (3:36) |
+| `vid7` | Evaluating agentic search: traces, tool-call vs retrieval errors | ok (sidebar 6m) |
+| `vid8` | Improving retrieval with data preparation (chunking, AST parsing, metadata, precision/recall@k) | ok (sidebar 9m) |
+| `vid9` | Drew Breunig part 2: recursive language models (test-time strategy) | ok (sidebar 5m) |
+| `vid10` | Module recap; hands off to M3 (context window filling up) | ok (sidebar 1m) |
+| `lab1` | `C1_M2_Lab_1_agentic_search.ipynb`: seven tools (semantic, symbol lexical, pattern lexical, ranked lexical, hybrid with RRF, log search, DB query), then single, hybrid and multi-hop queries | no saved outputs |
+| `lab2` | `C1_M2_Lab_2_Tool_Registry.ipynb`: baseline all-tools vs tools indexed in Chroma and retrieved per query; comparison; when to use registries | no saved outputs |
+
+Lab notebooks were saved unexecuted, so any lab "outcome" must come from the
+notebook prose or videos, not from outputs. `lab2/embedding_model` is a
+verified byte-identical copy of `lab1/embedding_model` (not used by the book).
+Slide PDFs for M1-M4 are also in the course folder (reference only; no
+screenshots in the book).
+
+Module 1 topics were confirmed during Phase 1; Module 2 transcripts and lab
+notebooks were read in full during Phase 2.
 
 ## Existing chapter 11 sections (for mapping)
 

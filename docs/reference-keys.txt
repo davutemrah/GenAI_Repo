@@ -398,6 +398,13 @@ context-components
 context-is-a-finite-attention-budget
 four-failures
 four-families
+agentic-search
+search-methods
+tool-descriptions-decide-which-search-runs
+tool-registries
+search-failures
+data-preparation
+recursive-lms
 context-cost
 context-features-are-becoming-platform-features
 harness-engineering
@@ -523,3 +530,6 @@ context-labs-m1
 lab-triggering-the-four-failure-modes
 lab-inside-a-customer-support-agent
 lab-shaping-the-agents-context-with-a-hook
+context-labs-m2
+lab-an-agentic-code-search-system
+lab-searching-for-the-right-tool-with-a-registry

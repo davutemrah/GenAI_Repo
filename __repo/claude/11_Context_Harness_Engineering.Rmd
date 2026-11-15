@@ -28,8 +28,9 @@ Product names, API identifiers, and preview status are as of October 2026.
 
 Parts of this chapter began as study notes from the DeepLearning.AI course
 *Context Engineering*, built with Chroma and taught by Chroma's CEO, Jeff
-Huber. The course follows one customer-service agent through its examples,
-and this chapter borrows that scenario. Chroma sells retrieval infrastructure,
+Huber. Its first module follows a customer-service agent, and its second a
+coding agent investigating a customer-feedback app; this chapter borrows both
+scenarios. Chroma sells retrieval infrastructure,
 so its research claims carry the **[Vendor]** label like any other.
 
 ## Where the terms came from
@@ -146,6 +147,8 @@ The three axes and the four families of technique (Section
 \@ref(four-families)) describe the same work from two angles. Use the axes to
 diagnose a problem: *is the issue what was found, how it was presented, or
 when it arrived?* Then pick a technique from the families to fix it.
+Section \@ref(agentic-search) covers the first axis, right information, in
+depth.
 
 ### What is in the context window {#context-components}
 
@@ -324,6 +327,299 @@ Supporting guidance from the
 - Make tools self-contained, robust to errors, and clearly distinct from one
   another. Return compact tool outputs, not raw dumps.
 
+### Right information: agentic search {#agentic-search}
+
+Select is the family that decides *what* reaches the window. The course's
+second module treats it through **agentic search**: the agent, not the
+developer, decides what to look for, where, and how, and it can search again
+after reading the first results.
+
+The contrast is with a fixed retrieval pipeline. Classic RAG (Section
+\@ref(retrieval-augmented-generation-rag)) runs the same steps on every
+request:
+
+| Decision | Fixed pipeline (basic RAG) | Agentic search |
+|:---------|:---------------------------|:---------------|
+| What to look for | The user's query, perhaps rewritten once | The agent breaks the task into its own sub-queries |
+| Where to look | One index, chosen by the developer | Any source it has a tool for: documents, code, logs, a database |
+| How to match | One retriever, usually vector search | The search method that suits each sub-query |
+| When to stop | After one retrieval step | When the evidence is enough, or an iteration limit is hit |
+| Recovery from a bad first result | Only if the developer built a fallback | The agent refines the query and searches again |
+
+The course's example: support staff notice that similar tickets are not
+escalated consistently, and an engineer asks a coding agent to investigate. The
+agent searches the code for the escalation logic, finds several factors
+(category, an order ID, internal rules), searches further for each, and then
+writes SQL to find two tickets with the same category and urgency but
+different escalation outcomes. The pair shows the cause: tickets without an
+order ID were never escalated. No single search would have found it.
+
+A marketing analog: "why does the brand-lift dashboard disagree with the
+vendor's study?" may need the metric definition (documents), the transformation
+code (code search), last night's pipeline warnings (logs), and the exposed and
+control counts (SQL).
+
+Agentic search has three costs:
+
+- **Less predictable.** The same request can take different paths on
+  different runs, which makes testing harder.
+- **Slower and more expensive.** Each search is another model call, and the
+  whole context is resent each time (Section \@ref(context-components)).
+- **More context.** Every tool result is appended, so a thorough search fills
+  the window fast. Compress and isolate are the counterweights.
+
+#### Which search method fits the question {#search-methods}
+
+The course frames the choice the way a person would: *what am I looking for,
+where does it live, and how should I match it?*
+
+| What you are looking for | Method | Marketing example |
+|:-------------------------|:-------|:------------------|
+| An exact name, ID, or error code | Exact lexical match, or a regex for a pattern | `campaign_id = 'Q3-BRAND-07'`; every `_dedupe_` helper |
+| Several terms, some more important than others | Ranked lexical search (BM25: rare terms and frequent matches score higher) | "frequency cap weekly CTV" |
+| An idea that may be worded differently | Semantic search over embeddings | "how do we avoid counting a household twice?" |
+| An idea *and* an exact term | Hybrid search: run both, then fuse the rankings | "how is frequency capped, and where is `MAX_FREQ_PER_WEEK` set?" |
+| Current records, counts, statuses | A read-only SQL tool (retrieval, not search) | spend by campaign last week |
+| What actually happened at run time | Regex over log files | warnings in last night's pipeline run |
+
+Two details matter in practice:
+
+- **Tokenization decides what lexical search can find.** If an identifier
+  such as `MAX_FREQ_PER_WEEK` is indexed as one token, a search for
+  `frequency` will not match it. Code often needs preprocessing before
+  lexical search works well.
+- **Semantic search is weak on exact strings.** Embeddings capture meaning,
+  so an error code, ticket ID, or file name may rank below a chunk that
+  merely talks about the same topic.
+
+**Hybrid search and reciprocal rank fusion.** Semantic and BM25 scores live on
+different scales, so adding them is meaningless. Reciprocal rank fusion (RRF)
+combines **ranks** instead [@cormack2009rrf]:
+
+$$\text{RRF}(d) = \sum_{r \in R} \frac{w_r}{k + \text{rank}_r(d)}$$
+
+Each ranked list $r$ contributes more for documents near its top. A document
+found by both methods collects two contributions and rises. The constant
+$k = 60$ comes from the original paper and flattens the curve, so the top
+rank of one list does not dominate. The weights $w_r$ are a common extension.
+The original formula has none.
+
+```python
+def weighted_rrf(rankings: dict[str, list[str]], weights: dict[str, float],
+                 k: int = 60) -> list[tuple[str, float]]:
+    """Fuse ranked lists by rank, not score. Ranks start at 1."""
+    scores: dict[str, float] = {}
+    for method, ranked_docs in rankings.items():
+        for rank, doc in enumerate(ranked_docs, start=1):
+            scores[doc] = scores.get(doc, 0.0) + weights[method] / (k + rank)
+    return sorted(scores.items(), key=lambda item: item[1], reverse=True)
+
+
+# "How is frequency capped, and where is MAX_FREQ_PER_WEEK set?"
+semantic = ["reach_guide.md", "pacing.md", "budget_faq.md", "glossary.md",
+            "dsp_notes.md", "audience.md", "brand_lift.md", "frequency.py"]
+lexical = ["frequency.py", "config.yaml"]
+
+for w_sem in (1.0, 3.0):
+    fused = weighted_rrf({"semantic": semantic, "lexical": lexical},
+                         {"semantic": w_sem, "lexical": 1.0})
+    order = [doc for doc, _ in fused]
+    print(f"weights {w_sem:.0f}:1 -> top: {order[0]}, "
+          f"config.yaml at position {order.index('config.yaml') + 1} of {len(order)}")
+# weights 1:1 -> top: frequency.py, config.yaml at position 4 of 9
+# weights 3:1 -> top: frequency.py, config.yaml at position 9 of 9
+```
+
+`frequency.py` ranks only eighth semantically but first lexically, so fusion
+puts it on top. The second line shows a trap the course lab points out. With
+$k = 60$, rank 1 scores only about 30% more than rank 20 ($1/61$ against
+$1/80$), so a 3:1 weight outweighs any rank difference. `config.yaml`, found
+only by the keyword search, drops to last: **a lopsided weight does not reduce
+a method's influence, it removes it.** Start with equal weights.
+
+#### Tool descriptions decide which search runs
+
+The agent never sees how a tool works. It sees the name, the description, and
+the input schema (Section \@ref(designing-tools-a-model-can-use-well)). For
+search tools, the course suggests a description should answer three questions
+for the model:
+
+1. **Should I call this tool?** Name the data source and the matching method:
+   "metric definitions and methodology docs, matched by meaning."
+2. **How should I call it?** Say what a good input looks like: "a natural-
+   language description of the concept, not a list of keywords" for semantic
+   search; "the exact identifier, spelled in full" for lexical search.
+3. **What will I get back?** Describe the result: "up to `n` chunks of about
+   1,000 characters, each with file path and line number."
+
+Two more parts settle close calls. **When not to use it**, and **its
+limits**: a semantic tool returns relevant matches, not all matches, so it
+cannot prove that something is absent. Where tools overlap, **name the
+alternative**: "for an exact column name, use `symbol_lookup` instead."
+
+The danger phrase is "best for general exploration." It describes almost any
+request, so the model may choose that tool for everything.
+
+#### Tool registries: load definitions on demand {#tool-registries}
+
+Detailed descriptions have a price. Tool definitions behave like part of the
+system prompt: they are sent on every call, whether or not the tool is used.
+In a diagram by Drew Breunig shown in the course, OpenAI's Codex coding
+agent already holds about 5,500 tokens before the user types anything, and
+roughly a quarter of that is tool definitions (as shown in the course, not
+independently checked). A log-search step does not need the definition of a
+PDF-export tool.
+
+A **tool registry** keeps most definitions out of the window:
+
+1. Store every tool's name and description in a searchable index, usually a
+   vector store.
+2. Give the agent one always-loaded tool: `search_tools(query)`.
+3. When the agent needs a capability, it searches, and the matching
+   definitions are added to the context. Only then can it call those tools.
+
+The course reports that the lab's registry cut token use by more than 40%
+(as described in the course, not reproduced here). It can also reduce context
+confusion, because fewer look-alike tools compete for each choice.
+
+The costs are real:
+
+- **One more component.** An embedding model, an index, and a search step,
+  all of which can fail.
+- **A missed tool is invisible.** If the right tool is not in the top $k$
+  results, the agent never knows it existed. Measure how often the right tool
+  is retrieved, as Appendix \@ref(context-labs-m2) does.
+- **Interaction with caching (author's judgment).** Definitions appended
+  after the cached prefix keep the cache warm. Rewriting the tool list at the
+  top of the request invalidates it (Section \@ref(context-cost)). Check how
+  your framework inserts loaded tools.
+
+The course lab's rule of thumb: consider a registry with more than about ten
+tools, when most tools are rarely used, or when definitions reach 10,000
+tokens or more. With a handful of tools that are used on most tasks, load them
+all. Anthropic now ships this as a platform feature, the
+[tool search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool):
+tools marked `defer_loading` stay out of the context until a regex or BM25
+search finds them. Its documentation gives similar thresholds **[Vendor]**.
+
+#### Where agentic search fails {#search-failures}
+
+Start where Section \@ref(look-at-traces) left off: read traces and find
+answers that a knowledgeable colleague would have got right. Then locate the
+failure. The course's two examples cover both ends: an agent that answered
+from code when a policy document stated the rule directly, and an agent that
+insisted a database field did not exist because the class definition had been
+split across two chunks.
+
+| Where it failed | What the trace shows | Usual fix |
+|:----------------|:---------------------|:----------|
+| Wrong tool | A lexical search where meaning mattered, or the reverse | Expand descriptions; disambiguate overlapping tools; add a usage example |
+| Right tool, wrong source | The search ran over code when the answer was in the docs | State each tool's data source plainly |
+| Right tool, bad arguments | Missing parameters, keywords where a sentence was expected | Describe the input format; give an example call |
+| Right call, wrong data | The relevant chunk was missing, split, or ranked too low | Data preparation: chunking, metadata, more results, better ranking |
+
+Before fixing anything, turn the failures into a small eval:
+
+- **Collect reference searches.** Include the failures you found *and*
+  searches that already work, so you can catch regressions.
+- **Change one thing at a time.** Then you know what caused the change in
+  the score.
+- **Grade at the right level.** Grade the tool input when one call is
+  clearly correct. Grade the tool output or the final answer when several
+  paths are equally good.
+
+Chapter \@ref(evaluating-agentic-systems) covers component-level evals in
+general. Here, tool-selection accuracy is the component metric.
+
+#### Data preparation is context engineering {#data-preparation}
+
+When the right tool runs with the right query and still returns the wrong
+chunks, the problem is in how the data was prepared. This looks like data
+engineering, but it decides what can ever reach the window.
+
+- **Chunk size and overlap.** Embedding models accept limited input, so long
+  text is split. A little overlap between neighboring chunks keeps a sentence
+  cut at a boundary readable. Too much overlap fills the top results with
+  repeats.
+- **Split on structure, not on character count.** Recursive splitting tries
+  paragraph breaks first, then lines, then sentences, then words. Markdown
+  can be split at its headings, keeping each section whole.
+- **Parse code.** A parser turns code into an abstract syntax tree (AST), so
+  chunks follow functions and classes instead of cutting a class in half. A
+  class split across two chunks caused the course's "missing field" error.
+- **Attach metadata.** Store the file path, line numbers, symbol name, and
+  document date with each chunk. Metadata lets the agent find a chunk's
+  neighbors. It also allows **filtering before ranking**, such as "only
+  current methodology docs" or "only this client", which shrinks the
+  candidate set. Section \@ref(metadata-context) makes the same argument for
+  analytics tables.
+- **Enrich small chunks.** Prepend a short summary of the surrounding
+  section or file so the chunk carries its context with it.
+
+Measure each change with **precision@k** (of the $k$ chunks retrieved, the
+share that is relevant) and **recall@k** (of the relevant chunks, the share
+retrieved). This requires a small ground-truth set: for each representative
+question, the chunks a correct answer needs.
+
+```python
+def precision_recall_at_k(retrieved: list[str], relevant: set[str], k: int):
+    """Precision@k and recall@k for one query."""
+    hits = len(set(retrieved[:k]) & relevant)
+    return hits / k, hits / len(relevant)
+
+
+# Ground truth for "how do we compute incremental reach?": 4 chunks
+relevant = {"reach.md#2", "reach.md#3", "dedup.sql#1", "glossary.md#7"}
+retrieved = ["reach.md#2", "faq.md#1", "reach.md#3", "pacing.md#4",
+             "glossary.md#7", "reach.md#1", "budget.md#2", "faq.md#3"]
+p, r = precision_recall_at_k(retrieved, relevant, k=8)
+print(f"precision@8 = {p:.2f}, recall@8 = {r:.2f}")
+# precision@8 = 0.38, recall@8 = 0.75
+```
+
+The missing chunk is `dedup.sql#1`, the code that actually removes duplicate
+households. A metadata filter to methodology docs and SQL, or a lexical leg
+for "dedup", is the kind of fix to try next.
+
+The levers pull against each other:
+
+| Change | Precision | Recall | Why |
+|:-------|:----------|:-------|:----|
+| Smaller chunks | Usually up | Can fall | Less irrelevant text per chunk, but neighbors lose their context |
+| More overlap | Can fall | Can fall | Repeated text crowds distinct chunks out of the top $k$ |
+| Metadata filter | Up | Same or up | Irrelevant candidates are removed before ranking |
+| Larger $k$ | Down | Up | More chunks, and more noise in the window |
+
+The course's advice: keep overlap small and let metadata place each chunk in
+its context. Chapter \@ref(evaluating-agentic-systems) has a fuller precision
+and recall example.
+
+#### Very large inputs: recursive language models {#recursive-lms}
+
+Some inputs will never fit: a year of ad-server logs, or 800 MB of agent
+traces. In the course's second interview, Drew Breunig describes
+**recursive language models (RLMs)**, a test-time strategy from
+[Zhang and Khattab (2025)](https://alexzhang13.github.io/blog/2025/rlm/):
+
+- The large input is **not** put in the context. It is loaded as a variable
+  in a code environment (a REPL, such as a Python notebook).
+- The model writes code to inspect it: look at the first few hundred
+  characters, detect that it is JSON lines, count, filter, and sample.
+- It can **call a sub-model on a slice**, which gets a fresh context window
+  and the same code environment. That recursion gives the method its name.
+- Only what the model pulls out of the variable enters its context.
+
+Breunig's argument: models are strong at coding and reasoning but weak with
+very long contexts, so turn the long-context problem into a coding problem.
+In this chapter's terms, an RLM combines select (the model pulls only what it
+needs) with isolate (sub-calls get clean windows), using code execution as the
+tool (Chapter \@ref(tool-use)).
+
+This is early research. The authors report gains on long-context benchmarks
+**[Vendor]** (the authors' own results), and Breunig's enthusiasm is his
+opinion. For an analyst, the familiar version is already common practice: do
+not paste the 2 GB file into the chat; let the agent query it with code.
+
 ### Cost: the overlooked dimension {#context-cost}
 
 Agents read far more tokens than they write. Manus reports a ratio of roughly
@@ -351,7 +647,9 @@ Vendors now ship these techniques as features, for example Anthropic's
 [context editing](https://platform.claude.com/docs/en/build-with-claude/context-editing),
 [memory tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/memory-tool),
 [server-side compaction](https://platform.claude.com/docs/en/build-with-claude/compaction),
-and the progressive disclosure built into Agent Skills
+[tool search](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool)
+(Section \@ref(tool-registries)), and the progressive disclosure built into
+Agent Skills
 (Chapter \@ref(claude-code-skills)). Learn the four families. The API names
 will change, but the families will still apply.
 
@@ -759,7 +1057,8 @@ table or shows the table without the narrative.
 
 **Hands-on.** Appendix \@ref(context-labs) walks through the course labs for
 this chapter: triggering the four failure modes, measuring how an agent's
-context grows, and filtering stale policies with a post-tool hook.
+context grows, filtering stale policies with a post-tool hook, giving a coding
+agent seven search tools, and loading tool definitions from a registry.
 
 ## Exercise: audit one AI-assisted app
 
@@ -779,6 +1078,11 @@ Choose an existing assistant or prototype and answer:
 4. **Measure.** Build 20 to 30 representative questions with known answers. Run
    each several times and report pass^k before and after your change, holding
    the model constant.
+5. **Search audit.** For five real questions, write down where a careful
+   colleague would look and how they would match: an exact ID, keywords, a
+   concept, SQL, or logs (Section \@ref(search-methods)). Compare that with the
+   tools the agent called in its traces. For one question, list the ground-truth
+   chunks and compute precision@k and recall@k.
 
 ## Key takeaways
 
@@ -796,6 +1100,18 @@ Choose an existing assistant or prototype and answer:
 - Context rot is a size problem; poisoning, clash, confusion, and distraction
   are quality problems. Effective context length is shorter than the
   advertised length, and the whole context is resent on every call.
+- Agentic search lets the agent choose what to search, where, and how, and
+  search again. It finds better context at the cost of predictability, time,
+  and context size. Match the method to the question: exact match for IDs,
+  BM25 for keywords, embeddings for concepts, RRF to fuse both, SQL for
+  records.
+- When search fails, locate the failure before fixing it: wrong tool, wrong
+  source, bad arguments, or the right call returning the wrong chunks. The
+  last one is a data-preparation problem; measure it with precision@k and
+  recall@k.
+- Tool definitions are resent on every call. With many rarely used tools, a
+  tool registry loads definitions on demand, at the risk of never retrieving
+  the right one.
 - The model chooses tools, while the harness runs hooks. When a rule can be
   written as code, enforce it with a hook rather than more prompt text, which
   builds prompt debt.
@@ -825,7 +1141,10 @@ Choose an existing assistant or prototype and answer:
 - [Chroma: Context rot (Jul 2025)](https://www.trychroma.com/research/context-rot)
 - [Liu et al.: Lost in the middle (2023)](https://arxiv.org/abs/2307.03172)
 - [Wu et al.: LongMemEval: Benchmarking chat assistants on long-term interactive memory (ICLR 2025)](https://arxiv.org/abs/2410.10813)
-- DeepLearning.AI and Chroma: *Context Engineering* (course; Module 1 lectures and labs, including a conversation with Drew Breunig)
+- [Cormack, Clarke, and Büttcher: Reciprocal rank fusion outperforms Condorcet and individual rank learning methods (SIGIR 2009)](http://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf)
+- [Zhang and Khattab: Recursive language models (Oct 2025)](https://alexzhang13.github.io/blog/2025/rlm/)
+- [Anthropic: Tool search tool (documentation)](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool)
+- DeepLearning.AI and Chroma: *Context Engineering* (course; Modules 1 and 2 lectures and labs, including two conversations with Drew Breunig)
 
 **Harness engineering**
 

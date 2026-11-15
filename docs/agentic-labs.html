@@ -717,8 +717,9 @@ div.csl-indent {
 <li class="chapter" data-level="22.4.3" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-is-a-finite-attention-budget"><i class="fa fa-check"></i><b>22.4.3</b> Context is a finite attention budget</a></li>
 <li class="chapter" data-level="22.4.4" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#four-failures"><i class="fa fa-check"></i><b>22.4.4</b> Four ways context fails</a></li>
 <li class="chapter" data-level="22.4.5" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#four-families"><i class="fa fa-check"></i><b>22.4.5</b> Four families of technique: write, select, compress, isolate</a></li>
-<li class="chapter" data-level="22.4.6" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-cost"><i class="fa fa-check"></i><b>22.4.6</b> Cost: the overlooked dimension</a></li>
-<li class="chapter" data-level="22.4.7" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-features-are-becoming-platform-features"><i class="fa fa-check"></i><b>22.4.7</b> Context features are becoming platform features</a></li>
+<li class="chapter" data-level="22.4.6" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#agentic-search"><i class="fa fa-check"></i><b>22.4.6</b> Right information: agentic search</a></li>
+<li class="chapter" data-level="22.4.7" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-cost"><i class="fa fa-check"></i><b>22.4.7</b> Cost: the overlooked dimension</a></li>
+<li class="chapter" data-level="22.4.8" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#context-features-are-becoming-platform-features"><i class="fa fa-check"></i><b>22.4.8</b> Context features are becoming platform features</a></li>
 </ul></li>
 <li class="chapter" data-level="22.5" data-path="context-harness-engineering.html"><a href="context-harness-engineering.html#harness-engineering"><i class="fa fa-check"></i><b>22.5</b> Harness engineering</a>
 <ul>
@@ -886,6 +887,11 @@ div.csl-indent {
 <li class="chapter" data-level="C.2.2" data-path="context-labs.html"><a href="context-labs.html#lab-inside-a-customer-support-agent"><i class="fa fa-check"></i><b>C.2.2</b> Lab: inside a customer support agent</a></li>
 <li class="chapter" data-level="C.2.3" data-path="context-labs.html"><a href="context-labs.html#lab-shaping-the-agents-context-with-a-hook"><i class="fa fa-check"></i><b>C.2.3</b> Lab: shaping the agent’s context with a hook</a></li>
 </ul></li>
+<li class="chapter" data-level="C.3" data-path="context-labs.html"><a href="context-labs.html#context-labs-m2"><i class="fa fa-check"></i><b>C.3</b> Module 2 labs: agentic search</a>
+<ul>
+<li class="chapter" data-level="C.3.1" data-path="context-labs.html"><a href="context-labs.html#lab-an-agentic-code-search-system"><i class="fa fa-check"></i><b>C.3.1</b> Lab: an agentic code search system</a></li>
+<li class="chapter" data-level="C.3.2" data-path="context-labs.html"><a href="context-labs.html#lab-searching-for-the-right-tool-with-a-registry"><i class="fa fa-check"></i><b>C.3.2</b> Lab: searching for the right tool with a registry</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="bibliography.html"><a href="bibliography.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
@@ -986,15 +992,15 @@ then revised code in the same tags.</li>
 and reflection.</li>
 </ol>
 <p>The extraction and execution step is a few lines:</p>
-<div class="sourceCode" id="cb132"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb132-1"><a href="agentic-labs.html#cb132-1" tabindex="-1"></a><span class="im">import</span> re</span>
-<span id="cb132-2"><a href="agentic-labs.html#cb132-2" tabindex="-1"></a></span>
-<span id="cb132-3"><a href="agentic-labs.html#cb132-3" tabindex="-1"></a>CODE <span class="op">=</span> re.<span class="bu">compile</span>(<span class="vs">r&quot;&lt;execute_python&gt;</span><span class="kw">(</span><span class="dv">.</span><span class="op">*?</span><span class="kw">)</span><span class="vs">&lt;/execute_python&gt;&quot;</span>, re.DOTALL)</span>
-<span id="cb132-4"><a href="agentic-labs.html#cb132-4" tabindex="-1"></a></span>
-<span id="cb132-5"><a href="agentic-labs.html#cb132-5" tabindex="-1"></a><span class="kw">def</span> run_tagged_code(llm_output: <span class="bu">str</span>, df) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb132-6"><a href="agentic-labs.html#cb132-6" tabindex="-1"></a>    match <span class="op">=</span> CODE.search(llm_output)</span>
-<span id="cb132-7"><a href="agentic-labs.html#cb132-7" tabindex="-1"></a>    <span class="cf">if</span> match <span class="kw">is</span> <span class="va">None</span>:</span>
-<span id="cb132-8"><a href="agentic-labs.html#cb132-8" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">&quot;no tagged code in the model&#39;s reply&quot;</span>)</span>
-<span id="cb132-9"><a href="agentic-labs.html#cb132-9" tabindex="-1"></a>    <span class="bu">exec</span>(match.group(<span class="dv">1</span>), {<span class="st">&quot;df&quot;</span>: df})   <span class="co"># lab only: no isolation, no time limit</span></span></code></pre></div>
+<div class="sourceCode" id="cb134"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb134-1"><a href="agentic-labs.html#cb134-1" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb134-2"><a href="agentic-labs.html#cb134-2" tabindex="-1"></a></span>
+<span id="cb134-3"><a href="agentic-labs.html#cb134-3" tabindex="-1"></a>CODE <span class="op">=</span> re.<span class="bu">compile</span>(<span class="vs">r&quot;&lt;execute_python&gt;</span><span class="kw">(</span><span class="dv">.</span><span class="op">*?</span><span class="kw">)</span><span class="vs">&lt;/execute_python&gt;&quot;</span>, re.DOTALL)</span>
+<span id="cb134-4"><a href="agentic-labs.html#cb134-4" tabindex="-1"></a></span>
+<span id="cb134-5"><a href="agentic-labs.html#cb134-5" tabindex="-1"></a><span class="kw">def</span> run_tagged_code(llm_output: <span class="bu">str</span>, df) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb134-6"><a href="agentic-labs.html#cb134-6" tabindex="-1"></a>    match <span class="op">=</span> CODE.search(llm_output)</span>
+<span id="cb134-7"><a href="agentic-labs.html#cb134-7" tabindex="-1"></a>    <span class="cf">if</span> match <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb134-8"><a href="agentic-labs.html#cb134-8" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">&quot;no tagged code in the model&#39;s reply&quot;</span>)</span>
+<span id="cb134-9"><a href="agentic-labs.html#cb134-9" tabindex="-1"></a>    <span class="bu">exec</span>(match.group(<span class="dv">1</span>), {<span class="st">&quot;df&quot;</span>: df})   <span class="co"># lab only: no isolation, no time limit</span></span></code></pre></div>
 <p>The critic’s instructions, paraphrased:</p>
 <pre class="text"><code>You are reviewing a chart made for this request: {request}
 The chart image is attached; the code that produced it is below.
@@ -1065,32 +1071,32 @@ total sales?”:</p>
 </tbody>
 </table>
 <p>A typical V1 and a robust version:</p>
-<div class="sourceCode" id="cb134"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb134-1"><a href="agentic-labs.html#cb134-1" tabindex="-1"></a><span class="co">-- V1: runs, but sale rows carry negative quantities</span></span>
-<span id="cb134-2"><a href="agentic-labs.html#cb134-2" tabindex="-1"></a><span class="kw">SELECT</span> color, <span class="fu">SUM</span>(qty_delta <span class="op">*</span> unit_price) <span class="kw">AS</span> total_sales</span>
-<span id="cb134-3"><a href="agentic-labs.html#cb134-3" tabindex="-1"></a><span class="kw">FROM</span> transactions</span>
-<span id="cb134-4"><a href="agentic-labs.html#cb134-4" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> color</span>
-<span id="cb134-5"><a href="agentic-labs.html#cb134-5" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> total_sales <span class="kw">DESC</span></span>
-<span id="cb134-6"><a href="agentic-labs.html#cb134-6" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">1</span>;</span>
-<span id="cb134-7"><a href="agentic-labs.html#cb134-7" tabindex="-1"></a></span>
-<span id="cb134-8"><a href="agentic-labs.html#cb134-8" tabindex="-1"></a><span class="co">-- Robust: keep only sale events, then flip the sign</span></span>
-<span id="cb134-9"><a href="agentic-labs.html#cb134-9" tabindex="-1"></a><span class="kw">SELECT</span> color, <span class="fu">SUM</span>(<span class="op">-</span>qty_delta <span class="op">*</span> unit_price) <span class="kw">AS</span> total_sales</span>
-<span id="cb134-10"><a href="agentic-labs.html#cb134-10" tabindex="-1"></a><span class="kw">FROM</span> transactions</span>
-<span id="cb134-11"><a href="agentic-labs.html#cb134-11" tabindex="-1"></a><span class="kw">WHERE</span> action <span class="op">=</span> <span class="st">&#39;sale&#39;</span></span>
-<span id="cb134-12"><a href="agentic-labs.html#cb134-12" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> color</span>
-<span id="cb134-13"><a href="agentic-labs.html#cb134-13" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> total_sales <span class="kw">DESC</span></span>
-<span id="cb134-14"><a href="agentic-labs.html#cb134-14" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">1</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb136"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb136-1"><a href="agentic-labs.html#cb136-1" tabindex="-1"></a><span class="co">-- V1: runs, but sale rows carry negative quantities</span></span>
+<span id="cb136-2"><a href="agentic-labs.html#cb136-2" tabindex="-1"></a><span class="kw">SELECT</span> color, <span class="fu">SUM</span>(qty_delta <span class="op">*</span> unit_price) <span class="kw">AS</span> total_sales</span>
+<span id="cb136-3"><a href="agentic-labs.html#cb136-3" tabindex="-1"></a><span class="kw">FROM</span> transactions</span>
+<span id="cb136-4"><a href="agentic-labs.html#cb136-4" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> color</span>
+<span id="cb136-5"><a href="agentic-labs.html#cb136-5" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> total_sales <span class="kw">DESC</span></span>
+<span id="cb136-6"><a href="agentic-labs.html#cb136-6" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">1</span>;</span>
+<span id="cb136-7"><a href="agentic-labs.html#cb136-7" tabindex="-1"></a></span>
+<span id="cb136-8"><a href="agentic-labs.html#cb136-8" tabindex="-1"></a><span class="co">-- Robust: keep only sale events, then flip the sign</span></span>
+<span id="cb136-9"><a href="agentic-labs.html#cb136-9" tabindex="-1"></a><span class="kw">SELECT</span> color, <span class="fu">SUM</span>(<span class="op">-</span>qty_delta <span class="op">*</span> unit_price) <span class="kw">AS</span> total_sales</span>
+<span id="cb136-10"><a href="agentic-labs.html#cb136-10" tabindex="-1"></a><span class="kw">FROM</span> transactions</span>
+<span id="cb136-11"><a href="agentic-labs.html#cb136-11" tabindex="-1"></a><span class="kw">WHERE</span> action <span class="op">=</span> <span class="st">&#39;sale&#39;</span></span>
+<span id="cb136-12"><a href="agentic-labs.html#cb136-12" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> color</span>
+<span id="cb136-13"><a href="agentic-labs.html#cb136-13" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span> total_sales <span class="kw">DESC</span></span>
+<span id="cb136-14"><a href="agentic-labs.html#cb136-14" tabindex="-1"></a><span class="kw">LIMIT</span> <span class="dv">1</span>;</span></code></pre></div>
 <p>A fix that only wraps the quantity in <code>ABS()</code> would still be wrong: insert
 events also have positive quantities and a price, so they would be counted as
 sales. Filtering on the event type is what makes the query mean “sales”.</p>
 <p>The difference between V2a and V2b is a single input to the critic:</p>
-<div class="sourceCode" id="cb135"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb135-1"><a href="agentic-labs.html#cb135-1" tabindex="-1"></a><span class="kw">def</span> critique_sql(question, schema, sql, result<span class="op">=</span><span class="va">None</span>):</span>
-<span id="cb135-2"><a href="agentic-labs.html#cb135-2" tabindex="-1"></a>    prompt <span class="op">=</span> <span class="ss">f&quot;Question: </span><span class="sc">{</span>question<span class="sc">}</span><span class="ch">\n</span><span class="ss">Schema:</span><span class="ch">\n</span><span class="sc">{</span>schema<span class="sc">}</span><span class="ch">\n</span><span class="ss">SQL:</span><span class="ch">\n</span><span class="sc">{</span>sql<span class="sc">}</span><span class="ch">\n</span><span class="ss">&quot;</span></span>
-<span id="cb135-3"><a href="agentic-labs.html#cb135-3" tabindex="-1"></a>    <span class="cf">if</span> result <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:                        <span class="co"># external feedback</span></span>
-<span id="cb135-4"><a href="agentic-labs.html#cb135-4" tabindex="-1"></a>        prompt <span class="op">+=</span> (<span class="ss">f&quot;It returned </span><span class="sc">{</span><span class="bu">len</span>(result)<span class="sc">}</span><span class="ss"> rows. First rows:</span><span class="ch">\n</span><span class="ss">&quot;</span></span>
-<span id="cb135-5"><a href="agentic-labs.html#cb135-5" tabindex="-1"></a>                   <span class="ss">f&quot;</span><span class="sc">{</span>result<span class="sc">.</span>head(<span class="dv">20</span>)<span class="sc">.</span>to_markdown()<span class="sc">}</span><span class="ch">\n</span><span class="ss">&quot;</span>)</span>
-<span id="cb135-6"><a href="agentic-labs.html#cb135-6" tabindex="-1"></a>    prompt <span class="op">+=</span> (<span class="st">&#39;Does the result answer the question? Return JSON &#39;</span></span>
-<span id="cb135-7"><a href="agentic-labs.html#cb135-7" tabindex="-1"></a>               <span class="st">&#39;{&quot;feedback&quot;: &quot;...&quot;, &quot;sql&quot;: &quot;&lt;final query&gt;&quot;}&#39;</span>)</span>
-<span id="cb135-8"><a href="agentic-labs.html#cb135-8" tabindex="-1"></a>    <span class="cf">return</span> llm(prompt)</span></code></pre></div>
+<div class="sourceCode" id="cb137"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb137-1"><a href="agentic-labs.html#cb137-1" tabindex="-1"></a><span class="kw">def</span> critique_sql(question, schema, sql, result<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb137-2"><a href="agentic-labs.html#cb137-2" tabindex="-1"></a>    prompt <span class="op">=</span> <span class="ss">f&quot;Question: </span><span class="sc">{</span>question<span class="sc">}</span><span class="ch">\n</span><span class="ss">Schema:</span><span class="ch">\n</span><span class="sc">{</span>schema<span class="sc">}</span><span class="ch">\n</span><span class="ss">SQL:</span><span class="ch">\n</span><span class="sc">{</span>sql<span class="sc">}</span><span class="ch">\n</span><span class="ss">&quot;</span></span>
+<span id="cb137-3"><a href="agentic-labs.html#cb137-3" tabindex="-1"></a>    <span class="cf">if</span> result <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:                        <span class="co"># external feedback</span></span>
+<span id="cb137-4"><a href="agentic-labs.html#cb137-4" tabindex="-1"></a>        prompt <span class="op">+=</span> (<span class="ss">f&quot;It returned </span><span class="sc">{</span><span class="bu">len</span>(result)<span class="sc">}</span><span class="ss"> rows. First rows:</span><span class="ch">\n</span><span class="ss">&quot;</span></span>
+<span id="cb137-5"><a href="agentic-labs.html#cb137-5" tabindex="-1"></a>                   <span class="ss">f&quot;</span><span class="sc">{</span>result<span class="sc">.</span>head(<span class="dv">20</span>)<span class="sc">.</span>to_markdown()<span class="sc">}</span><span class="ch">\n</span><span class="ss">&quot;</span>)</span>
+<span id="cb137-6"><a href="agentic-labs.html#cb137-6" tabindex="-1"></a>    prompt <span class="op">+=</span> (<span class="st">&#39;Does the result answer the question? Return JSON &#39;</span></span>
+<span id="cb137-7"><a href="agentic-labs.html#cb137-7" tabindex="-1"></a>               <span class="st">&#39;{&quot;feedback&quot;: &quot;...&quot;, &quot;sql&quot;: &quot;&lt;final query&gt;&quot;}&#39;</span>)</span>
+<span id="cb137-8"><a href="agentic-labs.html#cb137-8" tabindex="-1"></a>    <span class="cf">return</span> llm(prompt)</span></code></pre></div>
 <p><strong>Lessons:</strong></p>
 <ul>
 <li><strong>Semantic errors hide in valid SQL.</strong> A sign convention is invisible in the
@@ -1182,19 +1188,19 @@ writing the note, whatever order the request names them in.</li>
 <p>A tool written for a model has to expect sloppy arguments. The lab’s QR tool
 strips quotes and backticks from file names and falls back to a plain code if
 the logo is missing. The same habits in a note-writing tool:</p>
-<div class="sourceCode" id="cb136"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb136-1"><a href="agentic-labs.html#cb136-1" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
-<span id="cb136-2"><a href="agentic-labs.html#cb136-2" tabindex="-1"></a></span>
-<span id="cb136-3"><a href="agentic-labs.html#cb136-3" tabindex="-1"></a>NOTES_DIR <span class="op">=</span> Path(<span class="st">&quot;notes&quot;</span>).resolve()</span>
-<span id="cb136-4"><a href="agentic-labs.html#cb136-4" tabindex="-1"></a></span>
-<span id="cb136-5"><a href="agentic-labs.html#cb136-5" tabindex="-1"></a><span class="kw">def</span> write_note(name: <span class="bu">str</span>, content: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
-<span id="cb136-6"><a href="agentic-labs.html#cb136-6" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Save a short text note in the notes folder. Overwrites a note with the same name.&quot;&quot;&quot;</span></span>
-<span id="cb136-7"><a href="agentic-labs.html#cb136-7" tabindex="-1"></a>    name <span class="op">=</span> name.strip().strip(<span class="st">&quot;`&#39;</span><span class="ch">\&quot;</span><span class="st">&quot;</span>)             <span class="co"># models sometimes quote names</span></span>
-<span id="cb136-8"><a href="agentic-labs.html#cb136-8" tabindex="-1"></a>    path <span class="op">=</span> (NOTES_DIR <span class="op">/</span> name).with_suffix(<span class="st">&quot;.txt&quot;</span>).resolve()</span>
-<span id="cb136-9"><a href="agentic-labs.html#cb136-9" tabindex="-1"></a>    <span class="cf">if</span> NOTES_DIR <span class="kw">not</span> <span class="kw">in</span> path.parents:             <span class="co"># refuse paths outside the folder</span></span>
-<span id="cb136-10"><a href="agentic-labs.html#cb136-10" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">&quot;Error: give a plain note name, not a path.&quot;</span></span>
-<span id="cb136-11"><a href="agentic-labs.html#cb136-11" tabindex="-1"></a>    NOTES_DIR.mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb136-12"><a href="agentic-labs.html#cb136-12" tabindex="-1"></a>    path.write_text(content, encoding<span class="op">=</span><span class="st">&quot;utf-8&quot;</span>)</span>
-<span id="cb136-13"><a href="agentic-labs.html#cb136-13" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f&quot;Saved </span><span class="sc">{</span>path<span class="sc">.</span>name<span class="sc">}</span><span class="ss">&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb138"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb138-1"><a href="agentic-labs.html#cb138-1" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb138-2"><a href="agentic-labs.html#cb138-2" tabindex="-1"></a></span>
+<span id="cb138-3"><a href="agentic-labs.html#cb138-3" tabindex="-1"></a>NOTES_DIR <span class="op">=</span> Path(<span class="st">&quot;notes&quot;</span>).resolve()</span>
+<span id="cb138-4"><a href="agentic-labs.html#cb138-4" tabindex="-1"></a></span>
+<span id="cb138-5"><a href="agentic-labs.html#cb138-5" tabindex="-1"></a><span class="kw">def</span> write_note(name: <span class="bu">str</span>, content: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb138-6"><a href="agentic-labs.html#cb138-6" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Save a short text note in the notes folder. Overwrites a note with the same name.&quot;&quot;&quot;</span></span>
+<span id="cb138-7"><a href="agentic-labs.html#cb138-7" tabindex="-1"></a>    name <span class="op">=</span> name.strip().strip(<span class="st">&quot;`&#39;</span><span class="ch">\&quot;</span><span class="st">&quot;</span>)             <span class="co"># models sometimes quote names</span></span>
+<span id="cb138-8"><a href="agentic-labs.html#cb138-8" tabindex="-1"></a>    path <span class="op">=</span> (NOTES_DIR <span class="op">/</span> name).with_suffix(<span class="st">&quot;.txt&quot;</span>).resolve()</span>
+<span id="cb138-9"><a href="agentic-labs.html#cb138-9" tabindex="-1"></a>    <span class="cf">if</span> NOTES_DIR <span class="kw">not</span> <span class="kw">in</span> path.parents:             <span class="co"># refuse paths outside the folder</span></span>
+<span id="cb138-10"><a href="agentic-labs.html#cb138-10" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">&quot;Error: give a plain note name, not a path.&quot;</span></span>
+<span id="cb138-11"><a href="agentic-labs.html#cb138-11" tabindex="-1"></a>    NOTES_DIR.mkdir(exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb138-12"><a href="agentic-labs.html#cb138-12" tabindex="-1"></a>    path.write_text(content, encoding<span class="op">=</span><span class="st">&quot;utf-8&quot;</span>)</span>
+<span id="cb138-13"><a href="agentic-labs.html#cb138-13" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f&quot;Saved </span><span class="sc">{</span>path<span class="sc">.</span>name<span class="sc">}</span><span class="ss">&quot;</span></span></code></pre></div>
 <p><strong>Lessons:</strong></p>
 <ul>
 <li><strong>The docstring is the prompt.</strong> It is all the model sees when choosing a
@@ -1263,12 +1269,12 @@ involved.</p>
 </table>
 <p>The lab runs with no human check. A production version would put one in
 front of every send and delete:</p>
-<div class="sourceCode" id="cb137"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb137-1"><a href="agentic-labs.html#cb137-1" tabindex="-1"></a>NEEDS_APPROVAL <span class="op">=</span> {<span class="st">&quot;send_email&quot;</span>, <span class="st">&quot;delete_email&quot;</span>}</span>
-<span id="cb137-2"><a href="agentic-labs.html#cb137-2" tabindex="-1"></a></span>
-<span id="cb137-3"><a href="agentic-labs.html#cb137-3" tabindex="-1"></a><span class="kw">def</span> run_tool(name, args, tools, approve):</span>
-<span id="cb137-4"><a href="agentic-labs.html#cb137-4" tabindex="-1"></a>    <span class="cf">if</span> name <span class="kw">in</span> NEEDS_APPROVAL <span class="kw">and</span> <span class="kw">not</span> approve(name, args):</span>
-<span id="cb137-5"><a href="agentic-labs.html#cb137-5" tabindex="-1"></a>        <span class="cf">return</span> {<span class="st">&quot;status&quot;</span>: <span class="st">&quot;declined&quot;</span>, <span class="st">&quot;reason&quot;</span>: <span class="st">&quot;the user did not approve this action&quot;</span>}</span>
-<span id="cb137-6"><a href="agentic-labs.html#cb137-6" tabindex="-1"></a>    <span class="cf">return</span> tools[name](<span class="op">**</span>args)</span></code></pre></div>
+<div class="sourceCode" id="cb139"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb139-1"><a href="agentic-labs.html#cb139-1" tabindex="-1"></a>NEEDS_APPROVAL <span class="op">=</span> {<span class="st">&quot;send_email&quot;</span>, <span class="st">&quot;delete_email&quot;</span>}</span>
+<span id="cb139-2"><a href="agentic-labs.html#cb139-2" tabindex="-1"></a></span>
+<span id="cb139-3"><a href="agentic-labs.html#cb139-3" tabindex="-1"></a><span class="kw">def</span> run_tool(name, args, tools, approve):</span>
+<span id="cb139-4"><a href="agentic-labs.html#cb139-4" tabindex="-1"></a>    <span class="cf">if</span> name <span class="kw">in</span> NEEDS_APPROVAL <span class="kw">and</span> <span class="kw">not</span> approve(name, args):</span>
+<span id="cb139-5"><a href="agentic-labs.html#cb139-5" tabindex="-1"></a>        <span class="cf">return</span> {<span class="st">&quot;status&quot;</span>: <span class="st">&quot;declined&quot;</span>, <span class="st">&quot;reason&quot;</span>: <span class="st">&quot;the user did not approve this action&quot;</span>}</span>
+<span id="cb139-6"><a href="agentic-labs.html#cb139-6" tabindex="-1"></a>    <span class="cf">return</span> tools[name](<span class="op">**</span>args)</span></code></pre></div>
 <p><strong>Lessons:</strong></p>
 <ul>
 <li><strong>The tool list is the capability boundary.</strong> An action with no tool cannot
@@ -1331,20 +1337,20 @@ were found).</p>
 domain’s text appears anywhere in the host name, so <code>summit.edu</code> counts as
 <code>mit.edu</code>. It also counts a URL each time the output repeats it. A tighter
 version:</p>
-<div class="sourceCode" id="cb138"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb138-1"><a href="agentic-labs.html#cb138-1" tabindex="-1"></a><span class="im">import</span> re</span>
-<span id="cb138-2"><a href="agentic-labs.html#cb138-2" tabindex="-1"></a><span class="im">from</span> urllib.parse <span class="im">import</span> urlparse</span>
-<span id="cb138-3"><a href="agentic-labs.html#cb138-3" tabindex="-1"></a></span>
-<span id="cb138-4"><a href="agentic-labs.html#cb138-4" tabindex="-1"></a>URL <span class="op">=</span> re.<span class="bu">compile</span>(<span class="vs">r&quot;https</span><span class="op">?</span><span class="vs">://</span><span class="pp">[^</span><span class="dv">\s</span><span class="pp">)</span><span class="ch">\]</span><span class="pp">&gt;}</span><span class="ch">\&quot;</span><span class="pp">&#39;]</span><span class="op">+</span><span class="vs">&quot;</span>)</span>
-<span id="cb138-5"><a href="agentic-labs.html#cb138-5" tabindex="-1"></a></span>
-<span id="cb138-6"><a href="agentic-labs.html#cb138-6" tabindex="-1"></a><span class="kw">def</span> on_list(host: <span class="bu">str</span>, domains: <span class="bu">set</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="bu">bool</span>:</span>
-<span id="cb138-7"><a href="agentic-labs.html#cb138-7" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">any</span>(host <span class="op">==</span> d <span class="kw">or</span> host.endswith(<span class="st">&quot;.&quot;</span> <span class="op">+</span> d) <span class="cf">for</span> d <span class="kw">in</span> domains)</span>
-<span id="cb138-8"><a href="agentic-labs.html#cb138-8" tabindex="-1"></a></span>
-<span id="cb138-9"><a href="agentic-labs.html#cb138-9" tabindex="-1"></a><span class="kw">def</span> preferred_share(text: <span class="bu">str</span>, domains: <span class="bu">set</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="bu">float</span> <span class="op">|</span> <span class="va">None</span>:</span>
-<span id="cb138-10"><a href="agentic-labs.html#cb138-10" tabindex="-1"></a>    urls <span class="op">=</span> <span class="bu">set</span>(URL.findall(text))                  <span class="co"># count each URL once</span></span>
-<span id="cb138-11"><a href="agentic-labs.html#cb138-11" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> urls:</span>
-<span id="cb138-12"><a href="agentic-labs.html#cb138-12" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span>                                <span class="co"># no sources: report it, don&#39;t score it</span></span>
-<span id="cb138-13"><a href="agentic-labs.html#cb138-13" tabindex="-1"></a>    hits <span class="op">=</span> <span class="bu">sum</span>(on_list(urlparse(u).hostname <span class="kw">or</span> <span class="st">&quot;&quot;</span>, domains) <span class="cf">for</span> u <span class="kw">in</span> urls)</span>
-<span id="cb138-14"><a href="agentic-labs.html#cb138-14" tabindex="-1"></a>    <span class="cf">return</span> hits <span class="op">/</span> <span class="bu">len</span>(urls)</span></code></pre></div>
+<div class="sourceCode" id="cb140"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb140-1"><a href="agentic-labs.html#cb140-1" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb140-2"><a href="agentic-labs.html#cb140-2" tabindex="-1"></a><span class="im">from</span> urllib.parse <span class="im">import</span> urlparse</span>
+<span id="cb140-3"><a href="agentic-labs.html#cb140-3" tabindex="-1"></a></span>
+<span id="cb140-4"><a href="agentic-labs.html#cb140-4" tabindex="-1"></a>URL <span class="op">=</span> re.<span class="bu">compile</span>(<span class="vs">r&quot;https</span><span class="op">?</span><span class="vs">://</span><span class="pp">[^</span><span class="dv">\s</span><span class="pp">)</span><span class="ch">\]</span><span class="pp">&gt;}</span><span class="ch">\&quot;</span><span class="pp">&#39;]</span><span class="op">+</span><span class="vs">&quot;</span>)</span>
+<span id="cb140-5"><a href="agentic-labs.html#cb140-5" tabindex="-1"></a></span>
+<span id="cb140-6"><a href="agentic-labs.html#cb140-6" tabindex="-1"></a><span class="kw">def</span> on_list(host: <span class="bu">str</span>, domains: <span class="bu">set</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="bu">bool</span>:</span>
+<span id="cb140-7"><a href="agentic-labs.html#cb140-7" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">any</span>(host <span class="op">==</span> d <span class="kw">or</span> host.endswith(<span class="st">&quot;.&quot;</span> <span class="op">+</span> d) <span class="cf">for</span> d <span class="kw">in</span> domains)</span>
+<span id="cb140-8"><a href="agentic-labs.html#cb140-8" tabindex="-1"></a></span>
+<span id="cb140-9"><a href="agentic-labs.html#cb140-9" tabindex="-1"></a><span class="kw">def</span> preferred_share(text: <span class="bu">str</span>, domains: <span class="bu">set</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="bu">float</span> <span class="op">|</span> <span class="va">None</span>:</span>
+<span id="cb140-10"><a href="agentic-labs.html#cb140-10" tabindex="-1"></a>    urls <span class="op">=</span> <span class="bu">set</span>(URL.findall(text))                  <span class="co"># count each URL once</span></span>
+<span id="cb140-11"><a href="agentic-labs.html#cb140-11" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> urls:</span>
+<span id="cb140-12"><a href="agentic-labs.html#cb140-12" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span>                                <span class="co"># no sources: report it, don&#39;t score it</span></span>
+<span id="cb140-13"><a href="agentic-labs.html#cb140-13" tabindex="-1"></a>    hits <span class="op">=</span> <span class="bu">sum</span>(on_list(urlparse(u).hostname <span class="kw">or</span> <span class="st">&quot;&quot;</span>, domains) <span class="cf">for</span> u <span class="kw">in</span> urls)</span>
+<span id="cb140-14"><a href="agentic-labs.html#cb140-14" tabindex="-1"></a>    <span class="cf">return</span> hits <span class="op">/</span> <span class="bu">len</span>(urls)</span></code></pre></div>
 <p><strong>Lessons:</strong></p>
 <ul>
 <li><strong>Evaluate the step you are changing.</strong> Search quality can be compared
@@ -1425,21 +1431,21 @@ a request for two different items.</li>
 <p>The prompt asks the model to avoid partial writes, but nothing in the
 executor enforces it. Running the plan on a copy makes “all or nothing” a
 property of the code, and gives a natural place for approval:</p>
-<div class="sourceCode" id="cb139"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb139-1"><a href="agentic-labs.html#cb139-1" tabindex="-1"></a><span class="im">import</span> copy</span>
-<span id="cb139-2"><a href="agentic-labs.html#cb139-2" tabindex="-1"></a></span>
-<span id="cb139-3"><a href="agentic-labs.html#cb139-3" tabindex="-1"></a><span class="kw">def</span> run_plan(code: <span class="bu">str</span>, store: <span class="bu">dict</span>, approve) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
-<span id="cb139-4"><a href="agentic-labs.html#cb139-4" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Run a generated plan on a copy; return the store to keep.&quot;&quot;&quot;</span></span>
-<span id="cb139-5"><a href="agentic-labs.html#cb139-5" tabindex="-1"></a>    trial <span class="op">=</span> copy.deepcopy(store)                  <span class="co"># the plan only touches a copy</span></span>
-<span id="cb139-6"><a href="agentic-labs.html#cb139-6" tabindex="-1"></a>    scope <span class="op">=</span> {<span class="st">&quot;store&quot;</span>: trial}</span>
-<span id="cb139-7"><a href="agentic-labs.html#cb139-7" tabindex="-1"></a>    <span class="cf">try</span>:</span>
-<span id="cb139-8"><a href="agentic-labs.html#cb139-8" tabindex="-1"></a>        <span class="bu">exec</span>(code, scope)                         <span class="co"># still not isolated: see the lessons</span></span>
-<span id="cb139-9"><a href="agentic-labs.html#cb139-9" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> err:</span>
-<span id="cb139-10"><a href="agentic-labs.html#cb139-10" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">&quot;plan failed, nothing written:&quot;</span>, err)</span>
-<span id="cb139-11"><a href="agentic-labs.html#cb139-11" tabindex="-1"></a>        <span class="cf">return</span> store</span>
-<span id="cb139-12"><a href="agentic-labs.html#cb139-12" tabindex="-1"></a>    changed <span class="op">=</span> [k <span class="cf">for</span> k <span class="kw">in</span> store <span class="cf">if</span> store[k] <span class="op">!=</span> trial[k]]</span>
-<span id="cb139-13"><a href="agentic-labs.html#cb139-13" tabindex="-1"></a>    <span class="cf">if</span> changed <span class="kw">and</span> <span class="kw">not</span> approve(changed, scope.get(<span class="st">&quot;answer_text&quot;</span>)):</span>
-<span id="cb139-14"><a href="agentic-labs.html#cb139-14" tabindex="-1"></a>        <span class="cf">return</span> store                              <span class="co"># declined: nothing written</span></span>
-<span id="cb139-15"><a href="agentic-labs.html#cb139-15" tabindex="-1"></a>    <span class="cf">return</span> trial</span></code></pre></div>
+<div class="sourceCode" id="cb141"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb141-1"><a href="agentic-labs.html#cb141-1" tabindex="-1"></a><span class="im">import</span> copy</span>
+<span id="cb141-2"><a href="agentic-labs.html#cb141-2" tabindex="-1"></a></span>
+<span id="cb141-3"><a href="agentic-labs.html#cb141-3" tabindex="-1"></a><span class="kw">def</span> run_plan(code: <span class="bu">str</span>, store: <span class="bu">dict</span>, approve) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="cb141-4"><a href="agentic-labs.html#cb141-4" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Run a generated plan on a copy; return the store to keep.&quot;&quot;&quot;</span></span>
+<span id="cb141-5"><a href="agentic-labs.html#cb141-5" tabindex="-1"></a>    trial <span class="op">=</span> copy.deepcopy(store)                  <span class="co"># the plan only touches a copy</span></span>
+<span id="cb141-6"><a href="agentic-labs.html#cb141-6" tabindex="-1"></a>    scope <span class="op">=</span> {<span class="st">&quot;store&quot;</span>: trial}</span>
+<span id="cb141-7"><a href="agentic-labs.html#cb141-7" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb141-8"><a href="agentic-labs.html#cb141-8" tabindex="-1"></a>        <span class="bu">exec</span>(code, scope)                         <span class="co"># still not isolated: see the lessons</span></span>
+<span id="cb141-9"><a href="agentic-labs.html#cb141-9" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> err:</span>
+<span id="cb141-10"><a href="agentic-labs.html#cb141-10" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">&quot;plan failed, nothing written:&quot;</span>, err)</span>
+<span id="cb141-11"><a href="agentic-labs.html#cb141-11" tabindex="-1"></a>        <span class="cf">return</span> store</span>
+<span id="cb141-12"><a href="agentic-labs.html#cb141-12" tabindex="-1"></a>    changed <span class="op">=</span> [k <span class="cf">for</span> k <span class="kw">in</span> store <span class="cf">if</span> store[k] <span class="op">!=</span> trial[k]]</span>
+<span id="cb141-13"><a href="agentic-labs.html#cb141-13" tabindex="-1"></a>    <span class="cf">if</span> changed <span class="kw">and</span> <span class="kw">not</span> approve(changed, scope.get(<span class="st">&quot;answer_text&quot;</span>)):</span>
+<span id="cb141-14"><a href="agentic-labs.html#cb141-14" tabindex="-1"></a>        <span class="cf">return</span> store                              <span class="co"># declined: nothing written</span></span>
+<span id="cb141-15"><a href="agentic-labs.html#cb141-15" tabindex="-1"></a>    <span class="cf">return</span> trial</span></code></pre></div>
 <p><strong>Lessons:</strong></p>
 <ul>
 <li><strong>One program replaces a chain of tool calls.</strong> Filtering by shape and
