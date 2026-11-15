@@ -594,6 +594,30 @@ The course's advice: keep overlap small and let metadata place each chunk in
 its context. Chapter \@ref(evaluating-agentic-systems) has a fuller precision
 and recall example.
 
+**Evidence: how much chunking matters.** Chroma's 2024 technical report
+([Evaluating chunking strategies for retrieval](https://www.trychroma.com/research/evaluating-chunking),
+linked from the course) compared chunking methods on five corpora with 472
+LLM-generated questions **[Vendor]**. It scored *tokens* rather than whole
+chunks: how much of the passage that answers the question was retrieved,
+and how much retrieved text was wasted.
+
+- **The choice matters, but not enormously.** Recall differed by up to 9%
+  across strategies.
+- **A plain default is hard to beat.** A recursive splitter with 200-token
+  chunks and no overlap scored well on every metric, though it was not the
+  best on any. Chunkers that use embeddings or an LLM to place boundaries won
+  individual metrics, at a much higher compute cost.
+- **Overlap cuts both ways.** Less overlap improved efficiency, because
+  overlap repeats text. But with a small embedding model (the one the course
+  labs use), removing overlap lowered recall. Test overlap; do not assume it.
+- **Large default chunks did worst.** OpenAI Assistants' default at the
+  time, 800-token chunks with 400 overlapping, scored lowest on most metrics.
+
+The authors note their own limits: questions written by an LLM, a small and
+narrow dataset, and run time left out (LLM-based chunking took up to tens of
+minutes). Treat the results as a reason to measure on your own data, not as
+settings to copy.
+
 #### Very large inputs: recursive language models {#recursive-lms}
 
 Some inputs will never fit: a year of ad-server logs, or 800 MB of agent
@@ -1139,6 +1163,7 @@ Choose an existing assistant or prototype and answer:
 - [Drew Breunig: How to fix your context (Jun 2025)](https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html)
 - [Manus: Context engineering for AI agents (Jul 2025)](https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus)
 - [Chroma: Context rot (Jul 2025)](https://www.trychroma.com/research/context-rot)
+- [Smith and Troynikov: Evaluating chunking strategies for retrieval (Chroma, Jul 2024)](https://www.trychroma.com/research/evaluating-chunking)
 - [Liu et al.: Lost in the middle (2023)](https://arxiv.org/abs/2307.03172)
 - [Wu et al.: LongMemEval: Benchmarking chat assistants on long-term interactive memory (ICLR 2025)](https://arxiv.org/abs/2410.10813)
 - [Cormack, Clarke, and Büttcher: Reciprocal rank fusion outperforms Condorcet and individual rank learning methods (SIGIR 2009)](http://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf)

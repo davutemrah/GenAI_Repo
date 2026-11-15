@@ -1727,6 +1727,29 @@ for “dedup”, is the kind of fix to try next.</p>
 <p>The course’s advice: keep overlap small and let metadata place each chunk in
 its context. Chapter <a href="evaluating-agentic-systems.html#evaluating-agentic-systems">10</a> has a fuller precision
 and recall example.</p>
+<p><strong>Evidence: how much chunking matters.</strong> Chroma’s 2024 technical report
+(<a href="https://www.trychroma.com/research/evaluating-chunking">Evaluating chunking strategies for retrieval</a>,
+linked from the course) compared chunking methods on five corpora with 472
+LLM-generated questions <strong>[Vendor]</strong>. It scored <em>tokens</em> rather than whole
+chunks: how much of the passage that answers the question was retrieved,
+and how much retrieved text was wasted.</p>
+<ul>
+<li><strong>The choice matters, but not enormously.</strong> Recall differed by up to 9%
+across strategies.</li>
+<li><strong>A plain default is hard to beat.</strong> A recursive splitter with 200-token
+chunks and no overlap scored well on every metric, though it was not the
+best on any. Chunkers that use embeddings or an LLM to place boundaries won
+individual metrics, at a much higher compute cost.</li>
+<li><strong>Overlap cuts both ways.</strong> Less overlap improved efficiency, because
+overlap repeats text. But with a small embedding model (the one the course
+labs use), removing overlap lowered recall. Test overlap; do not assume it.</li>
+<li><strong>Large default chunks did worst.</strong> OpenAI Assistants’ default at the
+time, 800-token chunks with 400 overlapping, scored lowest on most metrics.</li>
+</ul>
+<p>The authors note their own limits: questions written by an LLM, a small and
+narrow dataset, and run time left out (LLM-based chunking took up to tens of
+minutes). Treat the results as a reason to measure on your own data, not as
+settings to copy.</p>
 </div>
 <div id="recursive-lms" class="section level4 hasAnchor" number="22.4.6.6">
 <h4><span class="header-section-number">22.4.6.6</span> Very large inputs: recursive language models<a href="context-harness-engineering.html#recursive-lms" class="anchor-section" aria-label="Anchor link to header"></a></h4>
@@ -2376,6 +2399,7 @@ concerns is the durable lesson.</li>
 <li><a href="https://www.dbreunig.com/2025/06/26/how-to-fix-your-context.html">Drew Breunig: How to fix your context (Jun 2025)</a></li>
 <li><a href="https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus">Manus: Context engineering for AI agents (Jul 2025)</a></li>
 <li><a href="https://www.trychroma.com/research/context-rot">Chroma: Context rot (Jul 2025)</a></li>
+<li><a href="https://www.trychroma.com/research/evaluating-chunking">Smith and Troynikov: Evaluating chunking strategies for retrieval (Chroma, Jul 2024)</a></li>
 <li><a href="https://arxiv.org/abs/2307.03172">Liu et al.: Lost in the middle (2023)</a></li>
 <li><a href="https://arxiv.org/abs/2410.10813">Wu et al.: LongMemEval: Benchmarking chat assistants on long-term interactive memory (ICLR 2025)</a></li>
 <li><a href="http://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf">Cormack, Clarke, and Büttcher: Reciprocal rank fusion outperforms Condorcet and individual rank learning methods (SIGIR 2009)</a></li>

@@ -86,7 +86,13 @@ Phase 2 (Module 2, agentic search) done 2026-11-15, not yet committed:
   Module 1.
 - Full render clean; no unresolved refs; citation resolves.
 
-Next: Davut reviews Phase 2, then commit/push. Module 3 (right format:
+Phase 2 committed and pushed as `195792e` (2026-11-15); Pages verified.
+Follow-up (2026-11-15): added a [Vendor] evidence paragraph to
+`{#data-preparation}` from Chroma's "Evaluating chunking strategies for
+retrieval" (Smith and Troynikov, Jul 2024; a course resource link), plus a
+reference entry. Numbers used only from the verbatim-read part of the page.
+
+Next: Module 3 (right format:
 pruning, compaction, scratchpads, dedup) when its materials are in; it will
 likely extend the Compress family and `{#context-cost}`.
 
