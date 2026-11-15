@@ -32,5 +32,6 @@ rmd_files:
   - __repo/claude/14_Supervisor_Agents.Rmd
   - __repo/A_Course_Labs.Rmd
   - __repo/B_Agentic_Labs.Rmd
+  - __repo/C_Context_Labs.Rmd
   - __repo/references.Rmd
 output_dir: "docs"

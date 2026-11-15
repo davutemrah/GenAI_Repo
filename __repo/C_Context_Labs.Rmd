@@ -1,0 +1,278 @@
+# Context Engineering Labs: Walkthroughs {#context-labs}
+
+The course *Context Engineering* (DeepLearning.AI, built with Chroma) pairs
+each module with hands-on labs. This appendix records what each lab built and
+what it teaches, module by module. It is written in my own words. The course
+notebooks are not reproduced: the code blocks below are short sketches of the
+idea a lab teaches, not runnable copies of the lab.
+
+> **About the results.** Outcomes below are **as described in the course
+> labs, not reproduced** here. Lab 1 runs a small local model and labs 2 and 3
+> call a hosted model, so each run can give a different answer. Read the
+> outcomes as illustrations of a pattern, not as benchmarks.
+
+## Common setup {#context-labs-setup}
+
+| Item | Choice |
+|:-----|:-------|
+| Models | Lab 1: Qwen2.5-Coder-1.5B-Instruct, run locally on a CPU. Labs 2 and 3: a hosted OpenAI chat model with native tool calling |
+| Harness | A small `Agent` class: a system prompt, a list of tools, and a loop with an iteration limit |
+| Tools | Python classes with Pydantic models for inputs and outputs; each tool produces its own JSON-schema definition for the model |
+| Data | Lab 1: seven text files for a fictional cloud provider. Labs 2 and 3: 150 ticket orders in a JSON file, plus refund policies as plain-text files |
+| Date | A fixed simulated "today", passed in the system prompt and to the tools, because a model's sense of the current date stops at its training cutoff |
+| Measurement | Token counts per context category, estimated with `tiktoken` |
+
+## Module 1 labs: foundations {#context-labs-m1}
+
+These labs go with Chapter \@ref(context-harness-engineering).
+
+### Lab: triggering the four failure modes
+
+**Goal.** Make each of the four context failures happen on purpose, one at a
+time, and see that none of them comes from missing information
+(Section \@ref(four-failures)).
+
+**Setup.** A support agent for a fictional cloud provider answers from seven
+internal documents. They include two versions of a pricing policy, a
+marketing draft, a product catalog, a compliance guide, an API snippet, and a
+server log dump. Several files contradict each other on purpose. The agent
+runs in a **single pass**: one similarity search, then one answer. The search
+returns the top seven matches, and the store holds exactly seven files, so
+every query hands the model the *whole* knowledge base. That deliberately
+tests the "put everything in the window and let the model sort it out"
+strategy.
+
+**Runs**, as described in the lab:
+
+| Test | Question (paraphrased) | The trap in the data | Outcome |
+|:-----|:-----------------------|:---------------------|:--------|
+| Baseline | Hourly cost of a compute instance | Both pricing versions agree | Correct |
+| Poisoning | Current rate for a deprecated instance | The old file quotes a price directly; the migration rule that changes it sits a few lines below | Quoted the outdated price |
+| Clash | "Your campaign says no more overage fees, right?" | A marketing draft promises no fees; the binding policy still charges them, has an effective date, and the draft's own note admits the policy was not updated | Sided with the marketing draft |
+| Confusion | Specs for a product name that three products share | The query does not say which one; the system prompt says to ask when a request is unclear | Gave partial specs, dropped one tier, never asked |
+| Distraction | "Is this region available right now?" | Five files describe the region favourably; one log entry says it is down | Answered from the descriptive files and missed the outage |
+
+A small test suite in the same spirit. Each case probes one failure, and
+repeated runs give a pass rate instead of a single anecdote:
+
+```python
+from dataclasses import dataclass
+
+
+@dataclass
+class Case:
+    failure: str       # poisoning, clash, confusion, distraction, or baseline
+    question: str
+    must_state: str    # a fact the correct answer has to contain
+
+
+def pass_rate(agent, case: Case, k: int = 5) -> float:
+    """Share of k runs whose answer states the required fact."""
+    hits = sum(case.must_state.lower() in agent(case.question).lower() for _ in range(k))
+    return hits / k
+```
+
+A substring check is enough for a price or a status. For clash and confusion,
+where the right answer may be a clarifying question, use a rubric or an LLM
+judge (Section \@ref(evaluating-agentic-systems)).
+
+**Lessons:**
+
+- **The answer was in the context every time.** All four failures happened
+  with the correct fact present. Adding more context would not have helped.
+- **Start from a baseline and change one thing at a time.** The clean baseline
+  rules out a broken setup, so each later failure can be blamed on the one
+  condition that changed. This is ordinary experimental design.
+- **A small model makes failures visible; a large model can hide them.** A
+  frontier model would often recover from these traps. That does not mean the
+  traps have gone. It means they surface later, on harder inputs. Companies
+  sometimes choose small local models to keep customer data in-house, and
+  then the margin for messy context is thin.
+- **Metadata in the text is not a guarantee.** In the clash test, the evidence
+  that settled the question (an effective date and an internal note) was in
+  the context, and the model still ignored it. Use metadata to filter in code,
+  not only to inform the model.
+- **Rules in the prompt are requests.** The system prompt said "ask for
+  clarification if the request is unclear," and the model did not.
+- **Supply the date.** Several traps depended on knowing what "now" is. The
+  harness passed the date in, rather than letting the model guess.
+
+### Lab: inside a customer support agent
+
+**Goal.** Follow one tool call from definition to output, then measure how
+the context grows over a short run
+(Sections \@ref(tools-and-hooks) and \@ref(context-components)).
+
+**Setup.** A ticketing service with 150 orders. Each order records the order
+ID, username, ticket count, order date, event date, refund status, and refund
+date. There are four refund policies as text files: a 14-day refund window, a
+rule that no refund is allowed within 2 days of the event (this overrides the
+window), a ban on duplicate refunds, and a processing-time notice. The agent
+works on a copy of the data, because one tool writes to it.
+
+The three tools are built with different responsibilities:
+
+| Tool | Does | Deliberately does not |
+|:-----|:-----|:----------------------|
+| `search_policies` | Returns the named policy files | Decide which policy applies |
+| `order_lookup` | Finds an order by ID, username, or both; reports a conflict or a missing identifier instead of guessing | Invent a record |
+| `refund_order` | The only write tool; stamps the refund status and date; refuses an order already refunded | Check the date rules, which stay in the policy text for the agent to apply |
+
+**Steps:**
+
+1. **Inspect the data**: the orders and the four policies.
+2. **Call each tool by hand** and read its output, including the error
+   message when the lookup gets no identifier.
+3. **Print the tool definition** the model receives (a JSON schema generated
+   from the Pydantic input model) and the schema of the output it gets back.
+4. **Write the system prompt.** It describes the order fields and lists the
+   tools. Its instructions are: read the policies first; look up the order
+   before acting; refund only when the policies allow it; name the policy when
+   denying; ask for an ID if none is given; never invent an order, date, or
+   policy. It ends with the current date.
+5. **Run the loop.** Call the model, run the tool it requests, append the
+   result, and repeat until it answers or reaches 10 iterations.
+6. **Turn on the resend view and the token tracker.** These show the whole
+   context sent on every call, split into six categories: system messages,
+   tool definitions, user messages, tool inputs, tool outputs, and agent
+   responses.
+
+**Outcome**, as described in the lab: the three largest categories were the
+system prompt, the tool definitions, and the tool outputs (the policy text).
+All three are resent on every call. The customer's message, the tool
+arguments, and the final answer were barely visible.
+
+The arithmetic behind that result, with assumed sizes for one refund request:
+
+```python
+# Illustrative token sizes for one refund request (assumed, not measured).
+fixed = {"system_prompt": 400, "tool_definitions": 600, "user_message": 20}
+steps = [  # what each tool call appends: (tool input, tool output)
+    ("search_policies", 30, 900),
+    ("order_lookup", 20, 150),
+    ("refund_order", 15, 150),
+]
+
+context = sum(fixed.values())
+sent = [context]  # call 1: system prompt, tool definitions, user message
+for _name, tool_in, tool_out in steps:
+    context += tool_in + tool_out
+    sent.append(context)  # the next call resends everything so far
+
+print("tokens sent per call:", sent)
+print("total tokens read by the model:", sum(sent))
+fixed_share = (fixed["system_prompt"] + fixed["tool_definitions"]) * len(sent) / sum(sent)
+print(f"share spent on system prompt + tool definitions: {fixed_share:.0%}")
+# tokens sent per call: [1020, 1950, 2120, 2285]
+# total tokens read by the model: 7375
+# share spent on system prompt + tool definitions: 54%
+```
+
+The final context is about 2,300 tokens, but the model read more than three
+times that over the run. More than half went on content that never changed.
+
+**Lessons:**
+
+- **The model sees only the definition.** The implementation stays in the
+  harness, so a tool can validate arguments, refuse an action, or reshape its
+  output without the model knowing how.
+- **Put the rules that protect data in code.** The duplicate-refund rule lives
+  in the refund tool, because a second refund would corrupt the record. The
+  date rules live in the policy text, which the agent must apply. Which rules
+  go where is a design choice. A rule whose failure damages data belongs in
+  code.
+- **Helpful errors are context too.** A lookup that says "no identifier given;
+  ask for an order ID or username" gives the agent its next step. A blank
+  result invites a guess.
+- **Policies as text cut both ways.** Editing a file changes the agent's
+  behaviour without touching Python. But it also means the model, not the
+  code, applies the rule.
+- **Resending is how the API works, not a display choice.** Prompt caching
+  lowers the price of a repeated prefix (Section \@ref(context-cost)). The
+  cached tokens still fill the context window, though.
+- **The data doubles as a test set.** The order IDs fall into bands by design:
+  refundable, bought too long ago, event too close or past, already refunded,
+  and boundary cases exactly on a threshold. That gives a labelled eval set
+  for free, with the boundary band testing the off-by-one cases.
+
+### Lab: shaping the agent's context with a hook
+
+**Goal.** Stop stale policy versions before they reach the agent, using a
+post-tool hook, and record why the agent made each tool call, using a reason
+field (Sections \@ref(tools-and-hooks) and \@ref(look-at-traces)).
+
+**Setup.** The same orders and the same three tools, but the policies have
+been revised twice. Each version folder holds only the files changed in that
+revision, and every file opens with its effective date.
+
+| Policy | v1 (2023) | v2 (2024) | v3 (2026) | In force on the lab's date |
+|:-------|:----------|:----------|:----------|:---------------------------|
+| Refund window | 14 days after purchase | Bought at least 30 days before the event | — | v2 |
+| Event-date restriction | No refund within 2 days of the event | Within 14 days | Within 30 days | v3 |
+| Duplicate refunds | Not allowed | — | — | v1 |
+| Processing time | 7 to 14 business days | — | 10 business days | v3 |
+
+No single folder holds all the current policies, and the folder names do not
+say which file is in force. Only the effective dates do.
+
+**Steps:**
+
+1. **Search without a hook.** Asking for the four policy names returns
+   **eight** documents: every version of each file. The retired versions set
+   up poisoning, and the conflicting rules set up a clash.
+2. **Turn on the reason field.** Every tool's input schema gains a nested
+   `reason` object with three fields: the current objective, why this tool was
+   chosen, and why these argument values were chosen. Print the definition to
+   see how much it grew.
+3. **Write the hook.** Group the returned documents by file name, ignoring the
+   folder. Keep the copy with the latest effective date that is not after
+   today. Log what was kept and dropped (the chapter's sketch in Section
+   \@ref(tools-and-hooks) does the same thing).
+4. **Attach it** to the policy tool through a `post_hooks` list and search
+   again. Eight documents go in and four come out.
+5. **Run the agent** and read the trace. The hook fires inside the first tool
+   call, and every call now carries its stated reason.
+6. **Compare token counts with the previous lab.** The totals are higher,
+   mostly in tool definitions, because the reason schema is resent on every
+   call.
+
+The `post_hooks` list works as a pipeline. Each hook receives the previous
+hook's output:
+
+```python
+def with_post_hooks(tool, hooks):
+    """Wrap a tool so each hook reshapes its output before the model sees it."""
+    def wrapped(**args):
+        output = tool(**args)
+        for hook in hooks:  # run in order; each receives the previous result
+            output = hook(args, output)
+        return output
+    return wrapped
+```
+
+For example, `with_post_hooks(search_policies, [keep_current, dedupe,
+log_kept])` filters first, then deduplicates, then logs. The model sees only
+the end result.
+
+**Lessons:**
+
+- **Retrieval and version selection are separate jobs.** The search finds
+  documents; the hook decides which ones apply. Keeping them apart lets you
+  test each one alone, and change the version rule without touching the search.
+- **The metadata makes the hook possible.** Effective dates in every file are
+  what let a few lines of code replace a judgment the model might get wrong.
+  Without them, no hook can tell old from current.
+- **One filter helps every later call.** The four dropped documents are never
+  appended, so they are never resent. The fix improves accuracy and lowers
+  cost at once.
+- **Nothing else changed.** The prompt, the model, the agent loop, and the
+  request were all the same as before. Only what reached the context changed.
+- **The trace is not the context.** The hook's log of dropped files appears in
+  the trace for the developer, but it is never sent to the model.
+- **The reason field is for auditing, and it has a cost.** It changes nothing
+  the agent can do. It adds tokens on every call and gives you a stated
+  purpose to review afterwards. Treat that purpose as the model's self-report.
+- **Pre-tool hooks are the mirror image.** They run before the tool, for
+  example to catch a request that has already been answered. The same idea
+  extends to summarizing, compacting, and storing context, which the later
+  modules cover.

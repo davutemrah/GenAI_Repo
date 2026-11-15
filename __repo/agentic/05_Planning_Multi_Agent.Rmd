@@ -270,7 +270,7 @@ each role. So why call it several agents? The value is mostly in
   and test one at a time.
 - **Focused context.** Each agent sees only what its role needs. This is the
   *isolate* technique of context engineering (Section
-  \@ref(four-families-of-technique-write-select-compress-isolate)).
+  \@ref(four-families)).
 - **Role-specific tools and permissions.** A researcher gets web search; a
   writer gets no tools; only one agent may write to the database.
 - **Parallelism.** Independent agents can work at the same time.

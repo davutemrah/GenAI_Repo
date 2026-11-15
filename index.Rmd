@@ -41,8 +41,8 @@ The book has four parts:
    Claude Code hooks and skills, reproducible notebooks, MCP, and supervisor
    agents on Databricks.
 
-An appendix summarizes the hands-on labs that accompanied the LLM foundations
-material.
+The appendices walk through the hands-on labs that accompanied the LLM
+foundations, Agentic AI, and context engineering material.
 
 These are educational notes, not vendor certification material. Product
 features change quickly, so product-specific chapters link to primary vendor

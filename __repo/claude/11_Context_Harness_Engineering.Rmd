@@ -26,6 +26,12 @@ labeled by strength throughout.
 
 Product names, API identifiers, and preview status are as of October 2026.
 
+Parts of this chapter began as study notes from the DeepLearning.AI course
+*Context Engineering*, built with Chroma and taught by Chroma's CEO, Jeff
+Huber. The course follows one customer-service agent through its examples,
+and this chapter borrows that scenario. Chroma sells retrieval infrastructure,
+so its research claims carry the **[Vendor]** label like any other.
+
 ## Where the terms came from
 
 ### Context engineering (mid-2025)
@@ -54,6 +60,10 @@ phrasing.
   definition: strategies for curating and maintaining the optimal set of tokens
   during LLM inference
   ([Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)).
+- The DeepLearning.AI and Chroma course uses a three-part working definition:
+  giving the agent **the right information, in the right format, at the right
+  time** for its current task. Section \@ref(right-info-format-time) uses it as
+  a design checklist.
 
 ### Harness engineering (early 2026)
 
@@ -118,6 +128,67 @@ multi-step agents**, which a prompt-only view hides.
 
 ## Context engineering
 
+### Right information, right format, right time {#right-info-format-time}
+
+The course's definition splits the work into three questions. Each one names
+a different part of the system to inspect.
+
+| Axis | Question to ask | Typical techniques | Closest family below |
+|---|---|---|---|
+| **Right information** | Did the agent retrieve the most relevant content for this task? | Search tools, agentic search, combining search methods | Select |
+| **Right format** | Is what was retrieved clean, structured, and free of duplicates and noise? | Deduplication, pruning, compaction, summaries, structured metadata | Compress |
+| **Right time** | Does the content arrive when it is needed, and not before? | Just-in-time retrieval, memory that stores and reloads state | Select and write |
+
+Formatting covers more than headers and layout. A summary is also a format:
+it consolidates information so that the important details stand out.
+
+The three axes and the four families of technique (Section
+\@ref(four-families)) describe the same work from two angles. Use the axes to
+diagnose a problem: *is the issue what was found, how it was presented, or
+when it arrived?* Then pick a technique from the families to fix it.
+
+### What is in the context window {#context-components}
+
+Before you change anything, list the kinds of context your agent handles. In
+a simple chatbot there were only three: the system prompt, the user's input,
+and the model's reply. RAG added retrieved documents. An agent adds several
+more:
+
+- **System prompt.** The standing instructions. It sits at the front of every
+  call, so it should be short and stable. Anything that changes per request
+  belongs elsewhere. A stable prefix also keeps the prompt cache warm (Section
+  \@ref(context-cost)).
+- **User input.** The request, plus any later turns in the conversation.
+- **Memory.** Stored information that is reloaded when relevant, such as user
+  preferences or task instructions.
+- **Reasoning traces.** The agent's own planning and intermediate thinking.
+- **Tool context.** Tool definitions, the inputs the model sends, the outputs
+  that come back, and any retrieved data.
+
+The course's running example is a ticket-refund agent. A customer asks for a
+refund and gives an order number. The agent calls a lookup tool to fetch the
+order, calls a policy-search tool to read the refund rules, calls a refund
+tool, and replies. Every one of those steps adds tool inputs and outputs to
+the context.
+
+**The context only grows, and it is resent in full.** The model is stateless,
+so the harness sends the whole accumulated context again on every call. That
+includes the system prompt, every tool definition, and every earlier tool
+output. Two consequences follow:
+
+- *Growth compounds.* If each turn adds 10% to the context, it roughly doubles
+  after seven turns ($1.1^7 \approx 1.95$). If each turn adds 150%, which is
+  plausible for a coding agent that reads files and runs tests, a context that
+  starts at 1,000 tokens passes one million tokens during the eighth turn
+  ($1{,}000 \times 2.5^7 \approx 610{,}000$ and $1{,}000 \times 2.5^8 \approx
+  1.5$ million).
+- *What people wrote is the smallest part.* In the course's token breakdown for
+  a short refund request, the largest categories were the system prompt, the
+  tool definitions, and the tool outputs. All three are resent on every call.
+  The customer's message, the tool arguments, and the final answer were barely
+  visible. The cost you pay is the *sum* of the context sizes over all calls,
+  not the size of the final context.
+
 ### Context is a finite attention budget
 
 The founding premise is that *more context can make results worse*. Anthropic
@@ -135,11 +206,40 @@ Evidence:
   ([Chroma, July 2025](https://www.trychroma.com/research/context-rot)).
   **[Vendor]**: Chroma sells retrieval infrastructure, and the study is not peer
   reviewed.
+- **Focused versus full history.** In the same report, Chroma used questions
+  from the LongMemEval benchmark
+  ([Wu et al., arXiv 2410.10813](https://arxiv.org/abs/2410.10813)), where
+  each question is about one exchange buried in a long chat history. A *full*
+  prompt held the whole history (about 113,000 tokens on average). A *focused*
+  prompt held only the few relevant messages (about 300 tokens). The answer was
+  present in both versions. Every model tested did significantly better on the
+  focused prompt. Thinking modes improved both conditions but did not close the
+  gap **[Vendor]**.
 
 A practical consequence: a larger advertised context window is a capacity
-limit, not a promise that the model will use every token equally well.
+limit, not a promise that the model will use every token equally well. The
+course separates two quantities:
 
-### Four ways context fails
+- **Advertised context length**: the maximum number of tokens a model accepts
+  in one call.
+- **Effective context length**: how much of that the model can use reliably
+  for a given task. It depends on the model, the task, and how the content is
+  arranged, so there is no universal cut-off.
+
+In the course, Chroma's instructor says the effective length can be as low as
+20% to 40% of the advertised length. That figure does not appear in the
+context rot report itself **[Unverified]**. Treat it as an order of
+magnitude, and measure on your own task.
+
+**Context rot is a size problem; the failures below are quality problems.**
+Rot comes from how attention behaves as the window fills, and it happens even
+when every token is correct. The four failure modes in the next section come
+from what the content says, and they can occur in a context of a few hundred
+tokens. A long history makes quality failures more likely, because there are
+more chances for two pieces to contradict each other, but the two problems
+need different fixes.
+
+### Four ways context fails {#four-failures}
 
 Breunig's taxonomy pairs each failure with a fix. The examples he cites are
 secondhand and were not checked against the original papers for this chapter.
@@ -151,7 +251,46 @@ secondhand and were not checked against the original papers for this chapter.
 | **Confusion** | Irrelevant tools or documents degrade choices | Load fewer tools; retrieve selectively |
 | **Clash** | New information contradicts earlier context | Remove stale content; keep one source of truth |
 
-### Four families of technique: write, select, compress, isolate
+**One conversation, four failures.** The course shows how all four can occur
+in a single short refund conversation. The company has just extended its
+refund window from 15 to 45 days, but both policy files are still in the
+document store.
+
+| Step in the conversation | Failure | Why it happened |
+|---|---|---|
+| The policy search returns the old 15-day file, and the agent denies a valid refund | **Poisoning** | Outdated content entered the context, and nothing marked it as outdated |
+| The customer pushes back; a second search returns the 45-day file, and both versions now sit in context | **Clash** | Two plausible rules conflict, and neither says which one is in force |
+| The customer says "just cancel it"; the agent calls the cancellation tool instead of the refund tool | **Confusion** | The two tool descriptions overlap, so an imprecise word picks the wrong action |
+| A side question triggers a web search that returns a long page of raw HTML | **Distraction** | Irrelevant content, some of it sharing keywords like "refund", crowds out the task |
+
+The customer ends up with no tickets and no money. None of these were failures
+of the model's reasoning. Each came from what the harness let into the context.
+
+The course uses the same four names with slightly broader meanings than
+Breunig's:
+
+- Its *poisoning* includes stale retrieved documents, not only hallucinations
+  that get reused.
+- Its *confusion* is about options too similar to tell apart. Those can be
+  overlapping tool descriptions, or three products that share a name.
+  Breunig's version is about superfluous tools or documents.
+- Its *distraction* is irrelevant content crowding the task, not only a long
+  history.
+
+The fixes are the same either way.
+
+**Evidence in the context is not enough.** In the course's first lab, a small
+local model (Qwen2.5-Coder 1.5B) received the whole knowledge base on every
+query. It still sided with a marketing draft over the binding pricing policy,
+even though the policy carried an effective date and the draft carried a note
+saying the policy had not been updated. A frontier model would often resolve
+that conflict. But companies sometimes run small models on their own
+infrastructure to keep customer data private, and a production system should
+not rely on the model making the right inference. Remove the stale or
+conflicting content before it reaches the model, as Section
+\@ref(tools-and-hooks) shows.
+
+### Four families of technique: write, select, compress, isolate {#four-families}
 
 LangChain groups the techniques into four families
 ([LangChain](https://www.langchain.com/blog/context-engineering-for-agents)).
@@ -183,7 +322,7 @@ Supporting guidance from the
 - Make tools self-contained, robust to errors, and clearly distinct from one
   another. Return compact tool outputs, not raw dumps.
 
-### Cost: the overlooked dimension
+### Cost: the overlooked dimension {#context-cost}
 
 Agents read far more tokens than they write. Manus reports a ratio of roughly
 100 input tokens per output token and calls the KV-cache hit rate the most
@@ -234,6 +373,89 @@ It helps to separate:
 
 Most data scientists work mainly on the user harness, or build a small builder
 harness inside an application.
+
+### Tools and hooks: the two levers {#tools-and-hooks}
+
+Context-management components enter a harness in one of two forms.
+
+A **tool** is a function the *model* chooses to call. It has four parts:
+
+| Part | What it is | Does the model see it? |
+|---|---|---|
+| Tool definition | Name, description, and input schema | Yes; it is the only part the model ever reads |
+| Tool input | The structured request (usually JSON) the model emits | Yes; the model writes it |
+| Tool implementation | The code that runs | No; it stays in the harness |
+| Tool output | What the code returns | Only after the harness appends it to the next call |
+
+Tool use can fail in four places. The model may skip a tool it needed, call
+the wrong tool, or call the right tool with the wrong arguments. The first
+three usually trace back to the tool description, which works like a
+docstring and must say clearly when to use the tool. The fourth failure is the
+subtle one: the right tool is called with the right argument, but the data
+behind it is wrong. In the course example, the policy search did exactly what
+was asked and returned an outdated file. No amount of prompt or description
+work fixes that, because the model cannot reject content it has no reason to
+doubt.
+
+A **hook** is a function the *harness* runs when a specific event happens. The
+model never sees it, never requests it, and cannot skip it. Hooks are
+deterministic.
+
+- A **pre-tool hook** runs before a tool executes. Examples: check that the
+  user is allowed to use the tool, or block a request that was already
+  answered.
+- A **post-tool hook** runs after the tool returns and before its output
+  enters the context. Examples: drop stale documents, deduplicate, truncate, or
+  validate a schema.
+
+Where a hook is wired in varies by system. The course labs call post-tool hooks
+from inside the tool, which leaves the agent loop untouched. Claude Code fires
+`PreToolUse` and `PostToolUse` hooks from the harness itself (Chapter
+\@ref(claude-code-hooks)). Either way, the model does not know the hook exists.
+
+The sketch below is a post-tool hook for the stale-policy problem, applied to
+marketing metric definitions. It assumes every document carries an effective
+date. That metadata is the precondition, and it is data-governance work
+(Section \@ref(metadata-context)). Without it, no hook can tell old from
+current.
+
+```python
+from datetime import date
+
+
+def keep_current_versions(docs: list[dict], today: date) -> list[dict]:
+    """Post-tool hook: keep only the version of each document in effect today."""
+    current: dict[str, dict] = {}
+    for doc in docs:
+        if doc["effective"] > today:  # drafts and future versions are not in effect yet
+            continue
+        best = current.get(doc["name"])
+        if best is None or doc["effective"] > best["effective"]:
+            current[doc["name"]] = doc
+    return list(current.values())
+
+
+# What a search tool might return for "how do we define reach and lift?"
+retrieved = [
+    {"name": "reach.md", "effective": date(2024, 1, 1), "text": "Reach = unique households exposed"},
+    {"name": "reach.md", "effective": date(2026, 3, 1), "text": "Reach = unique persons exposed"},
+    {"name": "lift.md", "effective": date(2025, 6, 1), "text": "Lift = test rate / control rate - 1"},
+    {"name": "lift.md", "effective": date(2027, 1, 1), "text": "Lift (draft) = incremental conversions"},
+]
+
+for doc in keep_current_versions(retrieved, today=date(2026, 11, 14)):
+    print(doc["name"], doc["effective"], "|", doc["text"])
+# reach.md 2026-03-01 | Reach = unique persons exposed
+# lift.md 2025-06-01 | Lift = test rate / control rate - 1
+```
+
+One short function prevents two failures. The retired version cannot poison
+the answer, and with only one version in context there is nothing to clash
+with. It also saves tokens on every later call, because the dropped documents
+are never resent. Nothing else changed: not the prompt, the model, nor the
+agent loop. This is the course's main argument for hooks: when a rule can be
+written in code, enforce it in the harness rather than hoping the model
+infers it.
 
 ### Guides and sensors
 
@@ -303,6 +525,107 @@ remains.
 When you compare models for your own application, hold the harness constant,
 and when you change the harness, hold the model constant.
 
+### Prompt debt
+
+In a conversation recorded for the course, Drew Breunig described a pattern
+he calls **prompt debt**, by analogy with technical debt. This is a
+practitioner's opinion, not a measured result.
+
+1. A team under pressure to ship gives a prompt to the largest frontier model
+   and lets it work out the path. It succeeds most of the time, and the demo
+   looks great.
+2. In use, edge cases keep appearing. Each fix is another line in the prompt:
+   a special rule, capital letters, a threat or a bribe.
+3. Those patches are tuned to one model's quirks. The prompt becomes long,
+   brittle, and hard to change, and switching to a new model means starting
+   over.
+
+The teams that get out of prompt debt tend to converge on the ideas DSPy is
+built around: make AI behave more like software, with contracts. In practice
+that means:
+
+- typed inputs and outputs;
+- retry logic;
+- structured prompts with schemas; and
+- breaking one large call that does twenty things into smaller steps, each
+  with its own eval.
+
+Breunig also offered a threshold. If an agent is wrong about 10% of the time,
+people stop using it, because they must check every result and might as well
+do the work themselves. Teams often add a human in the loop to cover the gap,
+as coding agents do. But the enterprise value he sees most often comes from
+narrow workflows with *no* human in the loop, where the task is small enough
+to make reliable.
+
+This connects to the rest of the chapter. Hashimoto's rule, "engineer a fix so
+the mistake never recurs", can be followed in two ways. Adding another line to
+the prompt builds prompt debt. Adding a deterministic check, hook, or test
+does not. The author's judgment is to use the prompt for judgment calls and
+put every rule that can be written as code into the harness.
+
+### Look at your traces {#look-at-traces}
+
+A complaint from a user tells you *that* something went wrong, but the user
+messages and the agent's replies alone rarely show *why*. To diagnose a
+context problem, you need to see what entered the context at each step.
+
+- A **trace** is the full record of one task: user inputs, agent responses,
+  every tool call with its input and output, the agent's reasoning, every
+  model call, and any housekeeping the harness did, such as compaction.
+- A **span** is one step inside the trace, for example a single tool call with
+  its input and output.
+
+A trace can hold more than the model saw. A hook's log of which documents it
+dropped belongs in the trace, but it was never sent to the model.
+
+Capturing *what* happened is ordinary logging. A logging hook that fires on
+each tool call can write to a file or to a tracing platform. The course names
+Arize, LangSmith, and Weights & Biases; on Databricks, MLflow Tracing plays
+this role.
+
+Capturing *why* is harder, because the reasoning is usually not in the
+replies. The course shows two options:
+
+- Ask the model to think step by step inside tags such as `<think>`, and log
+  those blocks.
+- Add a `reason` field to each tool's input schema. The model then states its
+  objective, why it picked this tool, and why it chose these arguments, and
+  the reason is logged with the call.
+
+```python
+# A tool definition with a reason field; the exact wrapper format varies by vendor.
+search_metrics_tool = {
+    "name": "search_metric_definitions",
+    "description": "Return the governed definition of one or more marketing metrics.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "metric_names": {"type": "array", "items": {"type": "string"}},
+            "reason": {
+                "type": "string",
+                "description": (
+                    "Your current objective, why this tool helps, "
+                    "and why you chose these metric names."
+                ),
+            },
+        },
+        "required": ["metric_names", "reason"],
+    },
+}
+```
+
+Two cautions, both the author's judgment:
+
+- **The reason field costs tokens on every call.** Its description is part of
+  the tool definition, which is resent on every call, and the model's answer
+  adds to the tool input. Measure that cost.
+- **A stated reason is the model's self-report, not ground truth.** Use it to
+  find where to look, and confirm with the actual inputs and outputs.
+
+Reading traces is the input to error analysis (Section
+\@ref(agentic-error-analysis)). Once you can name a failure in the traces, you
+can build an eval that measures whether a context-engineering fix worked.
+
 ### Evaluation is a harness too
 
 Anthropic's guide to agent evaluation distinguishes the *evaluation harness*
@@ -335,7 +658,7 @@ The design principle that follows from the evidence is:
 This is the author's synthesis rather than an official Databricks rule, but
 each part has support in the sources above.
 
-### Metadata is the highest-return context
+### Metadata is the highest-return context {#metadata-context}
 
 Text-to-SQL research suggests that semantic context often matters more than
 which frontier model you pick:
@@ -432,16 +755,22 @@ In a harness, this check runs after the model writes its summary. If it finds
 unsupported numbers, the app either asks the model to revise using only the
 table or shows the table without the narrative.
 
+**Hands-on.** Appendix \@ref(context-labs) walks through the course labs for
+this chapter: triggering the four failure modes, measuring how an agent's
+context grows, and filtering stale policies with a post-tool hook.
+
 ## Exercise: audit one AI-assisted app
 
 Choose an existing assistant or prototype and answer:
 
 1. **Context inventory.** List everything in the context window on a typical
-   request: system prompt, tool definitions, retrieved text, history. Estimate
-   tokens for each. What could be removed or loaded just in time?
-2. **Failure mapping.** Find one real failure and classify it as poisoning,
-   distraction, confusion, or clash, or as a harness failure such as premature
-   success or missing verification.
+   request, using the components in Section \@ref(context-components). Estimate
+   tokens for each, and how much each grows per turn. Remember that everything
+   is resent on every call. What could be removed or loaded just in time?
+2. **Failure mapping.** Read the full trace of one real failure, not just the
+   final answer. Classify it as poisoning, distraction, confusion, or clash,
+   or as a harness failure such as premature success or missing verification.
+   Then say which axis failed: information, format, or timing.
 3. **One guide, one sensor.** Add one guide (a metric definition, example query,
    or `AGENTS.md` rule) and one computational sensor (a schema check, number
    check, or test).
@@ -456,9 +785,20 @@ Choose an existing assistant or prototype and answer:
 - Treat *prompt ⊂ context ⊂ harness* as a useful heuristic, not an official
   taxonomy; the harness also includes deterministic parts that never enter the
   context.
+- Give the agent the right information, in the right format, at the right
+  time. Use these three axes to diagnose a problem, and the four families to
+  fix it.
 - Context is a finite attention budget: more tokens can reduce quality. Use the
   four families—write, select, compress, isolate—and watch the cost trade-off
   with caching.
+- Context rot is a size problem; poisoning, clash, confusion, and distraction
+  are quality problems. Effective context length is shorter than the
+  advertised length, and the whole context is resent on every call.
+- The model chooses tools, while the harness runs hooks. When a rule can be
+  written as code, enforce it with a hook rather than more prompt text, which
+  builds prompt debt.
+- Look at traces, not just final answers; they are the input to error
+  analysis and evals.
 - Organize harness controls as guides and sensors, and prefer deterministic
   sensors where possible. Each harness component should fix a named failure.
 - Benchmarks measure a model–harness pair. Hold one fixed when you evaluate the
@@ -482,6 +822,8 @@ Choose an existing assistant or prototype and answer:
 - [Manus: Context engineering for AI agents (Jul 2025)](https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus)
 - [Chroma: Context rot (Jul 2025)](https://www.trychroma.com/research/context-rot)
 - [Liu et al.: Lost in the middle (2023)](https://arxiv.org/abs/2307.03172)
+- [Wu et al.: LongMemEval: Benchmarking chat assistants on long-term interactive memory (ICLR 2025)](https://arxiv.org/abs/2410.10813)
+- DeepLearning.AI and Chroma: *Context Engineering* (course; Module 1 lectures and labs, including a conversation with Drew Breunig)
 
 **Harness engineering**
 
